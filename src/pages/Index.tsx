@@ -18,6 +18,8 @@ const Index = () => {
     setMatchActive,
     resetTournament,
     getPlayer,
+    setTableCount,
+    autoAssignTables,
   } = useTournament();
 
   const [tab, setTab] = useState('players');
@@ -121,6 +123,9 @@ const Index = () => {
                 getPlayer={getPlayer}
                 onUpdateScore={updateMatchScore}
                 onSetActive={setMatchActive}
+                tableCount={tournament.tableCount}
+                onTableCountChange={setTableCount}
+                onAutoAssign={autoAssignTables}
               />
             </TabsContent>
 

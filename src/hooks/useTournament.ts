@@ -19,6 +19,7 @@ function loadTournament(): Tournament {
     matches: [],
     rounds: 0,
     started: false,
+    tableCount: 4,
   };
 }
 
@@ -153,6 +154,46 @@ export function useTournament() {
       matches: [],
       rounds: 0,
       started: false,
+      tableCount: 4,
+    });
+  }, []);
+
+  const setTableCount = useCallback((count: number) => {
+    setTournament(prev => ({ ...prev, tableCount: Math.max(1, count) }));
+  }, []);
+
+  const autoAssignTables = useCallback(() => {
+    setTournament(prev => {
+      const activeTables = new Set(
+        prev.matches.filter(m => m.status === 'active' && m.table).map(m => m.table)
+      );
+      
+      const freeTables: number[] = [];
+      for (let i = 1; i <= prev.tableCount; i++) {
+        if (!activeTables.has(i)) freeTables.push(i);
+      }
+      
+      const pendingReadyMatches = prev.matches.filter(
+        m => m.status === 'pending' && m.player1Id && m.player2Id
+      );
+      
+      const updatedMatches = [...prev.matches];
+      let tableIdx = 0;
+      
+      for (const match of pendingReadyMatches) {
+        if (tableIdx >= freeTables.length) break;
+        const idx = updatedMatches.findIndex(m => m.id === match.id);
+        if (idx !== -1) {
+          updatedMatches[idx] = {
+            ...updatedMatches[idx],
+            status: 'active',
+            table: freeTables[tableIdx],
+          };
+          tableIdx++;
+        }
+      }
+      
+      return { ...prev, matches: updatedMatches };
     });
   }, []);
 
@@ -170,6 +211,8 @@ export function useTournament() {
     setMatchActive,
     resetTournament,
     getPlayer,
+    setTableCount,
+    autoAssignTables,
   };
 }
 

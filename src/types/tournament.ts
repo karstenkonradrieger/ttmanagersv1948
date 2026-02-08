@@ -29,4 +29,5 @@ export interface Tournament {
   matches: Match[];
   rounds: number;
   started: boolean;
+  tableCount: number;
 }

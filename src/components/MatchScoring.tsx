@@ -2,22 +2,29 @@ import { useState } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Check, Play, X } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Check, Play, X, Zap, Settings } from 'lucide-react';
 
 interface Props {
   matches: Match[];
   getPlayer: (id: string | null) => Player | null;
   onUpdateScore: (matchId: string, sets: SetScore[]) => void;
   onSetActive: (matchId: string, table?: number) => void;
+  tableCount: number;
+  onTableCountChange: (count: number) => void;
+  onAutoAssign: () => void;
 }
 
-export function MatchScoring({ matches, getPlayer, onUpdateScore, onSetActive }: Props) {
+export function MatchScoring({ matches, getPlayer, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign }: Props) {
   const pendingMatches = matches.filter(
     m => m.status !== 'completed' && m.player1Id && m.player2Id
   );
   const activeMatches = matches.filter(m => m.status === 'active');
   const completedMatches = matches.filter(m => m.status === 'completed' && m.sets.length > 0);
 
+  const activeTables = new Set(activeMatches.filter(m => m.table).map(m => m.table));
+  const freeTables = Array.from({ length: tableCount }, (_, i) => i + 1).filter(t => !activeTables.has(t));
+  const pendingReadyCount = matches.filter(m => m.status === 'pending' && m.player1Id && m.player2Id).length;
   if (matches.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-12">
@@ -28,6 +35,59 @@ export function MatchScoring({ matches, getPlayer, onUpdateScore, onSetActive }:
 
   return (
     <div className="space-y-6 animate-slide-up">
+      {/* Table Configuration */}
+      <div className="bg-card rounded-lg p-4 card-shadow">
+        <div className="flex items-center gap-2 mb-3">
+          <Settings className="h-4 w-4 text-primary" />
+          <h3 className="font-bold">Tischkonfiguration</h3>
+        </div>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="tableCount" className="text-sm">Anzahl Tische:</Label>
+            <Input
+              id="tableCount"
+              type="number"
+              min={1}
+              max={20}
+              value={tableCount}
+              onChange={e => onTableCountChange(parseInt(e.target.value) || 1)}
+              className="w-20 h-9 bg-secondary"
+            />
+          </div>
+          <div className="text-sm text-muted-foreground">
+            <span className="text-primary font-semibold">{freeTables.length}</span> frei | <span className="text-primary font-semibold">{activeTables.size}</span> belegt
+          </div>
+          {pendingReadyCount > 0 && freeTables.length > 0 && (
+            <Button onClick={onAutoAssign} size="sm" className="h-9 glow-green">
+              <Zap className="mr-1 h-4 w-4" />
+              Auto-Zuweisen ({Math.min(pendingReadyCount, freeTables.length)})
+            </Button>
+          )}
+        </div>
+        {/* Table status indicators */}
+        <div className="flex flex-wrap gap-2 mt-3">
+          {Array.from({ length: tableCount }, (_, i) => i + 1).map(table => {
+            const isActive = activeTables.has(table);
+            const match = activeMatches.find(m => m.table === table);
+            const p1 = match ? getPlayer(match.player1Id) : null;
+            const p2 = match ? getPlayer(match.player2Id) : null;
+            return (
+              <div
+                key={table}
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  isActive 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-secondary text-muted-foreground'
+                }`}
+                title={isActive && p1 && p2 ? `${p1.name} vs ${p2.name}` : 'Frei'}
+              >
+                T{table} {isActive && p1 && p2 ? `• ${p1.name?.split(' ')[0]} vs ${p2.name?.split(' ')[0]}` : ''}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {activeMatches.length > 0 && (
         <Section title="🏓 Laufende Spiele">
           {activeMatches.map(m => (
@@ -41,7 +101,7 @@ export function MatchScoring({ matches, getPlayer, onUpdateScore, onSetActive }:
           {pendingMatches
             .filter(m => m.status === 'pending')
             .map(m => (
-              <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={onSetActive} />
+              <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={onSetActive} freeTables={freeTables} />
             ))}
         </Section>
       )}
@@ -66,14 +126,15 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function PendingMatch({ match, getPlayer, onSetActive }: {
+function PendingMatch({ match, getPlayer, onSetActive, freeTables }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   onSetActive: (id: string, table?: number) => void;
+  freeTables: number[];
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
-  const [table, setTable] = useState('');
+  const [selectedTable, setSelectedTable] = useState<number | ''>(freeTables[0] || '');
 
   return (
     <div className="bg-card rounded-lg p-4 card-shadow">
@@ -85,19 +146,23 @@ function PendingMatch({ match, getPlayer, onSetActive }: {
         </div>
       </div>
       <div className="flex gap-2">
-        <Input
-          placeholder="Tisch Nr."
-          type="number"
-          value={table}
-          onChange={e => setTable(e.target.value)}
-          className="w-24 h-10 bg-secondary"
-        />
+        <select
+          value={selectedTable}
+          onChange={e => setSelectedTable(e.target.value ? parseInt(e.target.value) : '')}
+          className="w-28 h-10 rounded-md border border-input bg-secondary px-3 text-sm"
+        >
+          <option value="">Tisch...</option>
+          {freeTables.map(t => (
+            <option key={t} value={t}>Tisch {t}</option>
+          ))}
+        </select>
         <Button
-          onClick={() => onSetActive(match.id, table ? parseInt(table) : undefined)}
+          onClick={() => onSetActive(match.id, selectedTable || undefined)}
           className="h-10 flex-1 font-semibold"
+          disabled={freeTables.length === 0}
         >
           <Play className="mr-2 h-4 w-4" />
-          Spiel starten
+          {freeTables.length === 0 ? 'Kein Tisch frei' : 'Spiel starten'}
         </Button>
       </div>
     </div>
