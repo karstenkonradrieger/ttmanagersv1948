@@ -1,28 +1,60 @@
 import { useState } from 'react';
-import { useTournament } from '@/hooks/useTournament';
+import { useTournamentDb } from '@/hooks/useTournamentDb';
+import { TournamentSelector } from '@/components/TournamentSelector';
 import { PlayerManager } from '@/components/PlayerManager';
 import { TournamentBracket } from '@/components/TournamentBracket';
 import { MatchScoring } from '@/components/MatchScoring';
 import { LiveDashboard } from '@/components/LiveDashboard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Swords, PenLine, Monitor, RotateCcw, Play } from 'lucide-react';
+import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2 } from 'lucide-react';
 
 const Index = () => {
+  const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
   const {
     tournament,
+    loading,
     addPlayer,
     removePlayer,
     generateBracket,
     updateMatchScore,
     setMatchActive,
-    resetTournament,
     getPlayer,
     setTableCount,
     autoAssignTables,
-  } = useTournament();
+  } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
+
+  // If no tournament selected, show tournament list
+  if (!selectedTournamentId) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="gradient-sport border-b border-border sticky top-0 z-50">
+          <div className="container py-3 flex items-center gap-2">
+            <span className="text-2xl">🏓</span>
+            <h1 className="text-lg font-extrabold tracking-tight">
+              <span className="text-gradient">TT</span> Turnier
+            </h1>
+          </div>
+        </header>
+        <div className="container py-6">
+          <TournamentSelector
+            selectedId={selectedTournamentId}
+            onSelect={(id) => setSelectedTournamentId(id || null)}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,10 +62,20 @@ const Index = () => {
       <header className="gradient-sport border-b border-border sticky top-0 z-50">
         <div className="container py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedTournamentId(null)}
+              className="h-8 w-8"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
             <span className="text-2xl">🏓</span>
-            <h1 className="text-lg font-extrabold tracking-tight">
-              <span className="text-gradient">TT</span> Turnier
-            </h1>
+            <div>
+              <h1 className="text-lg font-extrabold tracking-tight leading-tight">
+                {tournament.name || 'Turnier'}
+              </h1>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {!tournament.started && tournament.players.length >= 2 && (
@@ -53,11 +95,11 @@ const Index = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={resetTournament}
-                className="text-destructive hover:text-destructive"
+                onClick={() => setSelectedTournamentId(null)}
+                className="text-muted-foreground"
               >
                 <RotateCcw className="mr-1 h-4 w-4" />
-                Neu
+                Zurück
               </Button>
             )}
           </div>
