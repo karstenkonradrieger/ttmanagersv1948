@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -179,10 +179,27 @@ function ScoreEntry({ match, getPlayer, onUpdateScore }: {
   const [sets, setSets] = useState<SetScore[]>(
     match.sets.length > 0 ? match.sets : [{ player1: 0, player2: 0 }]
   );
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isFirstRender = useRef(true);
 
   const p1Wins = sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
   const p2Wins = sets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
   const matchOver = p1Wins >= 3 || p2Wins >= 3;
+
+  // Auto-save with debounce
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      onUpdateScore(match.id, sets);
+    }, 500);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [sets, match.id, onUpdateScore]);
 
   const updateSet = (idx: number, field: 'player1' | 'player2', value: number) => {
     const updated = [...sets];
@@ -200,10 +217,6 @@ function ScoreEntry({ match, getPlayer, onUpdateScore }: {
     if (sets.length > 1) {
       setSets(sets.filter((_, i) => i !== idx));
     }
-  };
-
-  const saveScore = () => {
-    onUpdateScore(match.id, sets);
   };
 
   return (
@@ -258,10 +271,6 @@ function ScoreEntry({ match, getPlayer, onUpdateScore }: {
             + Satz
           </Button>
         )}
-        <Button onClick={saveScore} className="flex-1 h-12 font-semibold glow-green">
-          <Check className="mr-2 h-5 w-5" />
-          Speichern
-        </Button>
       </div>
 
       {matchOver && (
