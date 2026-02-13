@@ -182,6 +182,7 @@ const Index = () => {
                 matches={tournament.matches}
                 rounds={tournament.rounds}
                 getPlayer={getPlayer}
+                players={tournament.players}
               />
             </TabsContent>
 
