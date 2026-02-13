@@ -5,9 +5,10 @@ import { PlayerManager } from '@/components/PlayerManager';
 import { TournamentBracket } from '@/components/TournamentBracket';
 import { MatchScoring } from '@/components/MatchScoring';
 import { LiveDashboard } from '@/components/LiveDashboard';
+import { TournamentOverview } from '@/components/TournamentOverview';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2 } from 'lucide-react';
+import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList } from 'lucide-react';
 
 const Index = () => {
   const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
@@ -122,7 +123,7 @@ const Index = () => {
       {/* Main content */}
       <div className="container pb-24">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="w-full bg-secondary h-12 p-1 rounded-xl grid grid-cols-4">
+          <TabsList className="w-full bg-secondary h-12 p-1 rounded-xl grid grid-cols-5">
             <TabsTrigger value="players" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Spieler</span>
@@ -134,6 +135,10 @@ const Index = () => {
             <TabsTrigger value="scoring" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <PenLine className="h-4 w-4" />
               <span className="hidden sm:inline">Ergebnis</span>
+            </TabsTrigger>
+            <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
+              <ClipboardList className="h-4 w-4" />
+              <span className="hidden sm:inline">Übersicht</span>
             </TabsTrigger>
             <TabsTrigger value="live" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <Monitor className="h-4 w-4" />
@@ -168,6 +173,15 @@ const Index = () => {
                 tableCount={tournament.tableCount}
                 onTableCountChange={setTableCount}
                 onAutoAssign={autoAssignTables}
+              />
+            </TabsContent>
+
+            <TabsContent value="overview">
+              <TournamentOverview
+                tournamentName={tournament.name}
+                matches={tournament.matches}
+                rounds={tournament.rounds}
+                getPlayer={getPlayer}
               />
             </TabsContent>
 
