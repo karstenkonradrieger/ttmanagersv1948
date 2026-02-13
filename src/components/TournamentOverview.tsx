@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { FileDown } from 'lucide-react';
@@ -9,6 +10,7 @@ interface Props {
   matches: Match[];
   rounds: number;
   getPlayer: (id: string | null) => Player | null;
+  players: Player[];
 }
 
 function getRoundName(round: number, totalRounds: number): string {
@@ -34,7 +36,56 @@ function getSetWins(sets: SetScore[]): { p1: number; p2: number } {
   return { p1, p2 };
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer }: Props) {
+interface PlayerStats {
+  player: Player;
+  matchesPlayed: number;
+  matchesWon: number;
+  winRate: number;
+  setsWon: number;
+  setsLost: number;
+  pointsWon: number;
+  pointsLost: number;
+  avgSetDiff: number;
+}
+
+function computePlayerStats(players: Player[], matches: Match[]): PlayerStats[] {
+  const realMatches = matches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id && m.sets.length > 0);
+
+  return players.map(player => {
+    const played = realMatches.filter(m => m.player1Id === player.id || m.player2Id === player.id);
+    const won = played.filter(m => m.winnerId === player.id).length;
+
+    let setsWon = 0, setsLost = 0, pointsWon = 0, pointsLost = 0;
+    for (const m of played) {
+      const isP1 = m.player1Id === player.id;
+      for (const s of m.sets) {
+        const my = isP1 ? s.player1 : s.player2;
+        const opp = isP1 ? s.player2 : s.player1;
+        pointsWon += my;
+        pointsLost += opp;
+        if (my >= 11 && my - opp >= 2) setsWon++;
+        else if (opp >= 11 && opp - my >= 2) setsLost++;
+      }
+    }
+
+    const totalSets = setsWon + setsLost;
+    return {
+      player,
+      matchesPlayed: played.length,
+      matchesWon: won,
+      winRate: played.length > 0 ? (won / played.length) * 100 : 0,
+      setsWon,
+      setsLost,
+      pointsWon,
+      pointsLost,
+      avgSetDiff: totalSets > 0 ? (setsWon - setsLost) / played.length : 0,
+    };
+  }).sort((a, b) => b.winRate - a.winRate || b.avgSetDiff - a.avgSetDiff);
+}
+
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players }: Props) {
+  const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
+
   if (matches.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-12">
@@ -129,7 +180,47 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer 
     doc.text(`Spiele gesamt: ${totalMatches} | Abgeschlossen: ${completed}`, 14, startY + 7);
     if (champion) {
       doc.setFontSize(12);
-      doc.text(`🏆 Turniersieger: ${champion.name}`, 14, startY + 16);
+      doc.text(`Turniersieger: ${champion.name}`, 14, startY + 16);
+    }
+
+    // Player statistics table
+    startY = champion ? startY + 26 : startY + 16;
+    if (startY > 150) {
+      doc.addPage();
+      startY = 20;
+    }
+
+    if (playerStats.length > 0) {
+      const statsData = playerStats.map((s, i) => [
+        `${i + 1}`,
+        s.player.name,
+        s.player.club || '–',
+        `${s.matchesPlayed}`,
+        `${s.matchesWon}`,
+        `${s.winRate.toFixed(0)}%`,
+        `${s.setsWon}:${s.setsLost}`,
+        `${s.avgSetDiff > 0 ? '+' : ''}${s.avgSetDiff.toFixed(1)}`,
+        `${s.pointsWon}:${s.pointsLost}`,
+      ]);
+
+      autoTable(doc, {
+        startY,
+        head: [['#', 'Spieler', 'Verein', 'Spiele', 'Siege', 'Quote', 'Sätze (G:V)', 'Ø Satzdiff.', 'Punkte']],
+        body: statsData,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [59, 130, 246],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 10,
+        },
+        styles: { fontSize: 9, cellPadding: 3 },
+        columnStyles: {
+          0: { cellWidth: 10, halign: 'center' },
+          5: { halign: 'center' },
+          7: { halign: 'center' },
+        },
+      });
     }
 
     doc.save(`${tournamentName.replace(/\s+/g, '_')}_Ergebnisse.pdf`);
@@ -247,6 +338,56 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer 
           </div>
         );
       })}
+
+      {/* Player Statistics */}
+      {playerStats.length > 0 && (
+        <div>
+          <h4 className="font-bold text-sm mb-2 text-primary">📊 Spielerstatistiken</h4>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2 px-2 font-bold text-muted-foreground">#</th>
+                  <th className="text-left py-2 px-2 font-bold text-muted-foreground">Spieler</th>
+                  <th className="text-center py-2 px-2 font-bold text-muted-foreground">Spiele</th>
+                  <th className="text-center py-2 px-2 font-bold text-muted-foreground">Siege</th>
+                  <th className="text-center py-2 px-2 font-bold text-muted-foreground">Quote</th>
+                  <th className="text-center py-2 px-2 font-bold text-muted-foreground">Sätze</th>
+                  <th className="text-center py-2 px-2 font-bold text-muted-foreground">Ø Diff.</th>
+                  <th className="text-center py-2 px-2 font-bold text-muted-foreground">Punkte</th>
+                </tr>
+              </thead>
+              <tbody>
+                {playerStats.map((s, i) => (
+                  <tr key={s.player.id} className="border-b border-border/50 hover:bg-secondary/50">
+                    <td className="py-2 px-2 text-muted-foreground">{i + 1}</td>
+                    <td className="py-2 px-2">
+                      <span className="font-semibold">{s.player.name}</span>
+                      {s.player.club && (
+                        <span className="text-xs text-muted-foreground ml-1">({s.player.club})</span>
+                      )}
+                    </td>
+                    <td className="text-center py-2 px-2">{s.matchesPlayed}</td>
+                    <td className="text-center py-2 px-2 font-semibold">{s.matchesWon}</td>
+                    <td className="text-center py-2 px-2">
+                      <span className={`font-bold ${s.winRate >= 50 ? 'text-primary' : 'text-destructive'}`}>
+                        {s.winRate.toFixed(0)}%
+                      </span>
+                    </td>
+                    <td className="text-center py-2 px-2">{s.setsWon}:{s.setsLost}</td>
+                    <td className="text-center py-2 px-2">
+                      <span className={`font-semibold ${s.avgSetDiff > 0 ? 'text-primary' : s.avgSetDiff < 0 ? 'text-destructive' : ''}`}>
+                        {s.avgSetDiff > 0 ? '+' : ''}{s.avgSetDiff.toFixed(1)}
+                      </span>
+                    </td>
+                    <td className="text-center py-2 px-2 text-muted-foreground">{s.pointsWon}:{s.pointsLost}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
