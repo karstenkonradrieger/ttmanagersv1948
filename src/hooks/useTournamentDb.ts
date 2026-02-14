@@ -456,6 +456,17 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId]);
 
+  const updateName = useCallback(async (name: string) => {
+    if (!tournamentId || !name.trim()) return;
+    try {
+      await tournamentService.updateTournament(tournamentId, { name: name.trim() });
+      setTournament(prev => ({ ...prev, name: name.trim() }));
+    } catch (error) {
+      console.error('Error updating name:', error);
+      toast.error('Fehler beim Aktualisieren des Namens');
+    }
+  }, [tournamentId]);
+
   const addDoublesPair = useCallback(async (player1Id: string, player2Id: string, pairName: string) => {
     if (!tournamentId) return;
     try {
@@ -553,6 +564,7 @@ export function useTournamentDb(tournamentId: string | null) {
     setTableCount,
     autoAssignTables,
     updateLogoUrl,
+    updateName,
     updateTournamentMode,
     updateTournamentType,
     updateBestOf,

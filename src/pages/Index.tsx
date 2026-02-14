@@ -16,7 +16,8 @@ import { RoundRobinStandings } from '@/components/RoundRobinStandings';
 import { TournamentSettingsDialog } from '@/components/TournamentSettingsDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2 } from 'lucide-react';
+import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 const Index = () => {
   const { signOut } = useAuth();
@@ -36,6 +37,7 @@ const Index = () => {
     setTableCount,
     autoAssignTables,
     updateLogoUrl,
+    updateName,
     updateTournamentMode,
     updateTournamentType,
     updateBestOf,
@@ -46,6 +48,8 @@ const Index = () => {
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState('');
 
   const isDoubles = tournament.type === 'doubles';
   const isRoundRobin = tournament.mode === 'round_robin';
@@ -131,9 +135,23 @@ const Index = () => {
               onLogoChange={updateLogoUrl}
             />
             <div className="min-w-0">
-              <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-tight truncate">
-                {tournament.name || 'Turnier'}
-              </h1>
+              {editingName ? (
+                <Input
+                  autoFocus
+                  value={nameValue}
+                  onChange={e => setNameValue(e.target.value)}
+                  onBlur={() => { updateName(nameValue); setEditingName(false); }}
+                  onKeyDown={e => { if (e.key === 'Enter') { updateName(nameValue); setEditingName(false); } if (e.key === 'Escape') setEditingName(false); }}
+                  className="h-7 text-sm sm:text-lg font-extrabold w-48 sm:w-64"
+                />
+              ) : (
+                <div className="flex items-center gap-1 group cursor-pointer" onClick={() => { setNameValue(tournament.name); setEditingName(true); }}>
+                  <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-tight truncate">
+                    {tournament.name || 'Turnier'}
+                  </h1>
+                  <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                </div>
+              )}
               <div className="flex gap-1.5">
                 <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{modeLabel}</span>
                 <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{typeLabel}</span>
