@@ -87,24 +87,30 @@ export type Database = {
       }
       players: {
         Row: {
+          birth_date: string | null
           club: string
           created_at: string
+          gender: string
           id: string
           name: string
           tournament_id: string
           ttr: number
         }
         Insert: {
+          birth_date?: string | null
           club?: string
           created_at?: string
+          gender?: string
           id?: string
           name: string
           tournament_id: string
           ttr?: number
         }
         Update: {
+          birth_date?: string | null
           club?: string
           created_at?: string
+          gender?: string
           id?: string
           name?: string
           tournament_id?: string

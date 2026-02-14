@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { TournamentSelector } from '@/components/TournamentSelector';
 import { PlayerManager } from '@/components/PlayerManager';
+import { PlayerImportExport } from '@/components/PlayerImportExport';
 import { TournamentBracket } from '@/components/TournamentBracket';
 import { MatchScoring } from '@/components/MatchScoring';
 import { LiveDashboard } from '@/components/LiveDashboard';
@@ -18,6 +19,7 @@ const Index = () => {
     loading,
     addPlayer,
     removePlayer,
+    importPlayers,
     generateBracket,
     updateMatchScore,
     setMatchActive,
@@ -156,6 +158,13 @@ const Index = () => {
 
           <div className="mt-4">
             <TabsContent value="players">
+              <div className="mb-3">
+                <PlayerImportExport
+                  players={tournament.players}
+                  onImport={importPlayers}
+                  started={tournament.started}
+                />
+              </div>
               <PlayerManager
                 players={tournament.players}
                 onAdd={addPlayer}

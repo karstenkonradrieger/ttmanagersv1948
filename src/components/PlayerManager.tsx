@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Player } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus, Trash2, Trophy } from 'lucide-react';
 
 interface Props {
   players: Player[];
-  onAdd: (name: string, club: string, ttr: number) => void;
+  onAdd: (name: string, club: string, ttr: number, gender: string, birthDate: string | null) => void;
   onRemove: (id: string) => void;
   started: boolean;
 }
@@ -15,13 +16,17 @@ export function PlayerManager({ players, onAdd, onRemove, started }: Props) {
   const [name, setName] = useState('');
   const [club, setClub] = useState('');
   const [ttr, setTtr] = useState('');
+  const [gender, setGender] = useState('');
+  const [birthDate, setBirthDate] = useState('');
 
   const handleAdd = () => {
     if (!name.trim()) return;
-    onAdd(name.trim(), club.trim(), parseInt(ttr) || 0);
+    onAdd(name.trim(), club.trim(), parseInt(ttr) || 0, gender, birthDate || null);
     setName('');
     setClub('');
     setTtr('');
+    setGender('');
+    setBirthDate('');
   };
 
   return (
@@ -40,6 +45,25 @@ export function PlayerManager({ players, onAdd, onRemove, started }: Props) {
               placeholder="Verein"
               value={club}
               onChange={e => setClub(e.target.value)}
+              className="h-12 text-base bg-secondary border-border"
+            />
+            <Select value={gender} onValueChange={setGender}>
+              <SelectTrigger className="h-12 text-base bg-secondary border-border w-28">
+                <SelectValue placeholder="Geschl." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="m">Männlich</SelectItem>
+                <SelectItem value="w">Weiblich</SelectItem>
+                <SelectItem value="d">Divers</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Geburtsdatum"
+              type="date"
+              value={birthDate}
+              onChange={e => setBirthDate(e.target.value)}
               className="h-12 text-base bg-secondary border-border"
             />
             <Input
@@ -78,9 +102,17 @@ export function PlayerManager({ players, onAdd, onRemove, started }: Props) {
                 {i + 1}
               </div>
               <div>
-                <p className="font-semibold">{player.name}</p>
+                <p className="font-semibold">
+                  {player.name}
+                  {player.gender && (
+                    <span className="ml-1 text-xs text-muted-foreground">
+                      ({player.gender === 'm' ? '♂' : player.gender === 'w' ? '♀' : '⚧'})
+                    </span>
+                  )}
+                </p>
                 <p className="text-sm text-muted-foreground">
                   {player.club && `${player.club} · `}
+                  {player.birthDate && `${new Date(player.birthDate).toLocaleDateString('de-DE')} · `}
                   <Trophy className="inline h-3 w-3" /> {player.ttr}
                 </p>
               </div>
