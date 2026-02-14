@@ -3,6 +3,7 @@ import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Check, Play, X, Zap, Settings, Printer } from 'lucide-react';
 import { printRefereeSheet, printAllRefereeSheets } from '@/components/RefereeSheet';
 
@@ -20,6 +21,8 @@ interface Props {
 }
 
 export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName }: Props) {
+  const [autoPrint, setAutoPrint] = useState(true);
+
   const pendingMatches = matches.filter(
     m => m.status !== 'completed' && m.player1Id && m.player2Id
   );
@@ -33,16 +36,18 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
   // Wrap onSetActive to auto-print referee sheet
   const handleSetActive = (matchId: string, table?: number) => {
     onSetActive(matchId, table);
-    const match = matches.find(m => m.id === matchId);
-    if (match) {
-      const updatedMatch = { ...match, table: table, status: 'active' as const };
-      printRefereeSheet({
-        match: updatedMatch,
-        player1Name: getParticipantName(match.player1Id),
-        player2Name: getParticipantName(match.player2Id),
-        tournamentName,
-        bestOf,
-      });
+    if (autoPrint) {
+      const match = matches.find(m => m.id === matchId);
+      if (match) {
+        const updatedMatch = { ...match, table: table, status: 'active' as const };
+        printRefereeSheet({
+          match: updatedMatch,
+          player1Name: getParticipantName(match.player1Id),
+          player2Name: getParticipantName(match.player2Id),
+          tournamentName,
+          bestOf,
+        });
+      }
     }
   };
 
@@ -58,7 +63,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
 
     onAutoAssign();
 
-    if (assignedMatches.length > 0) {
+    if (autoPrint && assignedMatches.length > 0) {
       printAllRefereeSheets(
         assignedMatches,
         getParticipantName,
@@ -98,6 +103,10 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
           </div>
           <div className="text-sm text-muted-foreground">
             <span className="text-primary font-semibold">{freeTables.length}</span> frei | <span className="text-primary font-semibold">{activeTables.size}</span> belegt
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch id="autoPrint" checked={autoPrint} onCheckedChange={setAutoPrint} />
+            <Label htmlFor="autoPrint" className="text-sm cursor-pointer">SR-Zettel auto</Label>
           </div>
           {pendingReadyCount > 0 && freeTables.length > 0 && (
             <Button onClick={handleAutoAssign} size="sm" className="h-9 glow-green">
