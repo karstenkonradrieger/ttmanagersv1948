@@ -6,16 +6,16 @@ import { toast } from 'sonner';
 
 interface Props {
   players: Player[];
-  onImport: (players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null }>) => void;
+  onImport: (players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode?: string; city?: string; street?: string; houseNumber?: string; phone?: string }>) => void;
   started: boolean;
 }
 
 function exportPlayersCsv(players: Player[]) {
-  const header = 'Name;Verein;Geschlecht;Geburtsdatum;TTR';
+  const header = 'Name;Verein;Geschlecht;Geburtsdatum;TTR;Straße;Hausnummer;PLZ;Ort;Telefon';
   const rows = players.map(p => {
     const genderLabel = p.gender === 'm' ? 'männlich' : p.gender === 'w' ? 'weiblich' : p.gender === 'd' ? 'divers' : '';
     const bd = p.birthDate ? new Date(p.birthDate).toLocaleDateString('de-DE') : '';
-    return `${p.name};${p.club};${genderLabel};${bd};${p.ttr}`;
+    return `${p.name};${p.club};${genderLabel};${bd};${p.ttr};${p.street || ''};${p.houseNumber || ''};${p.postalCode || ''};${p.city || ''};${p.phone || ''}`;
   });
   return [header, ...rows].join('\n');
 }
@@ -41,7 +41,7 @@ function parseDateDE(value: string): string | null {
   return null;
 }
 
-function parseCsv(text: string): Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null }> {
+function parseCsv(text: string): Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; street: string; houseNumber: string; postalCode: string; city: string; phone: string }> {
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   if (lines.length < 2) return [];
   
@@ -49,7 +49,7 @@ function parseCsv(text: string): Array<{ name: string; club: string; ttr: number
   const sep = lines[0].includes(';') ? ';' : ',';
   
   // Skip header
-  const results: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null }> = [];
+  const results: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; street: string; houseNumber: string; postalCode: string; city: string; phone: string }> = [];
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split(sep).map(c => c.trim());
     if (cols.length < 1 || !cols[0]) continue;
@@ -59,6 +59,11 @@ function parseCsv(text: string): Array<{ name: string; club: string; ttr: number
       gender: parseGender(cols[2] || ''),
       birthDate: parseDateDE(cols[3] || ''),
       ttr: parseInt(cols[4]) || 0,
+      street: cols[5] || '',
+      houseNumber: cols[6] || '',
+      postalCode: cols[7] || '',
+      city: cols[8] || '',
+      phone: cols[9] || '',
     });
   }
   return results;

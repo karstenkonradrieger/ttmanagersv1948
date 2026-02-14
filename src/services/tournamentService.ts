@@ -21,6 +21,11 @@ export interface DbPlayer {
   gender: string;
   birth_date: string | null;
   ttr: number;
+  postal_code: string;
+  city: string;
+  street: string;
+  house_number: string;
+  phone: string;
   created_at: string;
 }
 
@@ -82,13 +87,18 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     rounds: tournament.rounds,
     started: tournament.started,
     logoUrl: tournament.logo_url,
-    players: (players || []).map((p: { id: string; name: string; club: string; gender: string; birth_date: string | null; ttr: number }) => ({
+    players: (players || []).map((p: { id: string; name: string; club: string; gender: string; birth_date: string | null; ttr: number; postal_code: string; city: string; street: string; house_number: string; phone: string }) => ({
       id: p.id,
       name: p.name,
       club: p.club,
       gender: p.gender,
       birthDate: p.birth_date,
       ttr: p.ttr,
+      postalCode: p.postal_code,
+      city: p.city,
+      street: p.street,
+      houseNumber: p.house_number,
+      phone: p.phone,
     })),
     matches: (matches || []).map((m: { 
       id: string; 
@@ -160,6 +170,11 @@ export async function addPlayerToDb(tournamentId: string, player: Omit<Player, '
       gender: player.gender,
       birth_date: player.birthDate,
       ttr: player.ttr,
+      postal_code: player.postalCode,
+      city: player.city,
+      street: player.street,
+      house_number: player.houseNumber,
+      phone: player.phone,
     })
     .select()
     .single();
@@ -172,6 +187,11 @@ export async function addPlayerToDb(tournamentId: string, player: Omit<Player, '
     gender: data.gender,
     birthDate: data.birth_date,
     ttr: data.ttr,
+    postalCode: data.postal_code,
+    city: data.city,
+    street: data.street,
+    houseNumber: data.house_number,
+    phone: data.phone,
   };
 }
 
@@ -191,6 +211,11 @@ export async function updatePlayerInDb(playerId: string, updates: Partial<Omit<P
   if (updates.gender !== undefined) dbUpdates.gender = updates.gender;
   if (updates.birthDate !== undefined) dbUpdates.birth_date = updates.birthDate;
   if (updates.ttr !== undefined) dbUpdates.ttr = updates.ttr;
+  if (updates.postalCode !== undefined) dbUpdates.postal_code = updates.postalCode;
+  if (updates.city !== undefined) dbUpdates.city = updates.city;
+  if (updates.street !== undefined) dbUpdates.street = updates.street;
+  if (updates.houseNumber !== undefined) dbUpdates.house_number = updates.houseNumber;
+  if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
 
   const { error } = await supabase
     .from('players')

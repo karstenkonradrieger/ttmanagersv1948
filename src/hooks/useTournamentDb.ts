@@ -76,10 +76,10 @@ export function useTournamentDb(tournamentId: string | null) {
     };
   }, [tournamentId, loadTournament]);
 
-  const addPlayer = useCallback(async (name: string, club: string, ttr: number, gender: string = '', birthDate: string | null = null) => {
+  const addPlayer = useCallback(async (name: string, club: string, ttr: number, gender: string = '', birthDate: string | null = null, postalCode: string = '', city: string = '', street: string = '', houseNumber: string = '', phone: string = '') => {
     if (!tournamentId) return;
     try {
-      const player = await tournamentService.addPlayerToDb(tournamentId, { name, club, gender, birthDate, ttr });
+      const player = await tournamentService.addPlayerToDb(tournamentId, { name, club, gender, birthDate, ttr, postalCode, city, street, houseNumber, phone });
       setTournament(prev => ({
         ...prev,
         players: [...prev.players, player],
@@ -95,7 +95,7 @@ export function useTournamentDb(tournamentId: string | null) {
     try {
       const added: Player[] = [];
       for (const p of playersData) {
-        const player = await tournamentService.addPlayerToDb(tournamentId, p);
+        const player = await tournamentService.addPlayerToDb(tournamentId, { ...p, postalCode: '', city: '', street: '', houseNumber: '', phone: '' });
         added.push(player);
       }
       setTournament(prev => ({

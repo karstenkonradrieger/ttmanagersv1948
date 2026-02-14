@@ -109,31 +109,46 @@ export type Database = {
       players: {
         Row: {
           birth_date: string | null
+          city: string
           club: string
           created_at: string
           gender: string
+          house_number: string
           id: string
           name: string
+          phone: string
+          postal_code: string
+          street: string
           tournament_id: string
           ttr: number
         }
         Insert: {
           birth_date?: string | null
+          city?: string
           club?: string
           created_at?: string
           gender?: string
+          house_number?: string
           id?: string
           name: string
+          phone?: string
+          postal_code?: string
+          street?: string
           tournament_id: string
           ttr?: number
         }
         Update: {
           birth_date?: string | null
+          city?: string
           club?: string
           created_at?: string
           gender?: string
+          house_number?: string
           id?: string
           name?: string
+          phone?: string
+          postal_code?: string
+          street?: string
           tournament_id?: string
           ttr?: number
         }

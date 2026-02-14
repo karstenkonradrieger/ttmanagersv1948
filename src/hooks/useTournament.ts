@@ -34,10 +34,10 @@ export function useTournament() {
     saveTournament(tournament);
   }, [tournament]);
 
-  const addPlayer = useCallback((name: string, club: string, ttr: number, gender: string = '', birthDate: string | null = null) => {
+  const addPlayer = useCallback((name: string, club: string, ttr: number, gender: string = '', birthDate: string | null = null, postalCode: string = '', city: string = '', street: string = '', houseNumber: string = '', phone: string = '') => {
     setTournament(prev => ({
       ...prev,
-      players: [...prev.players, { id: generateId(), name, club, gender, birthDate, ttr }],
+      players: [...prev.players, { id: generateId(), name, club, gender, birthDate, ttr, postalCode, city, street, houseNumber, phone }],
     }));
   }, []);
 

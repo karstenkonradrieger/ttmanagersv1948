@@ -9,7 +9,7 @@ import { UserPlus, Trash2, Trophy, Pencil, Check, X } from 'lucide-react';
 
 interface Props {
   players: Player[];
-  onAdd: (name: string, club: string, ttr: number, gender: string, birthDate: string | null) => void;
+  onAdd: (name: string, club: string, ttr: number, gender: string, birthDate: string | null, postalCode?: string, city?: string, street?: string, houseNumber?: string, phone?: string) => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, updates: Partial<Omit<Player, 'id'>>) => void;
   started: boolean;
@@ -25,17 +25,27 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
   const [ttr, setTtr] = useState('');
   const [gender, setGender] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [city, setCity] = useState('');
+  const [street, setStreet] = useState('');
+  const [houseNumber, setHouseNumber] = useState('');
+  const [phone, setPhone] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<Player>>({});
 
   const handleAdd = () => {
     if (!name.trim()) return;
-    onAdd(name.trim(), club, parseInt(ttr) || 0, gender, birthDate || null);
+    onAdd(name.trim(), club, parseInt(ttr) || 0, gender, birthDate || null, postalCode, city, street, houseNumber, phone);
     setName('');
     setClub('');
     setTtr('');
     setGender('');
     setBirthDate('');
+    setPostalCode('');
+    setCity('');
+    setStreet('');
+    setHouseNumber('');
+    setPhone('');
   };
 
   const handleAddNewClub = async () => {
@@ -63,6 +73,11 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
     const updates: Partial<Omit<Player, 'id'>> = {
       name: editData.name.trim(),
       birthDate: editData.birthDate || null,
+      postalCode: editData.postalCode || '',
+      city: editData.city || '',
+      street: editData.street || '',
+      houseNumber: editData.houseNumber || '',
+      phone: editData.phone || '',
     };
     if (!started) {
       updates.club = editData.club || '';
@@ -166,6 +181,41 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
               className="h-12 text-base bg-secondary border-border w-24"
             />
           </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Straße"
+              value={street}
+              onChange={e => setStreet(e.target.value)}
+              className="h-12 text-base bg-secondary border-border flex-1"
+            />
+            <Input
+              placeholder="Nr."
+              value={houseNumber}
+              onChange={e => setHouseNumber(e.target.value)}
+              className="h-12 text-base bg-secondary border-border w-20"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="PLZ"
+              value={postalCode}
+              onChange={e => setPostalCode(e.target.value)}
+              className="h-12 text-base bg-secondary border-border w-28"
+            />
+            <Input
+              placeholder="Ort"
+              value={city}
+              onChange={e => setCity(e.target.value)}
+              className="h-12 text-base bg-secondary border-border flex-1"
+            />
+          </div>
+          <Input
+            placeholder="Telefon"
+            type="tel"
+            value={phone}
+            onChange={e => setPhone(e.target.value)}
+            className="h-12 text-base bg-secondary border-border"
+          />
           <Button
             onClick={handleAdd}
             className="h-12 text-base font-semibold glow-green"
@@ -246,6 +296,41 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                     />
                   )}
                 </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={editData.street || ''}
+                    onChange={e => setEditData(prev => ({ ...prev, street: e.target.value }))}
+                    className="h-10 text-sm bg-background border-border flex-1"
+                    placeholder="Straße"
+                  />
+                  <Input
+                    value={editData.houseNumber || ''}
+                    onChange={e => setEditData(prev => ({ ...prev, houseNumber: e.target.value }))}
+                    className="h-10 text-sm bg-background border-border w-20"
+                    placeholder="Nr."
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={editData.postalCode || ''}
+                    onChange={e => setEditData(prev => ({ ...prev, postalCode: e.target.value }))}
+                    className="h-10 text-sm bg-background border-border w-28"
+                    placeholder="PLZ"
+                  />
+                  <Input
+                    value={editData.city || ''}
+                    onChange={e => setEditData(prev => ({ ...prev, city: e.target.value }))}
+                    className="h-10 text-sm bg-background border-border flex-1"
+                    placeholder="Ort"
+                  />
+                </div>
+                <Input
+                  type="tel"
+                  value={editData.phone || ''}
+                  onChange={e => setEditData(prev => ({ ...prev, phone: e.target.value }))}
+                  className="h-10 text-sm bg-background border-border"
+                  placeholder="Telefon"
+                />
                 <div className="flex justify-end gap-1">
                   <Button variant="ghost" size="icon" onClick={cancelEdit} className="h-8 w-8">
                     <X className="h-4 w-4" />
@@ -275,6 +360,14 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                       {player.birthDate && `${new Date(player.birthDate).toLocaleDateString('de-DE')} · `}
                       <Trophy className="inline h-3 w-3" /> {player.ttr}
                     </p>
+                    {(player.street || player.city || player.phone) && (
+                      <p className="text-xs text-muted-foreground">
+                        {player.street && `${player.street} ${player.houseNumber}`.trim()}
+                        {player.street && player.city ? ', ' : ''}
+                        {player.postalCode && `${player.postalCode} `}{player.city}
+                        {player.phone && ` · ☎ ${player.phone}`}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-1">

@@ -5,6 +5,11 @@ export interface Player {
   gender: string;
   birthDate: string | null;
   ttr: number;
+  postalCode: string;
+  city: string;
+  street: string;
+  houseNumber: string;
+  phone: string;
 }
 
 export interface SetScore {
