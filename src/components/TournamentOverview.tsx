@@ -104,9 +104,36 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     );
   }
 
-  const exportPdf = () => {
+  const exportPdf = async () => {
     const doc = new jsPDF({ orientation: 'landscape' });
-    
+    const pageW = doc.internal.pageSize.getWidth();
+
+    let headerY = 14;
+
+    // Logo
+    if (logoUrl) {
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => reject();
+          img.src = logoUrl;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext('2d')!.drawImage(img, 0, 0);
+        const logoData = canvas.toDataURL('image/png');
+        const maxH = 18;
+        const ratio = img.naturalWidth / img.naturalHeight;
+        const logoW = maxH * ratio;
+        doc.addImage(logoData, 'PNG', pageW - 14 - logoW, headerY, logoW, maxH);
+      } catch {
+        // ignore
+      }
+    }
+
     doc.setFontSize(18);
     doc.text(tournamentName, 14, 20);
     doc.setFontSize(10);
