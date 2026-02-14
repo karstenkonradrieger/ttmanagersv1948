@@ -20,6 +20,22 @@ interface Props {
   tournamentName: string;
 }
 
+const playAssignSound = () => {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
+  } catch {}
+};
+
 export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
 
@@ -36,6 +52,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
   // Wrap onSetActive to auto-print referee sheet
   const handleSetActive = (matchId: string, table?: number) => {
     onSetActive(matchId, table);
+    playAssignSound();
     if (autoPrint) {
       const match = matches.find(m => m.id === matchId);
       if (match) {
@@ -62,6 +79,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
     }));
 
     onAutoAssign();
+    if (assignedMatches.length > 0) playAssignSound();
 
     if (autoPrint && assignedMatches.length > 0) {
       printAllRefereeSheets(
