@@ -121,6 +121,20 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, []);
 
+  const updatePlayer = useCallback(async (id: string, updates: Partial<Omit<Player, 'id'>>) => {
+    try {
+      await tournamentService.updatePlayerInDb(id, updates);
+      setTournament(prev => ({
+        ...prev,
+        players: prev.players.map(p => p.id === id ? { ...p, ...updates } : p),
+      }));
+      toast.success('Spieler aktualisiert');
+    } catch (error) {
+      console.error('Error updating player:', error);
+      toast.error('Fehler beim Aktualisieren des Spielers');
+    }
+  }, []);
+
   const generateBracket = useCallback(async () => {
     if (!tournamentId) return;
 
@@ -371,6 +385,7 @@ export function useTournamentDb(tournamentId: string | null) {
     loading,
     addPlayer,
     removePlayer,
+    updatePlayer,
     importPlayers,
     generateBracket,
     updateMatchScore,

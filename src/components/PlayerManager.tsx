@@ -4,18 +4,19 @@ import { Club } from '@/hooks/useClubs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserPlus, Trash2, Trophy } from 'lucide-react';
+import { UserPlus, Trash2, Trophy, Pencil, Check, X } from 'lucide-react';
 
 interface Props {
   players: Player[];
   onAdd: (name: string, club: string, ttr: number, gender: string, birthDate: string | null) => void;
   onRemove: (id: string) => void;
+  onUpdate: (id: string, updates: Partial<Omit<Player, 'id'>>) => void;
   started: boolean;
   clubs?: Club[];
   onAddClub?: (name: string) => Promise<Club | null>;
 }
 
-export function PlayerManager({ players, onAdd, onRemove, started, clubs = [], onAddClub }: Props) {
+export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clubs = [], onAddClub }: Props) {
   const [name, setName] = useState('');
   const [club, setClub] = useState('');
   const [newClubName, setNewClubName] = useState('');
@@ -23,6 +24,8 @@ export function PlayerManager({ players, onAdd, onRemove, started, clubs = [], o
   const [ttr, setTtr] = useState('');
   const [gender, setGender] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<Partial<Player>>({});
 
   const handleAdd = () => {
     if (!name.trim()) return;
@@ -42,6 +45,29 @@ export function PlayerManager({ players, onAdd, onRemove, started, clubs = [], o
       setNewClubName('');
       setShowNewClub(false);
     }
+  };
+
+  const startEdit = (player: Player) => {
+    setEditingId(player.id);
+    setEditData({ ...player });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditData({});
+  };
+
+  const saveEdit = () => {
+    if (!editingId || !editData.name?.trim()) return;
+    onUpdate(editingId, {
+      name: editData.name.trim(),
+      club: editData.club || '',
+      gender: editData.gender || '',
+      birthDate: editData.birthDate || null,
+      ttr: editData.ttr || 0,
+    });
+    setEditingId(null);
+    setEditData({});
   };
 
   return (
@@ -156,38 +182,114 @@ export function PlayerManager({ players, onAdd, onRemove, started, clubs = [], o
         {players.map((player, i) => (
           <div
             key={player.id}
-            className="flex items-center justify-between bg-secondary rounded-lg p-3 animate-slide-up"
+            className="bg-secondary rounded-lg p-3 animate-slide-up"
             style={{ animationDelay: `${i * 50}ms` }}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                {i + 1}
+            {editingId === player.id ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Input
+                    value={editData.name || ''}
+                    onChange={e => setEditData(prev => ({ ...prev, name: e.target.value }))}
+                    className="h-10 text-sm bg-background border-border flex-1"
+                    placeholder="Name"
+                  />
+                  <Select
+                    value={editData.club || ''}
+                    onValueChange={v => setEditData(prev => ({ ...prev, club: v }))}
+                  >
+                    <SelectTrigger className="h-10 text-sm bg-background border-border w-40">
+                      <SelectValue placeholder="Verein" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clubs.map(c => (
+                        <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-2">
+                  <Select
+                    value={editData.gender || ''}
+                    onValueChange={v => setEditData(prev => ({ ...prev, gender: v }))}
+                  >
+                    <SelectTrigger className="h-10 text-sm bg-background border-border w-28">
+                      <SelectValue placeholder="Geschl." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="m">Männlich</SelectItem>
+                      <SelectItem value="w">Weiblich</SelectItem>
+                      <SelectItem value="d">Divers</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="date"
+                    value={editData.birthDate || ''}
+                    onChange={e => setEditData(prev => ({ ...prev, birthDate: e.target.value }))}
+                    className="h-10 text-sm bg-background border-border flex-1"
+                  />
+                  <Input
+                    type="number"
+                    value={editData.ttr ?? ''}
+                    onChange={e => setEditData(prev => ({ ...prev, ttr: parseInt(e.target.value) || 0 }))}
+                    className="h-10 text-sm bg-background border-border w-20"
+                    placeholder="TTR"
+                  />
+                </div>
+                <div className="flex justify-end gap-1">
+                  <Button variant="ghost" size="icon" onClick={cancelEdit} className="h-8 w-8">
+                    <X className="h-4 w-4" />
+                  </Button>
+                  <Button variant="default" size="icon" onClick={saveEdit} className="h-8 w-8" disabled={!editData.name?.trim()}>
+                    <Check className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold">
-                  {player.name}
-                  {player.gender && (
-                    <span className="ml-1 text-xs text-muted-foreground">
-                      ({player.gender === 'm' ? '♂' : player.gender === 'w' ? '♀' : '⚧'})
-                    </span>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+                    {i + 1}
+                  </div>
+                  <div>
+                    <p className="font-semibold">
+                      {player.name}
+                      {player.gender && (
+                        <span className="ml-1 text-xs text-muted-foreground">
+                          ({player.gender === 'm' ? '♂' : player.gender === 'w' ? '♀' : '⚧'})
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {player.club && `${player.club} · `}
+                      {player.birthDate && `${new Date(player.birthDate).toLocaleDateString('de-DE')} · `}
+                      <Trophy className="inline h-3 w-3" /> {player.ttr}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  {!started && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => startEdit(player)}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onRemove(player.id)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </Button>
+                    </>
                   )}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {player.club && `${player.club} · `}
-                  {player.birthDate && `${new Date(player.birthDate).toLocaleDateString('de-DE')} · `}
-                  <Trophy className="inline h-3 w-3" /> {player.ttr}
-                </p>
+                </div>
               </div>
-            </div>
-            {!started && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onRemove(player.id)}
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="h-5 w-5" />
-              </Button>
             )}
           </div>
         ))}
