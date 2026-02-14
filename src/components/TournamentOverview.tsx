@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { FileDown } from 'lucide-react';
+import { FileDown, Award } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -228,16 +228,109 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
 
   const finalMatch = matches.find(m => m.round === rounds - 1);
   const champion = finalMatch?.winnerId ? getPlayer(finalMatch.winnerId) : null;
+  const secondPlace = finalMatch ? getPlayer(finalMatch.winnerId === finalMatch.player1Id ? finalMatch.player2Id : finalMatch.player1Id) : null;
+
+  // Place 3: losers of the semi-finals
+  const semiRound = rounds - 2;
+  const semiMatches = semiRound >= 0 ? matches.filter(m => m.round === semiRound && m.status === 'completed') : [];
+  const thirdPlacePlayers = semiMatches
+    .map(m => {
+      const loserId = m.winnerId === m.player1Id ? m.player2Id : m.player1Id;
+      return loserId ? getPlayer(loserId) : null;
+    })
+    .filter((p): p is Player => p !== null);
+
+  const exportCertificates = () => {
+    const placements: { rank: number; label: string; player: Player }[] = [];
+    if (champion) placements.push({ rank: 1, label: '1. Platz', player: champion });
+    if (secondPlace) placements.push({ rank: 2, label: '2. Platz', player: secondPlace });
+    thirdPlacePlayers.forEach(p => placements.push({ rank: 3, label: '3. Platz', player: p }));
+
+    if (placements.length === 0) return;
+
+    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+
+    placements.forEach((placement, idx) => {
+      if (idx > 0) doc.addPage();
+      const w = doc.internal.pageSize.getWidth();
+      const h = doc.internal.pageSize.getHeight();
+
+      // Border
+      doc.setDrawColor(180, 160, 60);
+      doc.setLineWidth(3);
+      doc.rect(10, 10, w - 20, h - 20);
+      doc.setLineWidth(1);
+      doc.rect(14, 14, w - 28, h - 28);
+
+      // Medal emoji as text
+      const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
+      doc.setFontSize(40);
+      doc.text(medals[placement.rank] || '', w / 2, 45, { align: 'center' });
+
+      // Title
+      doc.setFontSize(36);
+      doc.setFont(undefined!, 'bold');
+      doc.setTextColor(50, 50, 50);
+      doc.text('Urkunde', w / 2, 65, { align: 'center' });
+
+      // Placement
+      doc.setFontSize(22);
+      doc.setTextColor(140, 120, 30);
+      doc.text(placement.label, w / 2, 82, { align: 'center' });
+
+      // Player name
+      doc.setFontSize(30);
+      doc.setTextColor(30, 30, 30);
+      doc.setFont(undefined!, 'bold');
+      doc.text(placement.player.name, w / 2, 108, { align: 'center' });
+
+      // Club
+      if (placement.player.club) {
+        doc.setFontSize(16);
+        doc.setFont(undefined!, 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text(placement.player.club, w / 2, 120, { align: 'center' });
+      }
+
+      // Tournament name
+      doc.setFontSize(14);
+      doc.setTextColor(80, 80, 80);
+      doc.setFont(undefined!, 'normal');
+      doc.text(tournamentName, w / 2, 142, { align: 'center' });
+
+      // Date
+      doc.setFontSize(12);
+      doc.text(new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }), w / 2, 155, { align: 'center' });
+
+      // Signature line
+      doc.setDrawColor(150, 150, 150);
+      doc.setLineWidth(0.5);
+      doc.line(w / 2 - 50, 180, w / 2 + 50, 180);
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
+      doc.text('Turnierleitung', w / 2, 187, { align: 'center' });
+    });
+
+    doc.save(`${tournamentName.replace(/\s+/g, '_')}_Urkunden.pdf`);
+  };
 
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header with export */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold">Spielübersicht</h3>
-        <Button onClick={exportPdf} size="sm" className="h-9 font-semibold">
-          <FileDown className="mr-1 h-4 w-4" />
-          PDF Export
-        </Button>
+        <div className="flex gap-2">
+          {champion && (
+            <Button onClick={exportCertificates} size="sm" variant="outline" className="h-9 font-semibold">
+              <Award className="mr-1 h-4 w-4" />
+              Urkunden
+            </Button>
+          )}
+          <Button onClick={exportPdf} size="sm" className="h-9 font-semibold">
+            <FileDown className="mr-1 h-4 w-4" />
+            PDF Export
+          </Button>
+        </div>
       </div>
 
       {/* Champion banner */}
