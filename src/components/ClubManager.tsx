@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Club } from '@/hooks/useClubs';
 import { Player } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ClubImportExport } from '@/components/ClubImportExport';
-import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone } from 'lucide-react';
+import { ClubImportExport, exportClubCsv, parseCsv } from '@/components/ClubImportExport';
+import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, Download, Upload } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Props {
   clubs: Club[];
@@ -13,6 +14,45 @@ interface Props {
   onAdd: (name: string) => Promise<Club | null>;
   onRemove: (id: string) => void;
   onImportClubsWithPlayers?: (data: Array<{ clubName: string; players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }> }>) => void;
+}
+
+function ClubImportButton({ clubName, onImport }: { clubName: string; onImport?: Props['onImportClubsWithPlayers'] }) {
+  const ref = useRef<HTMLInputElement>(null);
+  if (!onImport) return null;
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      const parsed = parseCsv(text);
+      if (parsed.length === 0) {
+        toast.error('Keine gültigen Daten gefunden');
+        return;
+      }
+      onImport(parsed);
+      const totalPlayers = parsed.reduce((sum, c) => sum + c.players.length, 0);
+      toast.success(`${totalPlayers} Spieler importiert`);
+    };
+    reader.readAsText(file);
+    if (ref.current) ref.current.value = '';
+  };
+
+  return (
+    <>
+      <input ref={ref} type="file" accept=".csv,.txt" onChange={handleFile} className="hidden" />
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={(e) => { e.stopPropagation(); ref.current?.click(); }}
+        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+        title={`Spieler für ${clubName} importieren`}
+      >
+        <Upload className="h-3.5 w-3.5" />
+      </Button>
+    </>
+  );
 }
 
 export function ClubManager({ clubs, players = [], onAdd, onRemove, onImportClubsWithPlayers }: Props) {
@@ -104,14 +144,26 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onImportClub
                       </span>
                     </button>
                   </CollapsibleTrigger>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onRemove(club.id)}
-                    className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => { e.stopPropagation(); exportClubCsv(club.name, players); }}
+                      className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                      title="Verein exportieren"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                    </Button>
+                    <ClubImportButton clubName={club.name} onImport={onImportClubsWithPlayers} />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onRemove(club.id)}
+                      className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
 
                 <CollapsibleContent>
