@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { useAuth } from '@/hooks/useAuth';
+import { useClubs } from '@/hooks/useClubs';
 import { TournamentSelector } from '@/components/TournamentSelector';
 import { PlayerManager } from '@/components/PlayerManager';
 import { PlayerImportExport } from '@/components/PlayerImportExport';
+import { ClubManager } from '@/components/ClubManager';
 import { TournamentBracket } from '@/components/TournamentBracket';
 import { MatchScoring } from '@/components/MatchScoring';
 import { LiveDashboard } from '@/components/LiveDashboard';
@@ -11,10 +13,11 @@ import { TournamentOverview } from '@/components/TournamentOverview';
 import { LogoUpload } from '@/components/LogoUpload';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut } from 'lucide-react';
+import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2 } from 'lucide-react';
 
 const Index = () => {
   const { signOut } = useAuth();
+  const { clubs, addClub, removeClub } = useClubs();
   const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
   const {
     tournament,
@@ -138,10 +141,14 @@ const Index = () => {
       {/* Main content */}
       <div className="container pb-24">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="w-full bg-secondary h-12 p-1 rounded-xl grid grid-cols-5">
+          <TabsList className="w-full bg-secondary h-12 p-1 rounded-xl grid grid-cols-6">
             <TabsTrigger value="players" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Spieler</span>
+            </TabsTrigger>
+            <TabsTrigger value="clubs" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
+              <Building2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Vereine</span>
             </TabsTrigger>
             <TabsTrigger value="bracket" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <Swords className="h-4 w-4" />
@@ -188,6 +195,16 @@ const Index = () => {
                 onAdd={addPlayer}
                 onRemove={removePlayer}
                 started={tournament.started}
+                clubs={clubs}
+                onAddClub={addClub}
+              />
+            </TabsContent>
+
+            <TabsContent value="clubs">
+              <ClubManager
+                clubs={clubs}
+                onAdd={addClub}
+                onRemove={removeClub}
               />
             </TabsContent>
 
