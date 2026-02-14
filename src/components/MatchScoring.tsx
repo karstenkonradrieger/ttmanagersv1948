@@ -20,12 +20,15 @@ interface Props {
   tournamentName: string;
 }
 
-const announceMatch = (table: number | undefined, player1Name: string, player2Name: string) => {
+const announceMatch = (table: number | undefined, player1Name: string, player2Name: string, nextPlayer1Name?: string, nextPlayer2Name?: string) => {
   try {
     const tableWords: Record<number, string> = { 1: 'eins', 2: 'zwei', 3: 'drei', 4: 'vier', 5: 'fünf', 6: 'sechs', 7: 'sieben', 8: 'acht', 9: 'neun', 10: 'zehn', 11: 'elf', 12: 'zwölf', 13: 'dreizehn', 14: 'vierzehn', 15: 'fünfzehn', 16: 'sechzehn', 17: 'siebzehn', 18: 'achtzehn', 19: 'neunzehn', 20: 'zwanzig' };
     const tableSpoken = table ? (tableWords[table] || String(table)) : undefined;
     const tableText = tableSpoken ? `Nächstes Spiel am Tisch ${tableSpoken}.` : 'Nächstes Spiel.';
-    const text = `${tableText} Es spielt ${player1Name} gegen ${player2Name}.`;
+    let text = `${tableText} Es spielt ${player1Name} gegen ${player2Name}.`;
+    if (nextPlayer1Name && nextPlayer2Name) {
+      text += ` Es bereiten sich vor: ${nextPlayer1Name} gegen ${nextPlayer2Name}.`;
+    }
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'de-DE';
     utterance.rate = 0.7;
@@ -47,11 +50,22 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
   const pendingReadyCount = matches.filter(m => m.status === 'pending' && m.player1Id && m.player2Id).length;
 
   // Wrap onSetActive to auto-print referee sheet
+  const getNextPendingAfter = (excludeId: string) => {
+    return matches.find(m => m.status === 'pending' && m.player1Id && m.player2Id && m.id !== excludeId);
+  };
+
   const handleSetActive = (matchId: string, table?: number) => {
     onSetActive(matchId, table);
     const match = matches.find(m => m.id === matchId);
     if (match) {
-      announceMatch(table, getParticipantName(match.player1Id), getParticipantName(match.player2Id));
+      const next = getNextPendingAfter(matchId);
+      announceMatch(
+        table,
+        getParticipantName(match.player1Id),
+        getParticipantName(match.player2Id),
+        next ? getParticipantName(next.player1Id) : undefined,
+        next ? getParticipantName(next.player2Id) : undefined,
+      );
     }
     if (autoPrint) {
       const match = matches.find(m => m.id === matchId);
@@ -80,9 +94,20 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
 
     onAutoAssign();
     if (assignedMatches.length > 0) {
+      const remainingPending = matches.filter(
+        m => m.status === 'pending' && m.player1Id && m.player2Id && !assignedMatches.find(a => a.id === m.id)
+      );
       assignedMatches.forEach((m, i) => {
+        // For the last assigned match, show the next pending as preparation
+        const nextPrep = i === assignedMatches.length - 1 ? remainingPending[0] : undefined;
         setTimeout(() => {
-          announceMatch(m.table, getParticipantName(m.player1Id), getParticipantName(m.player2Id));
+          announceMatch(
+            m.table,
+            getParticipantName(m.player1Id),
+            getParticipantName(m.player2Id),
+            nextPrep ? getParticipantName(nextPrep.player1Id) : undefined,
+            nextPrep ? getParticipantName(nextPrep.player2Id) : undefined,
+          );
         }, i * 500);
       });
     }
