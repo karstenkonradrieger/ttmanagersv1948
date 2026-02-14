@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, Trash2, ChevronRight, Trophy, Calendar, Loader2 } from 'lucide-react';
 import { fetchTournaments, createTournament, deleteTournament, DbTournament } from '@/services/tournamentService';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function TournamentSelector({ selectedId, onSelect }: Props) {
+  const { user } = useAuth();
   const [tournaments, setTournaments] = useState<DbTournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -41,7 +43,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
     if (!newName.trim()) return;
     setCreating(true);
     try {
-      const id = await createTournament(newName.trim());
+      const id = await createTournament(newName.trim(), user?.id);
       setNewName('');
       setDialogOpen(false);
       await load();
