@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Plus, Trash2, ChevronRight, Trophy, Calendar, Loader2 } from 'lucide-react';
 import { fetchTournaments, createTournament, deleteTournament, DbTournament } from '@/services/tournamentService';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { TournamentMode, TournamentType } from '@/types/tournament';
 
 interface Props {
   selectedId: string | null;
@@ -21,6 +24,8 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
+  const [newMode, setNewMode] = useState<TournamentMode>('knockout');
+  const [newType, setNewType] = useState<TournamentType>('singles');
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const load = async () => {
@@ -43,8 +48,10 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
     if (!newName.trim()) return;
     setCreating(true);
     try {
-      const id = await createTournament(newName.trim(), user?.id);
+      const id = await createTournament(newName.trim(), user?.id, newMode, newType);
       setNewName('');
+      setNewMode('knockout');
+      setNewType('singles');
       setDialogOpen(false);
       await load();
       onSelect(id);
@@ -102,6 +109,32 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                 onChange={e => setNewName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleCreate()}
               />
+              <div>
+                <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
+                <RadioGroup value={newMode} onValueChange={(v) => setNewMode(v as TournamentMode)} className="flex gap-4">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="knockout" id="mode-ko" />
+                    <Label htmlFor="mode-ko" className="text-sm cursor-pointer">KO-System</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="round_robin" id="mode-rr" />
+                    <Label htmlFor="mode-rr" className="text-sm cursor-pointer">Alle gegen Alle</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              <div>
+                <Label className="text-sm font-semibold mb-2 block">Turniertyp</Label>
+                <RadioGroup value={newType} onValueChange={(v) => setNewType(v as TournamentType)} className="flex gap-4">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="singles" id="type-singles" />
+                    <Label htmlFor="type-singles" className="text-sm cursor-pointer">Einzel</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="doubles" id="type-doubles" />
+                    <Label htmlFor="type-doubles" className="text-sm cursor-pointer">Doppel</Label>
+                  </div>
+                </RadioGroup>
+              </div>
               <Button 
                 onClick={handleCreate} 
                 disabled={!newName.trim() || creating}
@@ -141,6 +174,12 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                         Gestartet
                       </span>
                     )}
+                    <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
+                      {(t as any).mode === 'round_robin' ? 'Alle gg. Alle' : 'KO'}
+                    </span>
+                    <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
+                      {(t as any).type === 'doubles' ? 'Doppel' : 'Einzel'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                     <Calendar className="h-3 w-3" />

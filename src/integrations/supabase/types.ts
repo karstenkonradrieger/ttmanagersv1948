@@ -35,6 +35,55 @@ export type Database = {
         }
         Relationships: []
       }
+      doubles_pairs: {
+        Row: {
+          created_at: string
+          id: string
+          pair_name: string
+          player1_id: string
+          player2_id: string
+          tournament_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pair_name?: string
+          player1_id: string
+          player2_id: string
+          tournament_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pair_name?: string
+          player1_id?: string
+          player2_id?: string
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doubles_pairs_player1_id_fkey"
+            columns: ["player1_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doubles_pairs_player2_id_fkey"
+            columns: ["player2_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doubles_pairs_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           created_at: string
@@ -168,10 +217,12 @@ export type Database = {
           created_by: string | null
           id: string
           logo_url: string | null
+          mode: string
           name: string
           rounds: number
           started: boolean
           table_count: number
+          type: string
           updated_at: string
         }
         Insert: {
@@ -179,10 +230,12 @@ export type Database = {
           created_by?: string | null
           id?: string
           logo_url?: string | null
+          mode?: string
           name?: string
           rounds?: number
           started?: boolean
           table_count?: number
+          type?: string
           updated_at?: string
         }
         Update: {
@@ -190,10 +243,12 @@ export type Database = {
           created_by?: string | null
           id?: string
           logo_url?: string | null
+          mode?: string
           name?: string
           rounds?: number
           started?: boolean
           table_count?: number
+          type?: string
           updated_at?: string
         }
         Relationships: []

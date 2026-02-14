@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Tournament, Player, Match, SetScore } from '@/types/tournament';
+import { Tournament, Player, Match, SetScore, DoublesPair } from '@/types/tournament';
 import { Json } from '@/integrations/supabase/types';
 
 export interface DbTournament {
@@ -11,6 +11,8 @@ export interface DbTournament {
   created_at: string;
   updated_at: string;
   logo_url: string | null;
+  mode: string;
+  type: string;
 }
 
 export interface DbPlayer {
@@ -80,6 +82,14 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
   
   if (mError) throw mError;
 
+  // Fetch doubles pairs
+  const { data: doublesPairs, error: dpError } = await supabase
+    .from('doubles_pairs')
+    .select('*')
+    .eq('tournament_id', id);
+  
+  if (dpError) throw dpError;
+
   return {
     id: tournament.id,
     name: tournament.name,
@@ -87,6 +97,15 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     rounds: tournament.rounds,
     started: tournament.started,
     logoUrl: tournament.logo_url,
+    mode: (tournament.mode || 'knockout') as 'knockout' | 'round_robin',
+    type: (tournament.type || 'singles') as 'singles' | 'doubles',
+    doublesPairs: (doublesPairs || []).map((dp: any) => ({
+      id: dp.id,
+      tournamentId: dp.tournament_id,
+      player1Id: dp.player1_id,
+      player2Id: dp.player2_id,
+      pairName: dp.pair_name || '',
+    })),
     players: (players || []).map((p: { id: string; name: string; club: string; gender: string; birth_date: string | null; ttr: number; postal_code: string; city: string; street: string; house_number: string; phone: string }) => ({
       id: p.id,
       name: p.name,
@@ -124,10 +143,10 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
   };
 }
 
-export async function createTournament(name: string = 'Tischtennis Turnier', createdBy?: string): Promise<string> {
+export async function createTournament(name: string = 'Tischtennis Turnier', createdBy?: string, mode: string = 'knockout', type: string = 'singles'): Promise<string> {
   const { data, error } = await supabase
     .from('tournaments')
-    .insert({ name, created_by: createdBy || null })
+    .insert({ name, created_by: createdBy || null, mode, type })
     .select('id')
     .single();
   
@@ -141,6 +160,8 @@ export async function updateTournament(id: string, updates: Partial<{
   rounds: number;
   started: boolean;
   logo_url: string | null;
+  mode: string;
+  type: string;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')
@@ -298,4 +319,45 @@ export async function updateMultipleMatches(updates: Array<{ id: string; data: R
       supabase.from('matches').update(data).eq('id', id)
     )
   );
+}
+
+// Doubles pair operations
+export async function addDoublesPair(tournamentId: string, player1Id: string, player2Id: string, pairName: string): Promise<DoublesPair> {
+  const { data, error } = await supabase
+    .from('doubles_pairs')
+    .insert({
+      tournament_id: tournamentId,
+      player1_id: player1Id,
+      player2_id: player2Id,
+      pair_name: pairName,
+    })
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return {
+    id: data.id,
+    tournamentId: data.tournament_id,
+    player1Id: data.player1_id,
+    player2Id: data.player2_id,
+    pairName: data.pair_name,
+  };
+}
+
+export async function removeDoublesPair(pairId: string): Promise<void> {
+  const { error } = await supabase
+    .from('doubles_pairs')
+    .delete()
+    .eq('id', pairId);
+  
+  if (error) throw error;
+}
+
+export async function clearDoublesPairs(tournamentId: string): Promise<void> {
+  const { error } = await supabase
+    .from('doubles_pairs')
+    .delete()
+    .eq('tournament_id', tournamentId);
+  
+  if (error) throw error;
 }
