@@ -34,10 +34,10 @@ export function useTournament() {
     saveTournament(tournament);
   }, [tournament]);
 
-  const addPlayer = useCallback((name: string, club: string, ttr: number) => {
+  const addPlayer = useCallback((name: string, club: string, ttr: number, gender: string = '', birthDate: string | null = null) => {
     setTournament(prev => ({
       ...prev,
-      players: [...prev.players, { id: generateId(), name, club, ttr }],
+      players: [...prev.players, { id: generateId(), name, club, gender, birthDate, ttr }],
     }));
   }, []);
 

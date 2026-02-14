@@ -76,10 +76,10 @@ export function useTournamentDb(tournamentId: string | null) {
     };
   }, [tournamentId, loadTournament]);
 
-  const addPlayer = useCallback(async (name: string, club: string, ttr: number) => {
+  const addPlayer = useCallback(async (name: string, club: string, ttr: number, gender: string = '', birthDate: string | null = null) => {
     if (!tournamentId) return;
     try {
-      const player = await tournamentService.addPlayerToDb(tournamentId, { name, club, ttr });
+      const player = await tournamentService.addPlayerToDb(tournamentId, { name, club, gender, birthDate, ttr });
       setTournament(prev => ({
         ...prev,
         players: [...prev.players, player],
@@ -87,6 +87,24 @@ export function useTournamentDb(tournamentId: string | null) {
     } catch (error) {
       console.error('Error adding player:', error);
       toast.error('Fehler beim Hinzufügen des Spielers');
+    }
+  }, [tournamentId]);
+
+  const importPlayers = useCallback(async (playersData: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null }>) => {
+    if (!tournamentId) return;
+    try {
+      const added: Player[] = [];
+      for (const p of playersData) {
+        const player = await tournamentService.addPlayerToDb(tournamentId, p);
+        added.push(player);
+      }
+      setTournament(prev => ({
+        ...prev,
+        players: [...prev.players, ...added],
+      }));
+    } catch (error) {
+      console.error('Error importing players:', error);
+      toast.error('Fehler beim Importieren der Spieler');
     }
   }, [tournamentId]);
 
@@ -353,6 +371,7 @@ export function useTournamentDb(tournamentId: string | null) {
     loading,
     addPlayer,
     removePlayer,
+    importPlayers,
     generateBracket,
     updateMatchScore,
     setMatchActive,

@@ -18,6 +18,8 @@ export interface DbPlayer {
   tournament_id: string;
   name: string;
   club: string;
+  gender: string;
+  birth_date: string | null;
   ttr: number;
   created_at: string;
 }
@@ -80,10 +82,12 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     rounds: tournament.rounds,
     started: tournament.started,
     logoUrl: tournament.logo_url,
-    players: (players || []).map((p: { id: string; name: string; club: string; ttr: number }) => ({
+    players: (players || []).map((p: { id: string; name: string; club: string; gender: string; birth_date: string | null; ttr: number }) => ({
       id: p.id,
       name: p.name,
       club: p.club,
+      gender: p.gender,
+      birthDate: p.birth_date,
       ttr: p.ttr,
     })),
     matches: (matches || []).map((m: { 
@@ -153,6 +157,8 @@ export async function addPlayerToDb(tournamentId: string, player: Omit<Player, '
       tournament_id: tournamentId,
       name: player.name,
       club: player.club,
+      gender: player.gender,
+      birth_date: player.birthDate,
       ttr: player.ttr,
     })
     .select()
@@ -163,6 +169,8 @@ export async function addPlayerToDb(tournamentId: string, player: Omit<Player, '
     id: data.id,
     name: data.name,
     club: data.club,
+    gender: data.gender,
+    birthDate: data.birth_date,
     ttr: data.ttr,
   };
 }
