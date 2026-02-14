@@ -155,6 +155,19 @@ const Index = () => {
               <span className="hidden sm:inline">Live</span>
             </TabsTrigger>
           </TabsList>
+          <div className="flex justify-end mt-2">
+            {tab === 'live' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(`/live/${selectedTournamentId}`, '_blank')}
+                className="gap-1 text-xs"
+              >
+                <Monitor className="h-3 w-3" />
+                Im neuen Fenster öffnen
+              </Button>
+            )}
+          </div>
 
           <div className="mt-4">
             <TabsContent value="players">
