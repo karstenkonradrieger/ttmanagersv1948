@@ -29,6 +29,44 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
   const activeTables = new Set(activeMatches.filter(m => m.table).map(m => m.table));
   const freeTables = Array.from({ length: tableCount }, (_, i) => i + 1).filter(t => !activeTables.has(t));
   const pendingReadyCount = matches.filter(m => m.status === 'pending' && m.player1Id && m.player2Id).length;
+
+  // Wrap onSetActive to auto-print referee sheet
+  const handleSetActive = (matchId: string, table?: number) => {
+    onSetActive(matchId, table);
+    const match = matches.find(m => m.id === matchId);
+    if (match) {
+      const updatedMatch = { ...match, table: table, status: 'active' as const };
+      printRefereeSheet({
+        match: updatedMatch,
+        player1Name: getParticipantName(match.player1Id),
+        player2Name: getParticipantName(match.player2Id),
+        tournamentName,
+        bestOf,
+      });
+    }
+  };
+
+  // Wrap onAutoAssign to auto-print all newly assigned sheets
+  const handleAutoAssign = () => {
+    const pendingReady = matches.filter(m => m.status === 'pending' && m.player1Id && m.player2Id);
+    const assignCount = Math.min(pendingReady.length, freeTables.length);
+    const assignedMatches = pendingReady.slice(0, assignCount).map((m, i) => ({
+      ...m,
+      table: freeTables[i],
+      status: 'active' as const,
+    }));
+
+    onAutoAssign();
+
+    if (assignedMatches.length > 0) {
+      printAllRefereeSheets(
+        assignedMatches,
+        getParticipantName,
+        tournamentName,
+        bestOf,
+      );
+    }
+  };
   if (matches.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-12">
@@ -62,7 +100,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
             <span className="text-primary font-semibold">{freeTables.length}</span> frei | <span className="text-primary font-semibold">{activeTables.size}</span> belegt
           </div>
           {pendingReadyCount > 0 && freeTables.length > 0 && (
-            <Button onClick={onAutoAssign} size="sm" className="h-9 glow-green">
+            <Button onClick={handleAutoAssign} size="sm" className="h-9 glow-green">
               <Zap className="mr-1 h-4 w-4" />
               Auto-Zuweisen ({Math.min(pendingReadyCount, freeTables.length)})
             </Button>
@@ -110,7 +148,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
           {pendingMatches
             .filter(m => m.status === 'pending')
             .map(m => (
-              <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={onSetActive} freeTables={freeTables} />
+              <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={handleSetActive} freeTables={freeTables} />
             ))}
         </Section>
       )}
