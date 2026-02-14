@@ -20,6 +20,9 @@ function loadTournament(): Tournament {
     rounds: 0,
     started: false,
     tableCount: 4,
+    mode: 'knockout',
+    type: 'singles',
+    doublesPairs: [],
   };
 }
 
@@ -155,6 +158,9 @@ export function useTournament() {
       rounds: 0,
       started: false,
       tableCount: 4,
+      mode: 'knockout',
+      type: 'singles',
+      doublesPairs: [],
     });
   }, []);
 

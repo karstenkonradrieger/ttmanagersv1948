@@ -29,6 +29,17 @@ export interface Match {
   status: 'pending' | 'active' | 'completed';
 }
 
+export interface DoublesPair {
+  id: string;
+  tournamentId: string;
+  player1Id: string;
+  player2Id: string;
+  pairName: string;
+}
+
+export type TournamentMode = 'knockout' | 'round_robin';
+export type TournamentType = 'singles' | 'doubles';
+
 export interface Tournament {
   id: string;
   name: string;
@@ -38,4 +49,7 @@ export interface Tournament {
   started: boolean;
   tableCount: number;
   logoUrl?: string | null;
+  mode: TournamentMode;
+  type: TournamentType;
+  doublesPairs: DoublesPair[];
 }
