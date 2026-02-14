@@ -28,7 +28,7 @@ const announceMatch = (table: number | undefined, player1Name: string, player2Na
     const text = `${tableText} Es spielt ${player1Name} gegen ${player2Name}.`;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'de-DE';
-    utterance.rate = 0.9;
+    utterance.rate = 0.7;
     speechSynthesis.speak(utterance);
   } catch {}
 };
