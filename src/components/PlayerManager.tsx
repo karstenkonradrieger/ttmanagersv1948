@@ -59,13 +59,16 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
 
   const saveEdit = () => {
     if (!editingId || !editData.name?.trim()) return;
-    onUpdate(editingId, {
+    const updates: Partial<Omit<Player, 'id'>> = {
       name: editData.name.trim(),
-      club: editData.club || '',
-      gender: editData.gender || '',
       birthDate: editData.birthDate || null,
-      ttr: editData.ttr || 0,
-    });
+    };
+    if (!started) {
+      updates.club = editData.club || '';
+      updates.gender = editData.gender || '';
+      updates.ttr = editData.ttr || 0;
+    }
+    onUpdate(editingId, updates);
     setEditingId(null);
     setEditData({});
   };
@@ -194,47 +197,53 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                     className="h-10 text-sm bg-background border-border flex-1"
                     placeholder="Name"
                   />
-                  <Select
-                    value={editData.club || ''}
-                    onValueChange={v => setEditData(prev => ({ ...prev, club: v }))}
-                  >
-                    <SelectTrigger className="h-10 text-sm bg-background border-border w-40">
-                      <SelectValue placeholder="Verein" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clubs.map(c => (
-                        <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {!started && (
+                    <Select
+                      value={editData.club || ''}
+                      onValueChange={v => setEditData(prev => ({ ...prev, club: v }))}
+                    >
+                      <SelectTrigger className="h-10 text-sm bg-background border-border w-40">
+                        <SelectValue placeholder="Verein" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clubs.map(c => (
+                          <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
                 <div className="flex gap-2">
-                  <Select
-                    value={editData.gender || ''}
-                    onValueChange={v => setEditData(prev => ({ ...prev, gender: v }))}
-                  >
-                    <SelectTrigger className="h-10 text-sm bg-background border-border w-28">
-                      <SelectValue placeholder="Geschl." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="m">Männlich</SelectItem>
-                      <SelectItem value="w">Weiblich</SelectItem>
-                      <SelectItem value="d">Divers</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {!started && (
+                    <Select
+                      value={editData.gender || ''}
+                      onValueChange={v => setEditData(prev => ({ ...prev, gender: v }))}
+                    >
+                      <SelectTrigger className="h-10 text-sm bg-background border-border w-28">
+                        <SelectValue placeholder="Geschl." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="m">Männlich</SelectItem>
+                        <SelectItem value="w">Weiblich</SelectItem>
+                        <SelectItem value="d">Divers</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                   <Input
                     type="date"
                     value={editData.birthDate || ''}
                     onChange={e => setEditData(prev => ({ ...prev, birthDate: e.target.value }))}
                     className="h-10 text-sm bg-background border-border flex-1"
                   />
-                  <Input
-                    type="number"
-                    value={editData.ttr ?? ''}
-                    onChange={e => setEditData(prev => ({ ...prev, ttr: parseInt(e.target.value) || 0 }))}
-                    className="h-10 text-sm bg-background border-border w-20"
-                    placeholder="TTR"
-                  />
+                  {!started && (
+                    <Input
+                      type="number"
+                      value={editData.ttr ?? ''}
+                      onChange={e => setEditData(prev => ({ ...prev, ttr: parseInt(e.target.value) || 0 }))}
+                      className="h-10 text-sm bg-background border-border w-20"
+                      placeholder="TTR"
+                    />
+                  )}
                 </div>
                 <div className="flex justify-end gap-1">
                   <Button variant="ghost" size="icon" onClick={cancelEdit} className="h-8 w-8">
@@ -268,25 +277,23 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => startEdit(player)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                   {!started && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => startEdit(player)}
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onRemove(player.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </Button>
-                    </>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onRemove(player.id)}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
                   )}
                 </div>
               </div>
