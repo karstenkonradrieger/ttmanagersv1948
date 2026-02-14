@@ -4,6 +4,7 @@ import { Club } from '@/hooks/useClubs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { UserPlus, Trash2, Trophy, Pencil, Check, X } from 'lucide-react';
 
 interface Props {
@@ -286,14 +287,31 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                     <Pencil className="h-4 w-4" />
                   </Button>
                   {!started && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onRemove(player.id)}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Spieler entfernen?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Möchtest du <strong>{player.name}</strong> wirklich aus dem Turnier entfernen?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => onRemove(player.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Entfernen
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </div>
               </div>
