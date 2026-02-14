@@ -13,6 +13,7 @@ export interface DbTournament {
   logo_url: string | null;
   mode: string;
   type: string;
+  best_of: number;
 }
 
 export interface DbPlayer {
@@ -99,6 +100,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     logoUrl: tournament.logo_url,
     mode: (tournament.mode || 'knockout') as 'knockout' | 'round_robin',
     type: (tournament.type || 'singles') as 'singles' | 'doubles',
+    bestOf: tournament.best_of || 3,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -143,10 +145,10 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
   };
 }
 
-export async function createTournament(name: string = 'Tischtennis Turnier', createdBy?: string, mode: string = 'knockout', type: string = 'singles'): Promise<string> {
+export async function createTournament(name: string = 'Tischtennis Turnier', createdBy?: string, mode: string = 'knockout', type: string = 'singles', bestOf: number = 3): Promise<string> {
   const { data, error } = await supabase
     .from('tournaments')
-    .insert({ name, created_by: createdBy || null, mode, type })
+    .insert({ name, created_by: createdBy || null, mode, type, best_of: bestOf })
     .select('id')
     .single();
   
@@ -162,6 +164,7 @@ export async function updateTournament(id: string, updates: Partial<{
   logo_url: string | null;
   mode: string;
   type: string;
+  best_of: number;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')

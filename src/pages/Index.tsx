@@ -303,6 +303,7 @@ const Index = () => {
                 tableCount={tournament.tableCount}
                 onTableCountChange={setTableCount}
                 onAutoAssign={autoAssignTables}
+                bestOf={tournament.bestOf}
               />
             </TabsContent>
 

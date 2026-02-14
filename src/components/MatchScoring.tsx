@@ -13,9 +13,10 @@ interface Props {
   tableCount: number;
   onTableCountChange: (count: number) => void;
   onAutoAssign: () => void;
+  bestOf: number;
 }
 
-export function MatchScoring({ matches, getPlayer, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign }: Props) {
+export function MatchScoring({ matches, getPlayer, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf }: Props) {
   const pendingMatches = matches.filter(
     m => m.status !== 'completed' && m.player1Id && m.player2Id
   );
@@ -91,7 +92,7 @@ export function MatchScoring({ matches, getPlayer, onUpdateScore, onSetActive, t
       {activeMatches.length > 0 && (
         <Section title="🏓 Laufende Spiele">
           {activeMatches.map(m => (
-            <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} />
+            <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} />
           ))}
         </Section>
       )}
@@ -169,10 +170,11 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables }: {
   );
 }
 
-function ScoreEntry({ match, getPlayer, onUpdateScore }: {
+function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   onUpdateScore: (matchId: string, sets: SetScore[]) => void;
+  bestOf: number;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
@@ -180,9 +182,10 @@ function ScoreEntry({ match, getPlayer, onUpdateScore }: {
     match.sets.length > 0 ? match.sets : [{ player1: 0, player2: 0 }]
   );
 
+  const maxSets = bestOf * 2 - 1; // best of 3 = 3 sets max, best of 5 = 5 sets max
   const p1Wins = sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
   const p2Wins = sets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
-  const matchOver = p1Wins >= 3 || p2Wins >= 3;
+  const matchOver = p1Wins >= bestOf || p2Wins >= bestOf;
 
   const updateSet = (idx: number, field: 'player1' | 'player2', value: number) => {
     const updated = [...sets];
@@ -191,7 +194,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore }: {
   };
 
   const addSet = () => {
-    if (sets.length < 5 && !matchOver) {
+    if (sets.length < maxSets && !matchOver) {
       setSets([...sets, { player1: 0, player2: 0 }]);
     }
   };
@@ -253,7 +256,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore }: {
       </div>
 
       <div className="flex gap-2 mt-4">
-        {!matchOver && sets.length < 5 && (
+        {!matchOver && sets.length < maxSets && (
           <Button variant="secondary" onClick={addSet} className="flex-1 h-12 font-semibold">
             + Satz
           </Button>
@@ -266,7 +269,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore }: {
 
       {matchOver && (
         <p className="text-center text-primary font-bold mt-3 text-sm">
-          🏆 {p1Wins >= 3 ? p1?.name : p2?.name} gewinnt {p1Wins}:{p2Wins}
+          🏆 {p1Wins >= bestOf ? p1?.name : p2?.name} gewinnt {p1Wins}:{p2Wins}
         </p>
       )}
     </div>

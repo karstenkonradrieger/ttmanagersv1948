@@ -26,6 +26,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
   const [newName, setNewName] = useState('');
   const [newMode, setNewMode] = useState<TournamentMode>('knockout');
   const [newType, setNewType] = useState<TournamentType>('singles');
+  const [newBestOf, setNewBestOf] = useState<number>(3);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const load = async () => {
@@ -48,10 +49,11 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
     if (!newName.trim()) return;
     setCreating(true);
     try {
-      const id = await createTournament(newName.trim(), user?.id, newMode, newType);
+      const id = await createTournament(newName.trim(), user?.id, newMode, newType, newBestOf);
       setNewName('');
       setNewMode('knockout');
       setNewType('singles');
+      setNewBestOf(3);
       setDialogOpen(false);
       await load();
       onSelect(id);
@@ -132,6 +134,19 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="doubles" id="type-doubles" />
                     <Label htmlFor="type-doubles" className="text-sm cursor-pointer">Doppel</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              <div>
+                <Label className="text-sm font-semibold mb-2 block">Gewinnsätze</Label>
+                <RadioGroup value={String(newBestOf)} onValueChange={(v) => setNewBestOf(parseInt(v))} className="flex gap-4">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="2" id="bestof-2" />
+                    <Label htmlFor="bestof-2" className="text-sm cursor-pointer">2 Gewinnsätze (Best of 3)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="3" id="bestof-3" />
+                    <Label htmlFor="bestof-3" className="text-sm cursor-pointer">3 Gewinnsätze (Best of 5)</Label>
                   </div>
                 </RadioGroup>
               </div>

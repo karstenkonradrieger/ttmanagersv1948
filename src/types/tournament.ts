@@ -52,4 +52,5 @@ export interface Tournament {
   mode: TournamentMode;
   type: TournamentType;
   doublesPairs: DoublesPair[];
+  bestOf: number;
 }

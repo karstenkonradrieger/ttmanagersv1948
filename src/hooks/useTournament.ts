@@ -23,6 +23,7 @@ function loadTournament(): Tournament {
     mode: 'knockout',
     type: 'singles',
     doublesPairs: [],
+    bestOf: 3,
   };
 }
 
@@ -161,6 +162,7 @@ export function useTournament() {
       mode: 'knockout',
       type: 'singles',
       doublesPairs: [],
+      bestOf: 3,
     });
   }, []);
 
