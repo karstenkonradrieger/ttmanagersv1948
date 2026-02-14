@@ -337,6 +337,17 @@ export function useTournamentDb(tournamentId: string | null) {
     return tournament.players.find(p => p.id === id) || null;
   }, [tournament.players]);
 
+  const updateLogoUrl = useCallback(async (logoUrl: string | null) => {
+    if (!tournamentId) return;
+    try {
+      await tournamentService.updateTournament(tournamentId, { logo_url: logoUrl });
+      setTournament(prev => ({ ...prev, logoUrl }));
+    } catch (error) {
+      console.error('Error updating logo:', error);
+      toast.error('Fehler beim Aktualisieren des Logos');
+    }
+  }, [tournamentId]);
+
   return {
     tournament,
     loading,
@@ -348,6 +359,7 @@ export function useTournamentDb(tournamentId: string | null) {
     getPlayer,
     setTableCount,
     autoAssignTables,
+    updateLogoUrl,
     reload: loadTournament,
   };
 }

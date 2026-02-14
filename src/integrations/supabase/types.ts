@@ -124,6 +124,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          logo_url: string | null
           name: string
           rounds: number
           started: boolean
@@ -133,6 +134,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          logo_url?: string | null
           name?: string
           rounds?: number
           started?: boolean
@@ -142,6 +144,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          logo_url?: string | null
           name?: string
           rounds?: number
           started?: boolean

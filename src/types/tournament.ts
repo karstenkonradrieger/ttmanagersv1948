@@ -30,4 +30,5 @@ export interface Tournament {
   rounds: number;
   started: boolean;
   tableCount: number;
+  logoUrl?: string | null;
 }
