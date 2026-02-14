@@ -110,9 +110,10 @@ export function printRefereeSheet({ match, player1Name, player2Name, tournamentN
 
   doc.text(`Gewinnsätze: ${bestOf} (Best of ${maxSets})`, 10, footerY + 8);
 
-  // Print
-  doc.autoPrint();
-  window.open(doc.output('bloburl'), '_blank');
+  // Save as download (avoids popup blockers in Edge)
+  const p1Short = player1Name.replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_').substring(0, 15);
+  const p2Short = player2Name.replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_').substring(0, 15);
+  doc.save(`SR_Tisch${match.table || 0}_${p1Short}_vs_${p2Short}.pdf`);
 }
 
 export function printAllRefereeSheets(
@@ -131,8 +132,7 @@ export function printAllRefereeSheets(
     drawSheet(doc, match, getParticipantName(match.player1Id), getParticipantName(match.player2Id), tournamentName, bestOf);
   });
 
-  doc.autoPrint();
-  window.open(doc.output('bloburl'), '_blank');
+  doc.save(`SR_Zettel_alle.pdf`);
 }
 
 function drawSheet(doc: jsPDF, match: Match, player1Name: string, player2Name: string, tournamentName: string, bestOf: number) {
