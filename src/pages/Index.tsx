@@ -24,6 +24,7 @@ const Index = () => {
     loading,
     addPlayer,
     removePlayer,
+    updatePlayer,
     importPlayers,
     generateBracket,
     updateMatchScore,
@@ -194,6 +195,7 @@ const Index = () => {
                 players={tournament.players}
                 onAdd={addPlayer}
                 onRemove={removePlayer}
+                onUpdate={updatePlayer}
                 started={tournament.started}
                 clubs={clubs}
                 onAddClub={addClub}

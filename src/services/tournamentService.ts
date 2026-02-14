@@ -184,6 +184,22 @@ export async function removePlayerFromDb(playerId: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function updatePlayerInDb(playerId: string, updates: Partial<Omit<Player, 'id'>>): Promise<void> {
+  const dbUpdates: Record<string, unknown> = {};
+  if (updates.name !== undefined) dbUpdates.name = updates.name;
+  if (updates.club !== undefined) dbUpdates.club = updates.club;
+  if (updates.gender !== undefined) dbUpdates.gender = updates.gender;
+  if (updates.birthDate !== undefined) dbUpdates.birth_date = updates.birthDate;
+  if (updates.ttr !== undefined) dbUpdates.ttr = updates.ttr;
+
+  const { error } = await supabase
+    .from('players')
+    .update(dbUpdates)
+    .eq('id', playerId);
+
+  if (error) throw error;
+}
+
 // Match operations
 export async function createMatches(tournamentId: string, matches: Omit<Match, 'id'>[]): Promise<Match[]> {
   const dbMatches = matches.map(m => ({
