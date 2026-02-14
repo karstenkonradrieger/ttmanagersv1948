@@ -3,20 +3,23 @@ import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Check, Play, X, Zap, Settings } from 'lucide-react';
+import { Check, Play, X, Zap, Settings, Printer } from 'lucide-react';
+import { printRefereeSheet, printAllRefereeSheets } from '@/components/RefereeSheet';
 
 interface Props {
   matches: Match[];
   getPlayer: (id: string | null) => Player | null;
+  getParticipantName: (id: string | null) => string;
   onUpdateScore: (matchId: string, sets: SetScore[]) => void;
   onSetActive: (matchId: string, table?: number) => void;
   tableCount: number;
   onTableCountChange: (count: number) => void;
   onAutoAssign: () => void;
   bestOf: number;
+  tournamentName: string;
 }
 
-export function MatchScoring({ matches, getPlayer, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName }: Props) {
   const pendingMatches = matches.filter(
     m => m.status !== 'completed' && m.player1Id && m.player2Id
   );
@@ -90,9 +93,14 @@ export function MatchScoring({ matches, getPlayer, onUpdateScore, onSetActive, t
       </div>
 
       {activeMatches.length > 0 && (
-        <Section title="🏓 Laufende Spiele">
+        <Section title="🏓 Laufende Spiele" action={
+          <Button variant="outline" size="sm" onClick={() => printAllRefereeSheets(matches, getParticipantName, tournamentName, bestOf)} className="text-xs">
+            <Printer className="mr-1 h-3 w-3" />
+            Alle SR-Zettel drucken
+          </Button>
+        }>
           {activeMatches.map(m => (
-            <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} />
+            <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} getParticipantName={getParticipantName} tournamentName={tournamentName} />
           ))}
         </Section>
       )}
@@ -118,10 +126,13 @@ export function MatchScoring({ matches, getPlayer, onUpdateScore, onSetActive, t
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-lg font-bold mb-3">{title}</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-bold">{title}</h3>
+        {action}
+      </div>
       <div className="space-y-3">{children}</div>
     </div>
   );
@@ -170,11 +181,13 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables }: {
   );
 }
 
-function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf }: {
+function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantName, tournamentName }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   onUpdateScore: (matchId: string, sets: SetScore[]) => void;
   bestOf: number;
+  getParticipantName: (id: string | null) => string;
+  tournamentName: string;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
@@ -223,9 +236,26 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf }: {
         </div>
       </div>
 
-      {match.table && (
-        <p className="text-xs text-primary text-center mb-3 font-semibold">Tisch {match.table}</p>
-      )}
+      <div className="flex items-center justify-center gap-2 mb-3">
+        {match.table && (
+          <span className="text-xs text-primary font-semibold">Tisch {match.table}</span>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 text-xs text-muted-foreground"
+          onClick={() => printRefereeSheet({
+            match,
+            player1Name: getParticipantName(match.player1Id),
+            player2Name: getParticipantName(match.player2Id),
+            tournamentName,
+            bestOf,
+          })}
+        >
+          <Printer className="mr-1 h-3 w-3" />
+          SR-Zettel
+        </Button>
+      </div>
 
       <div className="space-y-2">
         {sets.map((set, i) => (
