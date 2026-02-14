@@ -6,9 +6,11 @@ interface Props {
   matches: Match[];
   rounds: number;
   getPlayer: (id: string | null) => Player | null;
+  getParticipantName?: (id: string | null) => string;
 }
 
-export function LiveDashboard({ matches, rounds, getPlayer }: Props) {
+export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName }: Props) {
+  const getName = (id: string | null) => getParticipantName ? getParticipantName(id) : (getPlayer(id)?.name || '—');
   const activeMatches = matches.filter(m => m.status === 'active');
   const nextPending = matches
     .filter(m => m.status === 'pending' && m.player1Id && m.player2Id)
@@ -25,7 +27,7 @@ export function LiveDashboard({ matches, rounds, getPlayer }: Props) {
         <div className="bg-gradient-to-r from-primary/20 to-tt-gold/20 border-2 border-tt-gold rounded-xl p-6 text-center">
           <Trophy className="h-12 w-12 mx-auto mb-2 text-tt-gold" />
           <p className="text-sm text-muted-foreground">Turniersieger</p>
-          <p className="text-2xl font-extrabold text-tt-gold">{championPlayer.name}</p>
+          <p className="text-2xl font-extrabold text-tt-gold">{getName(champion?.winnerId)}</p>
           {championPlayer.club && (
             <p className="text-sm text-muted-foreground">{championPlayer.club}</p>
           )}
@@ -52,12 +54,12 @@ export function LiveDashboard({ matches, rounds, getPlayer }: Props) {
                   )}
                   <div className="flex items-center justify-between">
                     <div className="text-center flex-1">
-                      <p className="font-bold">{p1?.name}</p>
+                      <p className="font-bold">{getName(match.player1Id)}</p>
                       <p className="text-3xl font-extrabold text-primary">{p1Wins}</p>
                     </div>
                     <span className="text-muted-foreground text-2xl">:</span>
                     <div className="text-center flex-1">
-                      <p className="font-bold">{p2?.name}</p>
+                      <p className="font-bold">{getName(match.player2Id)}</p>
                       <p className="text-3xl font-extrabold text-primary">{p2Wins}</p>
                     </div>
                   </div>
@@ -80,9 +82,9 @@ export function LiveDashboard({ matches, rounds, getPlayer }: Props) {
               const p2 = getPlayer(match.player2Id);
               return (
                 <div key={match.id} className="bg-card/60 rounded-lg p-3 flex items-center justify-between">
-                  <span className="font-semibold text-sm">{p1?.name}</span>
+                  <span className="font-semibold text-sm">{getName(match.player1Id)}</span>
                   <span className="text-xs text-muted-foreground">vs</span>
-                  <span className="font-semibold text-sm">{p2?.name}</span>
+                  <span className="font-semibold text-sm">{getName(match.player2Id)}</span>
                 </div>
               );
             })}

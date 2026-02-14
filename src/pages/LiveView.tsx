@@ -5,7 +5,8 @@ import { Loader2 } from 'lucide-react';
 
 const LiveView = () => {
   const { id } = useParams<{ id: string }>();
-  const { tournament, loading, getPlayer } = useTournamentDb(id || null);
+  const { tournament, loading, getPlayer, getParticipantName } = useTournamentDb(id || null);
+  const isDoubles = tournament.type === 'doubles';
 
   if (loading) {
     return (
@@ -32,7 +33,11 @@ const LiveView = () => {
         <LiveDashboard
           matches={tournament.matches}
           rounds={tournament.rounds}
-          getPlayer={getPlayer}
+          getPlayer={isDoubles
+            ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
+            : getPlayer
+          }
+          getParticipantName={getParticipantName}
         />
       </div>
     </div>
