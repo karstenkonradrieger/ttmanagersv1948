@@ -6,6 +6,7 @@ import { TournamentBracket } from '@/components/TournamentBracket';
 import { MatchScoring } from '@/components/MatchScoring';
 import { LiveDashboard } from '@/components/LiveDashboard';
 import { TournamentOverview } from '@/components/TournamentOverview';
+import { LogoUpload } from '@/components/LogoUpload';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList } from 'lucide-react';
@@ -23,6 +24,7 @@ const Index = () => {
     getPlayer,
     setTableCount,
     autoAssignTables,
+    updateLogoUrl,
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
@@ -32,10 +34,12 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-background">
         <header className="gradient-sport border-b border-border sticky top-0 z-50">
-          <div className="container py-3 flex items-center gap-2">
+           <div className="container py-3 flex items-center gap-2">
             <span className="text-2xl">🏓</span>
-            <h1 className="text-lg font-extrabold tracking-tight">
-              <span className="text-gradient">TT</span> Turnier
+            <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-tight">
+              <span className="text-gradient">TT</span> Turniermanager
+              <span className="hidden sm:inline"> SV Straßgräbchen 1948 e.V</span>
+              <span className="block text-xs font-semibold text-muted-foreground sm:inline sm:text-sm"> Sektion Tischtennis</span>
             </h1>
           </div>
         </header>
@@ -62,18 +66,22 @@ const Index = () => {
       {/* Header */}
       <header className="gradient-sport border-b border-border sticky top-0 z-50">
         <div className="container py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSelectedTournamentId(null)}
-              className="h-8 w-8"
+              className="h-8 w-8 flex-shrink-0"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <span className="text-2xl">🏓</span>
-            <div>
-              <h1 className="text-lg font-extrabold tracking-tight leading-tight">
+            <LogoUpload
+              tournamentId={selectedTournamentId}
+              logoUrl={tournament.logoUrl}
+              onLogoChange={updateLogoUrl}
+            />
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-tight truncate">
                 {tournament.name || 'Turnier'}
               </h1>
             </div>

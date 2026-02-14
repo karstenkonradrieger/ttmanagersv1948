@@ -10,6 +10,7 @@ export interface DbTournament {
   started: boolean;
   created_at: string;
   updated_at: string;
+  logo_url: string | null;
 }
 
 export interface DbPlayer {
@@ -78,6 +79,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     tableCount: tournament.table_count,
     rounds: tournament.rounds,
     started: tournament.started,
+    logoUrl: tournament.logo_url,
     players: (players || []).map((p: { id: string; name: string; club: string; ttr: number }) => ({
       id: p.id,
       name: p.name,
@@ -124,6 +126,7 @@ export async function updateTournament(id: string, updates: Partial<{
   table_count: number;
   rounds: number;
   started: boolean;
+  logo_url: string | null;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')
