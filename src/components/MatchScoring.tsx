@@ -20,19 +20,14 @@ interface Props {
   tournamentName: string;
 }
 
-const playAssignSound = () => {
+const announceMatch = (table: number | undefined, player1Name: string, player2Name: string) => {
   try {
-    const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = 880;
-    osc.type = 'sine';
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.4);
+    const tableText = table ? `Nächstes Spiel am Tisch ${table}.` : 'Nächstes Spiel.';
+    const text = `${tableText} Es spielt ${player1Name} gegen ${player2Name}.`;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'de-DE';
+    utterance.rate = 0.9;
+    speechSynthesis.speak(utterance);
   } catch {}
 };
 
@@ -52,7 +47,10 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
   // Wrap onSetActive to auto-print referee sheet
   const handleSetActive = (matchId: string, table?: number) => {
     onSetActive(matchId, table);
-    playAssignSound();
+    const match = matches.find(m => m.id === matchId);
+    if (match) {
+      announceMatch(table, getParticipantName(match.player1Id), getParticipantName(match.player2Id));
+    }
     if (autoPrint) {
       const match = matches.find(m => m.id === matchId);
       if (match) {
@@ -79,7 +77,13 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
     }));
 
     onAutoAssign();
-    if (assignedMatches.length > 0) playAssignSound();
+    if (assignedMatches.length > 0) {
+      assignedMatches.forEach((m, i) => {
+        setTimeout(() => {
+          announceMatch(m.table, getParticipantName(m.player1Id), getParticipantName(m.player2Id));
+        }, i * 500);
+      });
+    }
 
     if (autoPrint && assignedMatches.length > 0) {
       printAllRefereeSheets(
