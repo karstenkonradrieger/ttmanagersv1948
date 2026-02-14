@@ -15,6 +15,7 @@ const emptyTournament: Tournament = {
   mode: 'knockout',
   type: 'singles',
   doublesPairs: [],
+  bestOf: 3,
 };
 
 export function useTournamentDb(tournamentId: string | null) {
@@ -279,12 +280,13 @@ export function useTournamentDb(tournamentId: string | null) {
       else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) p2Wins++;
     }
 
+    const neededWins = tournament.bestOf;
     let winnerId: string | null = null;
     let status: Match['status'] = 'active';
-    if (p1Wins >= 3) {
+    if (p1Wins >= neededWins) {
       winnerId = match.player1Id;
       status = 'completed';
-    } else if (p2Wins >= 3) {
+    } else if (p2Wins >= neededWins) {
       winnerId = match.player2Id;
       status = 'completed';
     }

@@ -213,6 +213,7 @@ export type Database = {
       }
       tournaments: {
         Row: {
+          best_of: number
           created_at: string
           created_by: string | null
           id: string
@@ -226,6 +227,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          best_of?: number
           created_at?: string
           created_by?: string | null
           id?: string
@@ -239,6 +241,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          best_of?: number
           created_at?: string
           created_by?: string | null
           id?: string
