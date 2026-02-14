@@ -37,27 +37,24 @@ function parseDateDE(value: string): string | null {
   return null;
 }
 
-function exportClubsCsv(clubs: Club[], players: Player[]): string {
+function exportSingleClubCsv(clubName: string, players: Player[]): string {
   const header = 'Verein;Name;Geschlecht;Geburtsdatum;TTR;Straße;Hausnummer;PLZ;Ort;Telefon';
+  const clubPlayers = players.filter(p => p.club === clubName);
   const rows: string[] = [];
 
-  for (const club of clubs) {
-    const clubPlayers = players.filter(p => p.club === club.name);
-    if (clubPlayers.length === 0) {
-      // Export club with empty player row
-      rows.push(`${club.name};;;;;;;;;`);
-    } else {
-      for (const p of clubPlayers) {
-        const bd = p.birthDate ? new Date(p.birthDate).toLocaleDateString('de-DE') : '';
-        rows.push(`${club.name};${p.name};${formatGender(p.gender)};${bd};${p.ttr};${p.street || ''};${p.houseNumber || ''};${p.postalCode || ''};${p.city || ''};${p.phone || ''}`);
-      }
+  if (clubPlayers.length === 0) {
+    rows.push(`${clubName};;;;;;;;;`);
+  } else {
+    for (const p of clubPlayers) {
+      const bd = p.birthDate ? new Date(p.birthDate).toLocaleDateString('de-DE') : '';
+      rows.push(`${clubName};${p.name};${formatGender(p.gender)};${bd};${p.ttr};${p.street || ''};${p.houseNumber || ''};${p.postalCode || ''};${p.city || ''};${p.phone || ''}`);
     }
   }
 
   return [header, ...rows].join('\n');
 }
 
-function parseCsv(text: string): Array<{ clubName: string; players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }> }> {
+export function parseCsv(text: string): Array<{ clubName: string; players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }> }> {
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   if (lines.length < 2) return [];
 
@@ -94,23 +91,36 @@ function parseCsv(text: string): Array<{ clubName: string; players: Array<{ name
   return Array.from(clubMap.entries()).map(([clubName, players]) => ({ clubName, players }));
 }
 
+function downloadCsv(csv: string, filename: string) {
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function exportClubCsv(clubName: string, players: Player[]) {
+  const csv = exportSingleClubCsv(clubName, players);
+  const safeName = clubName.replace(/[^a-zA-Z0-9äöüÄÖÜß _-]/g, '_');
+  downloadCsv(csv, `${safeName}.csv`);
+  const count = players.filter(p => p.club === clubName).length;
+  toast.success(`${clubName} exportiert (${count} Spieler)`);
+}
+
 export function ClubImportExport({ clubs, players, onImport }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleExport = () => {
+  const handleExportAll = () => {
     if (clubs.length === 0) {
       toast.error('Keine Vereine zum Exportieren');
       return;
     }
-    const csv = exportClubsCsv(clubs, players);
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'vereine_mit_spielern.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success(`${clubs.length} Vereine exportiert`);
+    // Export each club as separate file
+    for (const club of clubs) {
+      exportClubCsv(club.name, players);
+    }
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,9 +146,9 @@ export function ClubImportExport({ clubs, players, onImport }: Props) {
 
   return (
     <div className="flex gap-2">
-      <Button variant="outline" size="sm" onClick={handleExport} className="text-xs">
+      <Button variant="outline" size="sm" onClick={handleExportAll} className="text-xs">
         <Download className="mr-1 h-3 w-3" />
-        Export CSV
+        Alle exportieren
       </Button>
       <input
         ref={fileInputRef}
