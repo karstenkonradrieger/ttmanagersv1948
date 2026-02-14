@@ -22,7 +22,9 @@ interface Props {
 
 const announceMatch = (table: number | undefined, player1Name: string, player2Name: string) => {
   try {
-    const tableText = table ? `Nächstes Spiel am Tisch ${table}.` : 'Nächstes Spiel.';
+    const tableWords: Record<number, string> = { 1: 'eins', 2: 'zwei', 3: 'drei', 4: 'vier' };
+    const tableSpoken = table ? (tableWords[table] || String(table)) : undefined;
+    const tableText = tableSpoken ? `Nächstes Spiel am Tisch ${tableSpoken}.` : 'Nächstes Spiel.';
     const text = `${tableText} Es spielt ${player1Name} gegen ${player2Name}.`;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'de-DE';
