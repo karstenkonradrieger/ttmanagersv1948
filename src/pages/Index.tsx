@@ -133,6 +133,7 @@ const Index = () => {
               <div className="flex gap-1.5">
                 <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{modeLabel}</span>
                 <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{typeLabel}</span>
+                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">Bo{tournament.bestOf * 2 - 1}</span>
               </div>
             </div>
           </div>

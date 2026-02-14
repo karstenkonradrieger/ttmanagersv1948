@@ -195,6 +195,9 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                     <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
                       {(t as any).type === 'doubles' ? 'Doppel' : 'Einzel'}
                     </span>
+                    <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
+                      Bo{((t as any).best_of || 3) * 2 - 1}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                     <Calendar className="h-3 w-3" />
