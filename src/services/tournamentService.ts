@@ -114,10 +114,10 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
   };
 }
 
-export async function createTournament(name: string = 'Tischtennis Turnier'): Promise<string> {
+export async function createTournament(name: string = 'Tischtennis Turnier', createdBy?: string): Promise<string> {
   const { data, error } = await supabase
     .from('tournaments')
-    .insert({ name })
+    .insert({ name, created_by: createdBy || null })
     .select('id')
     .single();
   

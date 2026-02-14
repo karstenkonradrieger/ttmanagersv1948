@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
+import { useAuth } from '@/hooks/useAuth';
 import { TournamentSelector } from '@/components/TournamentSelector';
 import { PlayerManager } from '@/components/PlayerManager';
 import { PlayerImportExport } from '@/components/PlayerImportExport';
@@ -10,9 +11,10 @@ import { TournamentOverview } from '@/components/TournamentOverview';
 import { LogoUpload } from '@/components/LogoUpload';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList } from 'lucide-react';
+import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut } from 'lucide-react';
 
 const Index = () => {
+  const { signOut } = useAuth();
   const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
   const {
     tournament,
@@ -38,11 +40,14 @@ const Index = () => {
         <header className="gradient-sport border-b border-border sticky top-0 z-50">
            <div className="container py-3 flex items-center gap-2">
             <span className="text-2xl">🏓</span>
-            <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-tight">
+            <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-tight flex-1">
               <span className="text-gradient">TT</span> Turniermanager
               <span className="hidden sm:inline"> SV Straßgräbchen 1948 e.V</span>
               <span className="block text-xs font-semibold text-muted-foreground sm:inline sm:text-sm"> Sektion Tischtennis</span>
             </h1>
+            <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground">
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </header>
         <div className="container py-6">
