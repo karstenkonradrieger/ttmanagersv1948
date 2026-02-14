@@ -69,29 +69,30 @@ export function printRefereeSheet({ match, player1Name, player2Name, tournamentN
   // Header row
   doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.setFillColor(230, 230, 230);
-  doc.rect(tableX, tableY, nameColW, rowH, 'FD');
+  doc.rect(tableX, tableY, nameColW, rowH);
   doc.text('Spieler', tableX + 2, tableY + 7);
 
   for (let s = 0; s < maxSets; s++) {
     const x = tableX + nameColW + s * setColW;
-    doc.rect(x, tableY, setColW, rowH, 'FD');
-    doc.text(`Satz ${s + 1}`, x + setColW / 2, tableY + 7, { align: 'center' });
+    doc.rect(x, tableY, setColW, rowH);
+    doc.text(`${s + 1}`, x + setColW / 2, tableY + 7, { align: 'center' });
   }
 
   const resX = tableX + nameColW + maxSets * setColW;
-  doc.rect(resX, tableY, resultColW, rowH, 'FD');
+  doc.rect(resX, tableY, resultColW, rowH);
   doc.text('Sätze', resX + resultColW / 2, tableY + 7, { align: 'center' });
 
   // Player rows
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   for (let row = 0; row < 2; row++) {
     const y = tableY + rowH + row * rowH;
-    const name = row === 0 ? `A: ${player1Name}` : `B: ${player2Name}`;
+    const label = row === 0 ? 'A' : 'B';
+    const pName = row === 0 ? player1Name : player2Name;
+    const truncated = pName.length > 18 ? pName.substring(0, 17) + '…' : pName;
 
     doc.rect(tableX, y, nameColW, rowH);
-    doc.text(name, tableX + 2, y + 7, { maxWidth: nameColW - 4 });
+    doc.text(`${label}: ${truncated}`, tableX + 2, y + 7);
 
     for (let s = 0; s < maxSets; s++) {
       const x = tableX + nameColW + s * setColW;
@@ -181,27 +182,28 @@ function drawSheet(doc: jsPDF, match: Match, player1Name: string, player2Name: s
 
   doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.setFillColor(230, 230, 230);
-  doc.rect(tableX, tableY, nameColW, rowH, 'FD');
+  doc.rect(tableX, tableY, nameColW, rowH);
   doc.text('Spieler', tableX + 2, tableY + 7);
 
   for (let s = 0; s < maxSets; s++) {
     const x = tableX + nameColW + s * setColW;
-    doc.rect(x, tableY, setColW, rowH, 'FD');
-    doc.text(`Satz ${s + 1}`, x + setColW / 2, tableY + 7, { align: 'center' });
+    doc.rect(x, tableY, setColW, rowH);
+    doc.text(`${s + 1}`, x + setColW / 2, tableY + 7, { align: 'center' });
   }
 
   const resX = tableX + nameColW + maxSets * setColW;
-  doc.rect(resX, tableY, resultColW, rowH, 'FD');
+  doc.rect(resX, tableY, resultColW, rowH);
   doc.text('Sätze', resX + resultColW / 2, tableY + 7, { align: 'center' });
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   for (let row = 0; row < 2; row++) {
     const y = tableY + rowH + row * rowH;
-    const name = row === 0 ? `A: ${player1Name}` : `B: ${player2Name}`;
+    const label = row === 0 ? 'A' : 'B';
+    const pName = row === 0 ? player1Name : player2Name;
+    const truncated = pName.length > 18 ? pName.substring(0, 17) + '…' : pName;
     doc.rect(tableX, y, nameColW, rowH);
-    doc.text(name, tableX + 2, y + 7, { maxWidth: nameColW - 4 });
+    doc.text(`${label}: ${truncated}`, tableX + 2, y + 7);
     for (let s = 0; s < maxSets; s++) {
       doc.rect(tableX + nameColW + s * setColW, y, setColW, rowH);
     }
