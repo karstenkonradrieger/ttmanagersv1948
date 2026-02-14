@@ -205,6 +205,7 @@ const Index = () => {
             <TabsContent value="clubs">
               <ClubManager
                 clubs={clubs}
+                players={tournament.players}
                 onAdd={addClub}
                 onRemove={removeClub}
               />
