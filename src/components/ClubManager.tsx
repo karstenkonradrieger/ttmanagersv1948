@@ -4,6 +4,7 @@ import { Player } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ClubImportExport } from '@/components/ClubImportExport';
 import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone } from 'lucide-react';
 
 interface Props {
@@ -11,9 +12,10 @@ interface Props {
   players?: Player[];
   onAdd: (name: string) => Promise<Club | null>;
   onRemove: (id: string) => void;
+  onImportClubsWithPlayers?: (data: Array<{ clubName: string; players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }> }>) => void;
 }
 
-export function ClubManager({ clubs, players = [], onAdd, onRemove }: Props) {
+export function ClubManager({ clubs, players = [], onAdd, onRemove, onImportClubsWithPlayers }: Props) {
   const [name, setName] = useState('');
   const [adding, setAdding] = useState(false);
   const [openClubs, setOpenClubs] = useState<Set<string>>(new Set());
@@ -61,6 +63,14 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove }: Props) {
           <Plus className="h-4 w-4" />
         </Button>
       </div>
+
+      {onImportClubsWithPlayers && (
+        <ClubImportExport
+          clubs={clubs}
+          players={players}
+          onImport={onImportClubsWithPlayers}
+        />
+      )}
 
       <div className="space-y-1">
         {clubs.length === 0 && (

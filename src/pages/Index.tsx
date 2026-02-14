@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { useAuth } from '@/hooks/useAuth';
 import { useClubs } from '@/hooks/useClubs';
@@ -36,6 +36,22 @@ const Index = () => {
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
+
+  const handleImportClubsWithPlayers = useCallback(async (data: Array<{ clubName: string; players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }> }>) => {
+    for (const entry of data) {
+      // Add club if not already existing
+      const existing = clubs.find(c => c.name === entry.clubName);
+      if (!existing) {
+        await addClub(entry.clubName);
+      }
+      // Add players to current tournament
+      if (entry.players.length > 0 && selectedTournamentId) {
+        for (const p of entry.players) {
+          await addPlayer(p.name, p.club, p.ttr, p.gender, p.birthDate, p.postalCode, p.city, p.street, p.houseNumber, p.phone);
+        }
+      }
+    }
+  }, [clubs, addClub, addPlayer, selectedTournamentId]);
 
   // If no tournament selected, show tournament list
   if (!selectedTournamentId) {
@@ -208,6 +224,7 @@ const Index = () => {
                 players={tournament.players}
                 onAdd={addClub}
                 onRemove={removeClub}
+                onImportClubsWithPlayers={handleImportClubsWithPlayers}
               />
             </TabsContent>
 
