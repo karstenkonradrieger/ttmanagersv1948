@@ -316,7 +316,7 @@ const Index = () => {
                   : getPlayer
                 }
                 players={isDoubles
-                  ? tournament.doublesPairs.map(dp => ({ id: dp.id, name: dp.pairName, club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' }))
+                  ? tournament.doublesPairs.map(dp => ({ id: dp.player1Id, name: dp.pairName, club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' }))
                   : tournament.players
                 }
               />

@@ -144,13 +144,12 @@ export function useTournamentDb(tournamentId: string | null) {
     const isDoubles = tournament.type === 'doubles';
     const isRoundRobin = tournament.mode === 'round_robin';
 
-    // Determine participants (player IDs or pair IDs used as player IDs)
+    // Determine participants
+    // For doubles, we use the pair's player1_id as the match participant identifier
+    // (since match FK references players table, we can't use pair IDs directly)
     let participants: string[];
     if (isDoubles) {
-      // For doubles, each pair acts as a "participant". We use pair player1_id as the match player1/player2 reference.
-      // Actually, for doubles we use the pair ID as the identifier in matches.
-      // We'll store pair IDs as player IDs in matches for simplicity.
-      participants = tournament.doublesPairs.map(dp => dp.id);
+      participants = tournament.doublesPairs.map(dp => dp.player1Id);
     } else {
       participants = [...tournament.players].sort((a, b) => b.ttr - a.ttr).map(p => p.id);
     }
@@ -519,8 +518,8 @@ export function useTournamentDb(tournamentId: string | null) {
 
   const getParticipantName = useCallback((id: string | null): string => {
     if (!id) return '—';
-    // Check if it's a doubles pair
-    const pair = tournament.doublesPairs.find(dp => dp.id === id);
+    // Check if it's a doubles pair (matched by player1Id since that's what we store in matches)
+    const pair = tournament.doublesPairs.find(dp => dp.player1Id === id);
     if (pair) return pair.pairName || `Paar`;
     // Otherwise it's a player
     const player = tournament.players.find(p => p.id === id);
