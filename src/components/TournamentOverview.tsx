@@ -11,6 +11,7 @@ interface Props {
   rounds: number;
   getPlayer: (id: string | null) => Player | null;
   players: Player[];
+  logoUrl?: string | null;
 }
 
 function getRoundName(round: number, totalRounds: number): string {
@@ -83,7 +84,7 @@ function computePlayerStats(players: Player[], matches: Match[]): PlayerStats[] 
   }).sort((a, b) => b.winRate - a.winRate || b.avgSetDiff - a.avgSetDiff);
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players }: Props) {
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl }: Props) {
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
   if (matches.length === 0) {
@@ -240,13 +241,41 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     })
     .filter((p): p is Player => p !== null);
 
-  const exportCertificates = () => {
+  const exportCertificates = async () => {
     const placements: { rank: number; label: string; player: Player }[] = [];
     if (champion) placements.push({ rank: 1, label: '1. Platz', player: champion });
     if (secondPlace) placements.push({ rank: 2, label: '2. Platz', player: secondPlace });
     thirdPlacePlayers.forEach(p => placements.push({ rank: 3, label: '3. Platz', player: p }));
 
     if (placements.length === 0) return;
+
+    // Pre-load logo if available
+    let logoData: string | null = null;
+    let logoWidth = 0;
+    let logoHeight = 0;
+    if (logoUrl) {
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => reject();
+          img.src = logoUrl;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext('2d')!.drawImage(img, 0, 0);
+        logoData = canvas.toDataURL('image/png');
+        // Scale logo to max 30mm height
+        const maxH = 30;
+        const ratio = img.naturalWidth / img.naturalHeight;
+        logoHeight = maxH;
+        logoWidth = maxH * ratio;
+      } catch {
+        // Ignore logo loading errors
+      }
+    }
 
     const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
 
@@ -262,45 +291,60 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       doc.setLineWidth(1);
       doc.rect(14, 14, w - 28, h - 28);
 
+      let yOffset = 30;
+
+      // Logo
+      if (logoData) {
+        doc.addImage(logoData, 'PNG', w / 2 - logoWidth / 2, yOffset, logoWidth, logoHeight);
+        yOffset += logoHeight + 8;
+      }
+
       // Medal emoji as text
       const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
       doc.setFontSize(40);
-      doc.text(medals[placement.rank] || '', w / 2, 45, { align: 'center' });
+      doc.text(medals[placement.rank] || '', w / 2, yOffset + 12, { align: 'center' });
+      yOffset += 22;
 
       // Title
       doc.setFontSize(36);
       doc.setFont(undefined!, 'bold');
       doc.setTextColor(50, 50, 50);
-      doc.text('Urkunde', w / 2, 65, { align: 'center' });
+      doc.text('Urkunde', w / 2, yOffset, { align: 'center' });
+      yOffset += 17;
 
       // Placement
       doc.setFontSize(22);
       doc.setTextColor(140, 120, 30);
-      doc.text(placement.label, w / 2, 82, { align: 'center' });
+      doc.text(placement.label, w / 2, yOffset, { align: 'center' });
+      yOffset += 26;
 
       // Player name
       doc.setFontSize(30);
       doc.setTextColor(30, 30, 30);
       doc.setFont(undefined!, 'bold');
-      doc.text(placement.player.name, w / 2, 108, { align: 'center' });
+      doc.text(placement.player.name, w / 2, yOffset, { align: 'center' });
+      yOffset += 12;
 
       // Club
       if (placement.player.club) {
         doc.setFontSize(16);
         doc.setFont(undefined!, 'normal');
         doc.setTextColor(100, 100, 100);
-        doc.text(placement.player.club, w / 2, 120, { align: 'center' });
+        doc.text(placement.player.club, w / 2, yOffset, { align: 'center' });
+        yOffset += 14;
+      } else {
+        yOffset += 8;
       }
 
       // Tournament name
       doc.setFontSize(14);
       doc.setTextColor(80, 80, 80);
       doc.setFont(undefined!, 'normal');
-      doc.text(tournamentName, w / 2, 142, { align: 'center' });
+      doc.text(tournamentName, w / 2, yOffset + 6, { align: 'center' });
 
       // Date
       doc.setFontSize(12);
-      doc.text(new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }), w / 2, 155, { align: 'center' });
+      doc.text(new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }), w / 2, yOffset + 19, { align: 'center' });
 
       // Signature line
       doc.setDrawColor(150, 150, 150);
