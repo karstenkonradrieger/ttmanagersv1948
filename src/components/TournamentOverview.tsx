@@ -329,12 +329,6 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         yOffset += logoHeight + 12;
       }
 
-      // Title
-      doc.setFontSize(40);
-      doc.setFont(undefined!, 'bold');
-      doc.setTextColor(50, 50, 50);
-      doc.text('Urkunde', w / 2, yOffset, { align: 'center' });
-      yOffset += 30;
 
       // Main text: Beim "Turniername" hat "Spieler" den "Platz" belegt.
       doc.setFontSize(20);
