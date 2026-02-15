@@ -12,6 +12,7 @@ interface Props {
   mode: TournamentMode;
   type: TournamentType;
   bestOf: number;
+  started?: boolean;
   tournamentDate: string | null;
   venueStreet: string;
   venueHouseNumber: string;
@@ -32,7 +33,7 @@ interface Props {
 }
 
 export function TournamentSettingsDialog({
-  mode, type, bestOf,
+  mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
@@ -153,41 +154,41 @@ export function TournamentSettingsDialog({
           </div>
 
           {/* Mode */}
-          <div>
+          <div className={started ? 'opacity-50' : ''}>
             <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
-            <RadioGroup value={localMode} onValueChange={(v) => setLocalMode(v as TournamentMode)} className="flex gap-4">
+            <RadioGroup value={localMode} onValueChange={(v) => setLocalMode(v as TournamentMode)} disabled={started} className="flex gap-4">
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="knockout" id="edit-mode-ko" />
+                <RadioGroupItem value="knockout" id="edit-mode-ko" disabled={started} />
                 <Label htmlFor="edit-mode-ko" className="text-sm cursor-pointer">KO-System</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="round_robin" id="edit-mode-rr" />
+                <RadioGroupItem value="round_robin" id="edit-mode-rr" disabled={started} />
                 <Label htmlFor="edit-mode-rr" className="text-sm cursor-pointer">Alle gegen Alle</Label>
               </div>
             </RadioGroup>
           </div>
-          <div>
+          <div className={started ? 'opacity-50' : ''}>
             <Label className="text-sm font-semibold mb-2 block">Turniertyp</Label>
-            <RadioGroup value={localType} onValueChange={(v) => setLocalType(v as TournamentType)} className="flex gap-4">
+            <RadioGroup value={localType} onValueChange={(v) => setLocalType(v as TournamentType)} disabled={started} className="flex gap-4">
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="singles" id="edit-type-singles" />
+                <RadioGroupItem value="singles" id="edit-type-singles" disabled={started} />
                 <Label htmlFor="edit-type-singles" className="text-sm cursor-pointer">Einzel</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="doubles" id="edit-type-doubles" />
+                <RadioGroupItem value="doubles" id="edit-type-doubles" disabled={started} />
                 <Label htmlFor="edit-type-doubles" className="text-sm cursor-pointer">Doppel</Label>
               </div>
             </RadioGroup>
           </div>
-          <div>
+          <div className={started ? 'opacity-50' : ''}>
             <Label className="text-sm font-semibold mb-2 block">Gewinnsätze</Label>
-            <RadioGroup value={String(localBestOf)} onValueChange={(v) => setLocalBestOf(parseInt(v))} className="flex gap-4">
+            <RadioGroup value={String(localBestOf)} onValueChange={(v) => setLocalBestOf(parseInt(v))} disabled={started} className="flex gap-4">
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="2" id="edit-bestof-2" />
+                <RadioGroupItem value="2" id="edit-bestof-2" disabled={started} />
                 <Label htmlFor="edit-bestof-2" className="text-sm cursor-pointer">2 Gewinnsätze (Best of 3)</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="3" id="edit-bestof-3" />
+                <RadioGroupItem value="3" id="edit-bestof-3" disabled={started} />
                 <Label htmlFor="edit-bestof-3" className="text-sm cursor-pointer">3 Gewinnsätze (Best of 5)</Label>
               </div>
             </RadioGroup>
