@@ -21,7 +21,7 @@ interface Props {
   readOnly?: boolean;
 }
 
-export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 3, readOnly = false }: Props) {
+export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, readOnly = false }: Props) {
   const [photos, setPhotos] = useState<MatchPhoto[]>([]);
   const [uploading, setUploading] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);

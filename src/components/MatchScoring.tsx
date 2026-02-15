@@ -235,7 +235,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
           <MatchPhotos
             tournamentId={tournamentId}
             photoType="ceremony"
-            maxPhotos={3}
+            maxPhotos={2}
           />
         </div>
       )}
@@ -440,7 +440,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
           tournamentId={tournamentId}
           matchId={match.id}
           photoType="match"
-          maxPhotos={3}
+          maxPhotos={2}
         />
       </div>
     </div>
@@ -504,7 +504,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
         tournamentId={tournamentId}
         matchId={match.id}
         photoType="match"
-        maxPhotos={3}
+        maxPhotos={2}
       />
     </div>
   );
