@@ -144,13 +144,15 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, r
         </span>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className={`flex gap-2 flex-wrap ${readOnly ? 'gap-3' : ''}`}>
         {photos.map((photo, i) => (
           <div key={photo.id} className="relative group">
             <img
               src={photo.photo_url}
               alt="Spielfoto"
-              className="h-16 w-16 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity border border-border"
+              className={`object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity border border-border ${
+                readOnly ? 'h-32 w-48' : 'h-16 w-16'
+              }`}
               onClick={() => openLightbox(i)}
             />
             {!readOnly && (
