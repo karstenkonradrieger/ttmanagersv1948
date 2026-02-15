@@ -269,7 +269,7 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId, tournament.players, tournament.doublesPairs, tournament.mode, tournament.type]);
 
-  const updateMatchScore = useCallback(async (matchId: string, sets: SetScore[]) => {
+  const updateMatchScore = useCallback(async (matchId: string, sets: SetScore[], effectiveBestOf?: number) => {
     const match = tournament.matches.find(m => m.id === matchId);
     if (!match) return;
 
@@ -280,7 +280,7 @@ export function useTournamentDb(tournamentId: string | null) {
       else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) p2Wins++;
     }
 
-    const neededWins = tournament.bestOf;
+    const neededWins = effectiveBestOf || tournament.bestOf;
     let winnerId: string | null = null;
     let status: Match['status'] = 'active';
     if (p1Wins >= neededWins) {

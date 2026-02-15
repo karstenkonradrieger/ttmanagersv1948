@@ -112,8 +112,9 @@ export function useTournament() {
     });
   }, []);
 
-  const updateMatchScore = useCallback((matchId: string, sets: SetScore[]) => {
+  const updateMatchScore = useCallback((matchId: string, sets: SetScore[], effectiveBestOf?: number) => {
     setTournament(prev => {
+      const neededWins = effectiveBestOf || prev.bestOf;
       const matches = prev.matches.map(m => {
         if (m.id !== matchId) return m;
 
@@ -126,10 +127,10 @@ export function useTournament() {
 
         let winnerId: string | null = null;
         let status: Match['status'] = 'active';
-        if (p1Wins >= 3) {
+        if (p1Wins >= neededWins) {
           winnerId = m.player1Id;
           status = 'completed';
-        } else if (p2Wins >= 3) {
+        } else if (p2Wins >= neededWins) {
           winnerId = m.player2Id;
           status = 'completed';
         }
