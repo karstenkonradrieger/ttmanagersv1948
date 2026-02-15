@@ -12,6 +12,7 @@ interface Props {
   getPlayer: (id: string | null) => Player | null;
   players: Player[];
   logoUrl?: string | null;
+  bestOf: number;
 }
 
 function getRoundName(round: number, totalRounds: number): string {
@@ -84,7 +85,13 @@ function computePlayerStats(players: Player[], matches: Match[]): PlayerStats[] 
   }).sort((a, b) => b.winRate - a.winRate || b.avgSetDiff - a.avgSetDiff);
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl }: Props) {
+function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
+  if (tournamentBestOf !== 2) return false;
+  const wins = getSetWins(match.sets);
+  return Math.max(wins.p1, wins.p2) >= 3;
+}
+
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf }: Props) {
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
   if (matches.length === 0) {
@@ -155,12 +162,13 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         const wins = getSetWins(m.sets);
         const winner = getPlayer(m.winnerId);
         const isBye = !m.player2Id && m.player1Id;
+        const upgraded = wasUpgradedBestOf(m, bestOf);
         
         return [
           `${idx + 1}`,
           p1?.name || (isBye ? '–' : 'TBD'),
           p2?.name || (isBye ? 'Freilos' : 'TBD'),
-          isBye ? '–' : `${wins.p1}:${wins.p2}`,
+          isBye ? '–' : `${wins.p1}:${wins.p2}${upgraded ? ' (Bo5)' : ''}`,
           isBye ? '–' : formatSets(m.sets),
           isBye ? (p1?.name || '–') : (winner?.name || '–'),
           m.status === 'completed' ? '✓' : m.status === 'active' ? '▶' : '○',
@@ -476,6 +484,11 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                             <span className="text-xs text-muted-foreground">
                               ({formatSets(m.sets)})
                             </span>
+                            {wasUpgradedBestOf(m, bestOf) && (
+                              <span className="text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded font-semibold">
+                                Bo5
+                              </span>
+                            )}
                           </div>
                         )}
                         {isBye && (
