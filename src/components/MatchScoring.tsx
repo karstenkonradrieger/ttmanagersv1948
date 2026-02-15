@@ -11,7 +11,7 @@ interface Props {
   matches: Match[];
   getPlayer: (id: string | null) => Player | null;
   getParticipantName: (id: string | null) => string;
-  onUpdateScore: (matchId: string, sets: SetScore[]) => void;
+  onUpdateScore: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
   onSetActive: (matchId: string, table?: number) => void;
   tableCount: number;
   onTableCountChange: (count: number) => void;
@@ -285,7 +285,7 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables }: {
 function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantName, tournamentName, rounds }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
-  onUpdateScore: (matchId: string, sets: SetScore[]) => void;
+  onUpdateScore: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
   bestOf: number;
   getParticipantName: (id: string | null) => string;
   tournamentName: string;
@@ -328,7 +328,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   };
 
   const saveScore = () => {
-    onUpdateScore(match.id, sets);
+    onUpdateScore(match.id, sets, effectiveBestOf);
   };
 
   return (
