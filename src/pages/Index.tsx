@@ -2,10 +2,13 @@ import { useState, useCallback } from 'react';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { useAuth } from '@/hooks/useAuth';
 import { useClubs } from '@/hooks/useClubs';
+import { useClubPlayers } from '@/hooks/useClubPlayers';
 import { TournamentSelector } from '@/components/TournamentSelector';
 import { PlayerManager } from '@/components/PlayerManager';
 import { PlayerImportExport } from '@/components/PlayerImportExport';
+import { ImportFromClubPlayers } from '@/components/ImportFromClubPlayers';
 import { ClubManager } from '@/components/ClubManager';
+import { ClubPlayersManager } from '@/components/ClubPlayersManager';
 import { TournamentBracket } from '@/components/TournamentBracket';
 import { MatchScoring } from '@/components/MatchScoring';
 import { LiveDashboard } from '@/components/LiveDashboard';
@@ -22,6 +25,7 @@ import { Input } from '@/components/ui/input';
 const Index = () => {
   const { signOut } = useAuth();
   const { clubs, addClub, removeClub } = useClubs();
+  const { players: clubPlayers, addPlayer: addClubPlayer, updatePlayer: updateClubPlayer, removePlayer: removeClubPlayer, getPlayersForClub } = useClubPlayers();
   const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
   const {
     tournament,
@@ -49,6 +53,7 @@ const Index = () => {
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
+  const [homeTab, setHomeTab] = useState<'tournaments' | 'clubs'>('tournaments');
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState('');
 
@@ -95,10 +100,43 @@ const Index = () => {
           </div>
         </header>
         <div className="container py-6">
-          <TournamentSelector
-            selectedId={selectedTournamentId}
-            onSelect={(id) => setSelectedTournamentId(id || null)}
-          />
+          <div className="flex gap-2 mb-4">
+            <Button
+              variant={homeTab === 'tournaments' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setHomeTab('tournaments')}
+              className="gap-1.5"
+            >
+              <Swords className="h-4 w-4" />
+              Turniere
+            </Button>
+            <Button
+              variant={homeTab === 'clubs' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setHomeTab('clubs')}
+              className="gap-1.5"
+            >
+              <Building2 className="h-4 w-4" />
+              Vereinsverwaltung
+            </Button>
+          </div>
+          {homeTab === 'tournaments' ? (
+            <TournamentSelector
+              selectedId={selectedTournamentId}
+              onSelect={(id) => setSelectedTournamentId(id || null)}
+            />
+          ) : (
+            <ClubPlayersManager
+              clubs={clubs}
+              clubPlayers={clubPlayers}
+              onAddClub={addClub}
+              onRemoveClub={removeClub}
+              onAddPlayer={addClubPlayer}
+              onUpdatePlayer={updateClubPlayer}
+              onRemovePlayer={removeClubPlayer}
+              getPlayersForClub={getPlayersForClub}
+            />
+          )}
         </div>
       </div>
     );
@@ -300,12 +338,25 @@ const Index = () => {
 
           <div className="mt-4">
             <TabsContent value="players">
-              <div className="mb-3">
+              <div className="mb-3 flex flex-wrap gap-2">
                 <PlayerImportExport
                   players={tournament.players}
                   onImport={importPlayers}
                   started={tournament.started}
                 />
+                {!tournament.started && (
+                  <ImportFromClubPlayers
+                    clubs={clubs}
+                    clubPlayers={clubPlayers}
+                    getPlayersForClub={getPlayersForClub}
+                    onImportPlayers={(players) => {
+                      for (const p of players) {
+                        addPlayer(p.name, p.club, p.ttr, p.gender, p.birthDate, p.postalCode, p.city, p.street, p.houseNumber, p.phone);
+                      }
+                    }}
+                    existingPlayerNames={tournament.players.map(p => p.name)}
+                  />
+                )}
               </div>
               <PlayerManager
                 players={tournament.players}

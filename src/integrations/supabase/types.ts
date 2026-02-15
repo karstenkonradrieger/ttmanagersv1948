@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      club_players: {
+        Row: {
+          birth_date: string | null
+          city: string
+          club_id: string
+          created_at: string
+          created_by: string | null
+          gender: string
+          house_number: string
+          id: string
+          name: string
+          phone: string
+          postal_code: string
+          street: string
+          ttr: number
+        }
+        Insert: {
+          birth_date?: string | null
+          city?: string
+          club_id: string
+          created_at?: string
+          created_by?: string | null
+          gender?: string
+          house_number?: string
+          id?: string
+          name: string
+          phone?: string
+          postal_code?: string
+          street?: string
+          ttr?: number
+        }
+        Update: {
+          birth_date?: string | null
+          city?: string
+          club_id?: string
+          created_at?: string
+          created_by?: string | null
+          gender?: string
+          house_number?: string
+          id?: string
+          name?: string
+          phone?: string
+          postal_code?: string
+          street?: string
+          ttr?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_players_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clubs: {
         Row: {
           created_at: string
