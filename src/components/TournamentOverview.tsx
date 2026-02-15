@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { FileDown, Award } from 'lucide-react';
+import { FileDown, Award, FileText } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MatchPhotos } from '@/components/MatchPhotos';
+import { generateMatchReport } from '@/components/MatchReport';
 
 interface Props {
   tournamentName: string;
@@ -517,7 +518,23 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     const p2 = getPlayer(m.player2Id);
                     return (
                       <div key={`photo-${m.id}`} className="bg-card rounded-lg p-3 card-shadow mb-2">
-                        <p className="text-xs font-semibold mb-2">{p1?.name} vs {p2?.name}</p>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs font-semibold">{p1?.name} vs {p2?.name}</p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 text-xs text-muted-foreground"
+                            onClick={() => generateMatchReport({
+                              match: m, player1: p1, player2: p2,
+                              tournamentName, tournamentId,
+                              roundName: getRoundName(r, rounds),
+                              logoUrl, bestOf,
+                            })}
+                          >
+                            <FileText className="mr-1 h-3 w-3" />
+                            Spielbericht
+                          </Button>
+                        </div>
                         <MatchPhotos
                           tournamentId={tournamentId}
                           matchId={m.id}
