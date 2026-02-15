@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Check, Play, X, Zap, Settings, Printer } from 'lucide-react';
+import { Check, Play, X, Zap, Settings, Printer, FileText } from 'lucide-react';
 import { printRefereeSheet, printAllRefereeSheets } from '@/components/RefereeSheet';
 import { MatchPhotos } from '@/components/MatchPhotos';
+import { generateMatchReport } from '@/components/MatchReport';
 
 interface Props {
   matches: Match[];
@@ -21,6 +22,7 @@ interface Props {
   tournamentName: string;
   rounds: number;
   tournamentId: string;
+  logoUrl?: string | null;
 }
 
 const announceMatch = (table: number | undefined, player1Name: string, player2Name: string, nextPlayer1Name?: string, nextPlayer2Name?: string) => {
@@ -43,7 +45,7 @@ const announceMatch = (table: number | undefined, player1Name: string, player2Na
   } catch {}
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
 
   const pendingMatches = matches.filter(
@@ -221,7 +223,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
       {completedMatches.length > 0 && (
         <Section title="✅ Abgeschlossene Spiele">
           {completedMatches.map(m => (
-            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} />
+            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} />
           ))}
         </Section>
       )}
@@ -445,16 +447,29 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   );
 }
 
-function CompletedMatch({ match, getPlayer, tournamentId }: {
+function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf, rounds, logoUrl }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   tournamentId: string;
+  tournamentName: string;
+  bestOf: number;
+  rounds: number;
+  logoUrl?: string | null;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
   const p1Wins = match.sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
   const p2Wins = match.sets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
   const winner = getPlayer(match.winnerId);
+
+  const getRoundName = (round: number, totalRounds: number): string => {
+    const diff = totalRounds - round;
+    if (diff === 1) return 'Finale';
+    if (diff === 2) return 'Halbfinale';
+    if (diff === 3) return 'Viertelfinale';
+    if (diff === 4) return 'Achtelfinale';
+    return `Runde ${round + 1}`;
+  };
 
   return (
     <div className="bg-card/50 rounded-lg p-3 card-shadow space-y-2">
@@ -464,7 +479,23 @@ function CompletedMatch({ match, getPlayer, tournamentId }: {
           <span className="text-muted-foreground mx-2">{p1Wins} : {p2Wins}</span>
           <span className={match.winnerId === match.player2Id ? 'font-bold text-primary' : ''}>{p2?.name}</span>
         </div>
-        <span className="text-xs text-primary">🏆 {winner?.name}</span>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-muted-foreground"
+            onClick={() => generateMatchReport({
+              match, player1: p1, player2: p2,
+              tournamentName, tournamentId,
+              roundName: getRoundName(match.round, rounds),
+              logoUrl, bestOf,
+            })}
+          >
+            <FileText className="mr-1 h-3 w-3" />
+            Spielbericht
+          </Button>
+          <span className="text-xs text-primary">🏆 {winner?.name}</span>
+        </div>
       </div>
       <div className="text-xs text-muted-foreground">
         {match.sets.map((s, i) => `${s.player1}:${s.player2}`).join(', ')}

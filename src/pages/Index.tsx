@@ -352,6 +352,7 @@ const Index = () => {
                 tournamentName={tournament.name}
                 rounds={tournament.rounds}
                 tournamentId={selectedTournamentId}
+                logoUrl={tournament.logoUrl}
               />
             </TabsContent>
 
