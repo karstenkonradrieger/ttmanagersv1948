@@ -41,6 +41,7 @@ interface MatchReportOptions {
   bestOf: number;
   tournamentDate?: string | null;
   venueString?: string;
+  motto?: string;
 }
 
 export async function generateMatchReport({
@@ -54,6 +55,7 @@ export async function generateMatchReport({
   bestOf,
   tournamentDate,
   venueString,
+  motto,
 }: MatchReportOptions) {
   const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
   const w = doc.internal.pageSize.getWidth();
@@ -84,11 +86,18 @@ export async function generateMatchReport({
     infoParts.push(new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }));
   }
   doc.text(infoParts.join('  •  '), 10, y + 9);
+  let extraY = 0;
+  if (motto) {
+    doc.setFont(undefined!, 'italic');
+    doc.text(`"${motto}"`, 10, y + 13);
+    extraY += 4;
+  }
   if (venueString) {
-    doc.text(venueString, 10, y + 13);
-    y += 18;
+    doc.setFont(undefined!, 'normal');
+    doc.text(venueString, 10, y + 13 + extraY);
+    y += 18 + extraY;
   } else {
-    y += 14;
+    y += 14 + extraY;
   }
 
   // Separator

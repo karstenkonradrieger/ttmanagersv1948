@@ -18,6 +18,7 @@ interface Props {
   tournamentId: string;
   tournamentDate?: string | null;
   venueString?: string;
+  motto?: string;
 }
 
 function getRoundName(round: number, totalRounds: number): string {
@@ -96,7 +97,7 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
   return Math.max(wins.p1, wins.p2) >= 3;
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString }: Props) {
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto }: Props) {
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
   if (matches.length === 0) {
@@ -148,6 +149,13 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
 
     doc.setFontSize(18);
     doc.text(tournamentName, 14, 20);
+    if (motto) {
+      doc.setFontSize(11);
+      doc.setFont(undefined!, 'italic');
+      doc.setTextColor(80);
+      doc.text(`"${motto}"`, 14, 26);
+      doc.setFont(undefined!, 'normal');
+    }
     doc.setFontSize(10);
     doc.setTextColor(120);
     const subParts: string[] = [];
@@ -158,10 +166,10 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       subParts.push(venueString);
     }
     subParts.push(`Erstellt am ${new Date().toLocaleDateString('de-DE')}`);
-    doc.text(subParts.join('  |  '), 14, 28);
+    doc.text(subParts.join('  |  '), 14, motto ? 32 : 28);
     doc.setTextColor(0);
 
-    let startY = 36;
+    let startY = motto ? 40 : 36;
 
     for (let r = 0; r < rounds; r++) {
       const roundMatches = matchesByRound[r];
@@ -342,6 +350,14 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         yOffset += logoHeight + 12;
       }
 
+      // Motto as subtitle on certificate
+      if (motto) {
+        doc.setFontSize(14);
+        doc.setFont(undefined!, 'italic');
+        doc.setTextColor(80, 80, 80);
+        doc.text(`"${motto}"`, w / 2, yOffset, { align: 'center' });
+        yOffset += 12;
+      }
 
       // Main text: Beim "Turniername" hat "Spieler" den "Platz" belegt.
       doc.setFontSize(20);
