@@ -381,6 +381,7 @@ const Index = () => {
                 logoUrl={tournament.logoUrl}
                 tournamentDate={tournament.tournamentDate}
                 venueString={venueString}
+                motto={tournament.motto}
               />
             </TabsContent>
 
@@ -402,6 +403,7 @@ const Index = () => {
                 }
                 tournamentDate={tournament.tournamentDate}
                 venueString={venueString}
+                motto={tournament.motto}
               />
             </TabsContent>
 

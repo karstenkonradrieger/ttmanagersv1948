@@ -25,6 +25,7 @@ interface Props {
   logoUrl?: string | null;
   tournamentDate?: string | null;
   venueString?: string;
+  motto?: string;
 }
 
 const announceMatch = (table: number | undefined, player1Name: string, player2Name: string, nextPlayer1Name?: string, nextPlayer2Name?: string) => {
@@ -47,7 +48,7 @@ const announceMatch = (table: number | undefined, player1Name: string, player2Na
   } catch {}
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
 
   const pendingMatches = matches.filter(
@@ -225,7 +226,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
       {completedMatches.length > 0 && (
         <Section title="✅ Abgeschlossene Spiele">
           {completedMatches.map(m => (
-            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} />
+            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} motto={motto} />
           ))}
         </Section>
       )}
@@ -449,7 +450,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   );
 }
 
-function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf, rounds, logoUrl, tournamentDate, venueString }: {
+function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf, rounds, logoUrl, tournamentDate, venueString, motto }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   tournamentId: string;
@@ -459,6 +460,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
   logoUrl?: string | null;
   tournamentDate?: string | null;
   venueString?: string;
+  motto?: string;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
@@ -492,7 +494,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
               match, player1: p1, player2: p2,
               tournamentName, tournamentId,
               roundName: getRoundName(match.round, rounds),
-              logoUrl, bestOf, tournamentDate, venueString,
+              logoUrl, bestOf, tournamentDate, venueString, motto,
             })}
           >
             <FileText className="mr-1 h-3 w-3" />
