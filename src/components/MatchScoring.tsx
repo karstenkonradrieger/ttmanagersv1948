@@ -432,6 +432,15 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
           🏆 {p1Wins >= effectiveBestOf ? p1?.name : p2?.name} gewinnt {p1Wins}:{p2Wins}
         </p>
       )}
+
+      <div className="mt-4">
+        <MatchPhotos
+          tournamentId={tournamentId}
+          matchId={match.id}
+          photoType="match"
+          maxPhotos={3}
+        />
+      </div>
     </div>
   );
 }
