@@ -261,12 +261,18 @@ export type Database = {
           id: string
           logo_url: string | null
           mode: string
+          motto: string
           name: string
           rounds: number
           started: boolean
           table_count: number
+          tournament_date: string | null
           type: string
           updated_at: string
+          venue_city: string
+          venue_house_number: string
+          venue_postal_code: string
+          venue_street: string
         }
         Insert: {
           best_of?: number
@@ -275,12 +281,18 @@ export type Database = {
           id?: string
           logo_url?: string | null
           mode?: string
+          motto?: string
           name?: string
           rounds?: number
           started?: boolean
           table_count?: number
+          tournament_date?: string | null
           type?: string
           updated_at?: string
+          venue_city?: string
+          venue_house_number?: string
+          venue_postal_code?: string
+          venue_street?: string
         }
         Update: {
           best_of?: number
@@ -289,12 +301,18 @@ export type Database = {
           id?: string
           logo_url?: string | null
           mode?: string
+          motto?: string
           name?: string
           rounds?: number
           started?: boolean
           table_count?: number
+          tournament_date?: string | null
           type?: string
           updated_at?: string
+          venue_city?: string
+          venue_house_number?: string
+          venue_postal_code?: string
+          venue_street?: string
         }
         Relationships: []
       }

@@ -53,4 +53,10 @@ export interface Tournament {
   type: TournamentType;
   doublesPairs: DoublesPair[];
   bestOf: number;
+  tournamentDate: string | null;
+  venueStreet: string;
+  venueHouseNumber: string;
+  venuePostalCode: string;
+  venueCity: string;
+  motto: string;
 }
