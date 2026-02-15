@@ -321,13 +321,6 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       const w = doc.internal.pageSize.getWidth();
       const h = doc.internal.pageSize.getHeight();
 
-      // Border
-      doc.setDrawColor(180, 160, 60);
-      doc.setLineWidth(3);
-      doc.rect(10, 10, w - 20, h - 20);
-      doc.setLineWidth(1);
-      doc.rect(14, 14, w - 28, h - 28);
-
       let yOffset = 40;
 
       // Logo
@@ -336,44 +329,41 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         yOffset += logoHeight + 12;
       }
 
-      // Skip medal emojis (not supported by jsPDF font)
-
       // Title
       doc.setFontSize(40);
       doc.setFont(undefined!, 'bold');
       doc.setTextColor(50, 50, 50);
       doc.text('Urkunde', w / 2, yOffset, { align: 'center' });
-      yOffset += 22;
-
-      // Placement
-      doc.setFontSize(24);
-      doc.setTextColor(140, 120, 30);
-      doc.text(placement.label, w / 2, yOffset, { align: 'center' });
       yOffset += 30;
 
-      // Player name
-      doc.setFontSize(32);
+      // Main text: Beim "Turniername" hat "Spieler" den "Platz" belegt.
+      doc.setFontSize(20);
+      doc.setFont(undefined!, 'normal');
       doc.setTextColor(30, 30, 30);
+      const mainText = `Beim "${tournamentName}" hat`;
+      doc.text(mainText, w / 2, yOffset, { align: 'center' });
+      yOffset += 16;
+
+      // Player name
+      doc.setFontSize(28);
       doc.setFont(undefined!, 'bold');
       doc.text(placement.player.name, w / 2, yOffset, { align: 'center' });
-      yOffset += 14;
+      yOffset += 16;
 
       // Club
       if (placement.player.club) {
-        doc.setFontSize(18);
+        doc.setFontSize(16);
         doc.setFont(undefined!, 'normal');
         doc.setTextColor(100, 100, 100);
-        doc.text(placement.player.club, w / 2, yOffset, { align: 'center' });
-        yOffset += 18;
-      } else {
-        yOffset += 10;
+        doc.text(`(${placement.player.club})`, w / 2, yOffset, { align: 'center' });
+        yOffset += 14;
       }
 
-      // Tournament name
-      doc.setFontSize(16);
-      doc.setTextColor(80, 80, 80);
+      // Placement line
+      doc.setFontSize(20);
       doc.setFont(undefined!, 'normal');
-      doc.text(tournamentName, w / 2, yOffset + 8, { align: 'center' });
+      doc.setTextColor(30, 30, 30);
+      doc.text(`den ${placement.label} belegt.`, w / 2, yOffset, { align: 'center' });
 
       // Date
       doc.setFontSize(13);
