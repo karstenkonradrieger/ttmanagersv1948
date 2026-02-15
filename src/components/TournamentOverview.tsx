@@ -336,11 +336,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         yOffset += logoHeight + 12;
       }
 
-      // Medal emoji as text
-      const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
-      doc.setFontSize(48);
-      doc.text(medals[placement.rank] || '', w / 2, yOffset + 14, { align: 'center' });
-      yOffset += 30;
+      // Skip medal emojis (not supported by jsPDF font)
 
       // Title
       doc.setFontSize(40);
