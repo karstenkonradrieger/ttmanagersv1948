@@ -351,6 +351,7 @@ const Index = () => {
                 getParticipantName={getParticipantName}
                 tournamentName={tournament.name}
                 rounds={tournament.rounds}
+                tournamentId={selectedTournamentId}
               />
             </TabsContent>
 
@@ -361,6 +362,7 @@ const Index = () => {
                 rounds={tournament.rounds}
                 logoUrl={tournament.logoUrl}
                 bestOf={tournament.bestOf}
+                tournamentId={selectedTournamentId}
                 getPlayer={isDoubles
                   ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
                   : getPlayer
