@@ -33,6 +33,10 @@ const announceMatch = (table: number | undefined, player1Name: string, player2Na
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'de-DE';
     utterance.rate = 0.7;
+    const voices = speechSynthesis.getVoices();
+    const maleDeVoice = voices.find(v => v.lang.startsWith('de') && /male|mann|männlich/i.test(v.name) && !/female|frau|weiblich/i.test(v.name))
+      || voices.find(v => v.lang.startsWith('de') && !/female|frau|weiblich/i.test(v.name));
+    if (maleDeVoice) utterance.voice = maleDeVoice;
     speechSynthesis.speak(utterance);
   } catch {}
 };
