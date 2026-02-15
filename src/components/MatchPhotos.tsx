@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Camera, X, Loader2, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { PhotoLightbox } from '@/components/PhotoLightbox';
 
 interface MatchPhoto {
   id: string;
@@ -24,7 +24,8 @@ interface Props {
 export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 3, readOnly = false }: Props) {
   const [photos, setPhotos] = useState<MatchPhoto[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -106,7 +107,6 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 3, r
 
   const handleDelete = async (photo: MatchPhoto) => {
     try {
-      // Extract path from URL
       const url = new URL(photo.photo_url);
       const pathParts = url.pathname.split('/match-photos/');
       if (pathParts[1]) {
@@ -126,7 +126,14 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 3, r
     fileInputRef.current?.click();
   };
 
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
   if (readOnly && photos.length === 0) return null;
+
+  const lightboxImages = photos.map(p => ({ id: p.id, url: p.photo_url }));
 
   return (
     <div className="space-y-2">
@@ -138,24 +145,14 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 3, r
       </div>
 
       <div className="flex gap-2 flex-wrap">
-        {photos.map(photo => (
+        {photos.map((photo, i) => (
           <div key={photo.id} className="relative group">
-            <Dialog>
-              <DialogTrigger asChild>
-                <img
-                  src={photo.photo_url}
-                  alt="Spielfoto"
-                  className="h-16 w-16 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity border border-border"
-                />
-              </DialogTrigger>
-              <DialogContent className="max-w-3xl p-2">
-                <img
-                  src={photo.photo_url}
-                  alt="Spielfoto"
-                  className="w-full h-auto rounded-lg"
-                />
-              </DialogContent>
-            </Dialog>
+            <img
+              src={photo.photo_url}
+              alt="Spielfoto"
+              className="h-16 w-16 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity border border-border"
+              onClick={() => openLightbox(i)}
+            />
             {!readOnly && (
               <button
                 onClick={() => handleDelete(photo)}
@@ -181,6 +178,13 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 3, r
           </button>
         )}
       </div>
+
+      <PhotoLightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
+      />
 
       <input
         ref={fileInputRef}
