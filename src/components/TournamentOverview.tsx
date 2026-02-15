@@ -252,7 +252,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
           fontStyle: 'bold',
           fontSize: 10,
         },
-        styles: { fontSize: 9, cellPadding: 3 },
+        styles: { fontSize: 8, cellPadding: 2 },
         columnStyles: {
           0: { cellWidth: 10, halign: 'center' },
           5: { halign: 'center' },
