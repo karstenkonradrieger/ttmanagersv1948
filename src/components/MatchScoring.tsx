@@ -18,6 +18,7 @@ interface Props {
   onAutoAssign: () => void;
   bestOf: number;
   tournamentName: string;
+  rounds: number;
 }
 
 const announceMatch = (table: number | undefined, player1Name: string, player2Name: string, nextPlayer1Name?: string, nextPlayer2Name?: string) => {
@@ -36,7 +37,7 @@ const announceMatch = (table: number | undefined, player1Name: string, player2Na
   } catch {}
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
 
   const pendingMatches = matches.filter(
@@ -196,7 +197,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
           </Button>
         }>
           {activeMatches.map(m => (
-            <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} getParticipantName={getParticipantName} tournamentName={tournamentName} />
+            <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} getParticipantName={getParticipantName} tournamentName={tournamentName} rounds={rounds} />
           ))}
         </Section>
       )}
@@ -277,24 +278,32 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables }: {
   );
 }
 
-function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantName, tournamentName }: {
+function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantName, tournamentName, rounds }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   onUpdateScore: (matchId: string, sets: SetScore[]) => void;
   bestOf: number;
   getParticipantName: (id: string | null) => string;
   tournamentName: string;
+  rounds: number;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
+
+  // Ab Halbfinale: Option auf 3 Gewinnsätze wenn Turnier auf 2 steht
+  const isSemiOrLater = rounds >= 2 && match.round >= rounds - 2;
+  const canUpgradeBestOf = bestOf === 2 && isSemiOrLater;
+  const [upgradedBestOf, setUpgradedBestOf] = useState(false);
+  const effectiveBestOf = canUpgradeBestOf && upgradedBestOf ? 3 : bestOf;
+
   const [sets, setSets] = useState<SetScore[]>(
     match.sets.length > 0 ? match.sets : [{ player1: 0, player2: 0 }]
   );
 
-  const maxSets = bestOf * 2 - 1; // best of 3 = 3 sets max, best of 5 = 5 sets max
+  const maxSets = effectiveBestOf * 2 - 1;
   const p1Wins = sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
   const p2Wins = sets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
-  const matchOver = p1Wins >= bestOf || p2Wins >= bestOf;
+  const matchOver = p1Wins >= effectiveBestOf || p2Wins >= effectiveBestOf;
 
   const updateSet = (idx: number, field: 'player1' | 'player2', value: number) => {
     const updated = [...sets];
@@ -332,9 +341,15 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
         </div>
       </div>
 
-      <div className="flex items-center justify-center gap-2 mb-3">
+      <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
         {match.table && (
           <span className="text-xs text-primary font-semibold">Tisch {match.table}</span>
+        )}
+        {canUpgradeBestOf && (
+          <div className="flex items-center gap-1.5">
+            <Switch id={`bo-${match.id}`} checked={upgradedBestOf} onCheckedChange={setUpgradedBestOf} />
+            <Label htmlFor={`bo-${match.id}`} className="text-xs cursor-pointer">3 Gewinnsätze</Label>
+          </div>
         )}
         <Button
           variant="ghost"
@@ -395,7 +410,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
 
       {matchOver && (
         <p className="text-center text-primary font-bold mt-3 text-sm">
-          🏆 {p1Wins >= bestOf ? p1?.name : p2?.name} gewinnt {p1Wins}:{p2Wins}
+          🏆 {p1Wins >= effectiveBestOf ? p1?.name : p2?.name} gewinnt {p1Wins}:{p2Wins}
         </p>
       )}
     </div>

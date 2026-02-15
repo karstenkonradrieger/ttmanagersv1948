@@ -350,6 +350,7 @@ const Index = () => {
                 bestOf={tournament.bestOf}
                 getParticipantName={getParticipantName}
                 tournamentName={tournament.name}
+                rounds={tournament.rounds}
               />
             </TabsContent>
 
