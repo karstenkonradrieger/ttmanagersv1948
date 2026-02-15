@@ -197,7 +197,7 @@ export async function generateMatchReport({
     y += 4;
 
     const photoWidth = 150;
-    const photoHeight = 100;
+    const photoHeight = 112.5;
     const gap = 4;
     const pageH = doc.internal.pageSize.getHeight();
 
