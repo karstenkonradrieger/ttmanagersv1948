@@ -84,6 +84,48 @@ export type Database = {
           },
         ]
       }
+      match_photos: {
+        Row: {
+          created_at: string
+          id: string
+          match_id: string | null
+          photo_type: string
+          photo_url: string
+          tournament_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_id?: string | null
+          photo_type?: string
+          photo_url: string
+          tournament_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_id?: string | null
+          photo_type?: string
+          photo_url?: string
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_photos_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_photos_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           created_at: string

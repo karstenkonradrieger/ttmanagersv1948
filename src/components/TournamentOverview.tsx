@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { FileDown, Award } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { MatchPhotos } from '@/components/MatchPhotos';
 
 interface Props {
   tournamentName: string;
@@ -13,6 +14,7 @@ interface Props {
   players: Player[];
   logoUrl?: string | null;
   bestOf: number;
+  tournamentId: string;
 }
 
 function getRoundName(round: number, totalRounds: number): string {
@@ -91,7 +93,7 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
   return Math.max(wins.p1, wins.p2) >= 3;
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf }: Props) {
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId }: Props) {
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
   if (matches.length === 0) {
@@ -498,6 +500,47 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
           </div>
         );
       })}
+
+      {/* Photo Retrospective */}
+      {matches.filter(m => m.status === 'completed').length > 0 && (
+        <div>
+          <h4 className="font-bold text-sm mb-3 text-primary">📸 Rückschau</h4>
+          <div className="space-y-3">
+            {matchesByRound.map((roundMatches, r) => {
+              const completedInRound = roundMatches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id);
+              if (completedInRound.length === 0) return null;
+              return (
+                <div key={`photos-${r}`}>
+                  <h5 className="text-xs font-semibold text-muted-foreground mb-2">{getRoundName(r, rounds)}</h5>
+                  {completedInRound.map(m => {
+                    const p1 = getPlayer(m.player1Id);
+                    const p2 = getPlayer(m.player2Id);
+                    return (
+                      <div key={`photo-${m.id}`} className="bg-card rounded-lg p-3 card-shadow mb-2">
+                        <p className="text-xs font-semibold mb-2">{p1?.name} vs {p2?.name}</p>
+                        <MatchPhotos
+                          tournamentId={tournamentId}
+                          matchId={m.id}
+                          photoType="match"
+                          readOnly
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+            <div className="bg-card rounded-lg p-3 card-shadow">
+              <p className="text-xs font-semibold mb-2">🏆 Siegerehrung</p>
+              <MatchPhotos
+                tournamentId={tournamentId}
+                photoType="ceremony"
+                readOnly
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Player Statistics */}
       {playerStats.length > 0 && (

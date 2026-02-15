@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Check, Play, X, Zap, Settings, Printer } from 'lucide-react';
 import { printRefereeSheet, printAllRefereeSheets } from '@/components/RefereeSheet';
+import { MatchPhotos } from '@/components/MatchPhotos';
 
 interface Props {
   matches: Match[];
@@ -19,6 +20,7 @@ interface Props {
   bestOf: number;
   tournamentName: string;
   rounds: number;
+  tournamentId: string;
 }
 
 const announceMatch = (table: number | undefined, player1Name: string, player2Name: string, nextPlayer1Name?: string, nextPlayer2Name?: string) => {
@@ -41,7 +43,7 @@ const announceMatch = (table: number | undefined, player1Name: string, player2Na
   } catch {}
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
 
   const pendingMatches = matches.filter(
@@ -201,7 +203,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
           </Button>
         }>
           {activeMatches.map(m => (
-            <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} getParticipantName={getParticipantName} tournamentName={tournamentName} rounds={rounds} />
+            <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} getParticipantName={getParticipantName} tournamentName={tournamentName} rounds={rounds} tournamentId={tournamentId} />
           ))}
         </Section>
       )}
@@ -219,9 +221,21 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
       {completedMatches.length > 0 && (
         <Section title="✅ Abgeschlossene Spiele">
           {completedMatches.map(m => (
-            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} />
+            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} />
           ))}
         </Section>
+      )}
+
+      {/* Siegerehrung Fotos */}
+      {matches.some(m => m.status === 'completed') && (
+        <div className="bg-card rounded-lg p-4 card-shadow">
+          <h3 className="text-lg font-bold mb-3">📸 Siegerehrung</h3>
+          <MatchPhotos
+            tournamentId={tournamentId}
+            photoType="ceremony"
+            maxPhotos={3}
+          />
+        </div>
       )}
     </div>
   );
@@ -282,7 +296,7 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables }: {
   );
 }
 
-function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantName, tournamentName, rounds }: {
+function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantName, tournamentName, rounds, tournamentId }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   onUpdateScore: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
@@ -290,6 +304,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   getParticipantName: (id: string | null) => string;
   tournamentName: string;
   rounds: number;
+  tournamentId: string;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
@@ -421,9 +436,10 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   );
 }
 
-function CompletedMatch({ match, getPlayer }: {
+function CompletedMatch({ match, getPlayer, tournamentId }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
+  tournamentId: string;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
@@ -432,7 +448,7 @@ function CompletedMatch({ match, getPlayer }: {
   const winner = getPlayer(match.winnerId);
 
   return (
-    <div className="bg-card/50 rounded-lg p-3 card-shadow">
+    <div className="bg-card/50 rounded-lg p-3 card-shadow space-y-2">
       <div className="flex items-center justify-between">
         <div className="text-sm">
           <span className={match.winnerId === match.player1Id ? 'font-bold text-primary' : ''}>{p1?.name}</span>
@@ -441,9 +457,15 @@ function CompletedMatch({ match, getPlayer }: {
         </div>
         <span className="text-xs text-primary">🏆 {winner?.name}</span>
       </div>
-      <div className="text-xs text-muted-foreground mt-1">
+      <div className="text-xs text-muted-foreground">
         {match.sets.map((s, i) => `${s.player1}:${s.player2}`).join(', ')}
       </div>
+      <MatchPhotos
+        tournamentId={tournamentId}
+        matchId={match.id}
+        photoType="match"
+        maxPhotos={3}
+      />
     </div>
   );
 }
