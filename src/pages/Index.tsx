@@ -207,13 +207,31 @@ const Index = () => {
 
       {/* Info bar */}
       <div className="container py-2">
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
           <span>{tournament.players.length} Spieler</span>
           {isDoubles && <span>{tournament.doublesPairs.length} Paare</span>}
           {tournament.started && (
             <>
               <span>·</span>
               <span>{tournament.matches.filter(m => m.status === 'completed').length}/{tournament.matches.length} Spiele</span>
+            </>
+          )}
+          {tournament.tournamentDate && (
+            <>
+              <span>·</span>
+              <span>📅 {new Date(tournament.tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+            </>
+          )}
+          {(tournament.venueCity || tournament.venueStreet) && (
+            <>
+              <span>·</span>
+              <span>📍 {[tournament.venueStreet, tournament.venueHouseNumber, tournament.venuePostalCode, tournament.venueCity].filter(Boolean).join(' ')}</span>
+            </>
+          )}
+          {tournament.motto && (
+            <>
+              <span>·</span>
+              <span className="italic">„{tournament.motto}"</span>
             </>
           )}
         </div>
