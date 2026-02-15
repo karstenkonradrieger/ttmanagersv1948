@@ -159,8 +159,7 @@ const Index = () => {
                 <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">Bo{tournament.bestOf * 2 - 1}</span>
               </div>
             </div>
-            {!tournament.started && (
-              <TournamentSettingsDialog
+            <TournamentSettingsDialog
                 mode={tournament.mode}
                 type={tournament.type}
                 bestOf={tournament.bestOf}
@@ -170,12 +169,12 @@ const Index = () => {
                 venuePostalCode={tournament.venuePostalCode}
                 venueCity={tournament.venueCity}
                 motto={tournament.motto}
+                started={tournament.started}
                 onUpdateMode={updateTournamentMode}
                 onUpdateType={updateTournamentType}
                 onUpdateBestOf={updateBestOf}
                 onUpdateDetails={updateDetails}
               />
-            )}
           </div>
           <div className="flex items-center gap-2">
             {canStart && (
