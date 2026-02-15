@@ -314,7 +314,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
     }
 
-    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+    const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
 
     placements.forEach((placement, idx) => {
       if (idx > 0) doc.addPage();
@@ -328,68 +328,69 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       doc.setLineWidth(1);
       doc.rect(14, 14, w - 28, h - 28);
 
-      let yOffset = 30;
+      let yOffset = 40;
 
       // Logo
       if (logoData) {
         doc.addImage(logoData, 'PNG', w / 2 - logoWidth / 2, yOffset, logoWidth, logoHeight);
-        yOffset += logoHeight + 8;
+        yOffset += logoHeight + 12;
       }
 
       // Medal emoji as text
       const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
-      doc.setFontSize(40);
-      doc.text(medals[placement.rank] || '', w / 2, yOffset + 12, { align: 'center' });
-      yOffset += 22;
+      doc.setFontSize(48);
+      doc.text(medals[placement.rank] || '', w / 2, yOffset + 14, { align: 'center' });
+      yOffset += 30;
 
       // Title
-      doc.setFontSize(36);
+      doc.setFontSize(40);
       doc.setFont(undefined!, 'bold');
       doc.setTextColor(50, 50, 50);
       doc.text('Urkunde', w / 2, yOffset, { align: 'center' });
-      yOffset += 17;
+      yOffset += 22;
 
       // Placement
-      doc.setFontSize(22);
+      doc.setFontSize(24);
       doc.setTextColor(140, 120, 30);
       doc.text(placement.label, w / 2, yOffset, { align: 'center' });
-      yOffset += 26;
+      yOffset += 30;
 
       // Player name
-      doc.setFontSize(30);
+      doc.setFontSize(32);
       doc.setTextColor(30, 30, 30);
       doc.setFont(undefined!, 'bold');
       doc.text(placement.player.name, w / 2, yOffset, { align: 'center' });
-      yOffset += 12;
+      yOffset += 14;
 
       // Club
       if (placement.player.club) {
-        doc.setFontSize(16);
+        doc.setFontSize(18);
         doc.setFont(undefined!, 'normal');
         doc.setTextColor(100, 100, 100);
         doc.text(placement.player.club, w / 2, yOffset, { align: 'center' });
-        yOffset += 14;
+        yOffset += 18;
       } else {
-        yOffset += 8;
+        yOffset += 10;
       }
 
       // Tournament name
-      doc.setFontSize(14);
+      doc.setFontSize(16);
       doc.setTextColor(80, 80, 80);
       doc.setFont(undefined!, 'normal');
-      doc.text(tournamentName, w / 2, yOffset + 6, { align: 'center' });
+      doc.text(tournamentName, w / 2, yOffset + 8, { align: 'center' });
 
       // Date
-      doc.setFontSize(12);
-      doc.text(new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }), w / 2, yOffset + 19, { align: 'center' });
+      doc.setFontSize(13);
+      doc.text(new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }), w / 2, yOffset + 24, { align: 'center' });
 
       // Signature line
+      const sigY = h - 40;
       doc.setDrawColor(150, 150, 150);
       doc.setLineWidth(0.5);
-      doc.line(w / 2 - 50, 180, w / 2 + 50, 180);
+      doc.line(w / 2 - 50, sigY, w / 2 + 50, sigY);
       doc.setFontSize(10);
       doc.setTextColor(150, 150, 150);
-      doc.text('Turnierleitung', w / 2, 187, { align: 'center' });
+      doc.text('Turnierleitung', w / 2, sigY + 7, { align: 'center' });
     });
 
     doc.save(`${tournamentName.replace(/\s+/g, '_')}_Urkunden.pdf`);
