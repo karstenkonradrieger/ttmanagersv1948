@@ -24,6 +24,12 @@ function loadTournament(): Tournament {
     type: 'singles',
     doublesPairs: [],
     bestOf: 3,
+    tournamentDate: null,
+    venueStreet: '',
+    venueHouseNumber: '',
+    venuePostalCode: '',
+    venueCity: '',
+    motto: '',
   };
 }
 
@@ -164,6 +170,12 @@ export function useTournament() {
       type: 'singles',
       doublesPairs: [],
       bestOf: 3,
+      tournamentDate: null,
+      venueStreet: '',
+      venueHouseNumber: '',
+      venuePostalCode: '',
+      venueCity: '',
+      motto: '',
     });
   }, []);
 

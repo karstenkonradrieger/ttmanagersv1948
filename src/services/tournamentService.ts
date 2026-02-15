@@ -14,6 +14,12 @@ export interface DbTournament {
   mode: string;
   type: string;
   best_of: number;
+  tournament_date: string | null;
+  venue_street: string;
+  venue_house_number: string;
+  venue_postal_code: string;
+  venue_city: string;
+  motto: string;
 }
 
 export interface DbPlayer {
@@ -101,6 +107,12 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     mode: (tournament.mode || 'knockout') as 'knockout' | 'round_robin',
     type: (tournament.type || 'singles') as 'singles' | 'doubles',
     bestOf: tournament.best_of || 3,
+    tournamentDate: tournament.tournament_date || null,
+    venueStreet: tournament.venue_street || '',
+    venueHouseNumber: tournament.venue_house_number || '',
+    venuePostalCode: tournament.venue_postal_code || '',
+    venueCity: tournament.venue_city || '',
+    motto: tournament.motto || '',
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -165,6 +177,12 @@ export async function updateTournament(id: string, updates: Partial<{
   mode: string;
   type: string;
   best_of: number;
+  tournament_date: string | null;
+  venue_street: string;
+  venue_house_number: string;
+  venue_postal_code: string;
+  venue_city: string;
+  motto: string;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')
