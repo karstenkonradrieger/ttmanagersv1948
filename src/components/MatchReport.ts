@@ -39,6 +39,8 @@ interface MatchReportOptions {
   roundName: string;
   logoUrl?: string | null;
   bestOf: number;
+  tournamentDate?: string | null;
+  venueString?: string;
 }
 
 export async function generateMatchReport({
@@ -50,6 +52,8 @@ export async function generateMatchReport({
   roundName,
   logoUrl,
   bestOf,
+  tournamentDate,
+  venueString,
 }: MatchReportOptions) {
   const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
   const w = doc.internal.pageSize.getWidth();
@@ -75,8 +79,17 @@ export async function generateMatchReport({
   doc.setFontSize(8);
   doc.setFont(undefined!, 'normal');
   doc.setTextColor(100);
-  doc.text(`${tournamentName}  •  ${roundName}`, 10, y + 9);
-  y += 14;
+  const infoParts = [tournamentName, roundName];
+  if (tournamentDate) {
+    infoParts.push(new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }));
+  }
+  doc.text(infoParts.join('  •  '), 10, y + 9);
+  if (venueString) {
+    doc.text(venueString, 10, y + 13);
+    y += 18;
+  } else {
+    y += 14;
+  }
 
   // Separator
   doc.setDrawColor(200);
