@@ -210,20 +210,19 @@ export async function generateMatchReport({
     doc.text('Fotos', 14, y);
     y += 8;
 
-    const photoWidth = (w - 28 - (photos.length - 1) * 4) / Math.min(photos.length, 3);
-    const photoHeight = photoWidth * 0.75;
+    // 10x15cm = 100x150mm in jsPDF units
+    const photoWidth = 100;
+    const photoHeight = 150;
 
-    let x = 14;
     for (const photo of photos.slice(0, 3)) {
       const imgData = await loadImage(photo.photo_url);
       if (imgData) {
         if (y + photoHeight > doc.internal.pageSize.getHeight() - 20) {
           doc.addPage();
           y = 20;
-          x = 14;
         }
-        doc.addImage(imgData, 'JPEG', x, y, photoWidth, photoHeight);
-        x += photoWidth + 4;
+        doc.addImage(imgData, 'JPEG', (w - photoWidth) / 2, y, photoWidth, photoHeight);
+        y += photoHeight + 6;
       }
     }
     y += photoHeight + 6;
