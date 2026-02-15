@@ -54,6 +54,7 @@ const Index = () => {
 
   const isDoubles = tournament.type === 'doubles';
   const isRoundRobin = tournament.mode === 'round_robin';
+  const venueString = [tournament.venueStreet, tournament.venueHouseNumber, tournament.venuePostalCode, tournament.venueCity].filter(Boolean).join(' ') || undefined;
 
   const handleImportClubsWithPlayers = useCallback(async (data: Array<{ clubName: string; players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }> }>) => {
     for (const entry of data) {
@@ -378,6 +379,8 @@ const Index = () => {
                 rounds={tournament.rounds}
                 tournamentId={selectedTournamentId}
                 logoUrl={tournament.logoUrl}
+                tournamentDate={tournament.tournamentDate}
+                venueString={venueString}
               />
             </TabsContent>
 
@@ -397,6 +400,8 @@ const Index = () => {
                   ? tournament.doublesPairs.map(dp => ({ id: dp.player1Id, name: dp.pairName, club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' }))
                   : tournament.players
                 }
+                tournamentDate={tournament.tournamentDate}
+                venueString={venueString}
               />
             </TabsContent>
 

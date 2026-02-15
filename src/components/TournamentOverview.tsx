@@ -16,6 +16,8 @@ interface Props {
   logoUrl?: string | null;
   bestOf: number;
   tournamentId: string;
+  tournamentDate?: string | null;
+  venueString?: string;
 }
 
 function getRoundName(round: number, totalRounds: number): string {
@@ -94,7 +96,7 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
   return Math.max(wins.p1, wins.p2) >= 3;
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId }: Props) {
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString }: Props) {
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
   if (matches.length === 0) {
@@ -148,7 +150,15 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     doc.text(tournamentName, 14, 20);
     doc.setFontSize(10);
     doc.setTextColor(120);
-    doc.text(`Erstellt am ${new Date().toLocaleDateString('de-DE')}`, 14, 28);
+    const subParts: string[] = [];
+    if (tournamentDate) {
+      subParts.push(new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }));
+    }
+    if (venueString) {
+      subParts.push(venueString);
+    }
+    subParts.push(`Erstellt am ${new Date().toLocaleDateString('de-DE')}`);
+    doc.text(subParts.join('  |  '), 14, 28);
     doc.setTextColor(0);
 
     let startY = 36;
@@ -362,9 +372,17 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       doc.setTextColor(30, 30, 30);
       doc.text(`den ${placement.label} belegt.`, w / 2, yOffset, { align: 'center' });
 
-      // Date
+      // Date + Venue
       doc.setFontSize(13);
-      doc.text(new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }), w / 2, yOffset + 24, { align: 'center' });
+      const certDate = tournamentDate
+        ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
+        : new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+      doc.text(certDate, w / 2, yOffset + 24, { align: 'center' });
+      if (venueString) {
+        doc.setFontSize(11);
+        doc.setTextColor(100, 100, 100);
+        doc.text(venueString, w / 2, yOffset + 34, { align: 'center' });
+      }
 
       // Signature line
       const sigY = h - 40;
