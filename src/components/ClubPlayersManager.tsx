@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Club } from '@/hooks/useClubs';
 import { ClubPlayer } from '@/hooks/useClubPlayers';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, UserPlus, Pencil, Check, X } from 'lucide-react';
+import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, UserPlus, Pencil, Check, X, Download, Upload } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Props {
   clubs: Club[];
@@ -19,9 +20,94 @@ interface Props {
   getPlayersForClub: (clubId: string) => ClubPlayer[];
 }
 
+function formatGender(g: string): string {
+  if (g === 'm') return 'männlich';
+  if (g === 'w') return 'weiblich';
+  if (g === 'd') return 'divers';
+  return '';
+}
+
+function parseGender(value: string): string {
+  const v = value.toLowerCase().trim();
+  if (v === 'm' || v === 'männlich' || v === 'maennlich' || v === 'male') return 'm';
+  if (v === 'w' || v === 'weiblich' || v === 'female') return 'w';
+  if (v === 'd' || v === 'divers' || v === 'diverse') return 'd';
+  return '';
+}
+
+function parseDateDE(value: string): string | null {
+  if (!value.trim()) return null;
+  const deParts = value.trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (deParts) return `${deParts[3]}-${deParts[2].padStart(2, '0')}-${deParts[1].padStart(2, '0')}`;
+  const isoParts = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoParts) return value.trim();
+  return null;
+}
+
+function downloadCsv(csv: string, filename: string) {
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function buildCsv(clubName: string, players: ClubPlayer[]): string {
+  const header = 'Verein;Name;Geschlecht;Geburtsdatum;TTR;Straße;Hausnummer;PLZ;Ort;Telefon';
+  const rows = players.length === 0
+    ? [`${clubName};;;;;;;;;`]
+    : players.map(p => {
+        const bd = p.birthDate ? new Date(p.birthDate).toLocaleDateString('de-DE') : '';
+        return `${clubName};${p.name};${formatGender(p.gender)};${bd};${p.ttr};${p.street || ''};${p.houseNumber || ''};${p.postalCode || ''};${p.city || ''};${p.phone || ''}`;
+      });
+  return [header, ...rows].join('\n');
+}
+
+interface CsvParsedPlayer {
+  clubName: string;
+  name: string;
+  gender: string;
+  birthDate: string | null;
+  ttr: number;
+  postalCode: string;
+  city: string;
+  street: string;
+  houseNumber: string;
+  phone: string;
+}
+
+function parseCsvForClubPlayers(text: string): CsvParsedPlayer[] {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const result: CsvParsedPlayer[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(sep).map(c => c.trim());
+    const clubName = cols[0] || '';
+    const playerName = cols[1] || '';
+    if (!clubName || !playerName) continue;
+    result.push({
+      clubName,
+      name: playerName,
+      gender: parseGender(cols[2] || ''),
+      birthDate: parseDateDE(cols[3] || ''),
+      ttr: parseInt(cols[4]) || 1000,
+      street: cols[5] || '',
+      houseNumber: cols[6] || '',
+      postalCode: cols[7] || '',
+      city: cols[8] || '',
+      phone: cols[9] || '',
+    });
+  }
+  return result;
+}
+
 export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub, onAddPlayer, onUpdatePlayer, onRemovePlayer, getPlayersForClub }: Props) {
   const [clubName, setClubName] = useState('');
   const [addingClub, setAddingClub] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [openClubs, setOpenClubs] = useState<Set<string>>(new Set());
   const [addingPlayerFor, setAddingPlayerFor] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -91,6 +177,55 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
     });
   };
 
+  const handleExportAll = () => {
+    if (clubs.length === 0) { toast.error('Keine Vereine zum Exportieren'); return; }
+    for (const club of clubs) {
+      const players = getPlayersForClub(club.id);
+      const csv = buildCsv(club.name, players);
+      const safeName = club.name.replace(/[^a-zA-Z0-9äöüÄÖÜß _-]/g, '_');
+      downloadCsv(csv, `${safeName}.csv`);
+    }
+    toast.success(`${clubs.length} Vereine exportiert`);
+  };
+
+  const handleExportClub = (club: Club) => {
+    const players = getPlayersForClub(club.id);
+    const csv = buildCsv(club.name, players);
+    const safeName = club.name.replace(/[^a-zA-Z0-9äöüÄÖÜß _-]/g, '_');
+    downloadCsv(csv, `${safeName}.csv`);
+    toast.success(`${club.name} exportiert (${players.length} Spieler)`);
+  };
+
+  const handleImportCsv = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    const parsed = parseCsvForClubPlayers(text);
+    if (parsed.length === 0) { toast.error('Keine gültigen Daten gefunden'); return; }
+
+    // Group by club
+    const byClub = new Map<string, CsvParsedPlayer[]>();
+    for (const p of parsed) {
+      if (!byClub.has(p.clubName)) byClub.set(p.clubName, []);
+      byClub.get(p.clubName)!.push(p);
+    }
+
+    let importedCount = 0;
+    for (const [cName, players] of byClub) {
+      let club = clubs.find(c => c.name.toLowerCase() === cName.toLowerCase());
+      if (!club) {
+        club = await onAddClub(cName) || undefined;
+      }
+      if (!club) continue;
+      for (const p of players) {
+        await onAddPlayer(club.id, p.name, p.gender, p.birthDate, p.ttr, p.postalCode, p.city, p.street, p.houseNumber, p.phone);
+        importedCount++;
+      }
+    }
+    toast.success(`${importedCount} Spieler aus ${byClub.size} Vereinen importiert`);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   return (
     <div className="space-y-4 animate-slide-up">
       <div className="flex gap-2">
@@ -103,6 +238,16 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
         />
         <Button onClick={handleAddClub} disabled={!clubName.trim() || addingClub} size="sm" className="h-10 px-3">
           <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" onClick={handleExportAll} className="text-xs gap-1" disabled={clubs.length === 0}>
+          <Download className="h-3 w-3" /> Alle exportieren
+        </Button>
+        <input ref={fileInputRef} type="file" accept=".csv,.txt" onChange={handleImportCsv} className="hidden" />
+        <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="text-xs gap-1">
+          <Upload className="h-3 w-3" /> CSV importieren
         </Button>
       </div>
 
@@ -127,6 +272,15 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                     </button>
                   </CollapsibleTrigger>
                   <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => { e.stopPropagation(); handleExportClub(club); }}
+                      className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                      title="Verein exportieren"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
