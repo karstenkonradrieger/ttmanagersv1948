@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Club } from '@/hooks/useClubs';
 import { ClubPlayer } from '@/hooks/useClubPlayers';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Building2, UserPlus, Users } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Building2, UserPlus, Users, Filter } from 'lucide-react';
 
 interface Props {
   clubs: Club[];
@@ -18,6 +20,23 @@ interface Props {
 export function ImportFromClubPlayers({ clubs, clubPlayers, getPlayersForClub, onImportPlayers, existingPlayerNames }: Props) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [genderFilter, setGenderFilter] = useState<string>('all');
+  const [ttrMin, setTtrMin] = useState<string>('');
+  const [ttrMax, setTtrMax] = useState<string>('');
+
+  const filteredForClub = useMemo(() => {
+    return (clubId: string) => {
+      let players = getPlayersForClub(clubId);
+      if (genderFilter !== 'all') {
+        players = players.filter(p => p.gender === genderFilter);
+      }
+      const min = ttrMin ? parseInt(ttrMin) : null;
+      const max = ttrMax ? parseInt(ttrMax) : null;
+      if (min !== null && !isNaN(min)) players = players.filter(p => p.ttr >= min);
+      if (max !== null && !isNaN(max)) players = players.filter(p => p.ttr <= max);
+      return players;
+    };
+  }, [getPlayersForClub, genderFilter, ttrMin, ttrMax]);
 
   const togglePlayer = (id: string) => {
     setSelected(prev => {
@@ -28,7 +47,7 @@ export function ImportFromClubPlayers({ clubs, clubPlayers, getPlayersForClub, o
   };
 
   const toggleClub = (clubId: string) => {
-    const players = getPlayersForClub(clubId);
+    const players = filteredForClub(clubId);
     const allSelected = players.every(p => selected.has(p.id));
     setSelected(prev => {
       const next = new Set(prev);
@@ -73,10 +92,38 @@ export function ImportFromClubPlayers({ clubs, clubPlayers, getPlayersForClub, o
         <DialogHeader>
           <DialogTitle>Spieler aus Vereinen importieren</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="max-h-[60vh]">
+        <div className="flex items-center gap-2 pb-2">
+          <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+          <Select value={genderFilter} onValueChange={setGenderFilter}>
+            <SelectTrigger className="h-8 w-28 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle</SelectItem>
+              <SelectItem value="m">Männlich</SelectItem>
+              <SelectItem value="w">Weiblich</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input
+            type="number"
+            placeholder="TTR min"
+            value={ttrMin}
+            onChange={e => setTtrMin(e.target.value)}
+            className="h-8 w-20 text-xs"
+          />
+          <span className="text-xs text-muted-foreground">–</span>
+          <Input
+            type="number"
+            placeholder="TTR max"
+            value={ttrMax}
+            onChange={e => setTtrMax(e.target.value)}
+            className="h-8 w-20 text-xs"
+          />
+        </div>
+        <ScrollArea className="max-h-[50vh]">
           <div className="space-y-3 pr-3">
             {clubs.map(club => {
-              const players = getPlayersForClub(club.id);
+              const players = filteredForClub(club.id);
               if (players.length === 0) return null;
               const allSelected = players.every(p => selected.has(p.id));
               const someSelected = players.some(p => selected.has(p.id));
