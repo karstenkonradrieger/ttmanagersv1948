@@ -180,7 +180,7 @@ export async function generateMatchReport({
     y += 5;
   }
 
-  // Photos - 9x6cm = 90x60mm, side by side
+  // Photos - 15x10cm = 150x100mm, stacked vertically
   const { data: photos } = await supabase
     .from('match_photos')
     .select('*')
@@ -196,10 +196,10 @@ export async function generateMatchReport({
     doc.text('Fotos', 10, y);
     y += 4;
 
-    const photoWidth = 90;
-    const photoHeight = 60;
+    const photoWidth = 150;
+    const photoHeight = 100;
     const gap = 4;
-    const gridX = (w - (photoWidth * 2 + gap)) / 2;
+    const pageH = doc.internal.pageSize.getHeight();
 
     const loaded: string[] = [];
     for (const photo of photos.slice(0, 2)) {
@@ -207,9 +207,14 @@ export async function generateMatchReport({
       if (imgData) loaded.push(imgData);
     }
 
-    loaded.forEach((imgData, i) => {
-      const x = gridX + i * (photoWidth + gap);
+    loaded.forEach((imgData) => {
+      if (y + photoHeight > pageH - 15) {
+        doc.addPage();
+        y = 15;
+      }
+      const x = (w - photoWidth) / 2;
       doc.addImage(imgData, 'JPEG', x, y, photoWidth, photoHeight);
+      y += photoHeight + gap;
     });
   }
 
