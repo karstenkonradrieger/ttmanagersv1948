@@ -10,6 +10,7 @@ export interface Player {
   street: string;
   houseNumber: string;
   phone: string;
+  groupNumber?: number | null;
 }
 
 export interface SetScore {
@@ -27,6 +28,7 @@ export interface Match {
   winnerId: string | null;
   table?: number;
   status: 'pending' | 'active' | 'completed';
+  groupNumber?: number | null;
 }
 
 export interface DoublesPair {
@@ -37,7 +39,7 @@ export interface DoublesPair {
   pairName: string;
 }
 
-export type TournamentMode = 'knockout' | 'round_robin';
+export type TournamentMode = 'knockout' | 'round_robin' | 'group_knockout';
 export type TournamentType = 'singles' | 'doubles';
 
 export interface Tournament {
@@ -53,6 +55,7 @@ export interface Tournament {
   type: TournamentType;
   doublesPairs: DoublesPair[];
   bestOf: number;
+  phase: 'group' | 'knockout' | null;
   tournamentDate: string | null;
   venueStreet: string;
   venueHouseNumber: string;

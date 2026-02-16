@@ -156,7 +156,7 @@ export function TournamentSettingsDialog({
           {/* Mode */}
           <div className={started ? 'opacity-50' : ''}>
             <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
-            <RadioGroup value={localMode} onValueChange={(v) => setLocalMode(v as TournamentMode)} disabled={started} className="flex gap-4">
+            <RadioGroup value={localMode} onValueChange={(v) => setLocalMode(v as TournamentMode)} disabled={started} className="flex flex-col gap-2">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="knockout" id="edit-mode-ko" disabled={started} />
                 <Label htmlFor="edit-mode-ko" className="text-sm cursor-pointer">KO-System</Label>
@@ -164,6 +164,10 @@ export function TournamentSettingsDialog({
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="round_robin" id="edit-mode-rr" disabled={started} />
                 <Label htmlFor="edit-mode-rr" className="text-sm cursor-pointer">Alle gegen Alle</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="group_knockout" id="edit-mode-gk" disabled={started} />
+                <Label htmlFor="edit-mode-gk" className="text-sm cursor-pointer">Gruppen + K.O.</Label>
               </div>
             </RadioGroup>
           </div>

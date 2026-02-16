@@ -16,6 +16,7 @@ const emptyTournament: Tournament = {
   type: 'singles',
   doublesPairs: [],
   bestOf: 3,
+  phase: null,
   tournamentDate: null,
   venueStreet: '',
   venueHouseNumber: '',
@@ -150,10 +151,9 @@ export function useTournamentDb(tournamentId: string | null) {
 
     const isDoubles = tournament.type === 'doubles';
     const isRoundRobin = tournament.mode === 'round_robin';
+    const isGroupKnockout = tournament.mode === 'group_knockout';
 
     // Determine participants
-    // For doubles, we use the pair's player1_id as the match participant identifier
-    // (since match FK references players table, we can't use pair IDs directly)
     let participants: string[];
     if (isDoubles) {
       participants = tournament.doublesPairs.map(dp => dp.player1Id);
@@ -166,6 +166,93 @@ export function useTournamentDb(tournamentId: string | null) {
 
     let matchesData: Omit<Match, 'id'>[];
     let rounds: number;
+
+    if (isGroupKnockout) {
+      // Group knockout: Phase 1 - assign groups of 4, round-robin within groups
+      const groupSize = 4;
+      const groupCount = Math.ceil(n / groupSize);
+
+      // Assign groups (snake seeding by TTR)
+      const groupAssignments: Array<{ playerId: string; groupNumber: number }> = [];
+      for (let i = 0; i < n; i++) {
+        const groupIdx = i < groupCount
+          ? i
+          : (Math.floor(i / groupCount) % 2 === 0
+            ? i % groupCount
+            : groupCount - 1 - (i % groupCount));
+        const finalGroup = Math.min(groupIdx, groupCount - 1);
+        groupAssignments.push({ playerId: participants[i], groupNumber: finalGroup });
+      }
+
+      // Update player group numbers in DB
+      await tournamentService.updatePlayersGroupNumbers(
+        groupAssignments.map(a => ({ id: a.playerId, group_number: a.groupNumber }))
+      );
+
+      // Update local state
+      setTournament(prev => ({
+        ...prev,
+        players: prev.players.map(p => {
+          const assignment = groupAssignments.find(a => a.playerId === p.id);
+          return assignment ? { ...p, groupNumber: assignment.groupNumber } : p;
+        }),
+      }));
+
+      // Generate round-robin matches per group
+      matchesData = [];
+      let maxRounds = 0;
+
+      for (let g = 0; g < groupCount; g++) {
+        const groupPlayers = groupAssignments
+          .filter(a => a.groupNumber === g)
+          .map(a => a.playerId);
+
+        if (groupPlayers.length < 2) continue;
+
+        const groupSchedule = generateRoundRobinSchedule(groupPlayers);
+        if (groupSchedule.length > maxRounds) maxRounds = groupSchedule.length;
+
+        for (let r = 0; r < groupSchedule.length; r++) {
+          for (let pos = 0; pos < groupSchedule[r].length; pos++) {
+            const [p1, p2] = groupSchedule[r][pos];
+            matchesData.push({
+              round: r,
+              position: pos + g * 100, // offset position by group
+              player1Id: p1,
+              player2Id: p2,
+              sets: [],
+              winnerId: null,
+              status: 'pending',
+              groupNumber: g,
+            });
+          }
+        }
+      }
+
+      rounds = maxRounds;
+
+      try {
+        const createdMatches = await tournamentService.createMatches(tournamentId, matchesData);
+
+        await tournamentService.updateTournament(tournamentId, {
+          started: true,
+          rounds,
+          phase: 'group',
+        });
+
+        setTournament(prev => ({
+          ...prev,
+          matches: createdMatches,
+          rounds,
+          started: true,
+          phase: 'group',
+        }));
+      } catch (error) {
+        console.error('Error generating group bracket:', error);
+        toast.error('Fehler beim Erstellen der Gruppenphase');
+      }
+      return;
+    }
 
     if (isRoundRobin) {
       // Round-robin: everyone plays everyone
@@ -310,13 +397,21 @@ export function useTournamentDb(tournamentId: string | null) {
       );
 
       // Propagate winner if completed (only for knockout mode)
-      if (winnerId && tournament.mode === 'knockout') {
-        updatedMatches = propagateWinners(updatedMatches);
+      if (winnerId && (tournament.mode === 'knockout' || (tournament.mode === 'group_knockout' && tournament.phase === 'knockout'))) {
+        const koMatches = tournament.mode === 'group_knockout'
+          ? updatedMatches.filter(m => m.groupNumber === undefined || m.groupNumber === null)
+          : updatedMatches;
+        const propagated = propagateWinners(koMatches);
+        // Merge propagated back
+        updatedMatches = updatedMatches.map(m => {
+          const p = propagated.find(pm => pm.id === m.id);
+          return p || m;
+        });
         
         // Find next match and update in DB
         const nextRound = match.round + 1;
         const nextPos = Math.floor(match.position / 2);
-        const nextMatch = updatedMatches.find(nm => nm.round === nextRound && nm.position === nextPos);
+        const nextMatch = updatedMatches.find(nm => nm.round === nextRound && nm.position === nextPos && (nm.groupNumber === undefined || nm.groupNumber === null));
         
         if (nextMatch) {
           const updateData = match.position % 2 === 0
@@ -331,7 +426,7 @@ export function useTournamentDb(tournamentId: string | null) {
       console.error('Error updating score:', error);
       toast.error('Fehler beim Speichern des Ergebnisses');
     }
-  }, [tournament.matches, tournament.mode]);
+  }, [tournament.matches, tournament.mode, tournament.phase]);
 
   const setMatchActive = useCallback(async (matchId: string, table?: number) => {
     try {
@@ -582,6 +677,167 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId]);
 
+  // Advance from group phase to knockout phase
+  const advanceToKnockout = useCallback(async () => {
+    if (!tournamentId || tournament.mode !== 'group_knockout' || tournament.phase !== 'group') return;
+
+    // Import computeGroupStandings dynamically to compute standings
+    const groupMatches = tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
+    const groupCount = Math.max(...tournament.players.map(p => (p.groupNumber ?? 0))) + 1;
+
+    // Compute standings per group
+    const qualifiedPlayers: Array<{ playerId: string; groupNumber: number; rank: number }> = [];
+    
+    for (let g = 0; g < groupCount; g++) {
+      const gMatches = groupMatches.filter(m => m.groupNumber === g);
+      // Compute standings inline
+      const map = new Map<string, { playerId: string; won: number; setsWon: number; setsLost: number; pointsWon: number; pointsLost: number }>();
+      
+      for (const m of gMatches) {
+        if (!m.player1Id || !m.player2Id || m.status !== 'completed') continue;
+        if (!map.has(m.player1Id)) map.set(m.player1Id, { playerId: m.player1Id, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
+        if (!map.has(m.player2Id)) map.set(m.player2Id, { playerId: m.player2Id, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
+        
+        const s1 = map.get(m.player1Id)!;
+        const s2 = map.get(m.player2Id)!;
+        if (m.winnerId === m.player1Id) s1.won++;
+        else if (m.winnerId === m.player2Id) s2.won++;
+        
+        for (const s of m.sets) {
+          s1.pointsWon += s.player1; s1.pointsLost += s.player2;
+          s2.pointsWon += s.player2; s2.pointsLost += s.player1;
+          if (s.player1 >= 11 && s.player1 - s.player2 >= 2) { s1.setsWon++; s2.setsLost++; }
+          else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) { s2.setsWon++; s1.setsLost++; }
+        }
+      }
+      
+      const standings = [...map.values()].sort((a, b) => {
+        if (b.won !== a.won) return b.won - a.won;
+        // Head-to-head
+        const h2h = gMatches.find(m => m.status === 'completed' &&
+          ((m.player1Id === a.playerId && m.player2Id === b.playerId) ||
+           (m.player1Id === b.playerId && m.player2Id === a.playerId)));
+        if (h2h) {
+          if (h2h.winnerId === a.playerId) return -1;
+          if (h2h.winnerId === b.playerId) return 1;
+        }
+        const aDiff = a.setsWon - a.setsLost;
+        const bDiff = b.setsWon - b.setsLost;
+        if (bDiff !== aDiff) return bDiff - aDiff;
+        return (b.pointsWon - b.pointsLost) - (a.pointsWon - a.pointsLost);
+      });
+      
+      // Top 2 qualify
+      for (let i = 0; i < Math.min(2, standings.length); i++) {
+        qualifiedPlayers.push({ playerId: standings[i].playerId, groupNumber: g, rank: i + 1 });
+      }
+    }
+
+    const qualifiedCount = qualifiedPlayers.length;
+    if (qualifiedCount < 2) return;
+
+    // Cross-seeding: Group winners vs runners-up of other groups
+    // Sort: all group winners first (by group), then runners-up (reversed for cross)
+    const winners = qualifiedPlayers.filter(q => q.rank === 1).sort((a, b) => a.groupNumber - b.groupNumber);
+    const runnersUp = qualifiedPlayers.filter(q => q.rank === 2).sort((a, b) => a.groupNumber - b.groupNumber);
+    
+    // Interleave: Winner A vs Runner-up B, Winner B vs Runner-up A, etc.
+    const seeded: string[] = [];
+    const runnersUpReversed = [...runnersUp].reverse();
+    for (let i = 0; i < winners.length; i++) {
+      seeded.push(winners[i].playerId);
+      if (i < runnersUpReversed.length) {
+        seeded.push(runnersUpReversed[i].playerId);
+      }
+    }
+    // Add any remaining runners-up
+    for (let i = winners.length; i < runnersUpReversed.length; i++) {
+      seeded.push(runnersUpReversed[i].playerId);
+    }
+
+    const n = seeded.length;
+    const slots = Math.pow(2, Math.ceil(Math.log2(n)));
+    const koRounds = Math.log2(slots);
+
+    const seededSlots: (string | null)[] = Array(slots).fill(null);
+    for (let i = 0; i < n; i++) {
+      seededSlots[i] = seeded[i];
+    }
+
+    const koMatchesData: Omit<Match, 'id'>[] = [];
+    
+    // First round
+    for (let i = 0; i < slots / 2; i++) {
+      const p1 = seededSlots[i * 2];
+      const p2 = seededSlots[i * 2 + 1];
+      const isBye = p2 === null;
+      koMatchesData.push({
+        round: 0,
+        position: i,
+        player1Id: p1,
+        player2Id: p2,
+        sets: [],
+        winnerId: isBye ? p1 : null,
+        status: isBye ? 'completed' : 'pending',
+        groupNumber: null,
+      });
+    }
+
+    // Subsequent rounds
+    for (let r = 1; r < koRounds; r++) {
+      const matchesInRound = slots / Math.pow(2, r + 1);
+      for (let i = 0; i < matchesInRound; i++) {
+        koMatchesData.push({
+          round: r,
+          position: i,
+          player1Id: null,
+          player2Id: null,
+          sets: [],
+          winnerId: null,
+          status: 'pending',
+          groupNumber: null,
+        });
+      }
+    }
+
+    try {
+      const createdKoMatches = await tournamentService.createMatches(tournamentId, koMatchesData);
+      
+      // Propagate byes
+      const propagated = propagateWinners(createdKoMatches);
+      const matchesToUpdate = propagated.filter((m, i) =>
+        m.player1Id !== createdKoMatches[i].player1Id ||
+        m.player2Id !== createdKoMatches[i].player2Id
+      );
+      
+      if (matchesToUpdate.length > 0) {
+        await tournamentService.updateMultipleMatches(
+          matchesToUpdate.map(m => ({
+            id: m.id,
+            data: { player1_id: m.player1Id, player2_id: m.player2Id },
+          }))
+        );
+      }
+
+      await tournamentService.updateTournament(tournamentId, {
+        phase: 'knockout',
+        rounds: koRounds,
+      });
+
+      setTournament(prev => ({
+        ...prev,
+        matches: [...prev.matches, ...propagated],
+        rounds: koRounds,
+        phase: 'knockout',
+      }));
+
+      toast.success(`K.O.-Runde mit ${qualifiedCount} Spielern gestartet`);
+    } catch (error) {
+      console.error('Error advancing to knockout:', error);
+      toast.error('Fehler beim Starten der K.O.-Runde');
+    }
+  }, [tournamentId, tournament.mode, tournament.phase, tournament.matches, tournament.players]);
+
   return {
     tournament,
     loading,
@@ -605,6 +861,7 @@ export function useTournamentDb(tournamentId: string | null) {
     removeDoublesPair,
     autoGenerateDoublesPairs,
     getParticipantName,
+    advanceToKnockout,
     reload: loadTournament,
   };
 }
