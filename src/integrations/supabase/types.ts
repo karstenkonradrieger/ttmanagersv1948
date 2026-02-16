@@ -185,6 +185,7 @@ export type Database = {
       matches: {
         Row: {
           created_at: string
+          group_number: number | null
           id: string
           player1_id: string | null
           player2_id: string | null
@@ -198,6 +199,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          group_number?: number | null
           id?: string
           player1_id?: string | null
           player2_id?: string | null
@@ -211,6 +213,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          group_number?: number | null
           id?: string
           player1_id?: string | null
           player2_id?: string | null
@@ -260,6 +263,7 @@ export type Database = {
           club: string
           created_at: string
           gender: string
+          group_number: number | null
           house_number: string
           id: string
           name: string
@@ -275,6 +279,7 @@ export type Database = {
           club?: string
           created_at?: string
           gender?: string
+          group_number?: number | null
           house_number?: string
           id?: string
           name: string
@@ -290,6 +295,7 @@ export type Database = {
           club?: string
           created_at?: string
           gender?: string
+          group_number?: number | null
           house_number?: string
           id?: string
           name?: string
@@ -319,6 +325,7 @@ export type Database = {
           mode: string
           motto: string
           name: string
+          phase: string | null
           rounds: number
           started: boolean
           table_count: number
@@ -339,6 +346,7 @@ export type Database = {
           mode?: string
           motto?: string
           name?: string
+          phase?: string | null
           rounds?: number
           started?: boolean
           table_count?: number
@@ -359,6 +367,7 @@ export type Database = {
           mode?: string
           motto?: string
           name?: string
+          phase?: string | null
           rounds?: number
           started?: boolean
           table_count?: number

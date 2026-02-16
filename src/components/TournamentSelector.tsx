@@ -113,7 +113,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
               />
               <div>
                 <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
-                <RadioGroup value={newMode} onValueChange={(v) => setNewMode(v as TournamentMode)} className="flex gap-4">
+                <RadioGroup value={newMode} onValueChange={(v) => setNewMode(v as TournamentMode)} className="flex flex-col gap-2">
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="knockout" id="mode-ko" />
                     <Label htmlFor="mode-ko" className="text-sm cursor-pointer">KO-System</Label>
@@ -121,6 +121,10 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="round_robin" id="mode-rr" />
                     <Label htmlFor="mode-rr" className="text-sm cursor-pointer">Alle gegen Alle</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="group_knockout" id="mode-gk" />
+                    <Label htmlFor="mode-gk" className="text-sm cursor-pointer">Gruppen + K.O.</Label>
                   </div>
                 </RadioGroup>
               </div>
@@ -190,7 +194,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                       </span>
                     )}
                     <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
-                      {(t as any).mode === 'round_robin' ? 'Alle gg. Alle' : 'KO'}
+                      {(t as any).mode === 'round_robin' ? 'Alle gg. Alle' : (t as any).mode === 'group_knockout' ? 'Gruppen+KO' : 'KO'}
                     </span>
                     <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
                       {(t as any).type === 'doubles' ? 'Doppel' : 'Einzel'}

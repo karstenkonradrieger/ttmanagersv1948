@@ -14,6 +14,7 @@ export interface DbTournament {
   mode: string;
   type: string;
   best_of: number;
+  phase: string | null;
   tournament_date: string | null;
   venue_street: string;
   venue_house_number: string;
@@ -35,6 +36,7 @@ export interface DbPlayer {
   street: string;
   house_number: string;
   phone: string;
+  group_number: number | null;
   created_at: string;
 }
 
@@ -49,6 +51,7 @@ export interface DbMatch {
   sets: SetScore[];
   table_number: number | null;
   status: 'pending' | 'active' | 'completed';
+  group_number: number | null;
   created_at: string;
 }
 
@@ -104,9 +107,10 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     rounds: tournament.rounds,
     started: tournament.started,
     logoUrl: tournament.logo_url,
-    mode: (tournament.mode || 'knockout') as 'knockout' | 'round_robin',
+    mode: (tournament.mode || 'knockout') as 'knockout' | 'round_robin' | 'group_knockout',
     type: (tournament.type || 'singles') as 'singles' | 'doubles',
     bestOf: tournament.best_of || 3,
+    phase: (tournament.phase as 'group' | 'knockout' | null) || null,
     tournamentDate: tournament.tournament_date || null,
     venueStreet: tournament.venue_street || '',
     venueHouseNumber: tournament.venue_house_number || '',
@@ -120,7 +124,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
       player2Id: dp.player2_id,
       pairName: dp.pair_name || '',
     })),
-    players: (players || []).map((p: { id: string; name: string; club: string; gender: string; birth_date: string | null; ttr: number; postal_code: string; city: string; street: string; house_number: string; phone: string }) => ({
+    players: (players || []).map((p: { id: string; name: string; club: string; gender: string; birth_date: string | null; ttr: number; postal_code: string; city: string; street: string; house_number: string; phone: string; group_number: number | null }) => ({
       id: p.id,
       name: p.name,
       club: p.club,
@@ -132,6 +136,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
       street: p.street,
       houseNumber: p.house_number,
       phone: p.phone,
+      groupNumber: p.group_number,
     })),
     matches: (matches || []).map((m: { 
       id: string; 
@@ -143,6 +148,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
       sets: Json; 
       table_number: number | null; 
       status: string;
+      group_number: number | null;
     }) => ({
       id: m.id,
       round: m.round,
@@ -153,6 +159,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
       sets: (Array.isArray(m.sets) ? m.sets : []) as unknown as SetScore[],
       table: m.table_number || undefined,
       status: m.status as 'pending' | 'active' | 'completed',
+      groupNumber: m.group_number,
     })),
   };
 }
@@ -177,6 +184,7 @@ export async function updateTournament(id: string, updates: Partial<{
   mode: string;
   type: string;
   best_of: number;
+  phase: string | null;
   tournament_date: string | null;
   venue_street: string;
   venue_house_number: string;
@@ -267,6 +275,14 @@ export async function updatePlayerInDb(playerId: string, updates: Partial<Omit<P
   if (error) throw error;
 }
 
+export async function updatePlayersGroupNumbers(updates: Array<{ id: string; group_number: number | null }>): Promise<void> {
+  await Promise.all(
+    updates.map(({ id, group_number }) =>
+      supabase.from('players').update({ group_number }).eq('id', id)
+    )
+  );
+}
+
 // Match operations
 export async function createMatches(tournamentId: string, matches: Omit<Match, 'id'>[]): Promise<Match[]> {
   const dbMatches = matches.map(m => ({
@@ -279,6 +295,7 @@ export async function createMatches(tournamentId: string, matches: Omit<Match, '
     sets: m.sets as unknown as Json,
     table_number: m.table || null,
     status: m.status,
+    group_number: m.groupNumber ?? null,
   }));
 
   const { data, error } = await supabase
@@ -298,6 +315,7 @@ export async function createMatches(tournamentId: string, matches: Omit<Match, '
     sets: Json;
     table_number: number | null;
     status: string;
+    group_number: number | null;
   }) => ({
     id: m.id,
     round: m.round,
@@ -308,6 +326,7 @@ export async function createMatches(tournamentId: string, matches: Omit<Match, '
     sets: (Array.isArray(m.sets) ? m.sets : []) as unknown as SetScore[],
     table: m.table_number || undefined,
     status: m.status as 'pending' | 'active' | 'completed',
+    groupNumber: m.group_number,
   }));
 }
 
