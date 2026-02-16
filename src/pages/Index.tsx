@@ -17,10 +17,11 @@ import { LogoUpload } from '@/components/LogoUpload';
 import { DoublesManager } from '@/components/DoublesManager';
 import { RoundRobinStandings } from '@/components/RoundRobinStandings';
 import { GroupStageView } from '@/components/GroupStageView';
+import { generateGroupStageReport } from '@/components/GroupStageReport';
 import { TournamentSettingsDialog } from '@/components/TournamentSettingsDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil } from 'lucide-react';
+import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 const Index = () => {
@@ -406,13 +407,41 @@ const Index = () => {
               {isGroupKnockout ? (
                 <>
                   {tournament.phase === 'group' || !tournament.phase ? (
-                    <GroupStageView
-                      matches={tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null)}
-                      players={tournament.players}
-                      getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
-                      onAdvanceToKnockout={advanceToKnockout}
-                      groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? 0)), 0) + 1}
-                    />
+                    <>
+                      <div className="flex justify-end mb-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 text-xs"
+                          onClick={() => {
+                            const groupMatches = tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
+                            const gc = Math.max(...tournament.players.map(p => (p.groupNumber ?? 0)), 0) + 1;
+                            generateGroupStageReport({
+                              matches: groupMatches,
+                              players: tournament.players,
+                              getParticipantName: isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—',
+                              groupCount: gc,
+                              tournamentName: tournament.name,
+                              bestOf: tournament.bestOf,
+                              logoUrl: tournament.logoUrl,
+                              tournamentDate: tournament.tournamentDate,
+                              venueString,
+                              motto: tournament.motto,
+                            });
+                          }}
+                        >
+                          <FileDown className="h-3 w-3" />
+                          Gruppenphase PDF
+                        </Button>
+                      </div>
+                      <GroupStageView
+                        matches={tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null)}
+                        players={tournament.players}
+                        getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
+                        onAdvanceToKnockout={advanceToKnockout}
+                        groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? 0)), 0) + 1}
+                      />
+                    </>
                   ) : (
                     <div className="space-y-6">
                       <GroupStageView
