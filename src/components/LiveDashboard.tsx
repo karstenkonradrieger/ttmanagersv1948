@@ -1,5 +1,6 @@
-import { Match, Player } from '@/types/tournament';
+import { Match, Player, TournamentMode } from '@/types/tournament';
 import { TournamentBracket } from './TournamentBracket';
+import { GroupStageView } from './GroupStageView';
 import { Monitor, Trophy } from 'lucide-react';
 
 interface Props {
@@ -7,9 +8,13 @@ interface Props {
   rounds: number;
   getPlayer: (id: string | null) => Player | null;
   getParticipantName?: (id: string | null) => string;
+  mode?: TournamentMode;
+  phase?: 'group' | 'knockout' | null;
+  players?: Player[];
+  groupCount?: number;
 }
 
-export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName }: Props) {
+export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, mode, phase, players = [], groupCount = 0 }: Props) {
   const getName = (id: string | null) => getParticipantName ? getParticipantName(id) : (getPlayer(id)?.name || '—');
   const activeMatches = matches.filter(m => m.status === 'active');
   const nextPending = matches
@@ -92,10 +97,25 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName }
         </div>
       )}
 
-      <div>
-        <h3 className="text-lg font-bold mb-3">🏆 Turnierbaum</h3>
-        <TournamentBracket matches={matches} rounds={rounds} getPlayer={getPlayer} />
-      </div>
+      {mode === 'group_knockout' && phase === 'group' && groupCount > 0 && (
+        <GroupStageView
+          matches={matches.filter(m => m.groupNumber != null)}
+          players={players}
+          getParticipantName={getName}
+          groupCount={groupCount}
+        />
+      )}
+
+      {(mode !== 'group_knockout' || phase === 'knockout') && rounds > 0 && (
+        <div>
+          <h3 className="text-lg font-bold mb-3">🏆 Turnierbaum</h3>
+          <TournamentBracket
+            matches={mode === 'group_knockout' ? matches.filter(m => m.groupNumber == null) : matches}
+            rounds={rounds}
+            getPlayer={getPlayer}
+          />
+        </div>
+      )}
     </div>
   );
 }

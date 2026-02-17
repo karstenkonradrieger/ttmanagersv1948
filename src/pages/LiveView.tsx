@@ -38,6 +38,10 @@ const LiveView = () => {
             : getPlayer
           }
           getParticipantName={getParticipantName}
+          mode={tournament.mode}
+          phase={tournament.phase}
+          players={tournament.players}
+          groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? -1) + 1), 0)}
         />
       </div>
     </div>
