@@ -53,6 +53,7 @@ export interface DbMatch {
   status: 'pending' | 'active' | 'completed';
   group_number: number | null;
   created_at: string;
+  completed_at: string | null;
 }
 
 // Tournament operations
@@ -149,6 +150,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
       table_number: number | null; 
       status: string;
       group_number: number | null;
+      completed_at: string | null;
     }) => ({
       id: m.id,
       round: m.round,
@@ -160,6 +162,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
       table: m.table_number || undefined,
       status: m.status as 'pending' | 'active' | 'completed',
       groupNumber: m.group_number,
+      completedAt: m.completed_at || null,
     })),
   };
 }
@@ -316,6 +319,7 @@ export async function createMatches(tournamentId: string, matches: Omit<Match, '
     table_number: number | null;
     status: string;
     group_number: number | null;
+    completed_at: string | null;
   }) => ({
     id: m.id,
     round: m.round,
@@ -327,6 +331,7 @@ export async function createMatches(tournamentId: string, matches: Omit<Match, '
     table: m.table_number || undefined,
     status: m.status as 'pending' | 'active' | 'completed',
     groupNumber: m.group_number,
+    completedAt: m.completed_at || null,
   }));
 }
 

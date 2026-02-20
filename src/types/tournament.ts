@@ -29,6 +29,7 @@ export interface Match {
   table?: number;
   status: 'pending' | 'active' | 'completed';
   groupNumber?: number | null;
+  completedAt?: string | null;
 }
 
 export interface DoublesPair {
