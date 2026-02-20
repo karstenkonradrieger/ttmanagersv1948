@@ -184,6 +184,7 @@ export type Database = {
       }
       matches: {
         Row: {
+          completed_at: string | null
           created_at: string
           group_number: number | null
           id: string
@@ -198,6 +199,7 @@ export type Database = {
           winner_id: string | null
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string
           group_number?: number | null
           id?: string
@@ -212,6 +214,7 @@ export type Database = {
           winner_id?: string | null
         }
         Update: {
+          completed_at?: string | null
           created_at?: string
           group_number?: number | null
           id?: string

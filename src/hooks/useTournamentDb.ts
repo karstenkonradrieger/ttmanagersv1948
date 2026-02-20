@@ -384,16 +384,19 @@ export function useTournamentDb(tournamentId: string | null) {
       status = 'completed';
     }
 
+    const completedAt = status === 'completed' ? new Date().toISOString() : null;
+
     try {
       await tournamentService.updateMatch(matchId, {
         sets,
         winner_id: winnerId,
         status,
+        ...(completedAt ? { completed_at: completedAt } : {}),
       });
 
       // Update local state
       let updatedMatches = tournament.matches.map(m =>
-        m.id === matchId ? { ...m, sets, winnerId, status } : m
+        m.id === matchId ? { ...m, sets, winnerId, status, completedAt } : m
       );
 
       // Propagate winner if completed (only for knockout mode)
@@ -429,6 +432,37 @@ export function useTournamentDb(tournamentId: string | null) {
   }, [tournament.matches, tournament.mode, tournament.phase]);
 
   const setMatchActive = useCallback(async (matchId: string, table?: number) => {
+    const match = tournament.matches.find(m => m.id === matchId);
+    if (!match) return;
+
+    // Check if any player is currently in an active match
+    const activePlayers = new Set<string>();
+    tournament.matches.filter(m => m.status === 'active').forEach(m => {
+      if (m.player1Id) activePlayers.add(m.player1Id);
+      if (m.player2Id) activePlayers.add(m.player2Id);
+    });
+
+    if ((match.player1Id && activePlayers.has(match.player1Id)) ||
+        (match.player2Id && activePlayers.has(match.player2Id))) {
+      toast.error('Ein Spieler spielt gerade noch ein anderes Spiel.');
+      return;
+    }
+
+    // Check 5-minute pause
+    const PAUSE_MS = 5 * 60 * 1000;
+    const now = Date.now();
+    const playerIds = [match.player1Id, match.player2Id].filter(Boolean) as string[];
+    const recentMatch = tournament.matches.find(m =>
+      m.status === 'completed' && m.completedAt &&
+      (now - new Date(m.completedAt).getTime() < PAUSE_MS) &&
+      playerIds.some(pid => m.player1Id === pid || m.player2Id === pid)
+    );
+    if (recentMatch) {
+      const remaining = Math.ceil((PAUSE_MS - (now - new Date(recentMatch.completedAt!).getTime())) / 60000);
+      toast.error(`Spieler braucht noch ${remaining} Min. Pause.`);
+      return;
+    }
+
     try {
       await tournamentService.updateMatch(matchId, {
         status: 'active',
@@ -445,7 +479,7 @@ export function useTournamentDb(tournamentId: string | null) {
       console.error('Error setting match active:', error);
       toast.error('Fehler beim Aktivieren des Spiels');
     }
-  }, []);
+  }, [tournament.matches]);
 
   const setTableCount = useCallback(async (count: number) => {
     if (!tournamentId) return;
@@ -469,20 +503,56 @@ export function useTournamentDb(tournamentId: string | null) {
       if (!activeTables.has(i)) freeTables.push(i);
     }
     
+    // Collect players currently in an active match
+    const activePlayers = new Set<string>();
+    tournament.matches.filter(m => m.status === 'active').forEach(m => {
+      if (m.player1Id) activePlayers.add(m.player1Id);
+      if (m.player2Id) activePlayers.add(m.player2Id);
+    });
+
+    // Collect players who completed a match less than 5 minutes ago
+    const PAUSE_MS = 5 * 60 * 1000;
+    const now = Date.now();
+    const recentPlayers = new Set<string>();
+    tournament.matches.filter(m => m.status === 'completed' && m.completedAt).forEach(m => {
+      const completedTime = new Date(m.completedAt!).getTime();
+      if (now - completedTime < PAUSE_MS) {
+        if (m.player1Id) recentPlayers.add(m.player1Id);
+        if (m.player2Id) recentPlayers.add(m.player2Id);
+      }
+    });
+
+    const unavailablePlayers = new Set([...activePlayers, ...recentPlayers]);
+
     const pendingReadyMatches = tournament.matches.filter(
       m => m.status === 'pending' && m.player1Id && m.player2Id
     );
     
     const updates: Array<{ id: string; table: number }> = [];
+    // Track players being assigned in this batch to avoid double-booking
+    const assignedPlayers = new Set<string>();
     let tableIdx = 0;
     
     for (const match of pendingReadyMatches) {
       if (tableIdx >= freeTables.length) break;
+      // Check both players are available
+      const p1 = match.player1Id!;
+      const p2 = match.player2Id!;
+      if (unavailablePlayers.has(p1) || unavailablePlayers.has(p2)) continue;
+      if (assignedPlayers.has(p1) || assignedPlayers.has(p2)) continue;
+      
       updates.push({ id: match.id, table: freeTables[tableIdx] });
+      assignedPlayers.add(p1);
+      assignedPlayers.add(p2);
       tableIdx++;
     }
 
-    if (updates.length === 0) return;
+    if (updates.length === 0) {
+      if (pendingReadyMatches.length > 0 && freeTables.length > 0) {
+        toast.info('Spieler benötigen noch eine Pause (mind. 5 Min.) oder spielen gerade.');
+      }
+      return;
+    }
 
     try {
       await Promise.all(
