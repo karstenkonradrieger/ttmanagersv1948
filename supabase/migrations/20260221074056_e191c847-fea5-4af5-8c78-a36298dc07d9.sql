@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN break_minutes integer NOT NULL DEFAULT 5;

@@ -63,4 +63,5 @@ export interface Tournament {
   venuePostalCode: string;
   venueCity: string;
   motto: string;
+  breakMinutes: number;
 }

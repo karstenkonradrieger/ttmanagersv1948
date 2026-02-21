@@ -23,6 +23,7 @@ const emptyTournament: Tournament = {
   venuePostalCode: '',
   venueCity: '',
   motto: '',
+  breakMinutes: 5,
 };
 
 export function useTournamentDb(tournamentId: string | null) {
@@ -449,7 +450,7 @@ export function useTournamentDb(tournamentId: string | null) {
     }
 
     // Check 5-minute pause
-    const PAUSE_MS = 5 * 60 * 1000;
+    const PAUSE_MS = tournament.breakMinutes * 60 * 1000;
     const now = Date.now();
     const playerIds = [match.player1Id, match.player2Id].filter(Boolean) as string[];
     const recentMatch = tournament.matches.find(m =>
@@ -511,7 +512,7 @@ export function useTournamentDb(tournamentId: string | null) {
     });
 
     // Collect players who completed a match less than 5 minutes ago
-    const PAUSE_MS = 5 * 60 * 1000;
+    const PAUSE_MS = tournament.breakMinutes * 60 * 1000;
     const now = Date.now();
     const recentPlayers = new Set<string>();
     tournament.matches.filter(m => m.status === 'completed' && m.completedAt).forEach(m => {
@@ -549,7 +550,7 @@ export function useTournamentDb(tournamentId: string | null) {
 
     if (updates.length === 0) {
       if (pendingReadyMatches.length > 0 && freeTables.length > 0) {
-        toast.info('Spieler benötigen noch eine Pause (mind. 5 Min.) oder spielen gerade.');
+        toast.info(`Spieler benötigen noch eine Pause (mind. ${tournament.breakMinutes} Min.) oder spielen gerade.`);
       }
       return;
     }
@@ -728,6 +729,7 @@ export function useTournamentDb(tournamentId: string | null) {
     venue_postal_code: string;
     venue_city: string;
     motto: string;
+    break_minutes: number;
   }) => {
     if (!tournamentId) return;
     try {
@@ -740,6 +742,7 @@ export function useTournamentDb(tournamentId: string | null) {
         venuePostalCode: details.venue_postal_code,
         venueCity: details.venue_city,
         motto: details.motto,
+        breakMinutes: details.break_minutes,
       }));
     } catch (error) {
       console.error('Error updating details:', error);
