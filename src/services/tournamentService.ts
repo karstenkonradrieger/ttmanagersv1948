@@ -21,6 +21,7 @@ export interface DbTournament {
   venue_postal_code: string;
   venue_city: string;
   motto: string;
+  break_minutes: number;
 }
 
 export interface DbPlayer {
@@ -118,6 +119,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     venuePostalCode: tournament.venue_postal_code || '',
     venueCity: tournament.venue_city || '',
     motto: tournament.motto || '',
+    breakMinutes: tournament.break_minutes ?? 5,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -194,6 +196,7 @@ export async function updateTournament(id: string, updates: Partial<{
   venue_postal_code: string;
   venue_city: string;
   motto: string;
+  break_minutes: number;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')

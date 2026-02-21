@@ -31,6 +31,7 @@ function loadTournament(): Tournament {
     venuePostalCode: '',
     venueCity: '',
     motto: '',
+    breakMinutes: 5,
   };
 }
 
@@ -178,6 +179,7 @@ export function useTournament() {
       venuePostalCode: '',
       venueCity: '',
       motto: '',
+      breakMinutes: 5,
     });
   }, []);
 

@@ -19,6 +19,7 @@ interface Props {
   venuePostalCode: string;
   venueCity: string;
   motto: string;
+  breakMinutes: number;
   onUpdateMode: (mode: TournamentMode) => Promise<void>;
   onUpdateType: (type: TournamentType) => Promise<void>;
   onUpdateBestOf: (bestOf: number) => Promise<void>;
@@ -29,12 +30,13 @@ interface Props {
     venue_postal_code: string;
     venue_city: string;
     motto: string;
+    break_minutes: number;
   }) => Promise<void>;
 }
 
 export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
-  tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto,
+  tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -47,6 +49,7 @@ export function TournamentSettingsDialog({
   const [localPostalCode, setLocalPostalCode] = useState(venuePostalCode);
   const [localCity, setLocalCity] = useState(venueCity);
   const [localMotto, setLocalMotto] = useState(motto);
+  const [localBreakMinutes, setLocalBreakMinutes] = useState(breakMinutes);
   const [saving, setSaving] = useState(false);
 
   const handleOpen = (isOpen: boolean) => {
@@ -60,6 +63,7 @@ export function TournamentSettingsDialog({
       setLocalPostalCode(venuePostalCode);
       setLocalCity(venueCity);
       setLocalMotto(motto);
+      setLocalBreakMinutes(breakMinutes);
     }
     setOpen(isOpen);
   };
@@ -69,7 +73,7 @@ export function TournamentSettingsDialog({
     (localDate || null) !== (tournamentDate || null) ||
     localStreet !== venueStreet || localHouseNumber !== venueHouseNumber ||
     localPostalCode !== venuePostalCode || localCity !== venueCity ||
-    localMotto !== motto;
+    localMotto !== motto || localBreakMinutes !== breakMinutes;
 
   const handleSave = async () => {
     setSaving(true);
@@ -82,7 +86,7 @@ export function TournamentSettingsDialog({
         (localDate || null) !== (tournamentDate || null) ||
         localStreet !== venueStreet || localHouseNumber !== venueHouseNumber ||
         localPostalCode !== venuePostalCode || localCity !== venueCity ||
-        localMotto !== motto;
+        localMotto !== motto || localBreakMinutes !== breakMinutes;
 
       if (detailsChanged) {
         await onUpdateDetails({
@@ -92,6 +96,7 @@ export function TournamentSettingsDialog({
           venue_postal_code: localPostalCode,
           venue_city: localCity,
           motto: localMotto,
+          break_minutes: localBreakMinutes,
         });
       }
 
@@ -151,6 +156,19 @@ export function TournamentSettingsDialog({
                 <Input placeholder="Ort" value={localCity} onChange={e => setLocalCity(e.target.value)} />
               </div>
             </div>
+          </div>
+
+          {/* Break time */}
+          <div>
+            <Label className="text-sm font-semibold mb-2 block">Pausenzeit zwischen Spielen</Label>
+            <RadioGroup value={String(localBreakMinutes)} onValueChange={(v) => setLocalBreakMinutes(parseInt(v))} className="flex gap-4">
+              {[0, 3, 5, 10].map(min => (
+                <div key={min} className="flex items-center space-x-2">
+                  <RadioGroupItem value={String(min)} id={`break-${min}`} />
+                  <Label htmlFor={`break-${min}`} className="text-sm cursor-pointer">{min === 0 ? 'Keine' : `${min} Min.`}</Label>
+                </div>
+              ))}
+            </RadioGroup>
           </div>
 
           {/* Mode */}

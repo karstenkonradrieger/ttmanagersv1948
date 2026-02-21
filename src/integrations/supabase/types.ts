@@ -321,6 +321,7 @@ export type Database = {
       tournaments: {
         Row: {
           best_of: number
+          break_minutes: number
           created_at: string
           created_by: string | null
           id: string
@@ -342,6 +343,7 @@ export type Database = {
         }
         Insert: {
           best_of?: number
+          break_minutes?: number
           created_at?: string
           created_by?: string | null
           id?: string
@@ -363,6 +365,7 @@ export type Database = {
         }
         Update: {
           best_of?: number
+          break_minutes?: number
           created_at?: string
           created_by?: string | null
           id?: string

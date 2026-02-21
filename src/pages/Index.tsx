@@ -212,6 +212,7 @@ const Index = () => {
                 venuePostalCode={tournament.venuePostalCode}
                 venueCity={tournament.venueCity}
                 motto={tournament.motto}
+                breakMinutes={tournament.breakMinutes}
                 started={tournament.started}
                 onUpdateMode={updateTournamentMode}
                 onUpdateType={updateTournamentType}
