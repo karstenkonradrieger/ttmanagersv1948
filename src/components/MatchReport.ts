@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
 import { Match, Player, SetScore } from '@/types/tournament';
+import { generateMatchQrDataUrl } from '@/utils/qrCode';
 
 function getSetWins(sets: SetScore[]): { p1: number; p2: number } {
   let p1 = 0, p2 = 0;
@@ -238,6 +239,18 @@ export async function generateMatchReport({
       doc.addImage(imgData, 'JPEG', x, y, photoWidth, photoHeight);
       y += photoHeight + gap;
     });
+  }
+
+  // QR Code
+  const qrData = await generateMatchQrDataUrl(tournamentId);
+  if (qrData) {
+    const qrSize = 25;
+    const pageH2 = doc.internal.pageSize.getHeight();
+    // Place QR code in bottom-right corner
+    doc.addImage(qrData, 'PNG', w - 10 - qrSize, pageH2 - 10 - qrSize, qrSize, qrSize);
+    doc.setFontSize(6);
+    doc.setTextColor(150);
+    doc.text('Live-Ansicht', w - 10 - qrSize / 2, pageH2 - 10 - qrSize - 1, { align: 'center' });
   }
 
   // Footer
