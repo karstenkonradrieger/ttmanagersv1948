@@ -89,6 +89,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
           player2Name: getParticipantName(match.player2Id),
           tournamentName,
           bestOf,
+          tournamentId,
         });
       }
     }
@@ -130,6 +131,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
         getParticipantName,
         tournamentName,
         bestOf,
+        tournamentId,
       );
     }
   };
@@ -202,7 +204,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
 
       {activeMatches.length > 0 && (
         <Section title="🏓 Laufende Spiele" action={
-          <Button variant="outline" size="sm" onClick={() => printAllRefereeSheets(matches, getParticipantName, tournamentName, bestOf)} className="text-xs">
+          <Button variant="outline" size="sm" onClick={() => printAllRefereeSheets(matches, getParticipantName, tournamentName, bestOf, tournamentId)} className="text-xs">
             <Printer className="mr-1 h-3 w-3" />
             Alle SR-Zettel drucken
           </Button>
@@ -385,6 +387,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
             player2Name: getParticipantName(match.player2Id),
             tournamentName,
             bestOf,
+            tournamentId,
           })}
         >
           <Printer className="mr-1 h-3 w-3" />
