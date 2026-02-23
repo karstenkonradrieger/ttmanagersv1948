@@ -53,6 +53,7 @@ const Index = () => {
     getParticipantName,
     updateDetails,
     advanceToKnockout,
+    resetTournament,
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
@@ -91,7 +92,7 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-background">
         <header className="gradient-sport border-b border-border sticky top-0 z-50">
-           <div className="container py-3 flex items-center gap-2">
+          <div className="container py-3 flex items-center gap-2">
             <span className="text-2xl">🏓</span>
             <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-tight flex-1">
               <span className="text-gradient">TT</span> Turniermanager
@@ -203,22 +204,22 @@ const Index = () => {
               </div>
             </div>
             <TournamentSettingsDialog
-                mode={tournament.mode}
-                type={tournament.type}
-                bestOf={tournament.bestOf}
-                tournamentDate={tournament.tournamentDate}
-                venueStreet={tournament.venueStreet}
-                venueHouseNumber={tournament.venueHouseNumber}
-                venuePostalCode={tournament.venuePostalCode}
-                venueCity={tournament.venueCity}
-                motto={tournament.motto}
-                breakMinutes={tournament.breakMinutes}
-                started={tournament.started}
-                onUpdateMode={updateTournamentMode}
-                onUpdateType={updateTournamentType}
-                onUpdateBestOf={updateBestOf}
-                onUpdateDetails={updateDetails}
-              />
+              mode={tournament.mode}
+              type={tournament.type}
+              bestOf={tournament.bestOf}
+              tournamentDate={tournament.tournamentDate}
+              venueStreet={tournament.venueStreet}
+              venueHouseNumber={tournament.venueHouseNumber}
+              venuePostalCode={tournament.venuePostalCode}
+              venueCity={tournament.venueCity}
+              motto={tournament.motto}
+              breakMinutes={tournament.breakMinutes}
+              started={tournament.started}
+              onUpdateMode={updateTournamentMode}
+              onUpdateType={updateTournamentType}
+              onUpdateBestOf={updateBestOf}
+              onUpdateDetails={updateDetails}
+            />
           </div>
           <div className="flex items-center gap-2">
             {canStart && (
@@ -235,15 +236,31 @@ const Index = () => {
               </Button>
             )}
             {tournament.started && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedTournamentId(null)}
-                className="text-muted-foreground"
-              >
-                <RotateCcw className="mr-1 h-4 w-4" />
-                Zurück
-              </Button>
+              <div className="flex gap-2">
+                {!tournament.matches.some(m => m.status !== 'pending' || (m.sets && m.sets.length > 0)) && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      if (window.confirm('Möchtest du das Turnier wirklich zurücksetzen? Die Auslosung geht dabei verloren.')) {
+                        resetTournament();
+                      }
+                    }}
+                    className="gap-1 opacity-90"
+                  >
+                    Zurücksetzen
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedTournamentId(null)}
+                  className="text-muted-foreground"
+                >
+                  <RotateCcw className="mr-1 h-4 w-4" />
+                  Zurück
+                </Button>
+              </div>
             )}
           </div>
         </div>

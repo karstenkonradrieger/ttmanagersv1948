@@ -1,6 +1,5 @@
 import { Match, Player, Tournament } from '@/types/tournament';
 import jsPDF from 'jspdf';
-import { generateMatchQrDataUrl } from '@/utils/qrCode';
 
 interface RefereeSheetOptions {
   match: Match;
@@ -8,10 +7,9 @@ interface RefereeSheetOptions {
   player2Name: string;
   tournamentName: string;
   bestOf: number;
-  tournamentId: string;
 }
 
-export async function printRefereeSheet({ match, player1Name, player2Name, tournamentName, bestOf, tournamentId }: RefereeSheetOptions) {
+export function printRefereeSheet({ match, player1Name, player2Name, tournamentName, bestOf }: RefereeSheetOptions) {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a5' });
   const w = doc.internal.pageSize.getWidth();
   const h = doc.internal.pageSize.getHeight();
@@ -113,41 +111,32 @@ export async function printRefereeSheet({ match, player1Name, player2Name, tourn
 
   doc.text(`Gewinnsätze: ${bestOf} (Best of ${maxSets})`, 10, footerY + 8);
 
-  // QR Code
-  const qrData = await generateMatchQrDataUrl(tournamentId);
-  if (qrData) {
-    const qrSize = 20;
-    doc.addImage(qrData, 'PNG', w - 10 - qrSize, footerY - 5, qrSize, qrSize);
-  }
-
   // Save as download (avoids popup blockers in Edge)
   const p1Short = player1Name.replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_').substring(0, 15);
   const p2Short = player2Name.replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_').substring(0, 15);
   doc.save(`SR_Tisch${match.table || 0}_${p1Short}_vs_${p2Short}.pdf`);
 }
 
-export async function printAllRefereeSheets(
+export function printAllRefereeSheets(
   matches: Match[],
   getParticipantName: (id: string | null) => string,
   tournamentName: string,
-  bestOf: number,
-  tournamentId: string
+  bestOf: number
 ) {
   const activeMatches = matches.filter(m => m.status === 'active' && m.player1Id && m.player2Id);
   if (activeMatches.length === 0) return;
 
-  const qrData = await generateMatchQrDataUrl(tournamentId);
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a5' });
 
   activeMatches.forEach((match, idx) => {
     if (idx > 0) doc.addPage();
-    drawSheet(doc, match, getParticipantName(match.player1Id), getParticipantName(match.player2Id), tournamentName, bestOf, qrData);
+    drawSheet(doc, match, getParticipantName(match.player1Id), getParticipantName(match.player2Id), tournamentName, bestOf);
   });
 
   doc.save(`SR_Zettel_alle.pdf`);
 }
 
-function drawSheet(doc: jsPDF, match: Match, player1Name: string, player2Name: string, tournamentName: string, bestOf: number, qrData: string | null) {
+function drawSheet(doc: jsPDF, match: Match, player1Name: string, player2Name: string, tournamentName: string, bestOf: number) {
   const w = doc.internal.pageSize.getWidth();
   const maxSets = bestOf * 2 - 1;
 
@@ -226,10 +215,4 @@ function drawSheet(doc: jsPDF, match: Match, player1Name: string, player2Name: s
   doc.text('Gewinner: ___________________________', 10, footerY);
   doc.text('Unterschrift SR: ___________________________', w / 2, footerY);
   doc.text(`Gewinnsätze: ${bestOf} (Best of ${maxSets})`, 10, footerY + 8);
-
-  // QR Code
-  if (qrData) {
-    const qrSize = 20;
-    doc.addImage(qrData, 'PNG', w - 10 - qrSize, footerY - 5, qrSize, qrSize);
-  }
 }

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { UserPlus, Trash2, Trophy, Pencil, Check, X } from 'lucide-react';
+import { LogicAgentValidator } from '@/components/LogicAgentValidator';
 
 interface Props {
   players: Player[];
@@ -91,6 +92,8 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
 
   return (
     <div className="space-y-4 animate-slide-up">
+      <LogicAgentValidator players={players} />
+
       {!started && (
         <div className="flex flex-col gap-3">
           <Input

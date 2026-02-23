@@ -173,16 +173,45 @@ export function useTournamentDb(tournamentId: string | null) {
       const groupSize = 4;
       const groupCount = Math.ceil(n / groupSize);
 
-      // Assign groups (snake seeding by TTR)
+      // Assign groups (snake seeding by TTR with club separation)
       const groupAssignments: Array<{ playerId: string; groupNumber: number }> = [];
+
+      const pots: string[][] = Array.from({ length: Math.ceil(n / groupCount) }, () => []);
       for (let i = 0; i < n; i++) {
-        const groupIdx = i < groupCount
-          ? i
-          : (Math.floor(i / groupCount) % 2 === 0
-            ? i % groupCount
-            : groupCount - 1 - (i % groupCount));
-        const finalGroup = Math.min(groupIdx, groupCount - 1);
-        groupAssignments.push({ playerId: participants[i], groupNumber: finalGroup });
+        pots[Math.floor(i / groupCount)].push(participants[i]);
+      }
+
+      for (let pIdx = 0; pIdx < pots.length; pIdx++) {
+        const pot = pots[pIdx];
+        const isReverseSnake = pIdx % 2 !== 0;
+        const availableGroups = Array.from({ length: groupCount }, (_, i) => i);
+        if (isReverseSnake) availableGroups.reverse();
+
+        for (let i = 0; i < pot.length; i++) {
+          const playerId = pot[i];
+          const playerClub = tournament.players.find(p => p.id === playerId)?.club || '';
+
+          let bestGroupIndex = 0;
+          let minSameClubPlayers = Infinity;
+
+          for (let j = 0; j < availableGroups.length; j++) {
+            const g = availableGroups[j];
+            const sameClubCount = groupAssignments.filter(a => {
+              const aClub = tournament.players.find(p => p.id === a.playerId)?.club || '';
+              return a.groupNumber === g && aClub === playerClub && playerClub !== '';
+            }).length;
+
+            if (sameClubCount < minSameClubPlayers) {
+              minSameClubPlayers = sameClubCount;
+              bestGroupIndex = j;
+            }
+            if (minSameClubPlayers === 0) break; // perfect match
+          }
+
+          const assignedGroup = availableGroups[bestGroupIndex];
+          groupAssignments.push({ playerId, groupNumber: assignedGroup });
+          availableGroups.splice(bestGroupIndex, 1);
+        }
       }
 
       // Update player group numbers in DB
@@ -286,7 +315,7 @@ export function useTournamentDb(tournamentId: string | null) {
       }
 
       matchesData = [];
-      
+
       // First round
       for (let i = 0; i < slots / 2; i++) {
         const p1 = seeded[i * 2];
@@ -322,17 +351,17 @@ export function useTournamentDb(tournamentId: string | null) {
 
     try {
       const createdMatches = await tournamentService.createMatches(tournamentId, matchesData);
-      
+
       let updated = createdMatches;
       if (!isRoundRobin) {
         // Propagate byes for knockout
         updated = propagateWinners(createdMatches);
-        
-        const matchesToUpdate = updated.filter((m, i) => 
-          m.player1Id !== createdMatches[i].player1Id || 
+
+        const matchesToUpdate = updated.filter((m, i) =>
+          m.player1Id !== createdMatches[i].player1Id ||
           m.player2Id !== createdMatches[i].player2Id
         );
-        
+
         if (matchesToUpdate.length > 0) {
           await tournamentService.updateMultipleMatches(
             matchesToUpdate.map(m => ({
@@ -411,12 +440,12 @@ export function useTournamentDb(tournamentId: string | null) {
           const p = propagated.find(pm => pm.id === m.id);
           return p || m;
         });
-        
+
         // Find next match and update in DB
         const nextRound = match.round + 1;
         const nextPos = Math.floor(match.position / 2);
         const nextMatch = updatedMatches.find(nm => nm.round === nextRound && nm.position === nextPos && (nm.groupNumber === undefined || nm.groupNumber === null));
-        
+
         if (nextMatch) {
           const updateData = match.position % 2 === 0
             ? { player1_id: winnerId }
@@ -444,7 +473,7 @@ export function useTournamentDb(tournamentId: string | null) {
     });
 
     if ((match.player1Id && activePlayers.has(match.player1Id)) ||
-        (match.player2Id && activePlayers.has(match.player2Id))) {
+      (match.player2Id && activePlayers.has(match.player2Id))) {
       toast.error('Ein Spieler spielt gerade noch ein anderes Spiel.');
       return;
     }
@@ -469,7 +498,7 @@ export function useTournamentDb(tournamentId: string | null) {
         status: 'active',
         table_number: table || null,
       });
-      
+
       setTournament(prev => ({
         ...prev,
         matches: prev.matches.map(m =>
@@ -498,12 +527,12 @@ export function useTournamentDb(tournamentId: string | null) {
     const activeTables = new Set(
       tournament.matches.filter(m => m.status === 'active' && m.table).map(m => m.table)
     );
-    
+
     const freeTables: number[] = [];
     for (let i = 1; i <= tournament.tableCount; i++) {
       if (!activeTables.has(i)) freeTables.push(i);
     }
-    
+
     // Collect players currently in an active match
     const activePlayers = new Set<string>();
     tournament.matches.filter(m => m.status === 'active').forEach(m => {
@@ -528,12 +557,12 @@ export function useTournamentDb(tournamentId: string | null) {
     const pendingReadyMatches = tournament.matches.filter(
       m => m.status === 'pending' && m.player1Id && m.player2Id
     );
-    
+
     const updates: Array<{ id: string; table: number }> = [];
     // Track players being assigned in this batch to avoid double-booking
     const assignedPlayers = new Set<string>();
     let tableIdx = 0;
-    
+
     for (const match of pendingReadyMatches) {
       if (tableIdx >= freeTables.length) break;
       // Check both players are available
@@ -541,7 +570,7 @@ export function useTournamentDb(tournamentId: string | null) {
       const p2 = match.player2Id!;
       if (unavailablePlayers.has(p1) || unavailablePlayers.has(p2)) continue;
       if (assignedPlayers.has(p1) || assignedPlayers.has(p2)) continue;
-      
+
       updates.push({ id: match.id, table: freeTables[tableIdx] });
       assignedPlayers.add(p1);
       assignedPlayers.add(p2);
@@ -760,22 +789,22 @@ export function useTournamentDb(tournamentId: string | null) {
 
     // Compute standings per group
     const qualifiedPlayers: Array<{ playerId: string; groupNumber: number; rank: number }> = [];
-    
+
     for (let g = 0; g < groupCount; g++) {
       const gMatches = groupMatches.filter(m => m.groupNumber === g);
       // Compute standings inline
       const map = new Map<string, { playerId: string; won: number; setsWon: number; setsLost: number; pointsWon: number; pointsLost: number }>();
-      
+
       for (const m of gMatches) {
         if (!m.player1Id || !m.player2Id || m.status !== 'completed') continue;
         if (!map.has(m.player1Id)) map.set(m.player1Id, { playerId: m.player1Id, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
         if (!map.has(m.player2Id)) map.set(m.player2Id, { playerId: m.player2Id, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
-        
+
         const s1 = map.get(m.player1Id)!;
         const s2 = map.get(m.player2Id)!;
         if (m.winnerId === m.player1Id) s1.won++;
         else if (m.winnerId === m.player2Id) s2.won++;
-        
+
         for (const s of m.sets) {
           s1.pointsWon += s.player1; s1.pointsLost += s.player2;
           s2.pointsWon += s.player2; s2.pointsLost += s.player1;
@@ -783,13 +812,13 @@ export function useTournamentDb(tournamentId: string | null) {
           else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) { s2.setsWon++; s1.setsLost++; }
         }
       }
-      
+
       const standings = [...map.values()].sort((a, b) => {
         if (b.won !== a.won) return b.won - a.won;
         // Head-to-head
         const h2h = gMatches.find(m => m.status === 'completed' &&
           ((m.player1Id === a.playerId && m.player2Id === b.playerId) ||
-           (m.player1Id === b.playerId && m.player2Id === a.playerId)));
+            (m.player1Id === b.playerId && m.player2Id === a.playerId)));
         if (h2h) {
           if (h2h.winnerId === a.playerId) return -1;
           if (h2h.winnerId === b.playerId) return 1;
@@ -799,7 +828,7 @@ export function useTournamentDb(tournamentId: string | null) {
         if (bDiff !== aDiff) return bDiff - aDiff;
         return (b.pointsWon - b.pointsLost) - (a.pointsWon - a.pointsLost);
       });
-      
+
       // Top 2 qualify
       for (let i = 0; i < Math.min(2, standings.length); i++) {
         qualifiedPlayers.push({ playerId: standings[i].playerId, groupNumber: g, rank: i + 1 });
@@ -813,7 +842,7 @@ export function useTournamentDb(tournamentId: string | null) {
     // Sort: all group winners first (by group), then runners-up (reversed for cross)
     const winners = qualifiedPlayers.filter(q => q.rank === 1).sort((a, b) => a.groupNumber - b.groupNumber);
     const runnersUp = qualifiedPlayers.filter(q => q.rank === 2).sort((a, b) => a.groupNumber - b.groupNumber);
-    
+
     // Interleave: Winner A vs Runner-up B, Winner B vs Runner-up A, etc.
     const seeded: string[] = [];
     const runnersUpReversed = [...runnersUp].reverse();
@@ -838,7 +867,7 @@ export function useTournamentDb(tournamentId: string | null) {
     }
 
     const koMatchesData: Omit<Match, 'id'>[] = [];
-    
+
     // First round
     for (let i = 0; i < slots / 2; i++) {
       const p1 = seededSlots[i * 2];
@@ -875,14 +904,14 @@ export function useTournamentDb(tournamentId: string | null) {
 
     try {
       const createdKoMatches = await tournamentService.createMatches(tournamentId, koMatchesData);
-      
+
       // Propagate byes
       const propagated = propagateWinners(createdKoMatches);
       const matchesToUpdate = propagated.filter((m, i) =>
         m.player1Id !== createdKoMatches[i].player1Id ||
         m.player2Id !== createdKoMatches[i].player2Id
       );
-      
+
       if (matchesToUpdate.length > 0) {
         await tournamentService.updateMultipleMatches(
           matchesToUpdate.map(m => ({
@@ -911,6 +940,36 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId, tournament.mode, tournament.phase, tournament.matches, tournament.players]);
 
+  const resetTournament = useCallback(async () => {
+    if (!tournamentId) return;
+
+    // Check if any sets have been played
+    const hasPlayedSets = tournament.matches.some(m => m.sets && m.sets.length > 0) || tournament.matches.some(m => m.status === 'completed' || m.status === 'active');
+
+    if (hasPlayedSets) {
+      toast.error('Turnier kann nicht zurückgesetzt werden, da bereits Spiele gestartet oder beendet wurden.');
+      return;
+    }
+
+    try {
+      await tournamentService.clearTournamentMatches(tournamentId);
+      await tournamentService.resetTournamentState(tournamentId);
+
+      setTournament(prev => ({
+        ...prev,
+        started: false,
+        rounds: 0,
+        phase: null,
+        matches: [],
+        players: prev.players.map(p => ({ ...p, groupNumber: null })),
+      }));
+      toast.success('Turnier erfolgreich zurückgesetzt.');
+    } catch (error) {
+      console.error('Error resetting tournament:', error);
+      toast.error('Fehler beim Zurücksetzen des Turniers.');
+    }
+  }, [tournamentId, tournament.matches]);
+
   return {
     tournament,
     loading,
@@ -935,6 +994,7 @@ export function useTournamentDb(tournamentId: string | null) {
     autoGenerateDoublesPairs,
     getParticipantName,
     advanceToKnockout,
+    resetTournament,
     reload: loadTournament,
   };
 }

@@ -45,7 +45,7 @@ const announceMatch = (table: number | undefined, player1Name: string, player2Na
       || voices.find(v => v.lang.startsWith('de') && !/female|frau|weiblich/i.test(v.name));
     if (maleDeVoice) utterance.voice = maleDeVoice;
     speechSynthesis.speak(utterance);
-  } catch {}
+  } catch { }
 };
 
 export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto }: Props) {
@@ -89,7 +89,6 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
           player2Name: getParticipantName(match.player2Id),
           tournamentName,
           bestOf,
-          tournamentId,
         });
       }
     }
@@ -131,7 +130,6 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
         getParticipantName,
         tournamentName,
         bestOf,
-        tournamentId,
       );
     }
   };
@@ -188,11 +186,10 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
             return (
               <div
                 key={table}
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  isActive 
-                    ? 'bg-primary text-primary-foreground' 
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${isActive
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-secondary text-muted-foreground'
-                }`}
+                  }`}
                 title={isActive && p1 && p2 ? `${p1.name} vs ${p2.name}` : 'Frei'}
               >
                 T{table} {isActive && p1 && p2 ? `• ${p1.name?.split(' ')[0]} vs ${p2.name?.split(' ')[0]}` : ''}
@@ -204,7 +201,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
 
       {activeMatches.length > 0 && (
         <Section title="🏓 Laufende Spiele" action={
-          <Button variant="outline" size="sm" onClick={() => printAllRefereeSheets(matches, getParticipantName, tournamentName, bestOf, tournamentId)} className="text-xs">
+          <Button variant="outline" size="sm" onClick={() => printAllRefereeSheets(matches, getParticipantName, tournamentName, bestOf)} className="text-xs">
             <Printer className="mr-1 h-3 w-3" />
             Alle SR-Zettel drucken
           </Button>
@@ -326,6 +323,8 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
     match.sets.length > 0 ? match.sets : [{ player1: 0, player2: 0 }]
   );
 
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   const maxSets = effectiveBestOf * 2 - 1;
   const p1Wins = sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
   const p2Wins = sets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
@@ -350,6 +349,19 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   };
 
   const saveScore = () => {
+    // Logic Agent: Validate ITTF 2-point rule
+    for (let i = 0; i < sets.length; i++) {
+      const s = sets[i];
+      if (s.player1 >= 11 || s.player2 >= 11) {
+        const diff = Math.abs(s.player1 - s.player2);
+        if (diff === 1) {
+          // Intervene!
+          setValidationError(`[Logic Agent]: Satz ${i + 1} ist ungültig (${s.player1}:${s.player2}). Laut ITTF-Regeln müssen bei Erreichen von 11 Punkten mindestens 2 Punkte Vorsprung bestehen.`);
+          return;
+        }
+      }
+    }
+    setValidationError(null);
     onUpdateScore(match.id, sets, effectiveBestOf);
   };
 
@@ -387,7 +399,6 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
             player2Name: getParticipantName(match.player2Id),
             tournamentName,
             bestOf,
-            tournamentId,
           })}
         >
           <Printer className="mr-1 h-3 w-3" />
@@ -434,6 +445,13 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
           Speichern
         </Button>
       </div>
+
+      {validationError && (
+        <div className="mt-3 p-3 bg-destructive/10 border border-destructive/50 text-destructive text-sm rounded-md flex items-start gap-2 animate-slide-up">
+          <Settings className="h-4 w-4 mt-0.5 flex-shrink-0" />
+          <p>{validationError}</p>
+        </div>
+      )}
 
       {matchOver && (
         <p className="text-center text-primary font-bold mt-3 text-sm">

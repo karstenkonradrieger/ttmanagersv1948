@@ -63,7 +63,7 @@ export async function fetchTournaments(): Promise<DbTournament[]> {
     .from('tournaments')
     .select('*')
     .order('created_at', { ascending: false });
-  
+
   if (error) throw error;
   return data || [];
 }
@@ -74,7 +74,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     .select('*')
     .eq('id', id)
     .maybeSingle();
-  
+
   if (tError) throw tError;
   if (!tournament) return null;
 
@@ -82,7 +82,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     .from('players')
     .select('*')
     .eq('tournament_id', id);
-  
+
   if (pError) throw pError;
 
   const { data: matches, error: mError } = await supabase
@@ -91,7 +91,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     .eq('tournament_id', id)
     .order('round', { ascending: true })
     .order('position', { ascending: true });
-  
+
   if (mError) throw mError;
 
   // Fetch doubles pairs
@@ -99,7 +99,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     .from('doubles_pairs')
     .select('*')
     .eq('tournament_id', id);
-  
+
   if (dpError) throw dpError;
 
   return {
@@ -141,15 +141,15 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
       phone: p.phone,
       groupNumber: p.group_number,
     })),
-    matches: (matches || []).map((m: { 
-      id: string; 
-      round: number; 
-      position: number; 
-      player1_id: string | null; 
-      player2_id: string | null; 
-      winner_id: string | null; 
-      sets: Json; 
-      table_number: number | null; 
+    matches: (matches || []).map((m: {
+      id: string;
+      round: number;
+      position: number;
+      player1_id: string | null;
+      player2_id: string | null;
+      winner_id: string | null;
+      sets: Json;
+      table_number: number | null;
       status: string;
       group_number: number | null;
       completed_at: string | null;
@@ -175,7 +175,7 @@ export async function createTournament(name: string = 'Tischtennis Turnier', cre
     .insert({ name, created_by: createdBy || null, mode, type, best_of: bestOf })
     .select('id')
     .single();
-  
+
   if (error) throw error;
   return data.id;
 }
@@ -202,7 +202,7 @@ export async function updateTournament(id: string, updates: Partial<{
     .from('tournaments')
     .update(updates)
     .eq('id', id);
-  
+
   if (error) throw error;
 }
 
@@ -211,7 +211,7 @@ export async function deleteTournament(id: string): Promise<void> {
     .from('tournaments')
     .delete()
     .eq('id', id);
-  
+
   if (error) throw error;
 }
 
@@ -234,7 +234,7 @@ export async function addPlayerToDb(tournamentId: string, player: Omit<Player, '
     })
     .select()
     .single();
-  
+
   if (error) throw error;
   return {
     id: data.id,
@@ -256,7 +256,7 @@ export async function removePlayerFromDb(playerId: string): Promise<void> {
     .from('players')
     .delete()
     .eq('id', playerId);
-  
+
   if (error) throw error;
 }
 
@@ -308,9 +308,9 @@ export async function createMatches(tournamentId: string, matches: Omit<Match, '
     .from('matches')
     .insert(dbMatches)
     .select();
-  
+
   if (error) throw error;
-  
+
   return (data || []).map((m: {
     id: string;
     round: number;
@@ -351,12 +351,12 @@ export async function updateMatch(matchId: string, updates: Partial<{
   if (updates.sets) {
     dbUpdates.sets = updates.sets as unknown as Json;
   }
-  
+
   const { error } = await supabase
     .from('matches')
     .update(dbUpdates)
     .eq('id', matchId);
-  
+
   if (error) throw error;
 }
 
@@ -381,7 +381,7 @@ export async function addDoublesPair(tournamentId: string, player1Id: string, pl
     })
     .select()
     .single();
-  
+
   if (error) throw error;
   return {
     id: data.id,
@@ -397,7 +397,7 @@ export async function removeDoublesPair(pairId: string): Promise<void> {
     .from('doubles_pairs')
     .delete()
     .eq('id', pairId);
-  
+
   if (error) throw error;
 }
 
@@ -406,6 +406,26 @@ export async function clearDoublesPairs(tournamentId: string): Promise<void> {
     .from('doubles_pairs')
     .delete()
     .eq('tournament_id', tournamentId);
-  
+
+  if (error) throw error;
+}
+
+export async function clearTournamentMatches(tournamentId: string): Promise<void> {
+  const { error } = await supabase
+    .from('matches')
+    .delete()
+    .eq('tournament_id', tournamentId);
+
+  if (error) throw error;
+}
+
+export async function resetTournamentState(tournamentId: string): Promise<void> {
+  await supabase.from('players').update({ group_number: null }).eq('tournament_id', tournamentId);
+
+  const { error } = await supabase
+    .from('tournaments')
+    .update({ started: false, rounds: 0, phase: null })
+    .eq('id', tournamentId);
+
   if (error) throw error;
 }
