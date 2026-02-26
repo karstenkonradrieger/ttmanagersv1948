@@ -21,11 +21,13 @@ export type Database = {
           club_id: string
           created_at: string
           created_by: string | null
+          email: string
           gender: string
           house_number: string
           id: string
           name: string
           phone: string
+          photo_consent: boolean
           postal_code: string
           street: string
           ttr: number
@@ -36,11 +38,13 @@ export type Database = {
           club_id: string
           created_at?: string
           created_by?: string | null
+          email?: string
           gender?: string
           house_number?: string
           id?: string
           name: string
           phone?: string
+          photo_consent?: boolean
           postal_code?: string
           street?: string
           ttr?: number
@@ -51,11 +55,13 @@ export type Database = {
           club_id?: string
           created_at?: string
           created_by?: string | null
+          email?: string
           gender?: string
           house_number?: string
           id?: string
           name?: string
           phone?: string
+          photo_consent?: boolean
           postal_code?: string
           street?: string
           ttr?: number

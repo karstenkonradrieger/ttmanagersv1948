@@ -16,6 +16,8 @@ export interface ClubPlayer {
   street: string;
   houseNumber: string;
   phone: string;
+  email: string;
+  photoConsent: boolean;
 }
 
 export function useClubPlayers() {
@@ -44,6 +46,8 @@ export function useClubPlayers() {
           street: row.street || '',
           houseNumber: row.house_number || '',
           phone: row.phone || '',
+          email: row.email || '',
+          photoConsent: row.photo_consent ?? false,
         }))
       );
     } catch (error) {
@@ -68,6 +72,8 @@ export function useClubPlayers() {
     street: string,
     houseNumber: string,
     phone: string,
+    email: string = '',
+    photoConsent: boolean = false,
   ): Promise<ClubPlayer | null> => {
     if (!user) return null;
     try {
@@ -84,6 +90,8 @@ export function useClubPlayers() {
           street,
           house_number: houseNumber,
           phone,
+          email,
+          photo_consent: photoConsent,
           created_by: user.id,
         })
         .select('*, clubs(name)')
@@ -102,6 +110,8 @@ export function useClubPlayers() {
         street: data.street || '',
         houseNumber: data.house_number || '',
         phone: data.phone || '',
+        email: data.email || '',
+        photoConsent: data.photo_consent ?? false,
       };
       setPlayers(prev => [...prev, mapped].sort((a, b) => a.name.localeCompare(b.name)));
       return mapped;
@@ -124,6 +134,8 @@ export function useClubPlayers() {
       if (updates.street !== undefined) dbUpdates.street = updates.street;
       if (updates.houseNumber !== undefined) dbUpdates.house_number = updates.houseNumber;
       if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
+      if (updates.email !== undefined) dbUpdates.email = updates.email;
+      if (updates.photoConsent !== undefined) dbUpdates.photo_consent = updates.photoConsent;
 
       const { error } = await supabase.from('club_players').update(dbUpdates).eq('id', id);
       if (error) throw error;
