@@ -4,9 +4,10 @@ import { ClubPlayer } from '@/hooks/useClubPlayers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, UserPlus, Pencil, Check, X, Download, Upload } from 'lucide-react';
+import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, UserPlus, Pencil, Check, X, Download, Upload, Mail, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
   clubPlayers: ClubPlayer[];
   onAddClub: (name: string) => Promise<Club | null>;
   onRemoveClub: (id: string) => void;
-  onAddPlayer: (clubId: string, name: string, gender: string, birthDate: string | null, ttr: number, postalCode: string, city: string, street: string, houseNumber: string, phone: string) => Promise<ClubPlayer | null>;
+  onAddPlayer: (clubId: string, name: string, gender: string, birthDate: string | null, ttr: number, postalCode: string, city: string, street: string, houseNumber: string, phone: string, email: string, photoConsent: boolean) => Promise<ClubPlayer | null>;
   onUpdatePlayer: (id: string, updates: Partial<Omit<ClubPlayer, 'id' | 'clubId' | 'clubName'>>) => void;
   onRemovePlayer: (id: string) => void;
   getPlayersForClub: (clubId: string) => ClubPlayer[];
@@ -123,6 +124,8 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const [pStreet, setPStreet] = useState('');
   const [pHouseNumber, setPHouseNumber] = useState('');
   const [pPhone, setPPhone] = useState('');
+  const [pEmail, setPEmail] = useState('');
+  const [pPhotoConsent, setPPhotoConsent] = useState(false);
 
   const handleAddClub = async () => {
     if (!clubName.trim()) return;
@@ -138,11 +141,12 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const resetPlayerForm = () => {
     setPName(''); setPGender(''); setPBirthDate(''); setPTtr('');
     setPPostalCode(''); setPCity(''); setPStreet(''); setPHouseNumber(''); setPPhone('');
+    setPEmail(''); setPPhotoConsent(false);
   };
 
   const handleAddPlayer = async (clubId: string) => {
     if (!pName.trim()) return;
-    await onAddPlayer(clubId, pName.trim(), pGender, pBirthDate || null, parseInt(pTtr) || 1000, pPostalCode, pCity, pStreet, pHouseNumber, pPhone);
+    await onAddPlayer(clubId, pName.trim(), pGender, pBirthDate || null, parseInt(pTtr) || 1000, pPostalCode, pCity, pStreet, pHouseNumber, pPhone, pEmail, pPhotoConsent);
     resetPlayerForm();
     setAddingPlayerFor(null);
   };
@@ -164,6 +168,8 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
       street: editData.street || '',
       houseNumber: editData.houseNumber || '',
       phone: editData.phone || '',
+      email: editData.email || '',
+      photoConsent: editData.photoConsent ?? false,
     });
     setEditingId(null);
     setEditData({});
@@ -218,7 +224,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
       }
       if (!club) continue;
       for (const p of players) {
-        await onAddPlayer(club.id, p.name, p.gender, p.birthDate, p.ttr, p.postalCode, p.city, p.street, p.houseNumber, p.phone);
+        await onAddPlayer(club.id, p.name, p.gender, p.birthDate, p.ttr, p.postalCode, p.city, p.street, p.houseNumber, p.phone, '', false);
         importedCount++;
       }
     }
@@ -341,6 +347,11 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                           <Input placeholder="Ort" value={pCity} onChange={e => setPCity(e.target.value)} className="h-9 text-sm bg-secondary flex-1" />
                         </div>
                         <Input placeholder="Telefon" type="tel" value={pPhone} onChange={e => setPPhone(e.target.value)} className="h-9 text-sm bg-secondary" />
+                        <Input placeholder="E-Mail" type="email" value={pEmail} onChange={e => setPEmail(e.target.value)} className="h-9 text-sm bg-secondary" />
+                        <div className="flex items-center gap-2">
+                          <Checkbox id={`photo-consent-new-${club.id}`} checked={pPhotoConsent} onCheckedChange={(v) => setPPhotoConsent(v === true)} />
+                          <label htmlFor={`photo-consent-new-${club.id}`} className="text-sm text-muted-foreground cursor-pointer">Fotoerlaubnis erteilt</label>
+                        </div>
                         <div className="flex gap-2">
                           <Button size="sm" className="flex-1 h-9" onClick={() => handleAddPlayer(club.id)} disabled={!pName.trim()}>
                             <UserPlus className="mr-1 h-3.5 w-3.5" /> Hinzufügen
@@ -382,6 +393,11 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                 <Input value={editData.city || ''} onChange={e => setEditData(p => ({ ...p, city: e.target.value }))} className="h-8 text-sm bg-secondary flex-1" placeholder="Ort" />
                               </div>
                               <Input type="tel" value={editData.phone || ''} onChange={e => setEditData(p => ({ ...p, phone: e.target.value }))} className="h-8 text-sm bg-secondary" placeholder="Telefon" />
+                              <Input type="email" value={editData.email || ''} onChange={e => setEditData(p => ({ ...p, email: e.target.value }))} className="h-8 text-sm bg-secondary" placeholder="E-Mail" />
+                              <div className="flex items-center gap-2">
+                                <Checkbox id={`photo-consent-edit-${editingId}`} checked={editData.photoConsent ?? false} onCheckedChange={(v) => setEditData(p => ({ ...p, photoConsent: v === true }))} />
+                                <label htmlFor={`photo-consent-edit-${editingId}`} className="text-sm text-muted-foreground cursor-pointer">Fotoerlaubnis erteilt</label>
+                              </div>
                               <div className="flex justify-end gap-1">
                                 <Button variant="ghost" size="icon" onClick={() => { setEditingId(null); setEditData({}); }} className="h-7 w-7"><X className="h-3.5 w-3.5" /></Button>
                                 <Button size="icon" onClick={saveEdit} className="h-7 w-7" disabled={!editData.name?.trim()}><Check className="h-3.5 w-3.5" /></Button>
@@ -403,6 +419,8 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   {player.birthDate && <span>{new Date(player.birthDate).toLocaleDateString('de-DE')}</span>}
                                   <span className="flex items-center gap-0.5"><Trophy className="h-3 w-3" /> {player.ttr}</span>
                                   {player.phone && <span className="flex items-center gap-0.5"><Phone className="h-3 w-3" /> {player.phone}</span>}
+                                  {player.email && <span className="flex items-center gap-0.5"><Mail className="h-3 w-3" /> {player.email}</span>}
+                                  <span className="flex items-center gap-0.5"><Camera className="h-3 w-3" /> {player.photoConsent ? '✓ Foto' : '✗ Foto'}</span>
                                 </div>
                                 {(player.street || player.city) && (
                                   <p className="text-xs text-muted-foreground mt-0.5">
