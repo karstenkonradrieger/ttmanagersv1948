@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { UserPlus, Trash2, Trophy, Pencil, Check, X } from 'lucide-react';
+import { UserPlus, Trash2, Trophy, Pencil, Check, X, Camera } from 'lucide-react';
 import { LogicAgentValidator } from '@/components/LogicAgentValidator';
+import { printPhotoConsentForm, printAllPhotoConsentForms } from '@/components/PhotoConsentForm';
+import { toast } from 'sonner';
 
 interface Props {
   players: Player[];
@@ -16,9 +18,13 @@ interface Props {
   started: boolean;
   clubs?: Club[];
   onAddClub?: (name: string) => Promise<Club | null>;
+  tournamentName?: string;
+  tournamentDate?: string | null;
+  venueString?: string;
+  logoUrl?: string | null;
 }
 
-export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clubs = [], onAddClub }: Props) {
+export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clubs = [], onAddClub, tournamentName = '', tournamentDate, venueString = '', logoUrl }: Props) {
   const [name, setName] = useState('');
   const [club, setClub] = useState('');
   const [newClubName, setNewClubName] = useState('');
@@ -231,6 +237,21 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
       )}
 
       <div className="space-y-2">
+        {players.length > 0 && (
+          <div className="flex justify-end mb-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs gap-1"
+              onClick={() => {
+                printAllPhotoConsentForms(players, tournamentName, tournamentDate ?? null, venueString, logoUrl);
+                toast.success(`${players.length} Fotoerlaubnis-Formulare erstellt`);
+              }}
+            >
+              <Camera className="h-3 w-3" /> Alle Fotoerlaubnisse drucken
+            </Button>
+          </div>
+        )}
         {players.length === 0 && (
           <p className="text-center text-muted-foreground py-8">
             Noch keine Spieler hinzugefügt
@@ -374,6 +395,18 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      printPhotoConsentForm({ player, tournamentName, tournamentDate: tournamentDate ?? null, venueString, logoUrl });
+                      toast.success(`Fotoerlaubnis für ${player.name} erstellt`);
+                    }}
+                    className="text-muted-foreground hover:text-foreground"
+                    title="Fotoerlaubnis drucken"
+                  >
+                    <Camera className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"

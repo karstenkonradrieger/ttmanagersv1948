@@ -394,6 +394,10 @@ const Index = () => {
                 started={tournament.started}
                 clubs={clubs}
                 onAddClub={addClub}
+                tournamentName={tournament.name}
+                tournamentDate={tournament.tournamentDate}
+                venueString={venueString}
+                logoUrl={tournament.logoUrl}
               />
             </TabsContent>
 
