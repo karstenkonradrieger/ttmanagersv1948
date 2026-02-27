@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, UserPlus, Users, Filter } from 'lucide-react';
+import { Building2, UserPlus, Users, Filter, AlertTriangle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Props {
   clubs: Club[];
@@ -158,6 +159,18 @@ export function ImportFromClubPlayers({ clubs, clubPlayers, getPlayersForClub, o
                           />
                           <span className="text-sm">{p.name}</span>
                           {p.ttr > 0 && <span className="text-xs text-muted-foreground">TTR {p.ttr}</span>}
+                          {!p.photoConsent && !alreadyExists && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <AlertTriangle className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-xs">
+                                  Fotoerlaubnis nicht erteilt
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                           {alreadyExists && <span className="text-xs text-muted-foreground italic">(bereits im Turnier)</span>}
                         </div>
                       );
