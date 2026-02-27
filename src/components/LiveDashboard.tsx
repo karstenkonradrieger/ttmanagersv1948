@@ -106,7 +106,7 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
         />
       )}
 
-      {(mode !== 'group_knockout' || phase === 'knockout') && rounds > 0 && (
+      {mode !== 'round_robin' && (mode !== 'group_knockout' || phase === 'knockout') && rounds > 0 && (
         <div>
           <h3 className="text-lg font-bold mb-3">🏆 Turnierbaum</h3>
           <TournamentBracket
