@@ -1,7 +1,8 @@
-import { Match, Player, TournamentMode } from '@/types/tournament';
+import { useMemo } from 'react';
+import { Match, Player, TournamentMode, SetScore } from '@/types/tournament';
 import { TournamentBracket } from './TournamentBracket';
 import { GroupStageView } from './GroupStageView';
-import { Monitor, Trophy } from 'lucide-react';
+import { Monitor, Trophy, Crown } from 'lucide-react';
 
 interface Props {
   matches: Match[];
@@ -26,6 +27,36 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
     : null;
   const championPlayer = champion ? getPlayer(champion.winnerId) : null;
 
+  // Round-robin leader calculation
+  const rrLeader = useMemo(() => {
+    if (mode !== 'round_robin') return null;
+    const completed = matches.filter(m => m.status === 'completed');
+    if (completed.length === 0) return null;
+
+    const stats = new Map<string, { won: number; setDiff: number; ptDiff: number }>();
+    for (const m of completed) {
+      if (!m.player1Id || !m.player2Id) continue;
+      if (!stats.has(m.player1Id)) stats.set(m.player1Id, { won: 0, setDiff: 0, ptDiff: 0 });
+      if (!stats.has(m.player2Id)) stats.set(m.player2Id, { won: 0, setDiff: 0, ptDiff: 0 });
+      const s1 = stats.get(m.player1Id)!;
+      const s2 = stats.get(m.player2Id)!;
+      if (m.winnerId === m.player1Id) { s1.won++; } else if (m.winnerId === m.player2Id) { s2.won++; }
+      for (const s of m.sets) {
+        s1.ptDiff += s.player1 - s.player2;
+        s2.ptDiff += s.player2 - s.player1;
+        if (s.player1 >= 11 && s.player1 - s.player2 >= 2) { s1.setDiff++; s2.setDiff--; }
+        else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) { s2.setDiff++; s1.setDiff--; }
+      }
+    }
+    let best: { id: string; won: number; setDiff: number; ptDiff: number } | null = null;
+    for (const [id, s] of stats) {
+      if (!best || s.won > best.won || (s.won === best.won && s.setDiff > best.setDiff) || (s.won === best.won && s.setDiff === best.setDiff && s.ptDiff > best.ptDiff)) {
+        best = { id, ...s };
+      }
+    }
+    return best;
+  }, [matches, mode]);
+
   return (
     <div className="space-y-6 animate-slide-up">
       {championPlayer && (
@@ -36,6 +67,17 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
           {championPlayer.club && (
             <p className="text-sm text-muted-foreground">{championPlayer.club}</p>
           )}
+        </div>
+      )}
+
+      {rrLeader && !championPlayer && (
+        <div className="bg-gradient-to-r from-primary/10 to-accent/10 border-2 border-primary/40 rounded-xl p-5 text-center">
+          <Crown className="h-10 w-10 mx-auto mb-1 text-primary" />
+          <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Aktueller Spitzenreiter</p>
+          <p className="text-2xl font-extrabold text-primary mt-1">{getName(rrLeader.id)}</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {rrLeader.won} {rrLeader.won === 1 ? 'Sieg' : 'Siege'} · Sätze {rrLeader.setDiff > 0 ? '+' : ''}{rrLeader.setDiff} · Punkte {rrLeader.ptDiff > 0 ? '+' : ''}{rrLeader.ptDiff}
+          </p>
         </div>
       )}
 
