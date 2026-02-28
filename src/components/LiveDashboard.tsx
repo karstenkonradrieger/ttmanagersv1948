@@ -27,8 +27,8 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
     : null;
   const championPlayer = champion ? getPlayer(champion.winnerId) : null;
 
-  // Round-robin leader calculation
-  const rrLeader = useMemo(() => {
+  // Round-robin top 3 calculation
+  const rrTopThree = useMemo(() => {
     if (mode !== 'round_robin') return null;
     const completed = matches.filter(m => m.status === 'completed');
     if (completed.length === 0) return null;
@@ -48,13 +48,10 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
         else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) { s2.setDiff++; s1.setDiff--; }
       }
     }
-    let best: { id: string; won: number; setDiff: number; ptDiff: number } | null = null;
-    for (const [id, s] of stats) {
-      if (!best || s.won > best.won || (s.won === best.won && s.setDiff > best.setDiff) || (s.won === best.won && s.setDiff === best.setDiff && s.ptDiff > best.ptDiff)) {
-        best = { id, ...s };
-      }
-    }
-    return best;
+    const sorted = [...stats.entries()]
+      .map(([id, s]) => ({ id, ...s }))
+      .sort((a, b) => b.won - a.won || b.setDiff - a.setDiff || b.ptDiff - a.ptDiff);
+    return sorted.slice(0, 3);
   }, [matches, mode]);
 
   return (
@@ -70,14 +67,31 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
         </div>
       )}
 
-      {rrLeader && !championPlayer && (
-        <div className="bg-gradient-to-r from-primary/10 to-accent/10 border-2 border-primary/40 rounded-xl p-5 text-center">
-          <Crown className="h-10 w-10 mx-auto mb-1 text-primary" />
-          <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Aktueller Spitzenreiter</p>
-          <p className="text-2xl font-extrabold text-primary mt-1">{getName(rrLeader.id)}</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            {rrLeader.won} {rrLeader.won === 1 ? 'Sieg' : 'Siege'} · Sätze {rrLeader.setDiff > 0 ? '+' : ''}{rrLeader.setDiff} · Punkte {rrLeader.ptDiff > 0 ? '+' : ''}{rrLeader.ptDiff}
-          </p>
+      {rrTopThree && rrTopThree.length > 0 && !championPlayer && (
+        <div className="bg-gradient-to-r from-primary/10 to-accent/10 border-2 border-primary/40 rounded-xl p-5 space-y-4">
+          {/* 1st place */}
+          <div className="text-center">
+            <Crown className="h-10 w-10 mx-auto mb-1 text-primary" />
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Aktueller Spitzenreiter</p>
+            <p className="text-2xl font-extrabold text-primary mt-1">{getName(rrTopThree[0].id)}</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {rrTopThree[0].won} {rrTopThree[0].won === 1 ? 'Sieg' : 'Siege'} · Sätze {rrTopThree[0].setDiff > 0 ? '+' : ''}{rrTopThree[0].setDiff} · Punkte {rrTopThree[0].ptDiff > 0 ? '+' : ''}{rrTopThree[0].ptDiff}
+            </p>
+          </div>
+          {/* 2nd & 3rd */}
+          {rrTopThree.length > 1 && (
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border/50">
+              {rrTopThree.slice(1).map((entry, i) => (
+                <div key={entry.id} className="text-center">
+                  <p className="text-xs text-muted-foreground font-semibold">{i === 0 ? '🥈 2.' : '🥉 3.'}</p>
+                  <p className="font-bold text-sm">{getName(entry.id)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {entry.won} {entry.won === 1 ? 'Sieg' : 'Siege'} · Sätze {entry.setDiff > 0 ? '+' : ''}{entry.setDiff}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
