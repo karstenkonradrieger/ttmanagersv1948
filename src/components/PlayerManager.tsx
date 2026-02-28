@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Player } from '@/types/tournament';
+import { Player, Match } from '@/types/tournament';
 import { Club } from '@/hooks/useClubs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { UserPlus, Trash2, Trophy, Pencil, Check, X, Camera } from 'lucide-react';
+import { UserPlus, Trash2, Trophy, Pencil, Check, X, Camera, FileText } from 'lucide-react';
+import { generatePlayerReport } from '@/components/PlayerReport';
 import { LogicAgentValidator } from '@/components/LogicAgentValidator';
 import { printPhotoConsentForm, printAllPhotoConsentForms } from '@/components/PhotoConsentForm';
 import { toast } from 'sonner';
@@ -22,9 +23,14 @@ interface Props {
   tournamentDate?: string | null;
   venueString?: string;
   logoUrl?: string | null;
+  matches?: Match[];
+  tournamentId?: string;
+  bestOf?: number;
+  totalRounds?: number;
+  getPlayer?: (id: string | null) => Player | null;
 }
 
-export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clubs = [], onAddClub, tournamentName = '', tournamentDate, venueString = '', logoUrl }: Props) {
+export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clubs = [], onAddClub, tournamentName = '', tournamentDate, venueString = '', logoUrl, matches = [], tournamentId = '', bestOf = 3, totalRounds = 0, getPlayer }: Props) {
   const [name, setName] = useState('');
   const [club, setClub] = useState('');
   const [newClubName, setNewClubName] = useState('');
@@ -407,6 +413,33 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                   >
                     <Camera className="h-4 w-4" />
                   </Button>
+                  {started && matches.length > 0 && getPlayer && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        generatePlayerReport({
+                          player,
+                          matches,
+                          getPlayer,
+                          tournamentName,
+                          tournamentId,
+                          totalRounds,
+                          logoUrl,
+                          bestOf,
+                          tournamentDate,
+                          venueString,
+                          motto: '',
+                        });
+                        toast.success(`Spielerbericht für ${player.name} wird erstellt…`);
+                      }}
+                      className="text-muted-foreground hover:text-foreground"
+                      title="Spielerbericht PDF"
+                    >
+                      <FileText className="h-4 w-4" />
+                    </Button>
+                  )}
+
                   <Button
                     variant="ghost"
                     size="icon"

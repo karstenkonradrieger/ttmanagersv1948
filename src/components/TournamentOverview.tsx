@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { FileDown, Award, FileText } from 'lucide-react';
+import { FileDown, Award, FileText, User } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MatchPhotos } from '@/components/MatchPhotos';
 import { generateMatchReport } from '@/components/MatchReport';
+import { generatePlayerReport } from '@/components/PlayerReport';
 
 interface Props {
   tournamentName: string;
@@ -589,6 +590,51 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                 readOnly
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Player Reports */}
+      {playerStats.length > 0 && matches.filter(m => m.status === 'completed').length > 0 && (
+        <div>
+          <h4 className="font-bold text-sm mb-2 text-primary">📄 Spielerberichte</h4>
+          <p className="text-xs text-muted-foreground mb-3">
+            Erstelle individuelle PDF-Berichte mit Spielübersicht und allen Spielberichten eines Spielers.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {playerStats.map((s) => {
+              const playerMatchCount = matches.filter(
+                m => (m.player1Id === s.player.id || m.player2Id === s.player.id) && m.status === 'completed'
+              ).length;
+              if (playerMatchCount === 0) return null;
+              return (
+                <Button
+                  key={s.player.id}
+                  variant="outline"
+                  size="sm"
+                  className="h-auto py-2 px-3 justify-start text-left"
+                  onClick={() => generatePlayerReport({
+                    player: s.player,
+                    matches,
+                    getPlayer,
+                    tournamentName,
+                    tournamentId,
+                    totalRounds: rounds,
+                    logoUrl,
+                    bestOf,
+                    tournamentDate,
+                    venueString,
+                    motto,
+                  })}
+                >
+                  <User className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-xs truncate">{s.player.name}</p>
+                    <p className="text-xs text-muted-foreground">{playerMatchCount} Spiele · {s.matchesWon} Siege</p>
+                  </div>
+                </Button>
+              );
+            })}
           </div>
         </div>
       )}
