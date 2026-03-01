@@ -570,12 +570,6 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                             Spielbericht
                           </Button>
                         </div>
-                        <MatchPhotos
-                          tournamentId={tournamentId}
-                          matchId={m.id}
-                          photoType="match"
-                          readOnly
-                        />
                       </div>
                     );
                   })}
