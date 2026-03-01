@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { FileDown, Award, FileText, User } from 'lucide-react';
+import { FileDown, Award, FileText, User, ImageIcon, ImageOff } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MatchPhotos } from '@/components/MatchPhotos';
@@ -99,6 +99,7 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
 }
 
 export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto }: Props) {
+  const [showMatchPhotos, setShowMatchPhotos] = useState(false);
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
   if (matches.length === 0) {
@@ -540,7 +541,18 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       {/* Photo Retrospective */}
       {matches.filter(m => m.status === 'completed').length > 0 && (
         <div>
-          <h4 className="font-bold text-sm mb-3 text-primary">📸 Rückschau</h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-bold text-sm text-primary">📸 Rückschau</h4>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 text-xs text-muted-foreground"
+              onClick={() => setShowMatchPhotos(prev => !prev)}
+            >
+              {showMatchPhotos ? <ImageOff className="mr-1 h-3 w-3" /> : <ImageIcon className="mr-1 h-3 w-3" />}
+              {showMatchPhotos ? 'Fotos ausblenden' : 'Fotos einblenden'}
+            </Button>
+          </div>
           <div className="space-y-3">
             {matchesByRound.map((roundMatches, r) => {
               const completedInRound = roundMatches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id);
@@ -570,6 +582,14 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                             Spielbericht
                           </Button>
                         </div>
+                        {showMatchPhotos && (
+                          <MatchPhotos
+                            tournamentId={tournamentId}
+                            matchId={m.id}
+                            photoType="match"
+                            readOnly
+                          />
+                        )}
                       </div>
                     );
                   })}
