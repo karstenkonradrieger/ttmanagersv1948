@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Match, Player, TournamentMode, SetScore } from '@/types/tournament';
 import { TournamentBracket } from './TournamentBracket';
 import { GroupStageView } from './GroupStageView';
+import { DoubleEliminationBracket } from './DoubleEliminationBracket';
 import { Monitor, Trophy, Crown } from 'lucide-react';
 
 interface Props {
@@ -23,13 +24,15 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
     .slice(0, 4);
 
   const champion = rounds > 0
-    ? matches.find(m => m.round === rounds - 1 && m.winnerId)
+    ? mode === 'double_knockout'
+      ? matches.find(m => m.groupNumber === -2 && m.winnerId)
+      : matches.find(m => m.round === rounds - 1 && m.winnerId && (m.groupNumber === null || m.groupNumber === undefined))
     : null;
   const championPlayer = champion ? getPlayer(champion.winnerId) : null;
 
   // Round-robin top 3 calculation
   const rrTopThree = useMemo(() => {
-    if (mode !== 'round_robin') return null;
+    if (mode !== 'round_robin' && mode !== 'swiss') return null;
     const completed = matches.filter(m => m.status === 'completed');
     if (completed.length === 0) return null;
 
@@ -162,7 +165,14 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
         />
       )}
 
-      {mode !== 'round_robin' && (mode !== 'group_knockout' || phase === 'knockout') && rounds > 0 && (
+      {mode === 'double_knockout' && rounds > 0 && (
+        <div>
+          <h3 className="text-lg font-bold mb-3">🏆 Doppel-K.o. Bracket</h3>
+          <DoubleEliminationBracket matches={matches} wbRounds={rounds} getPlayer={getPlayer} />
+        </div>
+      )}
+
+      {mode !== 'round_robin' && mode !== 'swiss' && mode !== 'double_knockout' && (mode !== 'group_knockout' || phase === 'knockout') && rounds > 0 && (
         <div>
           <h3 className="text-lg font-bold mb-3">🏆 Turnierbaum</h3>
           <TournamentBracket

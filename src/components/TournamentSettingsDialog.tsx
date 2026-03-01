@@ -174,19 +174,22 @@ export function TournamentSettingsDialog({
           {/* Mode */}
           <div className={started ? 'opacity-50' : ''}>
             <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
-            <RadioGroup value={localMode} onValueChange={(v) => setLocalMode(v as TournamentMode)} disabled={started} className="flex flex-col gap-2">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="knockout" id="edit-mode-ko" disabled={started} />
-                <Label htmlFor="edit-mode-ko" className="text-sm cursor-pointer">KO-System</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="round_robin" id="edit-mode-rr" disabled={started} />
-                <Label htmlFor="edit-mode-rr" className="text-sm cursor-pointer">Alle gegen Alle</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="group_knockout" id="edit-mode-gk" disabled={started} />
-                <Label htmlFor="edit-mode-gk" className="text-sm cursor-pointer">Gruppen + K.O.</Label>
-              </div>
+            <RadioGroup value={localMode} onValueChange={(v) => setLocalMode(v as TournamentMode)} disabled={started} className="flex flex-col gap-3">
+              {[
+                { value: 'knockout', label: 'K.-o.-System (Einfach-K.o.)', desc: 'Wer verliert, scheidet sofort aus. Ideal bei Zeitnot.' },
+                { value: 'double_knockout', label: 'Doppel-K.-o.-System', desc: 'Jeder darf einmal verlieren. Erst bei der zweiten Niederlage ist man raus.' },
+                { value: 'round_robin', label: 'Jeder gegen Jeden (Round Robin)', desc: 'Alle Teilnehmer spielen gegen alle anderen.' },
+                { value: 'group_knockout', label: 'Kombiniertes System', desc: 'Erst Gruppenphase (4er-Gruppen), dann K.O. für die Besten.' },
+                { value: 'swiss', label: 'Schweizer System', desc: 'Ähnliche Bilanzen spielen gegeneinander. Kein Ausscheiden.' },
+              ].map(opt => (
+                <div key={opt.value} className="flex items-start space-x-2">
+                  <RadioGroupItem value={opt.value} id={`edit-mode-${opt.value}`} disabled={started} className="mt-0.5" />
+                  <div>
+                    <Label htmlFor={`edit-mode-${opt.value}`} className="text-sm font-medium cursor-pointer">{opt.label}</Label>
+                    <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                  </div>
+                </div>
+              ))}
             </RadioGroup>
           </div>
           <div className={started ? 'opacity-50' : ''}>

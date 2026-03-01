@@ -40,7 +40,7 @@ export interface DoublesPair {
   pairName: string;
 }
 
-export type TournamentMode = 'knockout' | 'round_robin' | 'group_knockout';
+export type TournamentMode = 'knockout' | 'double_knockout' | 'round_robin' | 'group_knockout' | 'swiss';
 export type TournamentType = 'singles' | 'doubles';
 
 export interface Tournament {
