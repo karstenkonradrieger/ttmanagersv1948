@@ -153,6 +153,8 @@ export function useTournamentDb(tournamentId: string | null) {
     const isDoubles = tournament.type === 'doubles';
     const isRoundRobin = tournament.mode === 'round_robin';
     const isGroupKnockout = tournament.mode === 'group_knockout';
+    const isDoubleKnockout = tournament.mode === 'double_knockout';
+    const isSwiss = tournament.mode === 'swiss';
 
     // Determine participants
     let participants: string[];
@@ -280,6 +282,152 @@ export function useTournamentDb(tournamentId: string | null) {
       } catch (error) {
         console.error('Error generating group bracket:', error);
         toast.error('Fehler beim Erstellen der Gruppenphase');
+      }
+      return;
+    }
+
+    if (isDoubleKnockout) {
+      const slots = Math.pow(2, Math.ceil(Math.log2(n)));
+      const wbRounds = Math.log2(slots);
+      const lbRoundCount = 2 * (wbRounds - 1);
+
+      if (n < 3) {
+        toast.error('Doppel-K.o. benötigt mindestens 3 Teilnehmer');
+        return;
+      }
+
+      matchesData = [];
+
+      // Winner Bracket seeding
+      const seeded: (string | null)[] = Array(slots).fill(null);
+      for (let i = 0; i < n; i++) seeded[i] = participants[i];
+
+      // WB Round 0
+      for (let i = 0; i < slots / 2; i++) {
+        const p1 = seeded[i * 2];
+        const p2 = seeded[i * 2 + 1];
+        const isBye = p2 === null;
+        matchesData.push({
+          round: 0, position: i,
+          player1Id: p1, player2Id: p2,
+          sets: [], winnerId: isBye ? p1 : null,
+          status: isBye ? 'completed' : 'pending',
+          groupNumber: null,
+        });
+      }
+
+      // WB subsequent rounds
+      for (let r = 1; r < wbRounds; r++) {
+        const count = slots / Math.pow(2, r + 1);
+        for (let i = 0; i < count; i++) {
+          matchesData.push({
+            round: r, position: i,
+            player1Id: null, player2Id: null,
+            sets: [], winnerId: null,
+            status: 'pending', groupNumber: null,
+          });
+        }
+      }
+
+      // Loser Bracket
+      for (let lbR = 0; lbR < lbRoundCount; lbR++) {
+        const halfIdx = Math.floor(lbR / 2);
+        const count = Math.max(1, Math.floor(slots / (4 * Math.pow(2, halfIdx))));
+        for (let p = 0; p < count; p++) {
+          matchesData.push({
+            round: lbR, position: p,
+            player1Id: null, player2Id: null,
+            sets: [], winnerId: null,
+            status: 'pending', groupNumber: -1,
+          });
+        }
+      }
+
+      // Grand Final
+      matchesData.push({
+        round: 0, position: 0,
+        player1Id: null, player2Id: null,
+        sets: [], winnerId: null,
+        status: 'pending', groupNumber: -2,
+      });
+
+      rounds = wbRounds;
+
+      try {
+        const createdMatches = await tournamentService.createMatches(tournamentId, matchesData);
+
+        // Propagate WB byes
+        const allMatches = [...createdMatches];
+        const byeMatches = allMatches.filter(m =>
+          (m.groupNumber === null || m.groupNumber === undefined) &&
+          m.winnerId && m.status === 'completed'
+        );
+
+        for (const bm of byeMatches) {
+          if (bm.round < wbRounds - 1) {
+            const nextWb = allMatches.find(nm =>
+              (nm.groupNumber === null || nm.groupNumber === undefined) &&
+              nm.round === bm.round + 1 &&
+              nm.position === Math.floor(bm.position / 2)
+            );
+            if (nextWb) {
+              if (bm.position % 2 === 0) nextWb.player1Id = bm.winnerId;
+              else nextWb.player2Id = bm.winnerId;
+            }
+          }
+        }
+
+        const matchesToUpdate = allMatches.filter((m, i) =>
+          m.player1Id !== createdMatches[i].player1Id ||
+          m.player2Id !== createdMatches[i].player2Id
+        );
+
+        if (matchesToUpdate.length > 0) {
+          await tournamentService.updateMultipleMatches(
+            matchesToUpdate.map(m => ({
+              id: m.id,
+              data: { player1_id: m.player1Id, player2_id: m.player2Id },
+            }))
+          );
+        }
+
+        await tournamentService.updateTournament(tournamentId, { started: true, rounds });
+
+        setTournament(prev => ({
+          ...prev, matches: allMatches, rounds, started: true,
+        }));
+      } catch (error) {
+        console.error('Error generating double elimination bracket:', error);
+        toast.error('Fehler beim Erstellen des Doppel-K.o.-Brackets');
+      }
+      return;
+    }
+
+    if (isSwiss) {
+      matchesData = [];
+      const half = Math.ceil(n / 2);
+      for (let i = 0; i < half; i++) {
+        const p1 = participants[i];
+        const p2 = i + half < n ? participants[i + half] : null;
+        const isBye = !p2;
+        matchesData.push({
+          round: 0, position: i,
+          player1Id: p1, player2Id: p2,
+          sets: [], winnerId: isBye ? p1 : null,
+          status: isBye ? 'completed' : 'pending',
+        });
+      }
+      rounds = 1;
+
+      try {
+        const createdMatches = await tournamentService.createMatches(tournamentId, matchesData);
+        await tournamentService.updateTournament(tournamentId, { started: true, rounds: 1 });
+        setTournament(prev => ({
+          ...prev, matches: createdMatches, rounds: 1, started: true,
+        }));
+      } catch (error) {
+        console.error('Error generating Swiss round:', error);
+        toast.error('Fehler beim Erstellen der Schweizer Runde');
       }
       return;
     }
@@ -451,6 +599,100 @@ export function useTournamentDb(tournamentId: string | null) {
             ? { player1_id: winnerId }
             : { player2_id: winnerId };
           await tournamentService.updateMatch(nextMatch.id, updateData);
+        }
+      }
+
+      // Double elimination propagation
+      if (winnerId && tournament.mode === 'double_knockout') {
+        const completedMatch = updatedMatches.find(m => m.id === matchId)!;
+        const loserId = completedMatch.player1Id === winnerId ? completedMatch.player2Id : completedMatch.player1Id;
+        const wbRounds = tournament.rounds;
+        const isWB = completedMatch.groupNumber === null || completedMatch.groupNumber === undefined;
+        const isLB = completedMatch.groupNumber === -1;
+
+        const dbUpdates: Array<{ id: string; data: Record<string, unknown> }> = [];
+
+        if (isWB) {
+          if (completedMatch.round < wbRounds - 1) {
+            const nextWb = updatedMatches.find(nm =>
+              (nm.groupNumber === null || nm.groupNumber === undefined) &&
+              nm.round === completedMatch.round + 1 &&
+              nm.position === Math.floor(completedMatch.position / 2)
+            );
+            if (nextWb) {
+              const dbSlot = completedMatch.position % 2 === 0 ? 'player1_id' : 'player2_id';
+              if (completedMatch.position % 2 === 0) nextWb.player1Id = winnerId;
+              else nextWb.player2Id = winnerId;
+              dbUpdates.push({ id: nextWb.id, data: { [dbSlot]: winnerId } });
+            }
+          } else {
+            const gfMatch = updatedMatches.find(nm => nm.groupNumber === -2);
+            if (gfMatch) {
+              gfMatch.player1Id = winnerId;
+              dbUpdates.push({ id: gfMatch.id, data: { player1_id: winnerId } });
+            }
+          }
+
+          if (loserId) {
+            if (completedMatch.round === 0) {
+              const lbMatch = updatedMatches.find(nm =>
+                nm.groupNumber === -1 && nm.round === 0 &&
+                nm.position === Math.floor(completedMatch.position / 2)
+              );
+              if (lbMatch) {
+                const dbSlot = completedMatch.position % 2 === 0 ? 'player1_id' : 'player2_id';
+                if (completedMatch.position % 2 === 0) lbMatch.player1Id = loserId;
+                else lbMatch.player2Id = loserId;
+                dbUpdates.push({ id: lbMatch.id, data: { [dbSlot]: loserId } });
+              }
+            } else {
+              const lbRound = 2 * completedMatch.round - 1;
+              const lbMatch = updatedMatches.find(nm =>
+                nm.groupNumber === -1 && nm.round === lbRound &&
+                nm.position === completedMatch.position
+              );
+              if (lbMatch) {
+                lbMatch.player2Id = loserId;
+                dbUpdates.push({ id: lbMatch.id, data: { player2_id: loserId } });
+              }
+            }
+          }
+        } else if (isLB) {
+          const lastLbRound = 2 * (wbRounds - 1) - 1;
+          if (completedMatch.round === lastLbRound) {
+            const gfMatch = updatedMatches.find(nm => nm.groupNumber === -2);
+            if (gfMatch) {
+              gfMatch.player2Id = winnerId;
+              dbUpdates.push({ id: gfMatch.id, data: { player2_id: winnerId } });
+            }
+          } else if (completedMatch.round % 2 === 0) {
+            const next = updatedMatches.find(nm =>
+              nm.groupNumber === -1 && nm.round === completedMatch.round + 1 &&
+              nm.position === completedMatch.position
+            );
+            if (next) {
+              next.player1Id = winnerId;
+              dbUpdates.push({ id: next.id, data: { player1_id: winnerId } });
+            }
+          } else {
+            const next = updatedMatches.find(nm =>
+              nm.groupNumber === -1 && nm.round === completedMatch.round + 1 &&
+              nm.position === Math.floor(completedMatch.position / 2)
+            );
+            if (next) {
+              if (completedMatch.position % 2 === 0) {
+                next.player1Id = winnerId;
+                dbUpdates.push({ id: next.id, data: { player1_id: winnerId } });
+              } else {
+                next.player2Id = winnerId;
+                dbUpdates.push({ id: next.id, data: { player2_id: winnerId } });
+              }
+            }
+          }
+        }
+
+        if (dbUpdates.length > 0) {
+          await tournamentService.updateMultipleMatches(dbUpdates);
         }
       }
 
@@ -970,6 +1212,81 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId, tournament.matches]);
 
+  const generateNextSwissRound = useCallback(async () => {
+    if (!tournamentId || tournament.mode !== 'swiss') return;
+
+    const currentRound = tournament.rounds;
+
+    const standings = new Map<string, { wins: number; opponents: Set<string> }>();
+    for (const p of tournament.players) {
+      standings.set(p.id, { wins: 0, opponents: new Set() });
+    }
+
+    for (const m of tournament.matches) {
+      if (m.status !== 'completed' || !m.player1Id) continue;
+      if (m.player2Id) {
+        standings.get(m.player1Id)?.opponents.add(m.player2Id);
+        standings.get(m.player2Id)?.opponents.add(m.player1Id);
+      }
+      if (m.winnerId === m.player1Id) {
+        const s = standings.get(m.player1Id);
+        if (s) s.wins++;
+      } else if (m.winnerId === m.player2Id) {
+        const s = standings.get(m.player2Id);
+        if (s) s.wins++;
+      }
+    }
+
+    const sorted = [...standings.entries()]
+      .sort(([, a], [, b]) => b.wins - a.wins)
+      .map(([id]) => id);
+
+    const paired = new Set<string>();
+    const newMatches: Omit<Match, 'id'>[] = [];
+    let pos = 0;
+
+    for (let i = 0; i < sorted.length; i++) {
+      if (paired.has(sorted[i])) continue;
+      let found = false;
+      for (let j = i + 1; j < sorted.length; j++) {
+        if (paired.has(sorted[j])) continue;
+        if (standings.get(sorted[i])!.opponents.has(sorted[j])) continue;
+
+        newMatches.push({
+          round: currentRound, position: pos++,
+          player1Id: sorted[i], player2Id: sorted[j],
+          sets: [], winnerId: null, status: 'pending',
+        });
+        paired.add(sorted[i]);
+        paired.add(sorted[j]);
+        found = true;
+        break;
+      }
+      if (!found && !paired.has(sorted[i])) {
+        newMatches.push({
+          round: currentRound, position: pos++,
+          player1Id: sorted[i], player2Id: null,
+          sets: [], winnerId: sorted[i], status: 'completed',
+        });
+        paired.add(sorted[i]);
+      }
+    }
+
+    try {
+      const created = await tournamentService.createMatches(tournamentId, newMatches);
+      await tournamentService.updateTournament(tournamentId, { rounds: currentRound + 1 });
+      setTournament(prev => ({
+        ...prev,
+        matches: [...prev.matches, ...created],
+        rounds: currentRound + 1,
+      }));
+      toast.success(`Runde ${currentRound + 1} generiert`);
+    } catch (error) {
+      console.error('Error generating Swiss round:', error);
+      toast.error('Fehler beim Generieren der nächsten Runde');
+    }
+  }, [tournamentId, tournament.mode, tournament.rounds, tournament.matches, tournament.players]);
+
   return {
     tournament,
     loading,
@@ -995,6 +1312,7 @@ export function useTournamentDb(tournamentId: string | null) {
     getParticipantName,
     advanceToKnockout,
     resetTournament,
+    generateNextSwissRound,
     reload: loadTournament,
   };
 }

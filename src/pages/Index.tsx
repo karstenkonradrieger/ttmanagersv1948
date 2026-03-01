@@ -16,6 +16,8 @@ import { TournamentOverview } from '@/components/TournamentOverview';
 import { LogoUpload } from '@/components/LogoUpload';
 import { DoublesManager } from '@/components/DoublesManager';
 import { RoundRobinStandings } from '@/components/RoundRobinStandings';
+import { DoubleEliminationBracket } from '@/components/DoubleEliminationBracket';
+import { SwissStandings } from '@/components/SwissStandings';
 import { GroupStageView } from '@/components/GroupStageView';
 import { generateGroupStageReport } from '@/components/GroupStageReport';
 import { TournamentSettingsDialog } from '@/components/TournamentSettingsDialog';
@@ -54,6 +56,7 @@ const Index = () => {
     updateDetails,
     advanceToKnockout,
     resetTournament,
+    generateNextSwissRound,
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
@@ -64,6 +67,8 @@ const Index = () => {
   const isDoubles = tournament.type === 'doubles';
   const isRoundRobin = tournament.mode === 'round_robin';
   const isGroupKnockout = tournament.mode === 'group_knockout';
+  const isDoubleKnockout = tournament.mode === 'double_knockout';
+  const isSwiss = tournament.mode === 'swiss';
   const venueString = [tournament.venueStreet, tournament.venueHouseNumber, tournament.venuePostalCode, tournament.venueCity].filter(Boolean).join(' ') || undefined;
 
   const handleImportClubsWithPlayers = useCallback(async (data: Array<{ clubName: string; players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }> }>) => {
@@ -81,10 +86,11 @@ const Index = () => {
   }, [clubs, addClub, addPlayer, selectedTournamentId]);
 
   // Can start?
+  const minPlayers = isDoubleKnockout ? 3 : 2;
   const canStart = !tournament.started && (
     isDoubles
-      ? tournament.doublesPairs.length >= 2
-      : tournament.players.length >= 2
+      ? tournament.doublesPairs.length >= minPlayers
+      : tournament.players.length >= minPlayers
   );
 
   // If no tournament selected, show tournament list
@@ -155,7 +161,7 @@ const Index = () => {
     );
   }
 
-  const modeLabel = isRoundRobin ? 'Alle gg. Alle' : isGroupKnockout ? 'Gruppen+KO' : 'KO';
+  const modeLabel = isRoundRobin ? 'Jeder gg. Jeden' : isGroupKnockout ? 'Gruppen+KO' : isDoubleKnockout ? 'Doppel-KO' : isSwiss ? 'Schweizer' : 'KO';
   const typeLabel = isDoubles ? 'Doppel' : 'Einzel';
 
   const tabCount = isDoubles ? 7 : 6;
@@ -226,7 +232,7 @@ const Index = () => {
               <Button
                 onClick={() => {
                   generateBracket();
-                  setTab(isRoundRobin ? 'scoring' : isGroupKnockout ? 'bracket' : 'bracket');
+                  setTab(isRoundRobin || isSwiss ? 'scoring' : 'bracket');
                 }}
                 className="h-9 font-semibold glow-green"
                 size="sm"
@@ -324,7 +330,7 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger value="bracket" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <Swords className="h-4 w-4" />
-              <span className="hidden sm:inline">{isRoundRobin ? 'Tabelle' : isGroupKnockout ? 'Gruppen' : 'Bracket'}</span>
+              <span className="hidden sm:inline">{isRoundRobin || isSwiss ? 'Tabelle' : isGroupKnockout ? 'Gruppen' : 'Bracket'}</span>
             </TabsTrigger>
             <TabsTrigger value="scoring" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <PenLine className="h-4 w-4" />
@@ -489,6 +495,27 @@ const Index = () => {
                     </div>
                   )}
                 </>
+              ) : isDoubleKnockout ? (
+                <DoubleEliminationBracket
+                  matches={tournament.matches}
+                  wbRounds={tournament.rounds}
+                  getPlayer={isDoubles
+                    ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
+                    : getPlayer
+                  }
+                />
+              ) : isSwiss ? (
+                <SwissStandings
+                  matches={tournament.matches}
+                  players={isDoubles
+                    ? tournament.doublesPairs.map(dp => ({ id: dp.player1Id, name: dp.pairName, club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' }))
+                    : tournament.players
+                  }
+                  getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
+                  onGenerateNextRound={generateNextSwissRound}
+                  currentRound={tournament.rounds}
+                  isDoubles={isDoubles}
+                />
               ) : isRoundRobin ? (
                 <RoundRobinStandings
                   matches={tournament.matches}

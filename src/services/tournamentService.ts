@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Tournament, Player, Match, SetScore, DoublesPair } from '@/types/tournament';
+import { Tournament, Player, Match, SetScore, DoublesPair, TournamentMode } from '@/types/tournament';
 import { Json } from '@/integrations/supabase/types';
 
 export interface DbTournament {
@@ -109,7 +109,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     rounds: tournament.rounds,
     started: tournament.started,
     logoUrl: tournament.logo_url,
-    mode: (tournament.mode || 'knockout') as 'knockout' | 'round_robin' | 'group_knockout',
+    mode: (tournament.mode || 'knockout') as TournamentMode,
     type: (tournament.type || 'singles') as 'singles' | 'doubles',
     bestOf: tournament.best_of || 3,
     phase: (tournament.phase as 'group' | 'knockout' | null) || null,
