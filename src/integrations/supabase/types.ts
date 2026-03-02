@@ -146,6 +146,87 @@ export type Database = {
           },
         ]
       }
+      encounter_games: {
+        Row: {
+          away_player1_id: string | null
+          away_player2_id: string | null
+          created_at: string
+          game_number: number
+          game_type: string
+          home_player1_id: string | null
+          home_player2_id: string | null
+          id: string
+          match_id: string
+          sets: Json
+          status: string
+          winner_side: string | null
+        }
+        Insert: {
+          away_player1_id?: string | null
+          away_player2_id?: string | null
+          created_at?: string
+          game_number: number
+          game_type?: string
+          home_player1_id?: string | null
+          home_player2_id?: string | null
+          id?: string
+          match_id: string
+          sets?: Json
+          status?: string
+          winner_side?: string | null
+        }
+        Update: {
+          away_player1_id?: string | null
+          away_player2_id?: string | null
+          created_at?: string
+          game_number?: number
+          game_type?: string
+          home_player1_id?: string | null
+          home_player2_id?: string | null
+          id?: string
+          match_id?: string
+          sets?: Json
+          status?: string
+          winner_side?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "encounter_games_away_player1_id_fkey"
+            columns: ["away_player1_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encounter_games_away_player2_id_fkey"
+            columns: ["away_player2_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encounter_games_home_player1_id_fkey"
+            columns: ["home_player1_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encounter_games_home_player2_id_fkey"
+            columns: ["home_player2_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encounter_games_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_photos: {
         Row: {
           created_at: string
@@ -324,12 +405,81 @@ export type Database = {
           },
         ]
       }
+      team_players: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string
+          position: number
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id: string
+          position?: number
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string
+          position?: number
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_players_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_players_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          tournament_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          tournament_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournaments: {
         Row: {
           best_of: number
           break_minutes: number
           created_at: string
           created_by: string | null
+          early_finish_enabled: boolean
           id: string
           logo_url: string | null
           mode: string
@@ -339,6 +489,7 @@ export type Database = {
           rounds: number
           started: boolean
           table_count: number
+          team_mode: string | null
           tournament_date: string | null
           type: string
           updated_at: string
@@ -352,6 +503,7 @@ export type Database = {
           break_minutes?: number
           created_at?: string
           created_by?: string | null
+          early_finish_enabled?: boolean
           id?: string
           logo_url?: string | null
           mode?: string
@@ -361,6 +513,7 @@ export type Database = {
           rounds?: number
           started?: boolean
           table_count?: number
+          team_mode?: string | null
           tournament_date?: string | null
           type?: string
           updated_at?: string
@@ -374,6 +527,7 @@ export type Database = {
           break_minutes?: number
           created_at?: string
           created_by?: string | null
+          early_finish_enabled?: boolean
           id?: string
           logo_url?: string | null
           mode?: string
@@ -383,6 +537,7 @@ export type Database = {
           rounds?: number
           started?: boolean
           table_count?: number
+          team_mode?: string | null
           tournament_date?: string | null
           type?: string
           updated_at?: string
