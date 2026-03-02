@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Settings2 } from 'lucide-react';
-import { TournamentMode, TournamentType } from '@/types/tournament';
+import { TournamentMode, TournamentType, TeamMode } from '@/types/tournament';
 import { toast } from 'sonner';
 
 interface Props {
@@ -202,6 +202,10 @@ export function TournamentSettingsDialog({
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="doubles" id="edit-type-doubles" disabled={started} />
                 <Label htmlFor="edit-type-doubles" className="text-sm cursor-pointer">Doppel</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="team" id="edit-type-team" disabled={started} />
+                <Label htmlFor="edit-type-team" className="text-sm cursor-pointer">Mannschaft</Label>
               </div>
             </RadioGroup>
           </div>

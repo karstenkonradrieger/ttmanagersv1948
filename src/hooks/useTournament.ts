@@ -20,8 +20,8 @@ function loadTournament(): Tournament {
     rounds: 0,
     started: false,
     tableCount: 4,
-    mode: 'knockout',
-    type: 'singles',
+    mode: 'knockout' as const,
+    type: 'singles' as const,
     doublesPairs: [],
     bestOf: 3,
     phase: null,
@@ -32,6 +32,10 @@ function loadTournament(): Tournament {
     venueCity: '',
     motto: '',
     breakMinutes: 5,
+    teamMode: null,
+    earlyFinishEnabled: false,
+    teams: [],
+    teamPlayers: [],
   };
 }
 
@@ -180,6 +184,10 @@ export function useTournament() {
       venueCity: '',
       motto: '',
       breakMinutes: 5,
+      teamMode: null,
+      earlyFinishEnabled: false,
+      teams: [],
+      teamPlayers: [],
     });
   }, []);
 

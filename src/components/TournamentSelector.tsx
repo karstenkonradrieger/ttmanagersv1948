@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { TournamentMode, TournamentType } from '@/types/tournament';
+import { TournamentMode, TournamentType, TeamMode } from '@/types/tournament';
 
 interface Props {
   selectedId: string | null;
@@ -27,6 +27,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
   const [newMode, setNewMode] = useState<TournamentMode>('knockout');
   const [newType, setNewType] = useState<TournamentType>('singles');
   const [newBestOf, setNewBestOf] = useState<number>(3);
+  const [newTeamMode, setNewTeamMode] = useState<TeamMode>('bundessystem');
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const load = async () => {
@@ -49,11 +50,12 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
     if (!newName.trim()) return;
     setCreating(true);
     try {
-      const id = await createTournament(newName.trim(), user?.id, newMode, newType, newBestOf);
+      const id = await createTournament(newName.trim(), user?.id, newMode, newType, newBestOf, newType === 'team' ? newTeamMode : null);
       setNewName('');
       setNewMode('knockout');
       setNewType('singles');
       setNewBestOf(3);
+      setNewTeamMode('bundessystem');
       setDialogOpen(false);
       await load();
       onSelect(id);
@@ -142,8 +144,33 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                     <RadioGroupItem value="doubles" id="type-doubles" />
                     <Label htmlFor="type-doubles" className="text-sm cursor-pointer">Doppel</Label>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="team" id="type-team" />
+                    <Label htmlFor="type-team" className="text-sm cursor-pointer">Mannschaft</Label>
+                  </div>
                 </RadioGroup>
               </div>
+              {newType === 'team' && (
+                <div>
+                  <Label className="text-sm font-semibold mb-2 block">Mannschaftssystem</Label>
+                  <RadioGroup value={newTeamMode} onValueChange={(v) => setNewTeamMode(v as TeamMode)} className="flex flex-col gap-3">
+                    {[
+                      { value: 'bundessystem', label: 'Bundessystem (4er)', desc: '2 Doppel + 8 Einzel. Erster ab 6 Siegen.' },
+                      { value: 'werner_scheffler', label: 'Werner-Scheffler (4er)', desc: '2 Doppel + 6 Einzel. Erster ab 5 Siegen.' },
+                      { value: 'olympic', label: 'Olympisches System (3er)', desc: '2 Einzel, 1 Doppel, ggf. 2 weitere Einzel.' },
+                      { value: 'corbillon', label: 'Corbillon-Cup (2er)', desc: '2 Einzel, 1 Doppel, ggf. 2 weitere Einzel.' },
+                    ].map(opt => (
+                      <div key={opt.value} className="flex items-start space-x-2">
+                        <RadioGroupItem value={opt.value} id={`team-${opt.value}`} className="mt-0.5" />
+                        <div>
+                          <Label htmlFor={`team-${opt.value}`} className="text-sm font-medium cursor-pointer">{opt.label}</Label>
+                          <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              )}
               <div>
                 <Label className="text-sm font-semibold mb-2 block">Gewinnsätze</Label>
                 <RadioGroup value={String(newBestOf)} onValueChange={(v) => setNewBestOf(parseInt(v))} className="flex gap-4">
@@ -200,7 +227,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                       {(t as any).mode === 'round_robin' ? 'Alle gg. Alle' : (t as any).mode === 'group_knockout' ? 'Gruppen+KO' : (t as any).mode === 'double_knockout' ? 'Doppel-KO' : (t as any).mode === 'swiss' ? 'Schweizer' : 'KO'}
                     </span>
                     <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
-                      {(t as any).type === 'doubles' ? 'Doppel' : 'Einzel'}
+                      {(t as any).type === 'doubles' ? 'Doppel' : (t as any).type === 'team' ? 'Mannschaft' : 'Einzel'}
                     </span>
                     <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
                       Bo{((t as any).best_of || 3) * 2 - 1}

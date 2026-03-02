@@ -271,9 +271,11 @@ export type Database = {
       }
       matches: {
         Row: {
+          away_team_id: string | null
           completed_at: string | null
           created_at: string
           group_number: number | null
+          home_team_id: string | null
           id: string
           player1_id: string | null
           player2_id: string | null
@@ -286,9 +288,11 @@ export type Database = {
           winner_id: string | null
         }
         Insert: {
+          away_team_id?: string | null
           completed_at?: string | null
           created_at?: string
           group_number?: number | null
+          home_team_id?: string | null
           id?: string
           player1_id?: string | null
           player2_id?: string | null
@@ -301,9 +305,11 @@ export type Database = {
           winner_id?: string | null
         }
         Update: {
+          away_team_id?: string | null
           completed_at?: string | null
           created_at?: string
           group_number?: number | null
+          home_team_id?: string | null
           id?: string
           player1_id?: string | null
           player2_id?: string | null
@@ -316,6 +322,20 @@ export type Database = {
           winner_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "matches_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "matches_player1_id_fkey"
             columns: ["player1_id"]
