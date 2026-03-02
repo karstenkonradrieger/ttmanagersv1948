@@ -113,19 +113,22 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
               />
               <div>
                 <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
-                <RadioGroup value={newMode} onValueChange={(v) => setNewMode(v as TournamentMode)} className="flex flex-col gap-2">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="knockout" id="mode-ko" />
-                    <Label htmlFor="mode-ko" className="text-sm cursor-pointer">KO-System</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="round_robin" id="mode-rr" />
-                    <Label htmlFor="mode-rr" className="text-sm cursor-pointer">Alle gegen Alle</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="group_knockout" id="mode-gk" />
-                    <Label htmlFor="mode-gk" className="text-sm cursor-pointer">Gruppen + K.O.</Label>
-                  </div>
+                <RadioGroup value={newMode} onValueChange={(v) => setNewMode(v as TournamentMode)} className="flex flex-col gap-3">
+                  {[
+                    { value: 'knockout', label: 'K.-o.-System (Einfach-K.o.)', desc: 'Wer verliert, scheidet sofort aus.' },
+                    { value: 'double_knockout', label: 'Doppel-K.-o.-System', desc: 'Jeder darf einmal verlieren.' },
+                    { value: 'round_robin', label: 'Jeder gegen Jeden (Round Robin)', desc: 'Alle spielen gegen alle anderen.' },
+                    { value: 'group_knockout', label: 'Kombiniertes System', desc: 'Erst Gruppenphase, dann K.O.' },
+                    { value: 'swiss', label: 'Schweizer System', desc: 'Ähnliche Bilanzen spielen gegeneinander.' },
+                  ].map(opt => (
+                    <div key={opt.value} className="flex items-start space-x-2">
+                      <RadioGroupItem value={opt.value} id={`mode-${opt.value}`} className="mt-0.5" />
+                      <div>
+                        <Label htmlFor={`mode-${opt.value}`} className="text-sm font-medium cursor-pointer">{opt.label}</Label>
+                        <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </RadioGroup>
               </div>
               <div>
@@ -194,7 +197,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                       </span>
                     )}
                     <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
-                      {(t as any).mode === 'round_robin' ? 'Alle gg. Alle' : (t as any).mode === 'group_knockout' ? 'Gruppen+KO' : 'KO'}
+                      {(t as any).mode === 'round_robin' ? 'Alle gg. Alle' : (t as any).mode === 'group_knockout' ? 'Gruppen+KO' : (t as any).mode === 'double_knockout' ? 'Doppel-KO' : (t as any).mode === 'swiss' ? 'Schweizer' : 'KO'}
                     </span>
                     <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
                       {(t as any).type === 'doubles' ? 'Doppel' : 'Einzel'}
