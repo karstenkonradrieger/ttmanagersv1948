@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Player, Match, Tournament, SetScore, DoublesPair, TournamentMode, TournamentType } from '@/types/tournament';
+import { Player, Match, Tournament, SetScore, DoublesPair, TournamentMode, TournamentType, Team, TeamPlayer, TeamMode } from '@/types/tournament';
 import * as tournamentService from '@/services/tournamentService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -24,6 +24,10 @@ const emptyTournament: Tournament = {
   venueCity: '',
   motto: '',
   breakMinutes: 5,
+  teamMode: null,
+  earlyFinishEnabled: false,
+  teams: [],
+  teamPlayers: [],
 };
 
 export function useTournamentDb(tournamentId: string | null) {
@@ -151,6 +155,7 @@ export function useTournamentDb(tournamentId: string | null) {
     if (!tournamentId) return;
 
     const isDoubles = tournament.type === 'doubles';
+    const isTeam = tournament.type === 'team';
     const isRoundRobin = tournament.mode === 'round_robin';
     const isGroupKnockout = tournament.mode === 'group_knockout';
     const isDoubleKnockout = tournament.mode === 'double_knockout';
@@ -158,7 +163,9 @@ export function useTournamentDb(tournamentId: string | null) {
 
     // Determine participants
     let participants: string[];
-    if (isDoubles) {
+    if (isTeam) {
+      participants = tournament.teams.map(t => t.id);
+    } else if (isDoubles) {
       participants = tournament.doublesPairs.map(dp => dp.player1Id);
     } else {
       participants = [...tournament.players].sort((a, b) => b.ttr - a.ttr).map(p => p.id);
@@ -472,10 +479,12 @@ export function useTournamentDb(tournamentId: string | null) {
         matchesData.push({
           round: 0,
           position: i,
-          player1Id: p1,
-          player2Id: p2,
+          player1Id: isTeam ? null : p1,
+          player2Id: isTeam ? null : p2,
+          homeTeamId: isTeam ? p1 : null,
+          awayTeamId: isTeam ? p2 : null,
           sets: [],
-          winnerId: isBye ? p1 : null,
+          winnerId: isBye && !isTeam ? p1 : null,
           status: isBye ? 'completed' : 'pending',
         });
       }
@@ -489,6 +498,8 @@ export function useTournamentDb(tournamentId: string | null) {
             position: i,
             player1Id: null,
             player2Id: null,
+            homeTeamId: null,
+            awayTeamId: null,
             sets: [],
             winnerId: null,
             status: 'pending',
@@ -985,13 +996,16 @@ export function useTournamentDb(tournamentId: string | null) {
 
   const getParticipantName = useCallback((id: string | null): string => {
     if (!id) return '—';
-    // Check if it's a doubles pair (matched by player1Id since that's what we store in matches)
+    // Check if it's a team
+    const team = tournament.teams.find(t => t.id === id);
+    if (team) return team.name;
+    // Check if it's a doubles pair
     const pair = tournament.doublesPairs.find(dp => dp.player1Id === id);
     if (pair) return pair.pairName || `Paar`;
     // Otherwise it's a player
     const player = tournament.players.find(p => p.id === id);
     return player?.name || '—';
-  }, [tournament.players, tournament.doublesPairs]);
+  }, [tournament.players, tournament.doublesPairs, tournament.teams]);
 
   const updateDetails = useCallback(async (details: {
     tournament_date: string | null;
@@ -1287,6 +1301,78 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId, tournament.mode, tournament.rounds, tournament.matches, tournament.players]);
 
+  // Team management
+  const addTeam = useCallback(async (name: string) => {
+    if (!tournamentId) return;
+    try {
+      const team = await tournamentService.addTeam(tournamentId, name);
+      setTournament(prev => ({ ...prev, teams: [...prev.teams, team] }));
+      toast.success('Team erstellt');
+    } catch (error) {
+      console.error('Error adding team:', error);
+      toast.error('Fehler beim Erstellen des Teams');
+    }
+  }, [tournamentId]);
+
+  const removeTeam = useCallback(async (teamId: string) => {
+    try {
+      await tournamentService.removeTeam(teamId);
+      setTournament(prev => ({
+        ...prev,
+        teams: prev.teams.filter(t => t.id !== teamId),
+        teamPlayers: prev.teamPlayers.filter(tp => tp.teamId !== teamId),
+      }));
+      toast.success('Team gelöscht');
+    } catch (error) {
+      console.error('Error removing team:', error);
+      toast.error('Fehler beim Löschen des Teams');
+    }
+  }, []);
+
+  const addPlayerToTeam = useCallback(async (teamId: string, playerId: string, position: number) => {
+    try {
+      const tp = await tournamentService.addTeamPlayer(teamId, playerId, position);
+      setTournament(prev => ({ ...prev, teamPlayers: [...prev.teamPlayers, tp] }));
+    } catch (error) {
+      console.error('Error adding player to team:', error);
+      toast.error('Fehler beim Zuordnen des Spielers');
+    }
+  }, []);
+
+  const removePlayerFromTeam = useCallback(async (teamPlayerId: string) => {
+    try {
+      await tournamentService.removeTeamPlayer(teamPlayerId);
+      setTournament(prev => ({
+        ...prev,
+        teamPlayers: prev.teamPlayers.filter(tp => tp.id !== teamPlayerId),
+      }));
+    } catch (error) {
+      console.error('Error removing player from team:', error);
+      toast.error('Fehler beim Entfernen des Spielers aus dem Team');
+    }
+  }, []);
+
+  const updateTeamMode = useCallback(async (teamMode: TeamMode | null) => {
+    if (!tournamentId) return;
+    try {
+      await tournamentService.updateTournament(tournamentId, { team_mode: teamMode });
+      setTournament(prev => ({ ...prev, teamMode }));
+    } catch (error) {
+      console.error('Error updating team mode:', error);
+      toast.error('Fehler beim Aktualisieren des Team-Modus');
+    }
+  }, [tournamentId]);
+
+  const updateEarlyFinish = useCallback(async (enabled: boolean) => {
+    if (!tournamentId) return;
+    try {
+      await tournamentService.updateTournament(tournamentId, { early_finish_enabled: enabled });
+      setTournament(prev => ({ ...prev, earlyFinishEnabled: enabled }));
+    } catch (error) {
+      console.error('Error updating early finish:', error);
+    }
+  }, [tournamentId]);
+
   return {
     tournament,
     loading,
@@ -1313,6 +1399,12 @@ export function useTournamentDb(tournamentId: string | null) {
     advanceToKnockout,
     resetTournament,
     generateNextSwissRound,
+    addTeam,
+    removeTeam,
+    addPlayerToTeam,
+    removePlayerFromTeam,
+    updateTeamMode,
+    updateEarlyFinish,
     reload: loadTournament,
   };
 }
