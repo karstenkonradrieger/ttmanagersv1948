@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Player, Match, Tournament, SetScore, DoublesPair, TournamentMode, TournamentType, Team, TeamPlayer, TeamMode } from '@/types/tournament';
+import { Player, Match, Tournament, SetScore, DoublesPair, TournamentMode, TournamentType, Team, TeamPlayer, TeamMode, TEAM_GAME_SEQUENCES } from '@/types/tournament';
 import * as tournamentService from '@/services/tournamentService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -531,6 +531,37 @@ export function useTournamentDb(tournamentId: string | null) {
               }
             }))
           );
+        }
+      }
+
+      // Generate encounter games for team matches
+      if (isTeam && tournament.teamMode) {
+        const sequence = TEAM_GAME_SEQUENCES[tournament.teamMode];
+        if (sequence) {
+          const teamMatchesWithBothTeams = updated.filter(
+            m => m.homeTeamId && m.awayTeamId && m.status !== 'completed'
+          );
+
+          for (const match of teamMatchesWithBothTeams) {
+            const homeTeamPlayers = tournament.teamPlayers
+              .filter(tp => tp.teamId === match.homeTeamId)
+              .sort((a, b) => a.position - b.position);
+            const awayTeamPlayers = tournament.teamPlayers
+              .filter(tp => tp.teamId === match.awayTeamId)
+              .sort((a, b) => a.position - b.position);
+
+            const games = sequence.games.map((game, idx) => ({
+              match_id: match.id,
+              game_number: idx + 1,
+              game_type: game.type,
+              home_player1_id: homeTeamPlayers[game.homePositions[0] - 1]?.playerId || null,
+              home_player2_id: game.type === 'doubles' ? (homeTeamPlayers[game.homePositions[1] - 1]?.playerId || null) : null,
+              away_player1_id: awayTeamPlayers[game.awayPositions[0] - 1]?.playerId || null,
+              away_player2_id: game.type === 'doubles' ? (awayTeamPlayers[game.awayPositions[1] - 1]?.playerId || null) : null,
+            }));
+
+            await tournamentService.createEncounterGames(games);
+          }
         }
       }
 
