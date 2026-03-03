@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Player, Match, Tournament, SetScore, DoublesPair, TournamentMode, TournamentType, Team, TeamPlayer, TeamMode, TEAM_GAME_SEQUENCES } from '@/types/tournament';
+import { Player, Match, Tournament, SetScore, DoublesPair, TournamentMode, TournamentType, Team, TeamPlayer, TeamMode, TEAM_GAME_SEQUENCES, EncounterGame } from '@/types/tournament';
+import { Json } from '@/integrations/supabase/types';
 import * as tournamentService from '@/services/tournamentService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -1404,6 +1405,97 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId]);
 
+  // Encounter game scoring for team matches
+  const [encounterGames, setEncounterGames] = useState<Record<string, EncounterGame[]>>({});
+
+  const loadEncounterGames = useCallback(async (matchId: string) => {
+    try {
+      const games = await tournamentService.fetchEncounterGames(matchId);
+      setEncounterGames(prev => ({ ...prev, [matchId]: games }));
+      return games;
+    } catch (error) {
+      console.error('Error loading encounter games:', error);
+      return [];
+    }
+  }, []);
+
+  const updateEncounterGameScore = useCallback(async (gameId: string, matchId: string, sets: SetScore[]) => {
+    // Determine winner of this individual game
+    let homeSetWins = 0;
+    let awaySetWins = 0;
+    for (const s of sets) {
+      if (s.player1 >= 11 && s.player1 - s.player2 >= 2) homeSetWins++;
+      else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) awaySetWins++;
+    }
+
+    const neededWins = tournament.bestOf;
+    let winnerSide: 'home' | 'away' | null = null;
+    let status: 'pending' | 'active' | 'completed' = 'active';
+    if (homeSetWins >= neededWins) {
+      winnerSide = 'home';
+      status = 'completed';
+    } else if (awaySetWins >= neededWins) {
+      winnerSide = 'away';
+      status = 'completed';
+    }
+
+    try {
+      await tournamentService.updateEncounterGame(gameId, {
+        sets: sets as unknown as Json,
+        winner_side: winnerSide,
+        status,
+      });
+
+      // Update local state
+      setEncounterGames(prev => {
+        const games = (prev[matchId] || []).map(g =>
+          g.id === gameId ? { ...g, sets, winnerSide, status } : g
+        );
+
+        // Check if encounter is decided
+        if (tournament.teamMode) {
+          const sequence = TEAM_GAME_SEQUENCES[tournament.teamMode];
+          let homeWins = 0;
+          let awayWins = 0;
+          for (const g of games) {
+            if (g.winnerSide === 'home') homeWins++;
+            else if (g.winnerSide === 'away') awayWins++;
+          }
+
+          const allDone = games.every(g => g.status === 'completed');
+          const earlyWin = tournament.earlyFinishEnabled &&
+            (homeWins >= sequence.winsNeeded || awayWins >= sequence.winsNeeded);
+
+          if (allDone || earlyWin) {
+            // Update the match as completed with the winning team
+            const match = tournament.matches.find(m => m.id === matchId);
+            if (match) {
+              const winningSide = homeWins > awayWins ? 'home' : 'away';
+              const winnerTeamId = winningSide === 'home' ? match.homeTeamId : match.awayTeamId;
+              tournamentService.updateMatch(matchId, {
+                status: 'completed',
+                winner_id: winnerTeamId,
+                completed_at: new Date().toISOString(),
+              }).then(() => {
+                setTournament(prev => ({
+                  ...prev,
+                  matches: prev.matches.map(m =>
+                    m.id === matchId ? { ...m, status: 'completed', winnerId: winnerTeamId, completedAt: new Date().toISOString() } : m
+                  ),
+                }));
+              });
+            }
+          }
+        }
+
+        return { ...prev, [matchId]: games };
+      });
+    } catch (error) {
+      console.error('Error updating encounter game:', error);
+      toast.error('Fehler beim Speichern des Spielergebnisses');
+    }
+  }, [tournament.bestOf, tournament.teamMode, tournament.earlyFinishEnabled, tournament.matches]);
+
   return {
     tournament,
     loading,
@@ -1436,6 +1528,9 @@ export function useTournamentDb(tournamentId: string | null) {
     removePlayerFromTeam,
     updateTeamMode,
     updateEarlyFinish,
+    encounterGames,
+    loadEncounterGames,
+    updateEncounterGameScore,
     reload: loadTournament,
   };
 }
