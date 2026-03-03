@@ -12,6 +12,7 @@ import { ClubPlayersManager } from '@/components/ClubPlayersManager';
 import { TournamentBracket } from '@/components/TournamentBracket';
 import { MatchScoring } from '@/components/MatchScoring';
 import { LiveDashboard } from '@/components/LiveDashboard';
+import { EncounterView } from '@/components/EncounterView';
 import { TournamentOverview } from '@/components/TournamentOverview';
 import { LogoUpload } from '@/components/LogoUpload';
 import { DoublesManager } from '@/components/DoublesManager';
@@ -22,6 +23,7 @@ import { GroupStageView } from '@/components/GroupStageView';
 import { generateGroupStageReport } from '@/components/GroupStageReport';
 import { TournamentSettingsDialog } from '@/components/TournamentSettingsDialog';
 import { TeamManager } from '@/components/TeamManager';
+import { TeamEncounterScoring } from '@/components/TeamEncounterScoring';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield } from 'lucide-react';
@@ -64,6 +66,9 @@ const Index = () => {
     removePlayerFromTeam,
     updateTeamMode,
     updateEarlyFinish,
+    encounterGames,
+    loadEncounterGames,
+    updateEncounterGameScore,
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
@@ -568,27 +573,46 @@ const Index = () => {
             </TabsContent>
 
             <TabsContent value="scoring">
-              <MatchScoring
-                matches={tournament.matches}
-                getPlayer={isDoubles
-                  ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
-                  : getPlayer
-                }
-                onUpdateScore={updateMatchScore}
-                onSetActive={setMatchActive}
-                tableCount={tournament.tableCount}
-                onTableCountChange={setTableCount}
-                onAutoAssign={autoAssignTables}
-                bestOf={tournament.bestOf}
-                getParticipantName={getParticipantName}
-                tournamentName={tournament.name}
-                rounds={tournament.rounds}
-                tournamentId={selectedTournamentId}
-                logoUrl={tournament.logoUrl}
-                tournamentDate={tournament.tournamentDate}
-                venueString={venueString}
-                motto={tournament.motto}
-              />
+              {isTeam && tournament.teamMode ? (
+                <TeamEncounterScoring
+                  matches={tournament.matches}
+                  teams={tournament.teams}
+                  teamPlayers={tournament.teamPlayers}
+                  teamMode={tournament.teamMode}
+                  bestOf={tournament.bestOf}
+                  earlyFinishEnabled={tournament.earlyFinishEnabled}
+                  getPlayer={getPlayer}
+                  encounterGames={encounterGames}
+                  loadEncounterGames={loadEncounterGames}
+                  updateEncounterGameScore={updateEncounterGameScore}
+                  onSetActive={setMatchActive}
+                  tableCount={tournament.tableCount}
+                  onTableCountChange={setTableCount}
+                  onAutoAssign={autoAssignTables}
+                />
+              ) : (
+                <MatchScoring
+                  matches={tournament.matches}
+                  getPlayer={isDoubles
+                    ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
+                    : getPlayer
+                  }
+                  onUpdateScore={updateMatchScore}
+                  onSetActive={setMatchActive}
+                  tableCount={tournament.tableCount}
+                  onTableCountChange={setTableCount}
+                  onAutoAssign={autoAssignTables}
+                  bestOf={tournament.bestOf}
+                  getParticipantName={getParticipantName}
+                  tournamentName={tournament.name}
+                  rounds={tournament.rounds}
+                  tournamentId={selectedTournamentId}
+                  logoUrl={tournament.logoUrl}
+                  tournamentDate={tournament.tournamentDate}
+                  venueString={venueString}
+                  motto={tournament.motto}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="overview">
