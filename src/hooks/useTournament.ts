@@ -36,6 +36,7 @@ function loadTournament(): Tournament {
     earlyFinishEnabled: false,
     teams: [],
     teamPlayers: [],
+    kaiserDurationMinutes: 10,
   };
 }
 
@@ -188,6 +189,7 @@ export function useTournament() {
       earlyFinishEnabled: false,
       teams: [],
       teamPlayers: [],
+      kaiserDurationMinutes: 10,
     });
   }, []);
 

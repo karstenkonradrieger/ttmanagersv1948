@@ -24,6 +24,7 @@ import { generateGroupStageReport } from '@/components/GroupStageReport';
 import { TournamentSettingsDialog } from '@/components/TournamentSettingsDialog';
 import { TeamManager } from '@/components/TeamManager';
 import { TeamEncounterScoring } from '@/components/TeamEncounterScoring';
+import { KaiserScoring } from '@/components/KaiserScoring';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield } from 'lucide-react';
@@ -69,6 +70,8 @@ const Index = () => {
     encounterGames,
     loadEncounterGames,
     updateEncounterGameScore,
+    updateKaiserDuration,
+    generateNextKaiserRound,
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
@@ -82,6 +85,8 @@ const Index = () => {
   const isGroupKnockout = tournament.mode === 'group_knockout';
   const isDoubleKnockout = tournament.mode === 'double_knockout';
   const isSwiss = tournament.mode === 'swiss';
+  const isKaiser = tournament.mode === 'kaiser';
+  const isHandicap = tournament.mode === 'handicap';
   const venueString = [tournament.venueStreet, tournament.venueHouseNumber, tournament.venuePostalCode, tournament.venueCity].filter(Boolean).join(' ') || undefined;
 
   const handleImportClubsWithPlayers = useCallback(async (data: Array<{ clubName: string; players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }> }>) => {
@@ -176,7 +181,7 @@ const Index = () => {
     );
   }
 
-  const modeLabel = isRoundRobin ? 'Jeder gg. Jeden' : isGroupKnockout ? 'Gruppen+KO' : isDoubleKnockout ? 'Doppel-KO' : isSwiss ? 'Schweizer' : 'KO';
+  const modeLabel = isRoundRobin ? 'Jeder gg. Jeden' : isGroupKnockout ? 'Gruppen+KO' : isDoubleKnockout ? 'Doppel-KO' : isSwiss ? 'Schweizer' : isKaiser ? 'Kaiser' : isHandicap ? 'Vorgabe' : 'KO';
   const typeLabel = isTeam ? 'Mannschaft' : isDoubles ? 'Doppel' : 'Einzel';
 
   const tabCount = isTeam ? 7 : isDoubles ? 7 : 6;
@@ -247,7 +252,7 @@ const Index = () => {
               <Button
                 onClick={() => {
                   generateBracket();
-                  setTab(isRoundRobin || isSwiss ? 'scoring' : 'bracket');
+                  setTab(isRoundRobin || isSwiss || isKaiser || isHandicap ? 'scoring' : 'bracket');
                 }}
                 className="h-9 font-semibold glow-green"
                 size="sm"
@@ -351,7 +356,7 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger value="bracket" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <Swords className="h-4 w-4" />
-              <span className="hidden sm:inline">{isRoundRobin || isSwiss ? 'Tabelle' : isGroupKnockout ? 'Gruppen' : 'Bracket'}</span>
+              <span className="hidden sm:inline">{isRoundRobin || isSwiss || isHandicap ? 'Tabelle' : isKaiser ? 'Rangliste' : isGroupKnockout ? 'Gruppen' : 'Bracket'}</span>
             </TabsTrigger>
             <TabsTrigger value="scoring" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <PenLine className="h-4 w-4" />
@@ -554,12 +559,16 @@ const Index = () => {
                   currentRound={tournament.rounds}
                   isDoubles={isDoubles}
                 />
-              ) : isRoundRobin ? (
+              ) : isRoundRobin || isHandicap ? (
                 <RoundRobinStandings
                   matches={tournament.matches}
                   getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
                   isDoubles={isDoubles}
                 />
+              ) : isKaiser ? (
+                <div className="text-center text-muted-foreground py-8">
+                  <p>Die Kaiser-Rangliste findest du im Tab „Ergebnis".</p>
+                </div>
               ) : (
                 <TournamentBracket
                   matches={tournament.matches}
@@ -573,7 +582,24 @@ const Index = () => {
             </TabsContent>
 
             <TabsContent value="scoring">
-              {isTeam && tournament.teamMode ? (
+              {isKaiser ? (
+                <KaiserScoring
+                  matches={tournament.matches}
+                  players={tournament.players}
+                  getPlayer={getPlayer}
+                  getParticipantName={getParticipantName}
+                  onUpdateScore={updateMatchScore}
+                  onSetActive={setMatchActive}
+                  onGenerateNextRound={generateNextKaiserRound}
+                  kaiserDurationMinutes={tournament.kaiserDurationMinutes}
+                  onUpdateDuration={updateKaiserDuration}
+                  currentRound={tournament.rounds}
+                  bestOf={tournament.bestOf}
+                  tableCount={tournament.tableCount}
+                  onTableCountChange={setTableCount}
+                  started={tournament.started}
+                />
+              ) : isTeam && tournament.teamMode ? (
                 <TeamEncounterScoring
                   matches={tournament.matches}
                   teams={tournament.teams}
@@ -611,6 +637,8 @@ const Index = () => {
                   tournamentDate={tournament.tournamentDate}
                   venueString={venueString}
                   motto={tournament.motto}
+                  isHandicap={isHandicap}
+                  players={tournament.players}
                 />
               )}
             </TabsContent>

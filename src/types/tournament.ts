@@ -42,7 +42,25 @@ export interface DoublesPair {
   pairName: string;
 }
 
-export type TournamentMode = 'knockout' | 'double_knockout' | 'round_robin' | 'group_knockout' | 'swiss';
+export type TournamentMode = 'knockout' | 'double_knockout' | 'round_robin' | 'group_knockout' | 'swiss' | 'kaiser' | 'handicap';
+
+// Handicap tiers: TTR difference → points advantage per set for weaker player
+export const HANDICAP_TIERS: Array<{ minDiff: number; maxDiff: number; points: number }> = [
+  { minDiff: 0, maxDiff: 99, points: 0 },
+  { minDiff: 100, maxDiff: 199, points: 2 },
+  { minDiff: 200, maxDiff: 299, points: 4 },
+  { minDiff: 300, maxDiff: 399, points: 6 },
+  { minDiff: 400, maxDiff: Infinity, points: 8 },
+];
+
+export function getHandicap(ttr1: number, ttr2: number): { player1Handicap: number; player2Handicap: number } {
+  const diff = Math.abs(ttr1 - ttr2);
+  const tier = HANDICAP_TIERS.find(t => diff >= t.minDiff && diff <= t.maxDiff);
+  const points = tier?.points || 0;
+  if (ttr1 < ttr2) return { player1Handicap: points, player2Handicap: 0 };
+  if (ttr2 < ttr1) return { player1Handicap: 0, player2Handicap: points };
+  return { player1Handicap: 0, player2Handicap: 0 };
+}
 export type TournamentType = 'singles' | 'doubles' | 'team';
 export type TeamMode = 'bundessystem' | 'werner_scheffler' | 'olympic' | 'corbillon';
 
@@ -160,4 +178,5 @@ export interface Tournament {
   earlyFinishEnabled: boolean;
   teams: Team[];
   teamPlayers: TeamPlayer[];
+  kaiserDurationMinutes: number;
 }

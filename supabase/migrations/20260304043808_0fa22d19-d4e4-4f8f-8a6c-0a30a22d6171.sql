@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN kaiser_duration_minutes integer NOT NULL DEFAULT 10;
