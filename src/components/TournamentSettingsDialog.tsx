@@ -181,6 +181,8 @@ export function TournamentSettingsDialog({
                 { value: 'round_robin', label: 'Jeder gegen Jeden (Round Robin)', desc: 'Alle Teilnehmer spielen gegen alle anderen.' },
                 { value: 'group_knockout', label: 'Kombiniertes System', desc: 'Erst Gruppenphase (4er-Gruppen), dann K.O. für die Besten.' },
                 { value: 'swiss', label: 'Schweizer System', desc: 'Ähnliche Bilanzen spielen gegeneinander. Kein Ausscheiden.' },
+                { value: 'kaiser', label: 'Kaiserspiel (King of the Hill)', desc: 'Gewinner rücken auf, Verlierer ab. Timer-basiert.' },
+                { value: 'handicap', label: 'Vorgabeturnier (Handicap)', desc: 'Schwächere starten mit Punktevorsprung pro Satz.' },
               ].map(opt => (
                 <div key={opt.value} className="flex items-start space-x-2">
                   <RadioGroupItem value={opt.value} id={`edit-mode-${opt.value}`} disabled={started} className="mt-0.5" />

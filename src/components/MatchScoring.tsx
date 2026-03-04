@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Match, Player, SetScore } from '@/types/tournament';
+import { Match, Player, SetScore, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,6 +26,8 @@ interface Props {
   tournamentDate?: string | null;
   venueString?: string;
   motto?: string;
+  isHandicap?: boolean;
+  players?: Player[];
 }
 
 const announceMatch = (table: number | undefined, player1Name: string, player2Name: string, nextPlayer1Name?: string, nextPlayer2Name?: string) => {
@@ -48,8 +50,15 @@ const announceMatch = (table: number | undefined, player1Name: string, player2Na
   } catch { }
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, isHandicap = false, players = [] }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
+
+  const computeHandicap = (match: Match, gp: (id: string | null) => Player | null) => {
+    const p1 = gp(match.player1Id);
+    const p2 = gp(match.player2Id);
+    if (!p1 || !p2) return null;
+    return getHandicap(p1.ttr, p2.ttr);
+  };
 
   const pendingMatches = matches.filter(
     m => m.status !== 'completed' && m.player1Id && m.player2Id
@@ -206,9 +215,10 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
             Alle SR-Zettel drucken
           </Button>
         }>
-          {activeMatches.map(m => (
-            <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} getParticipantName={getParticipantName} tournamentName={tournamentName} rounds={rounds} tournamentId={tournamentId} />
-          ))}
+          {activeMatches.map(m => {
+            const handicapInfo = isHandicap ? computeHandicap(m, getPlayer) : null;
+            return <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} getParticipantName={getParticipantName} tournamentName={tournamentName} rounds={rounds} tournamentId={tournamentId} handicapInfo={handicapInfo} />;
+          })}
         </Section>
       )}
 
@@ -216,9 +226,10 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
         <Section title="⏳ Anstehende Spiele">
           {pendingMatches
             .filter(m => m.status === 'pending')
-            .map(m => (
-              <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={handleSetActive} freeTables={freeTables} />
-            ))}
+            .map(m => {
+              const handicapInfo = isHandicap ? computeHandicap(m, getPlayer) : null;
+              return <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={handleSetActive} freeTables={freeTables} handicapInfo={handicapInfo} />;
+            })}
         </Section>
       )}
 
@@ -257,11 +268,12 @@ function Section({ title, children, action }: { title: string; children: React.R
   );
 }
 
-function PendingMatch({ match, getPlayer, onSetActive, freeTables }: {
+function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   onSetActive: (id: string, table?: number) => void;
   freeTables: number[];
+  handicapInfo?: { player1Handicap: number; player2Handicap: number } | null;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
@@ -272,8 +284,14 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables }: {
       <div className="flex items-center justify-between mb-3">
         <div className="text-sm">
           <span className="font-semibold">{p1?.name}</span>
+          {handicapInfo && handicapInfo.player1Handicap > 0 && (
+            <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded">+{handicapInfo.player1Handicap}</span>
+          )}
           <span className="text-muted-foreground mx-2">vs</span>
           <span className="font-semibold">{p2?.name}</span>
+          {handicapInfo && handicapInfo.player2Handicap > 0 && (
+            <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded">+{handicapInfo.player2Handicap}</span>
+          )}
         </div>
       </div>
       <div className="flex gap-2">
@@ -300,7 +318,7 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables }: {
   );
 }
 
-function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantName, tournamentName, rounds, tournamentId }: {
+function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantName, tournamentName, rounds, tournamentId, handicapInfo }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   onUpdateScore: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
@@ -309,6 +327,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   tournamentName: string;
   rounds: number;
   tournamentId: string;
+  handicapInfo?: { player1Handicap: number; player2Handicap: number } | null;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
@@ -319,8 +338,11 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   const [upgradedBestOf, setUpgradedBestOf] = useState(false);
   const effectiveBestOf = canUpgradeBestOf && upgradedBestOf ? 3 : bestOf;
 
+  const handicapP1 = handicapInfo?.player1Handicap || 0;
+  const handicapP2 = handicapInfo?.player2Handicap || 0;
+
   const [sets, setSets] = useState<SetScore[]>(
-    match.sets.length > 0 ? match.sets : [{ player1: 0, player2: 0 }]
+    match.sets.length > 0 ? match.sets : [{ player1: handicapP1, player2: handicapP2 }]
   );
 
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -338,7 +360,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
 
   const addSet = () => {
     if (sets.length < maxSets && !matchOver) {
-      setSets([...sets, { player1: 0, player2: 0 }]);
+      setSets([...sets, { player1: handicapP1, player2: handicapP2 }]);
     }
   };
 

@@ -128,6 +128,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     breakMinutes: tournament.break_minutes ?? 5,
     teamMode: (tournament.team_mode as TeamMode | null) || null,
     earlyFinishEnabled: tournament.early_finish_enabled ?? false,
+    kaiserDurationMinutes: (tournament as any).kaiser_duration_minutes ?? 10,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -222,6 +223,7 @@ export async function updateTournament(id: string, updates: Partial<{
   break_minutes: number;
   team_mode: string | null;
   early_finish_enabled: boolean;
+  kaiser_duration_minutes: number;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')

@@ -501,6 +501,7 @@ export type Database = {
           created_by: string | null
           early_finish_enabled: boolean
           id: string
+          kaiser_duration_minutes: number
           logo_url: string | null
           mode: string
           motto: string
@@ -525,6 +526,7 @@ export type Database = {
           created_by?: string | null
           early_finish_enabled?: boolean
           id?: string
+          kaiser_duration_minutes?: number
           logo_url?: string | null
           mode?: string
           motto?: string
@@ -549,6 +551,7 @@ export type Database = {
           created_by?: string | null
           early_finish_enabled?: boolean
           id?: string
+          kaiser_duration_minutes?: number
           logo_url?: string | null
           mode?: string
           motto?: string

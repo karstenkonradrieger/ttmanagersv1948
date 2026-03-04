@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Player, Match, Tournament, SetScore, DoublesPair, TournamentMode, TournamentType, Team, TeamPlayer, TeamMode, TEAM_GAME_SEQUENCES, EncounterGame } from '@/types/tournament';
+import { Player, Match, Tournament, SetScore, DoublesPair, TournamentMode, TournamentType, Team, TeamPlayer, TeamMode, TEAM_GAME_SEQUENCES, EncounterGame, getHandicap } from '@/types/tournament';
 import { Json } from '@/integrations/supabase/types';
 import * as tournamentService from '@/services/tournamentService';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,6 +29,7 @@ const emptyTournament: Tournament = {
   earlyFinishEnabled: false,
   teams: [],
   teamPlayers: [],
+  kaiserDurationMinutes: 10,
 };
 
 export function useTournamentDb(tournamentId: string | null) {
@@ -161,6 +162,8 @@ export function useTournamentDb(tournamentId: string | null) {
     const isGroupKnockout = tournament.mode === 'group_knockout';
     const isDoubleKnockout = tournament.mode === 'double_knockout';
     const isSwiss = tournament.mode === 'swiss';
+    const isKaiser = tournament.mode === 'kaiser';
+    const isHandicap = tournament.mode === 'handicap';
 
     // Determine participants
     let participants: string[];
@@ -436,6 +439,78 @@ export function useTournamentDb(tournamentId: string | null) {
       } catch (error) {
         console.error('Error generating Swiss round:', error);
         toast.error('Fehler beim Erstellen der Schweizer Runde');
+      }
+      return;
+    }
+
+    if (isKaiser) {
+      // Kaiser: assign players to tables, each table has a match
+      // Shuffle players randomly for initial seating
+      const shuffled = [...participants].sort(() => Math.random() - 0.5);
+      const tableCount = Math.floor(shuffled.length / 2);
+
+      matchesData = [];
+      for (let i = 0; i < tableCount; i++) {
+        matchesData.push({
+          round: 0,
+          position: i,
+          player1Id: shuffled[i * 2],
+          player2Id: shuffled[i * 2 + 1],
+          sets: [],
+          winnerId: null,
+          status: 'pending',
+        });
+      }
+      // If odd number, last player gets a bye (sits out this round)
+      rounds = 1;
+
+      try {
+        const createdMatches = await tournamentService.createMatches(tournamentId, matchesData);
+        await tournamentService.updateTournament(tournamentId, {
+          started: true,
+          rounds: 1,
+          table_count: tableCount,
+        });
+        setTournament(prev => ({
+          ...prev, matches: createdMatches, rounds: 1, started: true, tableCount: tableCount,
+        }));
+      } catch (error) {
+        console.error('Error generating Kaiser round:', error);
+        toast.error('Fehler beim Erstellen des Kaiserspiels');
+      }
+      return;
+    }
+
+    if (isHandicap) {
+      // Handicap mode uses round-robin structure
+      matchesData = [];
+      const roundsList = generateRoundRobinSchedule(participants);
+      rounds = roundsList.length;
+
+      for (let r = 0; r < roundsList.length; r++) {
+        for (let pos = 0; pos < roundsList[r].length; pos++) {
+          const [p1, p2] = roundsList[r][pos];
+          matchesData.push({
+            round: r,
+            position: pos,
+            player1Id: p1,
+            player2Id: p2,
+            sets: [],
+            winnerId: null,
+            status: 'pending',
+          });
+        }
+      }
+
+      try {
+        const createdMatches = await tournamentService.createMatches(tournamentId, matchesData);
+        await tournamentService.updateTournament(tournamentId, { started: true, rounds });
+        setTournament(prev => ({
+          ...prev, matches: createdMatches, rounds, started: true,
+        }));
+      } catch (error) {
+        console.error('Error generating handicap bracket:', error);
+        toast.error('Fehler beim Erstellen des Vorgabeturniers');
       }
       return;
     }
@@ -1496,6 +1571,75 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournament.bestOf, tournament.teamMode, tournament.earlyFinishEnabled, tournament.matches]);
 
+  const updateKaiserDuration = useCallback(async (minutes: number) => {
+    if (!tournamentId) return;
+    try {
+      await tournamentService.updateTournament(tournamentId, { kaiser_duration_minutes: minutes });
+      setTournament(prev => ({ ...prev, kaiserDurationMinutes: minutes }));
+    } catch (error) {
+      console.error('Error updating kaiser duration:', error);
+    }
+  }, [tournamentId]);
+
+  const generateNextKaiserRound = useCallback(async () => {
+    if (!tournamentId || tournament.mode !== 'kaiser') return;
+
+    const currentRound = tournament.rounds;
+    const lastRoundMatches = tournament.matches.filter(m => m.round === currentRound - 1);
+
+    if (lastRoundMatches.some(m => m.status !== 'completed')) {
+      toast.error('Alle Spiele der aktuellen Runde müssen beendet sein.');
+      return;
+    }
+
+    // Collect winners and losers per table (sorted by table/position)
+    const sorted = [...lastRoundMatches].sort((a, b) => a.position - b.position);
+    const winners: string[] = [];
+    const losers: string[] = [];
+    for (const match of sorted) {
+      winners.push(match.winnerId!);
+      losers.push(match.player1Id === match.winnerId ? match.player2Id! : match.player1Id!);
+    }
+
+    // Build new order: Kaiser winner stays, losers drop, winners rise
+    const newOrder: string[] = [];
+    newOrder.push(winners[0]); // Kaiser stays at top
+    for (let i = 0; i < sorted.length - 1; i++) {
+      newOrder.push(losers[i]);
+      if (i + 1 < winners.length) {
+        newOrder.push(winners[i + 1]);
+      }
+    }
+    newOrder.push(losers[sorted.length - 1]); // last loser stays
+
+    // Handle bye players (odd count)
+    const inMatches = new Set(sorted.flatMap(m => [m.player1Id, m.player2Id].filter(Boolean) as string[]));
+    const byePlayers = tournament.players.map(p => p.id).filter(id => !inMatches.has(id));
+    for (const bp of byePlayers) newOrder.push(bp);
+
+    const newMatches: Omit<Match, 'id'>[] = [];
+    const tableCount = Math.floor(newOrder.length / 2);
+    for (let i = 0; i < tableCount; i++) {
+      newMatches.push({
+        round: currentRound, position: i,
+        player1Id: newOrder[i * 2], player2Id: newOrder[i * 2 + 1],
+        sets: [], winnerId: null, status: 'pending',
+      });
+    }
+
+    try {
+      const created = await tournamentService.createMatches(tournamentId, newMatches);
+      await tournamentService.updateTournament(tournamentId, { rounds: currentRound + 1 });
+      setTournament(prev => ({
+        ...prev, matches: [...prev.matches, ...created], rounds: currentRound + 1,
+      }));
+      toast.success(`Kaiser-Runde ${currentRound + 1} gestartet`);
+    } catch (error) {
+      console.error('Error generating Kaiser round:', error);
+      toast.error('Fehler beim Generieren der nächsten Runde');
+    }
+  }, [tournamentId, tournament.mode, tournament.rounds, tournament.matches, tournament.players]);
+
   return {
     tournament,
     loading,
@@ -1532,6 +1676,8 @@ export function useTournamentDb(tournamentId: string | null) {
     loadEncounterGames,
     updateEncounterGameScore,
     reload: loadTournament,
+    updateKaiserDuration,
+    generateNextKaiserRound,
   };
 }
 

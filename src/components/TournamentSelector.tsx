@@ -122,6 +122,8 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                     { value: 'round_robin', label: 'Jeder gegen Jeden (Round Robin)', desc: 'Alle spielen gegen alle anderen.' },
                     { value: 'group_knockout', label: 'Kombiniertes System', desc: 'Erst Gruppenphase, dann K.O.' },
                     { value: 'swiss', label: 'Schweizer System', desc: 'Ähnliche Bilanzen spielen gegeneinander.' },
+                    { value: 'kaiser', label: 'Kaiserspiel (King of the Hill)', desc: 'Gewinner rücken auf, Verlierer ab. Timer-basiert.' },
+                    { value: 'handicap', label: 'Vorgabeturnier (Handicap)', desc: 'Schwächere starten mit Punktevorsprung pro Satz.' },
                   ].map(opt => (
                     <div key={opt.value} className="flex items-start space-x-2">
                       <RadioGroupItem value={opt.value} id={`mode-${opt.value}`} className="mt-0.5" />
@@ -224,7 +226,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                       </span>
                     )}
                     <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
-                      {(t as any).mode === 'round_robin' ? 'Alle gg. Alle' : (t as any).mode === 'group_knockout' ? 'Gruppen+KO' : (t as any).mode === 'double_knockout' ? 'Doppel-KO' : (t as any).mode === 'swiss' ? 'Schweizer' : 'KO'}
+                      {(t as any).mode === 'round_robin' ? 'Alle gg. Alle' : (t as any).mode === 'group_knockout' ? 'Gruppen+KO' : (t as any).mode === 'double_knockout' ? 'Doppel-KO' : (t as any).mode === 'swiss' ? 'Schweizer' : (t as any).mode === 'kaiser' ? 'Kaiser' : (t as any).mode === 'handicap' ? 'Vorgabe' : 'KO'}
                     </span>
                     <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
                       {(t as any).type === 'doubles' ? 'Doppel' : (t as any).type === 'team' ? 'Mannschaft' : 'Einzel'}
