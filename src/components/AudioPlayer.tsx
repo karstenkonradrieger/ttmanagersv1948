@@ -80,7 +80,7 @@ export function AudioPlayer() {
   };
 
   // --- Durchsage ---
-  const startAnnouncement = () => {
+  const playGongAndMute = useCallback((isAutomatic: boolean) => {
     if (announcing) return;
     setAnnouncing(true);
     savedVolumeRef.current = volume;
@@ -96,21 +96,30 @@ export function AudioPlayer() {
       gong.currentTime = 0;
       setGongPlaying(true);
       gong.play().catch(() => {});
-      gong.onended = () => setGongPlaying(false);
+      gong.onended = () => {
+        setGongPlaying(false);
+        if (isAutomatic) {
+          // Signal that gong is done so TTS can start
+          window.dispatchEvent(new CustomEvent('announcement-gong-done'));
+        }
+      };
+    } else if (isAutomatic) {
+      // No gong file available, proceed immediately
+      window.dispatchEvent(new CustomEvent('announcement-gong-done'));
     }
-  };
+  }, [announcing, volume]);
 
-  const endAnnouncement = () => {
-    if (!announcing) return;
+  const startAnnouncement = () => playGongAndMute(false);
+
+  const fadeBackIn = useCallback(() => {
     setAnnouncing(false);
     setGongPlaying(false);
 
-    // Fade music back in
     const audio = audioRef.current;
     if (!audio) return;
     let currentVol = 0;
     const target = muted ? 0 : savedVolumeRef.current;
-    const step = target / 20; // 20 steps over ~1s
+    const step = target / 20;
 
     if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
     fadeIntervalRef.current = setInterval(() => {
@@ -120,7 +129,22 @@ export function AudioPlayer() {
         if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
       }
     }, 50);
-  };
+  }, [muted]);
+
+  const endAnnouncement = () => fadeBackIn();
+
+  // Listen for automatic announcements from MatchScoring
+  useEffect(() => {
+    const handleAutoStart = () => playGongAndMute(true);
+    const handleAutoEnd = () => fadeBackIn();
+
+    window.addEventListener('announcement-start', handleAutoStart);
+    window.addEventListener('announcement-end', handleAutoEnd);
+    return () => {
+      window.removeEventListener('announcement-start', handleAutoStart);
+      window.removeEventListener('announcement-end', handleAutoEnd);
+    };
+  }, [playGongAndMute, fadeBackIn]);
 
   return (
     <>
