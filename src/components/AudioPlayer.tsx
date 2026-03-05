@@ -10,9 +10,9 @@ const RADIO_URL = 'https://icecast.v09.absolutradio.de/absolut-oldieclassics/liv
 
 // Placeholder local playlist
 const PLAYLIST = [
-  { title: 'Hintergrundmusik 1', src: '/audio/track1.mp3' },
-  { title: 'Hintergrundmusik 2', src: '/audio/track2.mp3' },
-  { title: 'Hintergrundmusik 3', src: '/audio/track3.mp3' },
+  { title: 'Ambient Background', src: '/audio/track1.mp3' },
+  { title: 'Soft Ambient', src: '/audio/track2.mp3' },
+  { title: 'Relaxing Ambient', src: '/audio/track3.mp3' },
 ];
 
 const GONG_SRC = '/audio/gong.mp3';
