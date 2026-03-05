@@ -30,6 +30,20 @@ interface Props {
   players?: Player[];
 }
 
+const speakText = (text: string) => {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'de-DE';
+  utterance.rate = 0.7;
+  const voices = speechSynthesis.getVoices();
+  const maleDeVoice = voices.find(v => v.lang.startsWith('de') && /male|mann|männlich/i.test(v.name) && !/female|frau|weiblich/i.test(v.name))
+    || voices.find(v => v.lang.startsWith('de') && !/female|frau|weiblich/i.test(v.name));
+  if (maleDeVoice) utterance.voice = maleDeVoice;
+  utterance.onend = () => {
+    window.dispatchEvent(new CustomEvent('announcement-end'));
+  };
+  speechSynthesis.speak(utterance);
+};
+
 const announceMatch = (table: number | undefined, player1Name: string, player2Name: string, nextPlayer1Name?: string, nextPlayer2Name?: string) => {
   try {
     const tableWords: Record<number, string> = { 1: 'eins', 2: 'zwei', 3: 'drei', 4: 'vier', 5: 'fünf', 6: 'sechs', 7: 'sieben', 8: 'acht', 9: 'neun', 10: 'zehn', 11: 'elf', 12: 'zwölf', 13: 'dreizehn', 14: 'vierzehn', 15: 'fünfzehn', 16: 'sechzehn', 17: 'siebzehn', 18: 'achtzehn', 19: 'neunzehn', 20: 'zwanzig' };
@@ -39,14 +53,14 @@ const announceMatch = (table: number | undefined, player1Name: string, player2Na
     if (nextPlayer1Name && nextPlayer2Name) {
       text += ` Es bereiten sich vor: ${nextPlayer1Name} gegen ${nextPlayer2Name}.`;
     }
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'de-DE';
-    utterance.rate = 0.7;
-    const voices = speechSynthesis.getVoices();
-    const maleDeVoice = voices.find(v => v.lang.startsWith('de') && /male|mann|männlich/i.test(v.name) && !/female|frau|weiblich/i.test(v.name))
-      || voices.find(v => v.lang.startsWith('de') && !/female|frau|weiblich/i.test(v.name));
-    if (maleDeVoice) utterance.voice = maleDeVoice;
-    speechSynthesis.speak(utterance);
+
+    // Dispatch event to mute music and play gong, then speak after gong ends
+    const onGongReady = () => {
+      window.removeEventListener('announcement-gong-done', onGongReady);
+      speakText(text);
+    };
+    window.addEventListener('announcement-gong-done', onGongReady);
+    window.dispatchEvent(new CustomEvent('announcement-start'));
   } catch { }
 };
 
