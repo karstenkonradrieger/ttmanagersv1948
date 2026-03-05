@@ -10,6 +10,7 @@ import StandingsView from "./pages/StandingsView";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 const queryClient = new QueryClient();
 
@@ -52,14 +53,17 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
-          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/live/:id" element={<LiveView />} />
-          <Route path="/standings/:id" element={<StandingsView />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="pb-16">
+          <Routes>
+            <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/live/:id" element={<LiveView />} />
+            <Route path="/standings/:id" element={<StandingsView />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+        <AudioPlayer />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
