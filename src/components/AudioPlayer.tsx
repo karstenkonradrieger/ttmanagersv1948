@@ -1,21 +1,22 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Play, Pause, Radio, Music, Volume2, VolumeX, SkipBack, SkipForward, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import { usePlaylistTracks } from '@/hooks/usePlaylistTracks';
+import { PlaylistManager } from '@/components/PlaylistManager';
 
 type AudioSource = 'radio' | 'playlist';
 
 const RADIO_URL = 'https://icecast.v09.absolutradio.de/absolut-oldieclassics/live/mp3/high';
 
-// Placeholder local playlist
-const PLAYLIST = [
+const DEFAULT_PLAYLIST = [
   { title: 'Ambient Background', src: '/audio/track1.mp3' },
   { title: 'Soft Ambient', src: '/audio/track2.mp3' },
   { title: 'Relaxing Ambient', src: '/audio/track3.mp3' },
 ];
 
-const GONG_SRC = '/audio/gong.mp3';
+const DEFAULT_GONG = '/audio/gong.mp3';
 
 export function AudioPlayer() {
   const [source, setSource] = useState<AudioSource>('radio');
@@ -31,7 +32,23 @@ export function AudioPlayer() {
   const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const savedVolumeRef = useRef(0.7);
 
-  const currentSrc = source === 'radio' ? RADIO_URL : PLAYLIST[trackIndex]?.src || '';
+  const { tracks: dbTracks, gongTrack, getPublicUrl } = usePlaylistTracks();
+
+  // Build effective playlist from DB tracks or fallback to defaults
+  const playlist = useMemo(() => {
+    if (dbTracks.length > 0) {
+      return dbTracks.map(t => ({ title: t.title, src: getPublicUrl(t.file_path) }));
+    }
+    return DEFAULT_PLAYLIST;
+  }, [dbTracks, getPublicUrl]);
+
+  const gongSrc = useMemo(() => {
+    if (gongTrack) return getPublicUrl(gongTrack.file_path);
+    return DEFAULT_GONG;
+  }, [gongTrack, getPublicUrl]);
+
+  const safeTrackIndex = trackIndex >= playlist.length ? 0 : trackIndex;
+  const currentSrc = source === 'radio' ? RADIO_URL : playlist[safeTrackIndex]?.src || '';
 
   // Apply volume
   useEffect(() => {
@@ -65,17 +82,18 @@ export function AudioPlayer() {
 
   const nextTrack = () => {
     if (source !== 'playlist') return;
-    setTrackIndex((i) => (i + 1) % PLAYLIST.length);
+    setTrackIndex((i) => (i + 1) % playlist.length);
   };
 
   const prevTrack = () => {
     if (source !== 'playlist') return;
-    setTrackIndex((i) => (i - 1 + PLAYLIST.length) % PLAYLIST.length);
+    setTrackIndex((i) => (i - 1 + playlist.length) % playlist.length);
   };
 
   const switchSource = (s: AudioSource) => {
     if (s === source) return;
     setSource(s);
+    setTrackIndex(0);
     setPlaying(true);
   };
 
@@ -85,29 +103,26 @@ export function AudioPlayer() {
     setAnnouncing(true);
     savedVolumeRef.current = volume;
 
-    // Instantly mute music
     if (audioRef.current) {
       audioRef.current.volume = 0;
     }
 
-    // Play gong
     const gong = gongRef.current;
     if (gong) {
+      gong.src = gongSrc;
       gong.currentTime = 0;
       setGongPlaying(true);
       gong.play().catch(() => {});
       gong.onended = () => {
         setGongPlaying(false);
         if (isAutomatic) {
-          // Signal that gong is done so TTS can start
           window.dispatchEvent(new CustomEvent('announcement-gong-done'));
         }
       };
     } else if (isAutomatic) {
-      // No gong file available, proceed immediately
       window.dispatchEvent(new CustomEvent('announcement-gong-done'));
     }
-  }, [announcing, volume]);
+  }, [announcing, volume, gongSrc]);
 
   const startAnnouncement = () => playGongAndMute(false);
 
@@ -133,7 +148,7 @@ export function AudioPlayer() {
 
   const endAnnouncement = () => fadeBackIn();
 
-  // Listen for automatic announcements from MatchScoring
+  // Listen for automatic announcements
   useEffect(() => {
     const handleAutoStart = () => playGongAndMute(true);
     const handleAutoEnd = () => fadeBackIn();
@@ -149,7 +164,7 @@ export function AudioPlayer() {
   return (
     <>
       <audio ref={audioRef} preload="none" />
-      <audio ref={gongRef} src={GONG_SRC} preload="auto" />
+      <audio ref={gongRef} src={gongSrc} preload="auto" />
 
       <footer className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md">
         <div className="container flex items-center gap-3 py-2 flex-wrap sm:flex-nowrap">
@@ -188,7 +203,7 @@ export function AudioPlayer() {
                 Absolut Oldie Classics
               </span>
             ) : (
-              <span>{PLAYLIST[trackIndex]?.title ?? '—'}</span>
+              <span>{playlist[safeTrackIndex]?.title ?? '—'}</span>
             )}
           </div>
 
@@ -227,6 +242,9 @@ export function AudioPlayer() {
               className="flex-1"
             />
           </div>
+
+          {/* Playlist manager */}
+          <PlaylistManager />
 
           {/* Durchsage button */}
           {!announcing ? (
