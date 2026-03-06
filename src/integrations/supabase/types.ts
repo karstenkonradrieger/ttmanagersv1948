@@ -425,6 +425,36 @@ export type Database = {
           },
         ]
       }
+      playlist_tracks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          file_path: string
+          id: string
+          is_gong: boolean
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          file_path: string
+          id?: string
+          is_gong?: boolean
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          file_path?: string
+          id?: string
+          is_gong?: boolean
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
       team_players: {
         Row: {
           created_at: string
