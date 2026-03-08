@@ -49,6 +49,7 @@ export function useClubPlayers() {
           phone: row.phone || '',
           email: row.email || '',
           photoConsent: row.photo_consent ?? false,
+          voiceNameUrl: row.voice_name_url || null,
         }))
       );
     } catch (error) {
