@@ -5,6 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { usePlaylistTracks } from '@/hooks/usePlaylistTracks';
 import { PlaylistManager } from '@/components/PlaylistManager';
+import { AnnouncementPhraseManager } from '@/components/AnnouncementPhraseManager';
 
 type AudioSource = 'radio' | 'playlist';
 
@@ -245,6 +246,9 @@ export function AudioPlayer() {
 
           {/* Playlist manager */}
           <PlaylistManager />
+
+          {/* Announcement phrase manager */}
+          <AnnouncementPhraseManager />
 
           {/* Durchsage button */}
           {!announcing ? (

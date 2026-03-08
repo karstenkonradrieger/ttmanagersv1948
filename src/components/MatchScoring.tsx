@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Match, Player, SetScore, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Check, Play, X, Zap, Settings, Printer, FileText } from 'lucide-react';
 import { printRefereeSheet, printAllRefereeSheets } from '@/components/RefereeSheet';
 import { MatchPhotos } from '@/components/MatchPhotos';
 import { generateMatchReport } from '@/components/MatchReport';
+import { useAnnouncementPhrases } from '@/hooks/useAnnouncementPhrases';
 
 interface Props {
   matches: Match[];
@@ -63,33 +64,73 @@ const announceMatch = (
   player2VoiceUrl?: string | null,
   nextPlayer1VoiceUrl?: string | null,
   nextPlayer2VoiceUrl?: string | null,
+  getPhraseAudio?: (key: string) => string | null,
 ) => {
   try {
     const tableWords: Record<number, string> = { 1: 'eins', 2: 'zwei', 3: 'drei', 4: 'vier', 5: 'fünf', 6: 'sechs', 7: 'sieben', 8: 'acht', 9: 'neun', 10: 'zehn', 11: 'elf', 12: 'zwölf', 13: 'dreizehn', 14: 'vierzehn', 15: 'fünfzehn', 16: 'sechzehn', 17: 'siebzehn', 18: 'achtzehn', 19: 'neunzehn', 20: 'zwanzig' };
     const tableSpoken = table ? (tableWords[table] || String(table)) : undefined;
-    const tableText = tableSpoken ? `Nächstes Spiel am Tisch ${tableSpoken}.` : 'Nächstes Spiel.';
 
-    const hasVoice = player1VoiceUrl || player2VoiceUrl || nextPlayer1VoiceUrl || nextPlayer2VoiceUrl;
+    // Helper: play phrase audio or fall back to TTS
+    const playPhrase = async (phraseKey: string, fallbackText: string) => {
+      const url = getPhraseAudio?.(phraseKey);
+      if (url) {
+        await playAudioFile(url);
+      } else {
+        await speakText(fallbackText);
+      }
+    };
+
+    // Helper: play a name (recorded voice or TTS)
+    const playName = async (name: string, voiceUrl?: string | null) => {
+      if (voiceUrl) {
+        await playAudioFile(voiceUrl);
+      } else {
+        await speakText(name);
+      }
+    };
+
+    const hasAnyVoice = player1VoiceUrl || player2VoiceUrl || nextPlayer1VoiceUrl || nextPlayer2VoiceUrl;
+    const hasAnyPhrase = getPhraseAudio && (
+      getPhraseAudio('naechstes_spiel_tisch') || getPhraseAudio('naechstes_spiel') ||
+      getPhraseAudio('es_spielt') || getPhraseAudio('gegen') || getPhraseAudio('vorbereitung') ||
+      (table && getPhraseAudio(`tisch_${table}`))
+    );
+    const useMixedMode = hasAnyVoice || hasAnyPhrase;
 
     const onGongReady = async () => {
       window.removeEventListener('announcement-gong-done', onGongReady);
 
-      if (hasVoice) {
-        // Mixed mode: use TTS for structure, recorded audio for names
-        await speakText(tableText + ' Es spielt');
-        if (player1VoiceUrl) { await playAudioFile(player1VoiceUrl); } else { await speakText(player1Name); }
-        await speakText('gegen');
-        if (player2VoiceUrl) { await playAudioFile(player2VoiceUrl); } else { await speakText(player2Name); }
+      if (useMixedMode) {
+        // Mixed mode: use recorded phrases/names where available, TTS as fallback
+        if (table) {
+          // Try combined "Nächstes Spiel am Tisch" phrase
+          const combinedUrl = getPhraseAudio?.('naechstes_spiel_tisch');
+          if (combinedUrl) {
+            await playAudioFile(combinedUrl);
+            await playPhrase(`tisch_${table}`, tableSpoken || String(table));
+          } else {
+            await speakText(`Nächstes Spiel am Tisch`);
+            await playPhrase(`tisch_${table}`, tableSpoken || String(table));
+          }
+        } else {
+          await playPhrase('naechstes_spiel', 'Nächstes Spiel.');
+        }
+
+        await playPhrase('es_spielt', 'Es spielt');
+        await playName(player1Name, player1VoiceUrl);
+        await playPhrase('gegen', 'gegen');
+        await playName(player2Name, player2VoiceUrl);
 
         if (nextPlayer1Name && nextPlayer2Name) {
-          await speakText('Es bereiten sich vor:');
-          if (nextPlayer1VoiceUrl) { await playAudioFile(nextPlayer1VoiceUrl); } else { await speakText(nextPlayer1Name); }
-          await speakText('gegen');
-          if (nextPlayer2VoiceUrl) { await playAudioFile(nextPlayer2VoiceUrl); } else { await speakText(nextPlayer2Name); }
+          await playPhrase('vorbereitung', 'Es bereiten sich vor:');
+          await playName(nextPlayer1Name, nextPlayer1VoiceUrl);
+          await playPhrase('gegen', 'gegen');
+          await playName(nextPlayer2Name, nextPlayer2VoiceUrl);
         }
         window.dispatchEvent(new CustomEvent('announcement-end'));
       } else {
         // Pure TTS mode (original)
+        const tableText = tableSpoken ? `Nächstes Spiel am Tisch ${tableSpoken}.` : 'Nächstes Spiel.';
         let text = `${tableText} Es spielt ${player1Name} gegen ${player2Name}.`;
         if (nextPlayer1Name && nextPlayer2Name) {
           text += ` Es bereiten sich vor: ${nextPlayer1Name} gegen ${nextPlayer2Name}.`;
@@ -112,6 +153,7 @@ const announceMatch = (
 
 export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, isHandicap = false, players = [] }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
+  const { getPhraseAudioUrl } = useAnnouncementPhrases();
 
   const computeHandicap = (match: Match, gp: (id: string | null) => Player | null) => {
     const p1 = gp(match.player1Id);
@@ -152,6 +194,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
         getVoiceUrl(match.player2Id),
         next ? getVoiceUrl(next.player1Id) : null,
         next ? getVoiceUrl(next.player2Id) : null,
+        getPhraseAudioUrl,
       );
     }
     if (autoPrint) {
@@ -198,6 +241,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
             getVoiceUrl(m.player2Id),
             nextPrep ? getVoiceUrl(nextPrep.player1Id) : null,
             nextPrep ? getVoiceUrl(nextPrep.player2Id) : null,
+            getPhraseAudioUrl,
           );
         }, i * 500);
       });
