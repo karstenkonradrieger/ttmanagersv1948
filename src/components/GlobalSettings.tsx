@@ -26,14 +26,9 @@ export function GlobalSettings() {
           <p className="text-sm text-muted-foreground mb-4">
             Nimm natürliche Sprachaufnahmen für die Turnier-Durchsagen auf. Diese Aufnahmen ersetzen die synthetische Stimme und gelten für alle Turniere.
           </p>
-          <AnnouncementPhraseManagerInline />
+          <AnnouncementPhraseManager inline />
         </CardContent>
       </Card>
     </div>
   );
-}
-
-// Inline version that renders directly (not as a dialog trigger)
-function AnnouncementPhraseManagerInline() {
-  return <AnnouncementPhraseManager inline />;
 }
