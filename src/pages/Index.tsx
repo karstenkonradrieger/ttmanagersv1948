@@ -76,7 +76,7 @@ const Index = () => {
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
-  const [homeTab, setHomeTab] = useState<'tournaments' | 'clubs'>('tournaments');
+  const [homeTab, setHomeTab] = useState<'tournaments' | 'clubs' | 'settings'>('tournaments');
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState('');
 
