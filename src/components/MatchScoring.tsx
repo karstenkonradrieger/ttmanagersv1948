@@ -155,9 +155,10 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
     return matches.find(m => m.status === 'pending' && m.player1Id && m.player2Id && m.id !== excludeId);
   };
 
+  // Use the players array directly for voice URLs (getPlayer may return fake objects in doubles mode)
   const getVoiceUrl = (id: string | null) => {
     if (!id) return null;
-    const player = getPlayer(id);
+    const player = players.find(p => p.id === id);
     console.log('[Voice] getVoiceUrl for', id, '→ player:', player?.name, '→ voiceNameUrl:', player?.voiceNameUrl);
     return player?.voiceNameUrl || null;
   };
