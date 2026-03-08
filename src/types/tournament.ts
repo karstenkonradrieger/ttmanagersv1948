@@ -184,4 +184,5 @@ export interface Tournament {
   sport: string;
   directionsPdfUrl: string | null;
   googleMapsLink: string | null;
+  certificateText: string;
 }

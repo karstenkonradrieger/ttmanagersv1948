@@ -266,6 +266,7 @@ export async function updateTournament(id: string, updates: Partial<{
   tournament_end_date: string | null;
   directions_pdf_url: string | null;
   google_maps_link: string | null;
+  certificate_text: string;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')
