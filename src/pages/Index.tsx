@@ -411,7 +411,7 @@ const Index = () => {
                     getPlayersForClub={getPlayersForClub}
                     onImportPlayers={(players) => {
                       for (const p of players) {
-                        addPlayer(p.name, p.club, p.ttr, p.gender, p.birthDate, p.postalCode, p.city, p.street, p.houseNumber, p.phone);
+                        addPlayer(p.name, p.club, p.ttr, p.gender, p.birthDate, p.postalCode, p.city, p.street, p.houseNumber, p.phone, p.voiceNameUrl || undefined);
                       }
                     }}
                     existingPlayerNames={tournament.players.map(p => p.name)}

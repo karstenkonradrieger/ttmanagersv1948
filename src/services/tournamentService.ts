@@ -277,6 +277,7 @@ export async function addPlayerToDb(tournamentId: string, player: Omit<Player, '
     street: data.street,
     houseNumber: data.house_number,
     phone: data.phone,
+    voiceNameUrl: data.voice_name_url || null,
   };
 }
 

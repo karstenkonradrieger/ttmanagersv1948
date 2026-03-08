@@ -75,12 +75,6 @@ export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved, sto
       const { data: urlData } = supabase.storage.from('audio').getPublicUrl(filePath);
       const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
-      const { error: dbError } = await supabase
-        .from('players')
-        .update({ voice_name_url: publicUrl } as any)
-        .eq('id', playerId);
-      if (dbError) throw dbError;
-
       onSaved(publicUrl);
       toast.success(`Sprachaufnahme für ${playerName} gespeichert`);
       setOpen(false);
