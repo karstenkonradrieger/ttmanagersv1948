@@ -34,17 +34,34 @@ interface Props {
 const playAudioFile = (url: string): Promise<boolean> => {
   return new Promise((resolve) => {
     try {
-      const audio = new Audio(url);
-      audio.onended = () => resolve(true);
-      audio.onerror = () => {
-        console.warn('Audio playback failed for:', url);
+      console.log('[Announcement] Playing audio:', url);
+      const audio = new Audio();
+      audio.preload = 'auto';
+      
+      audio.oncanplaythrough = () => {
+        audio.play().then(() => {
+          console.log('[Announcement] Playing started:', url);
+        }).catch((err) => {
+          console.warn('[Announcement] play() rejected after load:', url, err);
+          resolve(false);
+        });
+      };
+      
+      audio.onended = () => {
+        console.log('[Announcement] Playback ended:', url);
+        resolve(true);
+      };
+      
+      audio.onerror = (e) => {
+        console.warn('[Announcement] Audio error for:', url, e);
         resolve(false);
       };
-      audio.play().catch(() => {
-        console.warn('Audio play() rejected for:', url);
-        resolve(false);
-      });
-    } catch {
+      
+      // Set source after attaching handlers
+      audio.src = url;
+      audio.load();
+    } catch (err) {
+      console.error('[Announcement] Exception:', err);
       resolve(false);
     }
   });
