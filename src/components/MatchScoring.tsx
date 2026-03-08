@@ -84,16 +84,18 @@ const announceMatch = (
     const playPhrase = async (phraseKey: string, fallbackText: string) => {
       const url = getPhraseAudio?.(phraseKey);
       if (url) {
-        await playAudioFile(url);
+        const ok = await playAudioFile(url);
+        if (!ok) await speakText(fallbackText);
       } else {
         await speakText(fallbackText);
       }
     };
 
-    // Helper: play a name (recorded voice or TTS)
+    // Helper: play a name (recorded voice or TTS, with fallback)
     const playName = async (name: string, voiceUrl?: string | null) => {
       if (voiceUrl) {
-        await playAudioFile(voiceUrl);
+        const ok = await playAudioFile(voiceUrl);
+        if (!ok) await speakText(name);
       } else {
         await speakText(name);
       }
