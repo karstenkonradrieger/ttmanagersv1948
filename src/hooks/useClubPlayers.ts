@@ -139,8 +139,9 @@ export function useClubPlayers() {
       if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
       if (updates.email !== undefined) dbUpdates.email = updates.email;
       if (updates.photoConsent !== undefined) dbUpdates.photo_consent = updates.photoConsent;
+      if (updates.voiceNameUrl !== undefined) dbUpdates.voice_name_url = updates.voiceNameUrl;
 
-      const { error } = await supabase.from('club_players').update(dbUpdates).eq('id', id);
+      const { error } = await supabase.from('club_players').update(dbUpdates as any).eq('id', id);
       if (error) throw error;
       setPlayers(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
     } catch (error) {

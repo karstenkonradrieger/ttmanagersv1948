@@ -71,6 +71,7 @@ export function ImportFromClubPlayers({ clubs, clubPlayers, getPlayersForClub, o
         street: p.street,
         houseNumber: p.houseNumber,
         phone: p.phone,
+        voiceNameUrl: p.voiceNameUrl || null,
       }));
     onImportPlayers(toImport);
     setSelected(new Set());
