@@ -28,6 +28,7 @@ export interface DbTournament {
   sport: string;
   directions_pdf_url: string | null;
   google_maps_link: string | null;
+  certificate_text: string;
 }
 
 export interface DbPlayer {
