@@ -10,9 +10,10 @@ interface Props {
   playerName: string;
   voiceNameUrl: string | null;
   onSaved: (url: string | null) => void;
+  storagePrefix?: string;
 }
 
-export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved }: Props) {
+export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved, storagePrefix = 'voice-names' }: Props) {
   const [open, setOpen] = useState(false);
   const [recording, setRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -61,7 +62,7 @@ export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved }: P
     if (!audioBlob) return;
     setUploading(true);
     try {
-      const filePath = `voice-names/${playerId}.webm`;
+      const filePath = `${storagePrefix}/${playerId}.webm`;
 
       // Delete old file if exists
       await supabase.storage.from('audio').remove([filePath]);
@@ -73,12 +74,6 @@ export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved }: P
 
       const { data: urlData } = supabase.storage.from('audio').getPublicUrl(filePath);
       const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-
-      const { error: dbError } = await supabase
-        .from('players')
-        .update({ voice_name_url: publicUrl } as any)
-        .eq('id', playerId);
-      if (dbError) throw dbError;
 
       onSaved(publicUrl);
       toast.success(`Sprachaufnahme für ${playerName} gespeichert`);
@@ -95,9 +90,8 @@ export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved }: P
   const deleteRecording = async () => {
     setUploading(true);
     try {
-      const filePath = `voice-names/${playerId}.webm`;
+      const filePath = `${storagePrefix}/${playerId}.webm`;
       await supabase.storage.from('audio').remove([filePath]);
-      await supabase.from('players').update({ voice_name_url: null } as any).eq('id', playerId);
       onSaved(null);
       setAudioBlob(null);
       setPreviewUrl(null);

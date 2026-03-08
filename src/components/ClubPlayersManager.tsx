@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, UserPlus, Pencil, Check, X, Download, Upload, Mail, Camera } from 'lucide-react';
+import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { toast } from 'sonner';
 
 interface Props {
@@ -431,6 +432,13 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                 )}
                               </div>
                               <div className="flex items-center gap-0.5">
+                                <VoiceRecorder
+                                  playerId={player.id}
+                                  playerName={player.name}
+                                  voiceNameUrl={player.voiceNameUrl}
+                                  onSaved={(url) => onUpdatePlayer(player.id, { voiceNameUrl: url })}
+                                  storagePrefix="voice-names-club"
+                                />
                                 <Button variant="ghost" size="icon" onClick={() => startEdit(player)} className="h-7 w-7 text-muted-foreground hover:text-foreground">
                                   <Pencil className="h-3.5 w-3.5" />
                                 </Button>

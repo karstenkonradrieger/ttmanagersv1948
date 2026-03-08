@@ -58,6 +58,7 @@ export type Database = {
           postal_code: string
           street: string
           ttr: number
+          voice_name_url: string | null
         }
         Insert: {
           birth_date?: string | null
@@ -75,6 +76,7 @@ export type Database = {
           postal_code?: string
           street?: string
           ttr?: number
+          voice_name_url?: string | null
         }
         Update: {
           birth_date?: string | null
@@ -92,6 +94,7 @@ export type Database = {
           postal_code?: string
           street?: string
           ttr?: number
+          voice_name_url?: string | null
         }
         Relationships: [
           {

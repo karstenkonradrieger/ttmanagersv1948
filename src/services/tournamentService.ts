@@ -259,6 +259,7 @@ export async function addPlayerToDb(tournamentId: string, player: Omit<Player, '
       street: player.street,
       house_number: player.houseNumber,
       phone: player.phone,
+      voice_name_url: player.voiceNameUrl || null,
     })
     .select()
     .single();
@@ -276,6 +277,7 @@ export async function addPlayerToDb(tournamentId: string, player: Omit<Player, '
     street: data.street,
     houseNumber: data.house_number,
     phone: data.phone,
+    voiceNameUrl: data.voice_name_url || null,
   };
 }
 
@@ -300,6 +302,7 @@ export async function updatePlayerInDb(playerId: string, updates: Partial<Omit<P
   if (updates.street !== undefined) dbUpdates.street = updates.street;
   if (updates.houseNumber !== undefined) dbUpdates.house_number = updates.houseNumber;
   if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
+  if (updates.voiceNameUrl !== undefined) dbUpdates.voice_name_url = updates.voiceNameUrl;
 
   const { error } = await supabase
     .from('players')

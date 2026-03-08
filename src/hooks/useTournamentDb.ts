@@ -94,10 +94,10 @@ export function useTournamentDb(tournamentId: string | null) {
     };
   }, [tournamentId, loadTournament]);
 
-  const addPlayer = useCallback(async (name: string, club: string, ttr: number, gender: string = '', birthDate: string | null = null, postalCode: string = '', city: string = '', street: string = '', houseNumber: string = '', phone: string = '') => {
+  const addPlayer = useCallback(async (name: string, club: string, ttr: number, gender: string = '', birthDate: string | null = null, postalCode: string = '', city: string = '', street: string = '', houseNumber: string = '', phone: string = '', voiceNameUrl?: string) => {
     if (!tournamentId) return;
     try {
-      const player = await tournamentService.addPlayerToDb(tournamentId, { name, club, gender, birthDate, ttr, postalCode, city, street, houseNumber, phone });
+      const player = await tournamentService.addPlayerToDb(tournamentId, { name, club, gender, birthDate, ttr, postalCode, city, street, houseNumber, phone, voiceNameUrl: voiceNameUrl || null });
       setTournament(prev => ({
         ...prev,
         players: [...prev.players, player],

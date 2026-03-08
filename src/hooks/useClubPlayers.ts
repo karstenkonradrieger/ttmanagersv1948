@@ -18,6 +18,7 @@ export interface ClubPlayer {
   phone: string;
   email: string;
   photoConsent: boolean;
+  voiceNameUrl: string | null;
 }
 
 export function useClubPlayers() {
@@ -48,6 +49,7 @@ export function useClubPlayers() {
           phone: row.phone || '',
           email: row.email || '',
           photoConsent: row.photo_consent ?? false,
+          voiceNameUrl: row.voice_name_url || null,
         }))
       );
     } catch (error) {
@@ -112,6 +114,7 @@ export function useClubPlayers() {
         phone: data.phone || '',
         email: data.email || '',
         photoConsent: data.photo_consent ?? false,
+        voiceNameUrl: (data as any).voice_name_url || null,
       };
       setPlayers(prev => [...prev, mapped].sort((a, b) => a.name.localeCompare(b.name)));
       return mapped;
@@ -136,8 +139,9 @@ export function useClubPlayers() {
       if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
       if (updates.email !== undefined) dbUpdates.email = updates.email;
       if (updates.photoConsent !== undefined) dbUpdates.photo_consent = updates.photoConsent;
+      if (updates.voiceNameUrl !== undefined) dbUpdates.voice_name_url = updates.voiceNameUrl;
 
-      const { error } = await supabase.from('club_players').update(dbUpdates).eq('id', id);
+      const { error } = await supabase.from('club_players').update(dbUpdates as any).eq('id', id);
       if (error) throw error;
       setPlayers(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
     } catch (error) {
