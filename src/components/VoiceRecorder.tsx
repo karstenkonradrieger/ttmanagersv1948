@@ -10,6 +10,7 @@ interface Props {
   playerName: string;
   voiceNameUrl: string | null;
   onSaved: (url: string | null) => void;
+  storagePrefix?: string;
 }
 
 export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved }: Props) {
