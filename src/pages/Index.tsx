@@ -151,13 +151,22 @@ const Index = () => {
               <Building2 className="h-4 w-4" />
               Vereinsverwaltung
             </Button>
+            <Button
+              variant={homeTab === 'settings' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setHomeTab('settings')}
+              className="gap-1.5"
+            >
+              <Settings className="h-4 w-4" />
+              Einstellungen
+            </Button>
           </div>
           {homeTab === 'tournaments' ? (
             <TournamentSelector
               selectedId={selectedTournamentId}
               onSelect={(id) => setSelectedTournamentId(id || null)}
             />
-          ) : (
+          ) : homeTab === 'clubs' ? (
             <ClubPlayersManager
               clubs={clubs}
               clubPlayers={clubPlayers}
@@ -168,6 +177,8 @@ const Index = () => {
               onRemovePlayer={removeClubPlayer}
               getPlayersForClub={getPlayersForClub}
             />
+          ) : (
+            <GlobalSettings />
           )}
         </div>
       </div>
