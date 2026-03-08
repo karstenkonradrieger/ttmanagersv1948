@@ -415,8 +415,8 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                       printPhotoConsentForm({ player, tournamentName, tournamentDate: tournamentDate ?? null, venueString, logoUrl });
                       toast.success(`Fotoerlaubnis für ${player.name} erstellt`);
                     }}
-                    className="text-muted-foreground hover:text-foreground"
-                    title="Fotoerlaubnis drucken"
+                    className="text-destructive hover:text-destructive"
+                    title="⚠ Fotoerlaubnis fehlt – klicken zum Drucken"
                   >
                     <Camera className="h-4 w-4" />
                   </Button>

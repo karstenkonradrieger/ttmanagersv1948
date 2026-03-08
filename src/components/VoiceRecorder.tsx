@@ -118,8 +118,8 @@ export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved }: P
         <Button
           variant="ghost"
           size="icon"
-          className={hasExisting ? 'text-primary hover:text-primary' : 'text-muted-foreground hover:text-foreground'}
-          title={hasExisting ? 'Sprachaufnahme vorhanden – klicken zum Ändern' : 'Namen aufnehmen'}
+          className={hasExisting ? 'text-primary hover:text-primary' : 'text-destructive hover:text-destructive'}
+          title={hasExisting ? 'Sprachaufnahme vorhanden – klicken zum Ändern' : '⚠ Keine Sprachaufnahme – klicken zum Aufnehmen'}
         >
           <Mic className="h-4 w-4" />
         </Button>
