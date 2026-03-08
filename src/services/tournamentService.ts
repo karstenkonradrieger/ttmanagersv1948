@@ -75,6 +75,10 @@ export async function fetchTournaments(): Promise<DbTournament[]> {
     ...t,
     team_mode: t.team_mode || null,
     early_finish_enabled: t.early_finish_enabled ?? false,
+    tournament_end_date: t.tournament_end_date || null,
+    sport: t.sport || 'Tischtennis',
+    directions_pdf_url: t.directions_pdf_url || null,
+    google_maps_link: t.google_maps_link || null,
   }));
 }
 
