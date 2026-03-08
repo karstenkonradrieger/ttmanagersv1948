@@ -85,7 +85,12 @@ export function PlaylistManager() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="audio-file">MP3-Datei</Label>
-            <Input id="audio-file" type="file" accept=".mp3,audio/mpeg" ref={fileRef} />
+            <Input id="audio-file" type="file" accept=".mp3,audio/mpeg" ref={fileRef} onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file && !title.trim()) {
+                setTitle(file.name.replace(/\.mp3$/i, ''));
+              }
+            }} />
           </div>
           <div className="flex items-center gap-2">
             <Switch id="is-gong" checked={isGong} onCheckedChange={setIsGong} />
