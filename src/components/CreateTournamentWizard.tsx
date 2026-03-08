@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Plus, Loader2, ArrowLeft, ArrowRight, Upload, X, MapPin } from 'lucide-react';
+import { Plus, Loader2, ArrowLeft, ArrowRight, Upload, X, MapPin, ImagePlus } from 'lucide-react';
 import { TournamentMode, TournamentType, TeamMode } from '@/types/tournament';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -21,11 +21,15 @@ interface WizardData {
   venueCity: string;
   directionsPdfUrl: string | null;
   googleMapsLink: string;
+  logoUrl: string | null;
+  certificateText: string;
   type: TournamentType;
   teamMode: TeamMode;
   mode: TournamentMode;
   bestOf: number;
 }
+
+const DEFAULT_CERTIFICATE_TEXT = 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.';
 
 const SPORT_OPTIONS = ['Tischtennis', 'Badminton', 'Tennis', 'Squash'];
 
@@ -61,6 +65,8 @@ interface Props {
       venue_city?: string;
       directions_pdf_url?: string | null;
       google_maps_link?: string | null;
+      logo_url?: string | null;
+      certificate_text?: string;
     },
   ) => Promise<string>;
 }
@@ -70,8 +76,10 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
   const [step, setStep] = useState(1);
   const [creating, setCreating] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [customSport, setCustomSport] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const [data, setData] = useState<WizardData>({
     name: '',
@@ -84,6 +92,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     venueCity: '',
     directionsPdfUrl: null,
     googleMapsLink: '',
+    logoUrl: null,
+    certificateText: DEFAULT_CERTIFICATE_TEXT,
     type: 'singles',
     teamMode: 'bundessystem',
     mode: 'knockout',
@@ -106,6 +116,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
         venueCity: '',
         directionsPdfUrl: null,
         googleMapsLink: '',
+        logoUrl: null,
+        certificateText: DEFAULT_CERTIFICATE_TEXT,
         type: 'singles',
         teamMode: 'bundessystem',
         mode: 'knockout',
@@ -152,6 +164,40 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     update({ directionsPdfUrl: null });
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Bitte nur Bilddateien hochladen');
+      return;
+    }
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `wizard-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+      update({ logoUrl: `${urlData.publicUrl}?t=${Date.now()}` });
+      toast.success('Logo hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen des Logos');
+    } finally {
+      setUploadingLogo(false);
+      if (logoInputRef.current) logoInputRef.current.value = '';
+    }
+  };
+
+  const removeLogo = async () => {
+    if (data.logoUrl) {
+      const url = data.logoUrl.split('?')[0];
+      const parts = url.split('/');
+      const fileName = parts[parts.length - 1];
+      await supabase.storage.from('logos').remove([fileName]);
+    }
+    update({ logoUrl: null });
+  };
+
   const canProceedStep1 = data.name.trim().length > 0;
 
   const handleCreate = async () => {
@@ -175,6 +221,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           venue_city: data.venueCity,
           directions_pdf_url: data.directionsPdfUrl,
           google_maps_link: data.googleMapsLink || null,
+          logo_url: data.logoUrl || null,
+          certificate_text: data.certificateText,
         },
       );
       setOpen(false);
@@ -204,15 +252,39 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
 
         {step === 1 && (
           <div className="space-y-4 pt-2">
-            {/* Name */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Turniername *</Label>
-              <Input
-                placeholder="z.B. Vereinsmeisterschaft 2026"
-                value={data.name}
-                onChange={e => update({ name: e.target.value })}
-                autoFocus
-              />
+            {/* Name + Logo */}
+            <div className="flex gap-3 items-end">
+              <div className="flex-1">
+                <Label className="text-sm font-semibold mb-1 block">Turniername *</Label>
+                <Input
+                  placeholder="z.B. Vereinsmeisterschaft 2026"
+                  value={data.name}
+                  onChange={e => update({ name: e.target.value })}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                <button
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={uploadingLogo}
+                  className="flex-shrink-0 h-10 w-10 rounded-lg overflow-hidden border border-border hover:border-primary transition-colors flex items-center justify-center bg-secondary relative"
+                  title="Turnierlogo hochladen"
+                >
+                  {uploadingLogo ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  ) : data.logoUrl ? (
+                    <img src={data.logoUrl} alt="Logo" className="h-full w-full object-contain" />
+                  ) : (
+                    <ImagePlus className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </button>
+                {data.logoUrl && (
+                  <button onClick={removeLogo} className="text-xs text-destructive hover:underline mt-0.5 block mx-auto">
+                    <X className="h-3 w-3 inline" />
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Sport */}
@@ -316,6 +388,20 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 value={data.googleMapsLink}
                 onChange={e => update({ googleMapsLink: e.target.value })}
               />
+            </div>
+
+            {/* Certificate Text */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">Text für Siegerurkunden</Label>
+              <Textarea
+                value={data.certificateText}
+                onChange={e => update({ certificateText: e.target.value })}
+                rows={3}
+                className="text-sm"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Platzhalter: <code className="bg-muted px-1 rounded">{'{turniername}'}</code> <code className="bg-muted px-1 rounded">{'{spieler}'}</code> <code className="bg-muted px-1 rounded">{'{verein}'}</code> <code className="bg-muted px-1 rounded">{'{platz}'}</code>
+              </p>
             </div>
 
             <Button onClick={() => setStep(2)} disabled={!canProceedStep1} className="w-full">

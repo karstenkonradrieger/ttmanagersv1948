@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN certificate_text text NOT NULL DEFAULT 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.';

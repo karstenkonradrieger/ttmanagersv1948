@@ -28,6 +28,7 @@ export interface DbTournament {
   sport: string;
   directions_pdf_url: string | null;
   google_maps_link: string | null;
+  certificate_text: string;
 }
 
 export interface DbPlayer {
@@ -141,6 +142,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     sport: (tournament as any).sport || 'Tischtennis',
     directionsPdfUrl: (tournament as any).directions_pdf_url || null,
     googleMapsLink: (tournament as any).google_maps_link || null,
+    certificateText: (tournament as any).certificate_text || 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.',
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -209,6 +211,8 @@ export async function createTournament(
     venue_city?: string;
     directions_pdf_url?: string | null;
     google_maps_link?: string | null;
+    logo_url?: string | null;
+    certificate_text?: string;
   },
 ): Promise<string> {
   const { data, error } = await supabase
@@ -229,6 +233,8 @@ export async function createTournament(
       ...(extras?.venue_city ? { venue_city: extras.venue_city } : {}),
       ...(extras?.directions_pdf_url ? { directions_pdf_url: extras.directions_pdf_url } : {}),
       ...(extras?.google_maps_link ? { google_maps_link: extras.google_maps_link } : {}),
+      ...(extras?.logo_url ? { logo_url: extras.logo_url } : {}),
+      ...(extras?.certificate_text ? { certificate_text: extras.certificate_text } : {}),
     })
     .select('id')
     .single();
@@ -261,6 +267,7 @@ export async function updateTournament(id: string, updates: Partial<{
   tournament_end_date: string | null;
   directions_pdf_url: string | null;
   google_maps_link: string | null;
+  certificate_text: string;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')

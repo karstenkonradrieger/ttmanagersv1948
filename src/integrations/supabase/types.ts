@@ -560,6 +560,7 @@ export type Database = {
         Row: {
           best_of: number
           break_minutes: number
+          certificate_text: string
           created_at: string
           created_by: string | null
           directions_pdf_url: string | null
@@ -589,6 +590,7 @@ export type Database = {
         Insert: {
           best_of?: number
           break_minutes?: number
+          certificate_text?: string
           created_at?: string
           created_by?: string | null
           directions_pdf_url?: string | null
@@ -618,6 +620,7 @@ export type Database = {
         Update: {
           best_of?: number
           break_minutes?: number
+          certificate_text?: string
           created_at?: string
           created_by?: string | null
           directions_pdf_url?: string | null
