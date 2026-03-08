@@ -45,12 +45,22 @@ const speakText = (text: string): Promise<void> => {
   });
 };
 
-const playAudioFile = (url: string): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    const audio = new Audio(url);
-    audio.onended = () => resolve();
-    audio.onerror = () => reject();
-    audio.play().catch(reject);
+const playAudioFile = (url: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    try {
+      const audio = new Audio(url);
+      audio.onended = () => resolve(true);
+      audio.onerror = () => {
+        console.warn('Audio playback failed for:', url);
+        resolve(false);
+      };
+      audio.play().catch(() => {
+        console.warn('Audio play() rejected for:', url);
+        resolve(false);
+      });
+    } catch {
+      resolve(false);
+    }
   });
 };
 
