@@ -27,7 +27,8 @@ import { TeamEncounterScoring } from '@/components/TeamEncounterScoring';
 import { KaiserScoring } from '@/components/KaiserScoring';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield } from 'lucide-react';
+import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings } from 'lucide-react';
+import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
 
 const Index = () => {
