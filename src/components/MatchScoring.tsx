@@ -135,6 +135,8 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
     return matches.find(m => m.status === 'pending' && m.player1Id && m.player2Id && m.id !== excludeId);
   };
 
+  const getVoiceUrl = (id: string | null) => id ? getPlayer(id)?.voiceNameUrl || null : null;
+
   const handleSetActive = (matchId: string, table?: number) => {
     onSetActive(matchId, table);
     const match = matches.find(m => m.id === matchId);
@@ -146,6 +148,10 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
         getParticipantName(match.player2Id),
         next ? getParticipantName(next.player1Id) : undefined,
         next ? getParticipantName(next.player2Id) : undefined,
+        getVoiceUrl(match.player1Id),
+        getVoiceUrl(match.player2Id),
+        next ? getVoiceUrl(next.player1Id) : null,
+        next ? getVoiceUrl(next.player2Id) : null,
       );
     }
     if (autoPrint) {
