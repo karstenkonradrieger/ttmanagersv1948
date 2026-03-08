@@ -16,6 +16,7 @@ export interface DbTournament {
   best_of: number;
   phase: string | null;
   tournament_date: string | null;
+  tournament_end_date: string | null;
   venue_street: string;
   venue_house_number: string;
   venue_postal_code: string;
@@ -24,6 +25,9 @@ export interface DbTournament {
   break_minutes: number;
   team_mode: string | null;
   early_finish_enabled: boolean;
+  sport: string;
+  directions_pdf_url: string | null;
+  google_maps_link: string | null;
 }
 
 export interface DbPlayer {
