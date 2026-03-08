@@ -210,6 +210,8 @@ export async function createTournament(
     venue_city?: string;
     directions_pdf_url?: string | null;
     google_maps_link?: string | null;
+    logo_url?: string | null;
+    certificate_text?: string;
   },
 ): Promise<string> {
   const { data, error } = await supabase
