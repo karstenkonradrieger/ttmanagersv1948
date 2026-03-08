@@ -1,0 +1,1 @@
+ALTER TABLE public.players ADD COLUMN voice_name_url text DEFAULT NULL;
