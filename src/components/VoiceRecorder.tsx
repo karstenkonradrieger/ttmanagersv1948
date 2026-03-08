@@ -97,7 +97,7 @@ export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved }: P
     try {
       const filePath = `voice-names/${playerId}.webm`;
       await supabase.storage.from('audio').remove([filePath]);
-      await supabase.from('players').update({ voice_name_url: null }).eq('id', playerId);
+      await supabase.from('players').update({ voice_name_url: null } as any).eq('id', playerId);
       onSaved(null);
       setAudioBlob(null);
       setPreviewUrl(null);
