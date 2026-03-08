@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, UserPlus, Pencil, Check, X, Download, Upload, Mail, Camera } from 'lucide-react';
+import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { toast } from 'sonner';
 
 interface Props {
