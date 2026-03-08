@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Match, Player, SetScore, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Check, Play, X, Zap, Settings, Printer, FileText } from 'lucide-react';
 import { printRefereeSheet, printAllRefereeSheets } from '@/components/RefereeSheet';
 import { MatchPhotos } from '@/components/MatchPhotos';
 import { generateMatchReport } from '@/components/MatchReport';
+import { useAnnouncementPhrases } from '@/hooks/useAnnouncementPhrases';
 
 interface Props {
   matches: Match[];
