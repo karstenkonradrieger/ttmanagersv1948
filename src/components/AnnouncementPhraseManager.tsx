@@ -248,20 +248,37 @@ export function AnnouncementPhraseManager({ inline = false }: { inline?: boolean
           />
         </div>
       </div>
-      <ScrollArea className={inline ? 'max-h-[70vh]' : 'max-h-[60vh]'}>
-        {loading ? (
-          <p className="text-sm text-muted-foreground text-center py-4">Laden...</p>
-        ) : (
-          phrases.map(phrase => (
-            <PhraseRecorderRow
-              key={phrase.id}
-              phrase={phrase}
-              onUpload={uploadPhraseAudio}
-              onRemove={removePhraseAudio}
-            />
-          ))
-        )}
-      </ScrollArea>
+      {inline ? (
+        <div>
+          {loading ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Laden...</p>
+          ) : (
+            phrases.map(phrase => (
+              <PhraseRecorderRow
+                key={phrase.id}
+                phrase={phrase}
+                onUpload={uploadPhraseAudio}
+                onRemove={removePhraseAudio}
+              />
+            ))
+          )}
+        </div>
+      ) : (
+        <ScrollArea className="max-h-[60vh]">
+          {loading ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Laden...</p>
+          ) : (
+            phrases.map(phrase => (
+              <PhraseRecorderRow
+                key={phrase.id}
+                phrase={phrase}
+                onUpload={uploadPhraseAudio}
+                onRemove={removePhraseAudio}
+              />
+            ))
+          )}
+        </ScrollArea>
+      )}
     </>
   );
 
