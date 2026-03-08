@@ -123,7 +123,7 @@ function PhraseRecorderRow({ phrase, onUpload, onRemove }: {
   );
 }
 
-export function AnnouncementPhraseManager() {
+export function AnnouncementPhraseManager({ inline = false }: { inline?: boolean } = {}) {
   const [open, setOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -210,6 +210,65 @@ export function AnnouncementPhraseManager() {
     }
   }, [phrases, uploadPhraseAudio, reload]);
 
+  const content = (
+    <>
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-primary inline-block" /> aufgenommen</span>
+          <span className="ml-3 inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-destructive inline-block" /> fehlt</span>
+          <span className="ml-3">{recordedCount}/{totalCount}</span>
+        </div>
+        <div className="flex gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs gap-1"
+            onClick={handleExport}
+            disabled={exporting || recordedCount === 0}
+          >
+            {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+            Export
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs gap-1"
+            onClick={() => importRef.current?.click()}
+            disabled={importing}
+          >
+            {importing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+            Import
+          </Button>
+          <input
+            ref={importRef}
+            type="file"
+            accept=".zip"
+            className="hidden"
+            onChange={handleImport}
+          />
+        </div>
+      </div>
+      <ScrollArea className={inline ? 'max-h-[70vh]' : 'max-h-[60vh]'}>
+        {loading ? (
+          <p className="text-sm text-muted-foreground text-center py-4">Laden...</p>
+        ) : (
+          phrases.map(phrase => (
+            <PhraseRecorderRow
+              key={phrase.id}
+              phrase={phrase}
+              onUpload={uploadPhraseAudio}
+              onRemove={removePhraseAudio}
+            />
+          ))
+        )}
+      </ScrollArea>
+    </>
+  );
+
+  if (inline) {
+    return content;
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -229,56 +288,7 @@ export function AnnouncementPhraseManager() {
         <p className="text-sm text-muted-foreground mb-2">
           Nimm natürliche Sprachaufnahmen für die Turnier-Durchsagen auf. Aufnahmen ersetzen die synthetische Stimme.
         </p>
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-primary inline-block" /> aufgenommen</span>
-            <span className="ml-3 inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-destructive inline-block" /> fehlt</span>
-            <span className="ml-3">{recordedCount}/{totalCount}</span>
-          </div>
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs gap-1"
-              onClick={handleExport}
-              disabled={exporting || recordedCount === 0}
-            >
-              {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-              Export
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs gap-1"
-              onClick={() => importRef.current?.click()}
-              disabled={importing}
-            >
-              {importing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
-              Import
-            </Button>
-            <input
-              ref={importRef}
-              type="file"
-              accept=".zip"
-              className="hidden"
-              onChange={handleImport}
-            />
-          </div>
-        </div>
-        <ScrollArea className="max-h-[60vh]">
-          {loading ? (
-            <p className="text-sm text-muted-foreground text-center py-4">Laden...</p>
-          ) : (
-            phrases.map(phrase => (
-              <PhraseRecorderRow
-                key={phrase.id}
-                phrase={phrase}
-                onUpload={uploadPhraseAudio}
-                onRemove={removePhraseAudio}
-              />
-            ))
-          )}
-        </ScrollArea>
+        {content}
       </DialogContent>
     </Dialog>
   );

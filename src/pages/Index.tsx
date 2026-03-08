@@ -27,7 +27,8 @@ import { TeamEncounterScoring } from '@/components/TeamEncounterScoring';
 import { KaiserScoring } from '@/components/KaiserScoring';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield } from 'lucide-react';
+import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings } from 'lucide-react';
+import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
 
 const Index = () => {
@@ -75,7 +76,7 @@ const Index = () => {
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
-  const [homeTab, setHomeTab] = useState<'tournaments' | 'clubs'>('tournaments');
+  const [homeTab, setHomeTab] = useState<'tournaments' | 'clubs' | 'settings'>('tournaments');
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState('');
 
@@ -150,13 +151,22 @@ const Index = () => {
               <Building2 className="h-4 w-4" />
               Vereinsverwaltung
             </Button>
+            <Button
+              variant={homeTab === 'settings' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setHomeTab('settings')}
+              className="gap-1.5"
+            >
+              <Settings className="h-4 w-4" />
+              Einstellungen
+            </Button>
           </div>
           {homeTab === 'tournaments' ? (
             <TournamentSelector
               selectedId={selectedTournamentId}
               onSelect={(id) => setSelectedTournamentId(id || null)}
             />
-          ) : (
+          ) : homeTab === 'clubs' ? (
             <ClubPlayersManager
               clubs={clubs}
               clubPlayers={clubPlayers}
@@ -167,6 +177,8 @@ const Index = () => {
               onRemovePlayer={removeClubPlayer}
               getPlayersForClub={getPlayersForClub}
             />
+          ) : (
+            <GlobalSettings />
           )}
         </div>
       </div>
