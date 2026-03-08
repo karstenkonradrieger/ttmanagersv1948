@@ -125,10 +125,90 @@ function PhraseRecorderRow({ phrase, onUpload, onRemove }: {
 
 export function AnnouncementPhraseManager() {
   const [open, setOpen] = useState(false);
-  const { phrases, loading, uploadPhraseAudio, removePhraseAudio } = useAnnouncementPhrases();
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const importRef = useRef<HTMLInputElement>(null);
+  const { phrases, loading, uploadPhraseAudio, removePhraseAudio, reload } = useAnnouncementPhrases();
 
   const recordedCount = phrases.filter(p => p.audioUrl).length;
   const totalCount = phrases.length;
+
+  const handleExport = useCallback(async () => {
+    const recorded = phrases.filter(p => p.audioUrl);
+    if (recorded.length === 0) {
+      toast.error('Keine Aufnahmen zum Exportieren');
+      return;
+    }
+    setExporting(true);
+    try {
+      const zip = new JSZip();
+      // Add manifest
+      const manifest = recorded.map(p => ({ phraseKey: p.phraseKey, label: p.label, fileName: `${p.phraseKey}.webm` }));
+      zip.file('manifest.json', JSON.stringify(manifest, null, 2));
+
+      // Download and add each audio file
+      for (const phrase of recorded) {
+        try {
+          const resp = await fetch(phrase.audioUrl!);
+          if (!resp.ok) continue;
+          const blob = await resp.blob();
+          zip.file(`${phrase.phraseKey}.webm`, blob);
+        } catch {
+          console.warn(`Failed to fetch audio for ${phrase.phraseKey}`);
+        }
+      }
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `durchsage-stimmen-${new Date().toISOString().slice(0, 10)}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`${recorded.length} Aufnahmen exportiert`);
+    } catch (err) {
+      console.error('Export error:', err);
+      toast.error('Fehler beim Export');
+    } finally {
+      setExporting(false);
+    }
+  }, [phrases]);
+
+  const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    try {
+      const zip = await JSZip.loadAsync(file);
+      const manifestFile = zip.file('manifest.json');
+      if (!manifestFile) {
+        toast.error('Ungültige ZIP-Datei: manifest.json fehlt');
+        return;
+      }
+      const manifest: Array<{ phraseKey: string; fileName: string }> = JSON.parse(await manifestFile.async('text'));
+      let imported = 0;
+
+      for (const entry of manifest) {
+        const audioFile = zip.file(entry.fileName);
+        if (!audioFile) continue;
+        const phrase = phrases.find(p => p.phraseKey === entry.phraseKey);
+        if (!phrase) continue;
+
+        const blob = await audioFile.async('blob');
+        const result = await uploadPhraseAudio(phrase.id, phrase.phraseKey, blob);
+        if (result) imported++;
+      }
+
+      await reload();
+      toast.success(`${imported} Aufnahmen importiert`);
+    } catch (err) {
+      console.error('Import error:', err);
+      toast.error('Fehler beim Import');
+    } finally {
+      setImporting(false);
+      if (importRef.current) importRef.current.value = '';
+    }
+  }, [phrases, uploadPhraseAudio, reload]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -149,10 +229,41 @@ export function AnnouncementPhraseManager() {
         <p className="text-sm text-muted-foreground mb-2">
           Nimm natürliche Sprachaufnahmen für die Turnier-Durchsagen auf. Aufnahmen ersetzen die synthetische Stimme.
         </p>
-        <div className="text-xs text-muted-foreground mb-3">
-          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-primary inline-block" /> aufgenommen</span>
-          <span className="ml-3 inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-destructive inline-block" /> fehlt</span>
-          <span className="ml-3">{recordedCount}/{totalCount}</span>
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-primary inline-block" /> aufgenommen</span>
+            <span className="ml-3 inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-destructive inline-block" /> fehlt</span>
+            <span className="ml-3">{recordedCount}/{totalCount}</span>
+          </div>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={handleExport}
+              disabled={exporting || recordedCount === 0}
+            >
+              {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+              Export
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={() => importRef.current?.click()}
+              disabled={importing}
+            >
+              {importing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+              Import
+            </Button>
+            <input
+              ref={importRef}
+              type="file"
+              accept=".zip"
+              className="hidden"
+              onChange={handleImport}
+            />
+          </div>
         </div>
         <ScrollArea className="max-h-[60vh]">
           {loading ? (
