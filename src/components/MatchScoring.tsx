@@ -194,6 +194,10 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
             getParticipantName(m.player2Id),
             nextPrep ? getParticipantName(nextPrep.player1Id) : undefined,
             nextPrep ? getParticipantName(nextPrep.player2Id) : undefined,
+            getVoiceUrl(m.player1Id),
+            getVoiceUrl(m.player2Id),
+            nextPrep ? getVoiceUrl(nextPrep.player1Id) : null,
+            nextPrep ? getVoiceUrl(nextPrep.player2Id) : null,
           );
         }, i * 500);
       });
