@@ -112,50 +112,55 @@ const announceMatch = (
     const onGongReady = async () => {
       window.removeEventListener('announcement-gong-done', onGongReady);
 
-      if (useMixedMode) {
-        // Mixed mode: use recorded phrases/names where available, TTS as fallback
-        if (table) {
-          // Try combined "Nächstes Spiel am Tisch" phrase
-          const combinedUrl = getPhraseAudio?.('naechstes_spiel_tisch');
-          if (combinedUrl) {
-            await playAudioFile(combinedUrl);
-            await playPhrase(`tisch_${table}`, tableSpoken || String(table));
+      try {
+        if (useMixedMode) {
+          // Mixed mode: use recorded phrases/names where available, TTS as fallback
+          if (table) {
+            const combinedUrl = getPhraseAudio?.('naechstes_spiel_tisch');
+            if (combinedUrl) {
+              const ok = await playAudioFile(combinedUrl);
+              if (!ok) await speakText('Nächstes Spiel am Tisch');
+              await playPhrase(`tisch_${table}`, tableSpoken || String(table));
+            } else {
+              await speakText('Nächstes Spiel am Tisch');
+              await playPhrase(`tisch_${table}`, tableSpoken || String(table));
+            }
           } else {
-            await speakText(`Nächstes Spiel am Tisch`);
-            await playPhrase(`tisch_${table}`, tableSpoken || String(table));
+            await playPhrase('naechstes_spiel', 'Nächstes Spiel.');
           }
-        } else {
-          await playPhrase('naechstes_spiel', 'Nächstes Spiel.');
-        }
 
-        await playPhrase('es_spielt', 'Es spielt');
-        await playName(player1Name, player1VoiceUrl);
-        await playPhrase('gegen', 'gegen');
-        await playName(player2Name, player2VoiceUrl);
-
-        if (nextPlayer1Name && nextPlayer2Name) {
-          await playPhrase('vorbereitung', 'Es bereiten sich vor:');
-          await playName(nextPlayer1Name, nextPlayer1VoiceUrl);
+          await playPhrase('es_spielt', 'Es spielt');
+          await playName(player1Name, player1VoiceUrl);
           await playPhrase('gegen', 'gegen');
-          await playName(nextPlayer2Name, nextPlayer2VoiceUrl);
+          await playName(player2Name, player2VoiceUrl);
+
+          if (nextPlayer1Name && nextPlayer2Name) {
+            await playPhrase('vorbereitung', 'Es bereiten sich vor:');
+            await playName(nextPlayer1Name, nextPlayer1VoiceUrl);
+            await playPhrase('gegen', 'gegen');
+            await playName(nextPlayer2Name, nextPlayer2VoiceUrl);
+          }
+          window.dispatchEvent(new CustomEvent('announcement-end'));
+        } else {
+          // Pure TTS mode (original)
+          const tableText = tableSpoken ? `Nächstes Spiel am Tisch ${tableSpoken}.` : 'Nächstes Spiel.';
+          let text = `${tableText} Es spielt ${player1Name} gegen ${player2Name}.`;
+          if (nextPlayer1Name && nextPlayer2Name) {
+            text += ` Es bereiten sich vor: ${nextPlayer1Name} gegen ${nextPlayer2Name}.`;
+          }
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'de-DE';
+          utterance.rate = 0.7;
+          const voices = speechSynthesis.getVoices();
+          const maleDeVoice = voices.find(v => v.lang.startsWith('de') && /male|mann|männlich/i.test(v.name) && !/female|frau|weiblich/i.test(v.name))
+            || voices.find(v => v.lang.startsWith('de') && !/female|frau|weiblich/i.test(v.name));
+          if (maleDeVoice) utterance.voice = maleDeVoice;
+          utterance.onend = () => window.dispatchEvent(new CustomEvent('announcement-end'));
+          speechSynthesis.speak(utterance);
         }
+      } catch (err) {
+        console.error('Announcement playback error:', err);
         window.dispatchEvent(new CustomEvent('announcement-end'));
-      } else {
-        // Pure TTS mode (original)
-        const tableText = tableSpoken ? `Nächstes Spiel am Tisch ${tableSpoken}.` : 'Nächstes Spiel.';
-        let text = `${tableText} Es spielt ${player1Name} gegen ${player2Name}.`;
-        if (nextPlayer1Name && nextPlayer2Name) {
-          text += ` Es bereiten sich vor: ${nextPlayer1Name} gegen ${nextPlayer2Name}.`;
-        }
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'de-DE';
-        utterance.rate = 0.7;
-        const voices = speechSynthesis.getVoices();
-        const maleDeVoice = voices.find(v => v.lang.startsWith('de') && /male|mann|männlich/i.test(v.name) && !/female|frau|weiblich/i.test(v.name))
-          || voices.find(v => v.lang.startsWith('de') && !/female|frau|weiblich/i.test(v.name));
-        if (maleDeVoice) utterance.voice = maleDeVoice;
-        utterance.onend = () => window.dispatchEvent(new CustomEvent('announcement-end'));
-        speechSynthesis.speak(utterance);
       }
     };
     window.addEventListener('announcement-gong-done', onGongReady);
