@@ -123,7 +123,7 @@ function PhraseRecorderRow({ phrase, onUpload, onRemove }: {
   );
 }
 
-export function AnnouncementPhraseManager() {
+export function AnnouncementPhraseManager({ inline = false }: { inline?: boolean } = {}) {
   const [open, setOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
