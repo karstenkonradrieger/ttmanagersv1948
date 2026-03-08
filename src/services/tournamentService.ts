@@ -232,6 +232,8 @@ export async function createTournament(
       ...(extras?.venue_city ? { venue_city: extras.venue_city } : {}),
       ...(extras?.directions_pdf_url ? { directions_pdf_url: extras.directions_pdf_url } : {}),
       ...(extras?.google_maps_link ? { google_maps_link: extras.google_maps_link } : {}),
+      ...(extras?.logo_url ? { logo_url: extras.logo_url } : {}),
+      ...(extras?.certificate_text ? { certificate_text: extras.certificate_text } : {}),
     })
     .select('id')
     .single();
