@@ -14,7 +14,7 @@ interface Props {
   clubs: Club[];
   clubPlayers: ClubPlayer[];
   getPlayersForClub: (clubId: string) => ClubPlayer[];
-  onImportPlayers: (players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }>) => void;
+  onImportPlayers: (players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string; voiceNameUrl?: string | null }>) => void;
   existingPlayerNames: string[];
 }
 
