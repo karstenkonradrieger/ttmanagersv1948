@@ -76,7 +76,7 @@ export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved }: P
 
       const { error: dbError } = await supabase
         .from('players')
-        .update({ voice_name_url: publicUrl })
+        .update({ voice_name_url: publicUrl } as any)
         .eq('id', playerId);
       if (dbError) throw dbError;
 
