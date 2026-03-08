@@ -31,20 +31,6 @@ interface Props {
   players?: Player[];
 }
 
-const speakText = (text: string): Promise<void> => {
-  return new Promise((resolve) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'de-DE';
-    utterance.rate = 0.7;
-    const voices = speechSynthesis.getVoices();
-    const maleDeVoice = voices.find(v => v.lang.startsWith('de') && /male|mann|männlich/i.test(v.name) && !/female|frau|weiblich/i.test(v.name))
-      || voices.find(v => v.lang.startsWith('de') && !/female|frau|weiblich/i.test(v.name));
-    if (maleDeVoice) utterance.voice = maleDeVoice;
-    utterance.onend = () => resolve();
-    speechSynthesis.speak(utterance);
-  });
-};
-
 const playAudioFile = (url: string): Promise<boolean> => {
   return new Promise((resolve) => {
     try {
@@ -77,87 +63,45 @@ const announceMatch = (
   getPhraseAudio?: (key: string) => string | null,
 ) => {
   try {
-    const tableWords: Record<number, string> = { 1: 'eins', 2: 'zwei', 3: 'drei', 4: 'vier', 5: 'fünf', 6: 'sechs', 7: 'sieben', 8: 'acht', 9: 'neun', 10: 'zehn', 11: 'elf', 12: 'zwölf', 13: 'dreizehn', 14: 'vierzehn', 15: 'fünfzehn', 16: 'sechzehn', 17: 'siebzehn', 18: 'achtzehn', 19: 'neunzehn', 20: 'zwanzig' };
-    const tableSpoken = table ? (tableWords[table] || String(table)) : undefined;
-
-    // Helper: play phrase audio or fall back to TTS
-    const playPhrase = async (phraseKey: string, fallbackText: string) => {
+    // Helper: play phrase audio if available, otherwise skip (silence)
+    const playPhrase = async (phraseKey: string) => {
       const url = getPhraseAudio?.(phraseKey);
       if (url) {
-        const ok = await playAudioFile(url);
-        if (!ok) await speakText(fallbackText);
-      } else {
-        await speakText(fallbackText);
+        await playAudioFile(url);
       }
     };
 
-    // Helper: play a name (recorded voice or TTS, with fallback)
-    const playName = async (name: string, voiceUrl?: string | null) => {
+    // Helper: play a name recording if available, otherwise skip (silence)
+    const playName = async (voiceUrl?: string | null) => {
       if (voiceUrl) {
-        const ok = await playAudioFile(voiceUrl);
-        if (!ok) await speakText(name);
-      } else {
-        await speakText(name);
+        await playAudioFile(voiceUrl);
       }
     };
-
-    const hasAnyVoice = player1VoiceUrl || player2VoiceUrl || nextPlayer1VoiceUrl || nextPlayer2VoiceUrl;
-    const hasAnyPhrase = getPhraseAudio && (
-      getPhraseAudio('naechstes_spiel_tisch') || getPhraseAudio('naechstes_spiel') ||
-      getPhraseAudio('es_spielt') || getPhraseAudio('gegen') || getPhraseAudio('vorbereitung') ||
-      (table && getPhraseAudio(`tisch_${table}`))
-    );
-    const useMixedMode = hasAnyVoice || hasAnyPhrase;
 
     const onGongReady = async () => {
       window.removeEventListener('announcement-gong-done', onGongReady);
 
       try {
-        if (useMixedMode) {
-          // Mixed mode: use recorded phrases/names where available, TTS as fallback
-          if (table) {
-            const combinedUrl = getPhraseAudio?.('naechstes_spiel_tisch');
-            if (combinedUrl) {
-              const ok = await playAudioFile(combinedUrl);
-              if (!ok) await speakText('Nächstes Spiel am Tisch');
-              await playPhrase(`tisch_${table}`, tableSpoken || String(table));
-            } else {
-              await speakText('Nächstes Spiel am Tisch');
-              await playPhrase(`tisch_${table}`, tableSpoken || String(table));
-            }
-          } else {
-            await playPhrase('naechstes_spiel', 'Nächstes Spiel.');
-          }
-
-          await playPhrase('es_spielt', 'Es spielt');
-          await playName(player1Name, player1VoiceUrl);
-          await playPhrase('gegen', 'gegen');
-          await playName(player2Name, player2VoiceUrl);
-
-          if (nextPlayer1Name && nextPlayer2Name) {
-            await playPhrase('vorbereitung', 'Es bereiten sich vor:');
-            await playName(nextPlayer1Name, nextPlayer1VoiceUrl);
-            await playPhrase('gegen', 'gegen');
-            await playName(nextPlayer2Name, nextPlayer2VoiceUrl);
-          }
-          window.dispatchEvent(new CustomEvent('announcement-end'));
+        // Only natural voices — missing recordings are skipped
+        if (table) {
+          await playPhrase('naechstes_spiel_tisch');
+          await playPhrase(`tisch_${table}`);
         } else {
-          // Pure TTS mode (original)
-          const tableText = tableSpoken ? `Nächstes Spiel am Tisch ${tableSpoken}.` : 'Nächstes Spiel.';
-          let text = `${tableText} Es spielt ${player1Name} gegen ${player2Name}.`;
-          if (nextPlayer1Name && nextPlayer2Name) {
-            text += ` Es bereiten sich vor: ${nextPlayer1Name} gegen ${nextPlayer2Name}.`;
-          }
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = 'de-DE';
-          utterance.rate = 0.7;
-          const voices = speechSynthesis.getVoices();
-          const maleDeVoice = voices.find(v => v.lang.startsWith('de') && /male|mann|männlich/i.test(v.name) && !/female|frau|weiblich/i.test(v.name))
-            || voices.find(v => v.lang.startsWith('de') && !/female|frau|weiblich/i.test(v.name));
-          if (maleDeVoice) utterance.voice = maleDeVoice;
-          utterance.onend = () => window.dispatchEvent(new CustomEvent('announcement-end'));
-          speechSynthesis.speak(utterance);
+          await playPhrase('naechstes_spiel');
         }
+
+        await playPhrase('es_spielt');
+        await playName(player1VoiceUrl);
+        await playPhrase('gegen');
+        await playName(player2VoiceUrl);
+
+        if (nextPlayer1Name && nextPlayer2Name) {
+          await playPhrase('vorbereitung');
+          await playName(nextPlayer1VoiceUrl);
+          await playPhrase('gegen');
+          await playName(nextPlayer2VoiceUrl);
+        }
+        window.dispatchEvent(new CustomEvent('announcement-end'));
       } catch (err) {
         console.error('Announcement playback error:', err);
         window.dispatchEvent(new CustomEvent('announcement-end'));
