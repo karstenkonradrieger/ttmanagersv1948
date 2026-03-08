@@ -194,6 +194,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
         getVoiceUrl(match.player2Id),
         next ? getVoiceUrl(next.player1Id) : null,
         next ? getVoiceUrl(next.player2Id) : null,
+        getPhraseAudioUrl,
       );
     }
     if (autoPrint) {
