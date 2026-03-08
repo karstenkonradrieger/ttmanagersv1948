@@ -169,6 +169,7 @@ export interface Tournament {
   bestOf: number;
   phase: 'group' | 'knockout' | null;
   tournamentDate: string | null;
+  tournamentEndDate: string | null;
   venueStreet: string;
   venueHouseNumber: string;
   venuePostalCode: string;
@@ -180,4 +181,7 @@ export interface Tournament {
   teams: Team[];
   teamPlayers: TeamPlayer[];
   kaiserDurationMinutes: number;
+  sport: string;
+  directionsPdfUrl: string | null;
+  googleMapsLink: string | null;
 }
