@@ -153,6 +153,7 @@ const announceMatch = (
 
 export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, isHandicap = false, players = [] }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
+  const { getPhraseAudioUrl } = useAnnouncementPhrases();
 
   const computeHandicap = (match: Match, gp: (id: string | null) => Player | null) => {
     const p1 = gp(match.player1Id);
