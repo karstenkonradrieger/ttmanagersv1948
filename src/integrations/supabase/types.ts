@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcement_phrases: {
+        Row: {
+          audio_url: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          phrase_key: string
+        }
+        Insert: {
+          audio_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          phrase_key: string
+        }
+        Update: {
+          audio_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          phrase_key?: string
+        }
+        Relationships: []
+      }
       club_players: {
         Row: {
           birth_date: string | null
