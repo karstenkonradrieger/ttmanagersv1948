@@ -382,6 +382,7 @@ export type Database = {
           street: string
           tournament_id: string
           ttr: number
+          voice_name_url: string | null
         }
         Insert: {
           birth_date?: string | null
@@ -398,6 +399,7 @@ export type Database = {
           street?: string
           tournament_id: string
           ttr?: number
+          voice_name_url?: string | null
         }
         Update: {
           birth_date?: string | null
@@ -414,6 +416,7 @@ export type Database = {
           street?: string
           tournament_id?: string
           ttr?: number
+          voice_name_url?: string | null
         }
         Relationships: [
           {

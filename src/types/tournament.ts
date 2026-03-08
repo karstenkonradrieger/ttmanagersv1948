@@ -11,6 +11,7 @@ export interface Player {
   houseNumber: string;
   phone: string;
   groupNumber?: number | null;
+  voiceNameUrl?: string | null;
 }
 
 export interface SetScore {

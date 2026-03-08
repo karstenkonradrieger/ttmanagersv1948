@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { UserPlus, Trash2, Trophy, Pencil, Check, X, Camera, FileText } from 'lucide-react';
+import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { generatePlayerReport } from '@/components/PlayerReport';
 import { LogicAgentValidator } from '@/components/LogicAgentValidator';
 import { printPhotoConsentForm, printAllPhotoConsentForms } from '@/components/PhotoConsentForm';
@@ -401,6 +402,12 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  <VoiceRecorder
+                    playerId={player.id}
+                    playerName={player.name}
+                    voiceNameUrl={player.voiceNameUrl || null}
+                    onSaved={(url) => onUpdate(player.id, { voiceNameUrl: url })}
+                  />
                   <Button
                     variant="ghost"
                     size="icon"
