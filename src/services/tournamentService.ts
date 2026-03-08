@@ -199,6 +199,17 @@ export async function createTournament(
   type: string = 'singles',
   bestOf: number = 3,
   teamMode?: string | null,
+  extras?: {
+    sport?: string;
+    tournament_date?: string | null;
+    tournament_end_date?: string | null;
+    venue_street?: string;
+    venue_house_number?: string;
+    venue_postal_code?: string;
+    venue_city?: string;
+    directions_pdf_url?: string | null;
+    google_maps_link?: string | null;
+  },
 ): Promise<string> {
   const { data, error } = await supabase
     .from('tournaments')
@@ -209,6 +220,15 @@ export async function createTournament(
       type,
       best_of: bestOf,
       ...(teamMode ? { team_mode: teamMode } : {}),
+      ...(extras?.sport ? { sport: extras.sport } : {}),
+      ...(extras?.tournament_date ? { tournament_date: extras.tournament_date } : {}),
+      ...(extras?.tournament_end_date ? { tournament_end_date: extras.tournament_end_date } : {}),
+      ...(extras?.venue_street ? { venue_street: extras.venue_street } : {}),
+      ...(extras?.venue_house_number ? { venue_house_number: extras.venue_house_number } : {}),
+      ...(extras?.venue_postal_code ? { venue_postal_code: extras.venue_postal_code } : {}),
+      ...(extras?.venue_city ? { venue_city: extras.venue_city } : {}),
+      ...(extras?.directions_pdf_url ? { directions_pdf_url: extras.directions_pdf_url } : {}),
+      ...(extras?.google_maps_link ? { google_maps_link: extras.google_maps_link } : {}),
     })
     .select('id')
     .single();
