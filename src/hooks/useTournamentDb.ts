@@ -34,6 +34,7 @@ const emptyTournament: Tournament = {
   sport: 'Tischtennis',
   directionsPdfUrl: null,
   googleMapsLink: null,
+  certificateText: 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.',
 };
 
 export function useTournamentDb(tournamentId: string | null) {
