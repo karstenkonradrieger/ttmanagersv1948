@@ -62,7 +62,7 @@ export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved, sto
     if (!audioBlob) return;
     setUploading(true);
     try {
-      const filePath = `voice-names/${playerId}.webm`;
+      const filePath = `${storagePrefix}/${playerId}.webm`;
 
       // Delete old file if exists
       await supabase.storage.from('audio').remove([filePath]);
