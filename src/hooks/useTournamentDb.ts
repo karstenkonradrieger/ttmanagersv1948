@@ -19,6 +19,7 @@ const emptyTournament: Tournament = {
   bestOf: 3,
   phase: null,
   tournamentDate: null,
+  tournamentEndDate: null,
   venueStreet: '',
   venueHouseNumber: '',
   venuePostalCode: '',
@@ -30,6 +31,9 @@ const emptyTournament: Tournament = {
   teams: [],
   teamPlayers: [],
   kaiserDurationMinutes: 10,
+  sport: 'Tischtennis',
+  directionsPdfUrl: null,
+  googleMapsLink: null,
 };
 
 export function useTournamentDb(tournamentId: string | null) {
