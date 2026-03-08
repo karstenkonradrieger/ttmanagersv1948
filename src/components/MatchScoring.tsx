@@ -241,6 +241,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
             getVoiceUrl(m.player2Id),
             nextPrep ? getVoiceUrl(nextPrep.player1Id) : null,
             nextPrep ? getVoiceUrl(nextPrep.player2Id) : null,
+            getPhraseAudioUrl,
           );
         }, i * 500);
       });
