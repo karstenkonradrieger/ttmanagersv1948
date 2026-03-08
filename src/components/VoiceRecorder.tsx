@@ -13,7 +13,7 @@ interface Props {
   storagePrefix?: string;
 }
 
-export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved }: Props) {
+export function VoiceRecorder({ playerId, playerName, voiceNameUrl, onSaved, storagePrefix = 'voice-names' }: Props) {
   const [open, setOpen] = useState(false);
   const [recording, setRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
