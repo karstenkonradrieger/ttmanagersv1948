@@ -247,6 +247,9 @@ export function AudioPlayer() {
           {/* Playlist manager */}
           <PlaylistManager />
 
+          {/* Announcement phrase manager */}
+          <AnnouncementPhraseManager />
+
           {/* Durchsage button */}
           {!announcing ? (
             <Button
