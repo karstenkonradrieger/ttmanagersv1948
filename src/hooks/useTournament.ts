@@ -26,6 +26,7 @@ function loadTournament(): Tournament {
     bestOf: 3,
     phase: null,
     tournamentDate: null,
+    tournamentEndDate: null,
     venueStreet: '',
     venueHouseNumber: '',
     venuePostalCode: '',
@@ -37,6 +38,9 @@ function loadTournament(): Tournament {
     teams: [],
     teamPlayers: [],
     kaiserDurationMinutes: 10,
+    sport: 'Tischtennis',
+    directionsPdfUrl: null,
+    googleMapsLink: null,
   };
 }
 
@@ -179,6 +183,7 @@ export function useTournament() {
       bestOf: 3,
       phase: null,
       tournamentDate: null,
+      tournamentEndDate: null,
       venueStreet: '',
       venueHouseNumber: '',
       venuePostalCode: '',
@@ -190,6 +195,9 @@ export function useTournament() {
       teams: [],
       teamPlayers: [],
       kaiserDurationMinutes: 10,
+      sport: 'Tischtennis',
+      directionsPdfUrl: null,
+      googleMapsLink: null,
     });
   }, []);
 

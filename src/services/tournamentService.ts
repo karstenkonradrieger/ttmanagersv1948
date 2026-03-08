@@ -16,6 +16,7 @@ export interface DbTournament {
   best_of: number;
   phase: string | null;
   tournament_date: string | null;
+  tournament_end_date: string | null;
   venue_street: string;
   venue_house_number: string;
   venue_postal_code: string;
@@ -24,6 +25,9 @@ export interface DbTournament {
   break_minutes: number;
   team_mode: string | null;
   early_finish_enabled: boolean;
+  sport: string;
+  directions_pdf_url: string | null;
+  google_maps_link: string | null;
 }
 
 export interface DbPlayer {
@@ -71,6 +75,10 @@ export async function fetchTournaments(): Promise<DbTournament[]> {
     ...t,
     team_mode: t.team_mode || null,
     early_finish_enabled: t.early_finish_enabled ?? false,
+    tournament_end_date: t.tournament_end_date || null,
+    sport: t.sport || 'Tischtennis',
+    directions_pdf_url: t.directions_pdf_url || null,
+    google_maps_link: t.google_maps_link || null,
   }));
 }
 
@@ -129,6 +137,10 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     teamMode: (tournament.team_mode as TeamMode | null) || null,
     earlyFinishEnabled: tournament.early_finish_enabled ?? false,
     kaiserDurationMinutes: (tournament as any).kaiser_duration_minutes ?? 10,
+    tournamentEndDate: (tournament as any).tournament_end_date || null,
+    sport: (tournament as any).sport || 'Tischtennis',
+    directionsPdfUrl: (tournament as any).directions_pdf_url || null,
+    googleMapsLink: (tournament as any).google_maps_link || null,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -187,6 +199,17 @@ export async function createTournament(
   type: string = 'singles',
   bestOf: number = 3,
   teamMode?: string | null,
+  extras?: {
+    sport?: string;
+    tournament_date?: string | null;
+    tournament_end_date?: string | null;
+    venue_street?: string;
+    venue_house_number?: string;
+    venue_postal_code?: string;
+    venue_city?: string;
+    directions_pdf_url?: string | null;
+    google_maps_link?: string | null;
+  },
 ): Promise<string> {
   const { data, error } = await supabase
     .from('tournaments')
@@ -197,6 +220,15 @@ export async function createTournament(
       type,
       best_of: bestOf,
       ...(teamMode ? { team_mode: teamMode } : {}),
+      ...(extras?.sport ? { sport: extras.sport } : {}),
+      ...(extras?.tournament_date ? { tournament_date: extras.tournament_date } : {}),
+      ...(extras?.tournament_end_date ? { tournament_end_date: extras.tournament_end_date } : {}),
+      ...(extras?.venue_street ? { venue_street: extras.venue_street } : {}),
+      ...(extras?.venue_house_number ? { venue_house_number: extras.venue_house_number } : {}),
+      ...(extras?.venue_postal_code ? { venue_postal_code: extras.venue_postal_code } : {}),
+      ...(extras?.venue_city ? { venue_city: extras.venue_city } : {}),
+      ...(extras?.directions_pdf_url ? { directions_pdf_url: extras.directions_pdf_url } : {}),
+      ...(extras?.google_maps_link ? { google_maps_link: extras.google_maps_link } : {}),
     })
     .select('id')
     .single();
@@ -225,6 +257,10 @@ export async function updateTournament(id: string, updates: Partial<{
   team_mode: string | null;
   early_finish_enabled: boolean;
   kaiser_duration_minutes: number;
+  sport: string;
+  tournament_end_date: string | null;
+  directions_pdf_url: string | null;
+  google_maps_link: string | null;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')

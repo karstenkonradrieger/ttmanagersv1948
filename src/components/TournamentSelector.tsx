@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Plus, Trash2, ChevronRight, Trophy, Calendar, Loader2 } from 'lucide-react';
+import { Trash2, ChevronRight, Trophy, Calendar, Loader2 } from 'lucide-react';
 import { fetchTournaments, createTournament, deleteTournament, DbTournament } from '@/services/tournamentService';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { TournamentMode, TournamentType, TeamMode } from '@/types/tournament';
+import { CreateTournamentWizard } from '@/components/CreateTournamentWizard';
 
 interface Props {
   selectedId: string | null;
@@ -22,13 +18,6 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
   const { user } = useAuth();
   const [tournaments, setTournaments] = useState<DbTournament[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newMode, setNewMode] = useState<TournamentMode>('knockout');
-  const [newType, setNewType] = useState<TournamentType>('singles');
-  const [newBestOf, setNewBestOf] = useState<number>(3);
-  const [newTeamMode, setNewTeamMode] = useState<TeamMode>('bundessystem');
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   const load = async () => {
     try {
@@ -46,26 +35,9 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
     load();
   }, []);
 
-  const handleCreate = async () => {
-    if (!newName.trim()) return;
-    setCreating(true);
-    try {
-      const id = await createTournament(newName.trim(), user?.id, newMode, newType, newBestOf, newType === 'team' ? newTeamMode : null);
-      setNewName('');
-      setNewMode('knockout');
-      setNewType('singles');
-      setNewBestOf(3);
-      setNewTeamMode('bundessystem');
-      setDialogOpen(false);
-      await load();
-      onSelect(id);
-      toast.success('Turnier erstellt');
-    } catch (error) {
-      console.error('Error creating tournament:', error);
-      toast.error('Fehler beim Erstellen des Turniers');
-    } finally {
-      setCreating(false);
-    }
+  const handleCreated = async (id: string) => {
+    await load();
+    onSelect(id);
   };
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
@@ -95,108 +67,11 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
     <div className="space-y-4 animate-slide-up">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">Turniere</h2>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="glow-green">
-              <Plus className="mr-2 h-4 w-4" />
-              Neues Turnier
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Neues Turnier erstellen</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <Input
-                placeholder="Turniername..."
-                value={newName}
-                onChange={e => setNewName(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleCreate()}
-              />
-              <div>
-                <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
-                <RadioGroup value={newMode} onValueChange={(v) => setNewMode(v as TournamentMode)} className="flex flex-col gap-3">
-                  {[
-                    { value: 'knockout', label: 'K.-o.-System (Einfach-K.o.)', desc: 'Wer verliert, scheidet sofort aus.' },
-                    { value: 'double_knockout', label: 'Doppel-K.-o.-System', desc: 'Jeder darf einmal verlieren.' },
-                    { value: 'round_robin', label: 'Jeder gegen Jeden (Round Robin)', desc: 'Alle spielen gegen alle anderen.' },
-                    { value: 'group_knockout', label: 'Kombiniertes System', desc: 'Erst Gruppenphase, dann K.O.' },
-                    { value: 'swiss', label: 'Schweizer System', desc: 'Ähnliche Bilanzen spielen gegeneinander.' },
-                    { value: 'kaiser', label: 'Kaiserspiel (King of the Hill)', desc: 'Gewinner rücken auf, Verlierer ab. Timer-basiert.' },
-                    { value: 'handicap', label: 'Vorgabeturnier (Handicap)', desc: 'Schwächere starten mit Punktevorsprung pro Satz.' },
-                  ].map(opt => (
-                    <div key={opt.value} className="flex items-start space-x-2">
-                      <RadioGroupItem value={opt.value} id={`mode-${opt.value}`} className="mt-0.5" />
-                      <div>
-                        <Label htmlFor={`mode-${opt.value}`} className="text-sm font-medium cursor-pointer">{opt.label}</Label>
-                        <p className="text-xs text-muted-foreground">{opt.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-              <div>
-                <Label className="text-sm font-semibold mb-2 block">Turniertyp</Label>
-                <RadioGroup value={newType} onValueChange={(v) => setNewType(v as TournamentType)} className="flex gap-4">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="singles" id="type-singles" />
-                    <Label htmlFor="type-singles" className="text-sm cursor-pointer">Einzel</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="doubles" id="type-doubles" />
-                    <Label htmlFor="type-doubles" className="text-sm cursor-pointer">Doppel</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="team" id="type-team" />
-                    <Label htmlFor="type-team" className="text-sm cursor-pointer">Mannschaft</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              {newType === 'team' && (
-                <div>
-                  <Label className="text-sm font-semibold mb-2 block">Mannschaftssystem</Label>
-                  <RadioGroup value={newTeamMode} onValueChange={(v) => setNewTeamMode(v as TeamMode)} className="flex flex-col gap-3">
-                    {[
-                      { value: 'bundessystem', label: 'Bundessystem (4er)', desc: '2 Doppel + 8 Einzel. Erster ab 6 Siegen.' },
-                      { value: 'werner_scheffler', label: 'Werner-Scheffler (4er)', desc: '2 Doppel + 6 Einzel. Erster ab 5 Siegen.' },
-                      { value: 'olympic', label: 'Olympisches System (3er)', desc: '2 Einzel, 1 Doppel, ggf. 2 weitere Einzel.' },
-                      { value: 'corbillon', label: 'Corbillon-Cup (2er)', desc: '2 Einzel, 1 Doppel, ggf. 2 weitere Einzel.' },
-                    ].map(opt => (
-                      <div key={opt.value} className="flex items-start space-x-2">
-                        <RadioGroupItem value={opt.value} id={`team-${opt.value}`} className="mt-0.5" />
-                        <div>
-                          <Label htmlFor={`team-${opt.value}`} className="text-sm font-medium cursor-pointer">{opt.label}</Label>
-                          <p className="text-xs text-muted-foreground">{opt.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-              )}
-              <div>
-                <Label className="text-sm font-semibold mb-2 block">Gewinnsätze</Label>
-                <RadioGroup value={String(newBestOf)} onValueChange={(v) => setNewBestOf(parseInt(v))} className="flex gap-4">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="2" id="bestof-2" />
-                    <Label htmlFor="bestof-2" className="text-sm cursor-pointer">2 Gewinnsätze (Best of 3)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="3" id="bestof-3" />
-                    <Label htmlFor="bestof-3" className="text-sm cursor-pointer">3 Gewinnsätze (Best of 5)</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              <Button 
-                onClick={handleCreate} 
-                disabled={!newName.trim() || creating}
-                className="w-full"
-              >
-                {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Erstellen
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <CreateTournamentWizard
+          onCreated={handleCreated}
+          userId={user?.id}
+          createTournament={createTournament}
+        />
       </div>
 
       {tournaments.length === 0 ? (
