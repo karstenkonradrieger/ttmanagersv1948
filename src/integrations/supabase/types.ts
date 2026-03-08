@@ -562,7 +562,9 @@ export type Database = {
           break_minutes: number
           created_at: string
           created_by: string | null
+          directions_pdf_url: string | null
           early_finish_enabled: boolean
+          google_maps_link: string | null
           id: string
           kaiser_duration_minutes: number
           logo_url: string | null
@@ -571,10 +573,12 @@ export type Database = {
           name: string
           phase: string | null
           rounds: number
+          sport: string
           started: boolean
           table_count: number
           team_mode: string | null
           tournament_date: string | null
+          tournament_end_date: string | null
           type: string
           updated_at: string
           venue_city: string
@@ -587,7 +591,9 @@ export type Database = {
           break_minutes?: number
           created_at?: string
           created_by?: string | null
+          directions_pdf_url?: string | null
           early_finish_enabled?: boolean
+          google_maps_link?: string | null
           id?: string
           kaiser_duration_minutes?: number
           logo_url?: string | null
@@ -596,10 +602,12 @@ export type Database = {
           name?: string
           phase?: string | null
           rounds?: number
+          sport?: string
           started?: boolean
           table_count?: number
           team_mode?: string | null
           tournament_date?: string | null
+          tournament_end_date?: string | null
           type?: string
           updated_at?: string
           venue_city?: string
@@ -612,7 +620,9 @@ export type Database = {
           break_minutes?: number
           created_at?: string
           created_by?: string | null
+          directions_pdf_url?: string | null
           early_finish_enabled?: boolean
+          google_maps_link?: string | null
           id?: string
           kaiser_duration_minutes?: number
           logo_url?: string | null
@@ -621,10 +631,12 @@ export type Database = {
           name?: string
           phase?: string | null
           rounds?: number
+          sport?: string
           started?: boolean
           table_count?: number
           team_mode?: string | null
           tournament_date?: string | null
+          tournament_end_date?: string | null
           type?: string
           updated_at?: string
           venue_city?: string
