@@ -302,6 +302,7 @@ export async function updatePlayerInDb(playerId: string, updates: Partial<Omit<P
   if (updates.street !== undefined) dbUpdates.street = updates.street;
   if (updates.houseNumber !== undefined) dbUpdates.house_number = updates.houseNumber;
   if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
+  if (updates.voiceNameUrl !== undefined) dbUpdates.voice_name_url = updates.voiceNameUrl;
 
   const { error } = await supabase
     .from('players')
