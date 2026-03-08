@@ -114,6 +114,7 @@ export function useClubPlayers() {
         phone: data.phone || '',
         email: data.email || '',
         photoConsent: data.photo_consent ?? false,
+        voiceNameUrl: (data as any).voice_name_url || null,
       };
       setPlayers(prev => [...prev, mapped].sort((a, b) => a.name.localeCompare(b.name)));
       return mapped;
