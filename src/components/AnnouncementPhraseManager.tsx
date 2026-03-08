@@ -1,11 +1,12 @@
-import { useState, useRef } from 'react';
-import { Mic, Square, Play, Trash2, Check, Loader2 } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { Mic, Square, Play, Trash2, Check, Loader2, Download, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAnnouncementPhrases, AnnouncementPhrase } from '@/hooks/useAnnouncementPhrases';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import JSZip from 'jszip';
 
 function PhraseRecorderRow({ phrase, onUpload, onRemove }: {
   phrase: AnnouncementPhrase;
