@@ -138,7 +138,12 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
     return matches.find(m => m.status === 'pending' && m.player1Id && m.player2Id && m.id !== excludeId);
   };
 
-  const getVoiceUrl = (id: string | null) => id ? getPlayer(id)?.voiceNameUrl || null : null;
+  const getVoiceUrl = (id: string | null) => {
+    if (!id) return null;
+    const player = getPlayer(id);
+    console.log('[Voice] getVoiceUrl for', id, '→ player:', player?.name, '→ voiceNameUrl:', player?.voiceNameUrl);
+    return player?.voiceNameUrl || null;
+  };
 
   const handleSetActive = (matchId: string, table?: number) => {
     onSetActive(matchId, table);
