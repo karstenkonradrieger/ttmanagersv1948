@@ -160,6 +160,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
       houseNumber: p.house_number,
       phone: p.phone,
       groupNumber: p.group_number,
+      voiceNameUrl: (p as any).voice_name_url || null,
     })),
     matches: (matches || []).map((m: any) => ({
       id: m.id,

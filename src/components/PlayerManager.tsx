@@ -402,6 +402,12 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  <VoiceRecorder
+                    playerId={player.id}
+                    playerName={player.name}
+                    voiceNameUrl={player.voiceNameUrl || null}
+                    onSaved={(url) => onUpdate(player.id, { voiceNameUrl: url })}
+                  />
                   <Button
                     variant="ghost"
                     size="icon"
