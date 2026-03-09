@@ -247,10 +247,12 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
 
       assignedMatches.forEach((m, i) => {
         const nextPrep = i === assignedMatches.length - 1 ? remainingPending[0] : undefined;
+        const ap1 = getParticipantName(m.player1Id);
+        const ap2 = getParticipantName(m.player2Id);
         enqueueAnnouncement(() => announceMatch(
           m.table,
-          getParticipantName(m.player1Id),
-          getParticipantName(m.player2Id),
+          ap1,
+          ap2,
           nextPrep ? getParticipantName(nextPrep.player1Id) : undefined,
           nextPrep ? getParticipantName(nextPrep.player2Id) : undefined,
           getAnnouncementVoiceUrls(m.player1Id),
@@ -258,7 +260,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
           nextPrep ? getAnnouncementVoiceUrls(nextPrep.player1Id) : [],
           nextPrep ? getAnnouncementVoiceUrls(nextPrep.player2Id) : [],
           getPhraseAudioUrl,
-        ));
+        ), `${ap1} vs ${ap2}${m.table ? ` · Tisch ${m.table}` : ''}`);
       });
     }
 
