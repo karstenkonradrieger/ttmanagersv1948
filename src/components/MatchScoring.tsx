@@ -34,9 +34,24 @@ interface Props {
 }
 
 let announcementQueue: Promise<void> = Promise.resolve();
+let queueLength = 0;
 
-const enqueueAnnouncement = (job: () => Promise<void>) => {
-  announcementQueue = announcementQueue.then(job).catch((err) => {
+const enqueueAnnouncement = (job: () => Promise<void>, label: string) => {
+  queueLength++;
+  const position = queueLength;
+  announcementQueue = announcementQueue.then(async () => {
+    const toastId = toast.loading(`🔊 Durchsage: ${label}`, {
+      description: queueLength > 1 ? `Noch ${queueLength - 1} in Warteschlange` : undefined,
+      duration: Infinity,
+    });
+    try {
+      await job();
+    } finally {
+      queueLength--;
+      toast.dismiss(toastId);
+    }
+  }).catch((err) => {
+    queueLength--;
     console.error('Announcement queue error:', err);
   });
   return announcementQueue;
