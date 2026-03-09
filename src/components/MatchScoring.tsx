@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Match, Player, SetScore, getHandicap } from '@/types/tournament';
+import { useState } from 'react';
+import { DoublesPair, Match, Player, SetScore, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,58 +29,59 @@ interface Props {
   motto?: string;
   isHandicap?: boolean;
   players?: Player[];
+  doublesPairs?: DoublesPair[];
 }
+
+let announcementQueue: Promise<void> = Promise.resolve();
+
+const enqueueAnnouncement = (job: () => Promise<void>) => {
+  announcementQueue = announcementQueue.then(job).catch((err) => {
+    console.error('Announcement queue error:', err);
+  });
+  return announcementQueue;
+};
 
 const playAudioFile = (url: string): Promise<boolean> => {
   return new Promise((resolve) => {
     try {
-      console.log('[Announcement] Playing audio:', url);
       const audio = new Audio();
       audio.preload = 'auto';
-      
+
       audio.oncanplaythrough = () => {
-        audio.play().then(() => {
-          console.log('[Announcement] Playing started:', url);
-        }).catch((err) => {
-          console.warn('[Announcement] play() rejected after load:', url, err);
+        audio.play().catch(() => {
           resolve(false);
         });
       };
-      
+
       audio.onended = () => {
-        console.log('[Announcement] Playback ended:', url);
         resolve(true);
       };
-      
-      audio.onerror = (e) => {
-        console.warn('[Announcement] Audio error for:', url, e);
+
+      audio.onerror = () => {
         resolve(false);
       };
-      
-      // Set source after attaching handlers
+
       audio.src = url;
       audio.load();
-    } catch (err) {
-      console.error('[Announcement] Exception:', err);
+    } catch {
       resolve(false);
     }
   });
 };
 
-const announceMatch = (
+const announceMatch = async (
   table: number | undefined,
   player1Name: string,
   player2Name: string,
   nextPlayer1Name?: string,
   nextPlayer2Name?: string,
-  player1VoiceUrl?: string | null,
-  player2VoiceUrl?: string | null,
-  nextPlayer1VoiceUrl?: string | null,
-  nextPlayer2VoiceUrl?: string | null,
+  player1VoiceUrls: string[] = [],
+  player2VoiceUrls: string[] = [],
+  nextPlayer1VoiceUrls: string[] = [],
+  nextPlayer2VoiceUrls: string[] = [],
   getPhraseAudio?: (key: string) => string | null,
-) => {
-  try {
-    // Helper: play phrase audio if available, otherwise skip (silence)
+): Promise<void> => {
+  return new Promise((resolve) => {
     const playPhrase = async (phraseKey: string) => {
       const url = getPhraseAudio?.(phraseKey);
       if (url) {
@@ -88,18 +89,17 @@ const announceMatch = (
       }
     };
 
-    // Helper: play a name recording if available, otherwise skip (silence)
-    const playName = async (voiceUrl?: string | null) => {
-      if (voiceUrl) {
-        await playAudioFile(voiceUrl);
+    const playParticipant = async (voiceUrls: string[]) => {
+      for (let i = 0; i < voiceUrls.length; i++) {
+        await playAudioFile(voiceUrls[i]);
+        if (i < voiceUrls.length - 1) {
+          await playPhrase('und');
+        }
       }
     };
 
     const onGongReady = async () => {
-      window.removeEventListener('announcement-gong-done', onGongReady);
-
       try {
-        // Only natural voices — missing recordings are skipped
         if (table) {
           await playPhrase('naechstes_spiel_tisch');
           await playPhrase(`tisch_${table}`);
@@ -108,28 +108,30 @@ const announceMatch = (
         }
 
         await playPhrase('es_spielt');
-        await playName(player1VoiceUrl);
+        await playParticipant(player1VoiceUrls);
         await playPhrase('gegen');
-        await playName(player2VoiceUrl);
+        await playParticipant(player2VoiceUrls);
 
         if (nextPlayer1Name && nextPlayer2Name) {
           await playPhrase('vorbereitung');
-          await playName(nextPlayer1VoiceUrl);
+          await playParticipant(nextPlayer1VoiceUrls);
           await playPhrase('gegen');
-          await playName(nextPlayer2VoiceUrl);
+          await playParticipant(nextPlayer2VoiceUrls);
         }
-        window.dispatchEvent(new CustomEvent('announcement-end'));
       } catch (err) {
         console.error('Announcement playback error:', err);
+      } finally {
         window.dispatchEvent(new CustomEvent('announcement-end'));
+        resolve();
       }
     };
-    window.addEventListener('announcement-gong-done', onGongReady);
+
+    window.addEventListener('announcement-gong-done', onGongReady, { once: true });
     window.dispatchEvent(new CustomEvent('announcement-start'));
-  } catch { }
+  });
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, isHandicap = false, players = [] }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, isHandicap = false, players = [], doublesPairs = [] }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
   const { getPhraseAudioUrl } = useAnnouncementPhrases();
 
