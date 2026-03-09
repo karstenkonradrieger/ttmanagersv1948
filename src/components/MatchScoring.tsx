@@ -157,12 +157,25 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
     return matches.find(m => m.status === 'pending' && m.player1Id && m.player2Id && m.id !== excludeId);
   };
 
-  // Use the players array directly for voice URLs (getPlayer may return fake objects in doubles mode)
-  const getVoiceUrl = (id: string | null) => {
+  const getVoiceUrlByPlayerId = (id: string | null) => {
     if (!id) return null;
     const player = players.find(p => p.id === id);
-    console.log('[Voice] getVoiceUrl for', id, '→ player:', player?.name, '→ voiceNameUrl:', player?.voiceNameUrl);
     return player?.voiceNameUrl || null;
+  };
+
+  const getAnnouncementVoiceUrls = (participantId: string | null): string[] => {
+    if (!participantId) return [];
+
+    const pair = doublesPairs.find(dp => dp.player1Id === participantId);
+    if (pair) {
+      return [
+        getVoiceUrlByPlayerId(pair.player1Id),
+        getVoiceUrlByPlayerId(pair.player2Id),
+      ].filter((url): url is string => Boolean(url));
+    }
+
+    const single = getVoiceUrlByPlayerId(participantId);
+    return single ? [single] : [];
   };
 
   const handleSetActive = (matchId: string, table?: number) => {
@@ -170,18 +183,18 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
     const match = matches.find(m => m.id === matchId);
     if (match) {
       const next = getNextPendingAfter(matchId);
-      announceMatch(
+      enqueueAnnouncement(() => announceMatch(
         table,
         getParticipantName(match.player1Id),
         getParticipantName(match.player2Id),
         next ? getParticipantName(next.player1Id) : undefined,
         next ? getParticipantName(next.player2Id) : undefined,
-        getVoiceUrl(match.player1Id),
-        getVoiceUrl(match.player2Id),
-        next ? getVoiceUrl(next.player1Id) : null,
-        next ? getVoiceUrl(next.player2Id) : null,
+        getAnnouncementVoiceUrls(match.player1Id),
+        getAnnouncementVoiceUrls(match.player2Id),
+        next ? getAnnouncementVoiceUrls(next.player1Id) : [],
+        next ? getAnnouncementVoiceUrls(next.player2Id) : [],
         getPhraseAudioUrl,
-      );
+      ));
     }
     if (autoPrint) {
       const match = matches.find(m => m.id === matchId);
@@ -213,23 +226,21 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
       const remainingPending = matches.filter(
         m => m.status === 'pending' && m.player1Id && m.player2Id && !assignedMatches.find(a => a.id === m.id)
       );
+
       assignedMatches.forEach((m, i) => {
-        // For the last assigned match, show the next pending as preparation
         const nextPrep = i === assignedMatches.length - 1 ? remainingPending[0] : undefined;
-        setTimeout(() => {
-          announceMatch(
-            m.table,
-            getParticipantName(m.player1Id),
-            getParticipantName(m.player2Id),
-            nextPrep ? getParticipantName(nextPrep.player1Id) : undefined,
-            nextPrep ? getParticipantName(nextPrep.player2Id) : undefined,
-            getVoiceUrl(m.player1Id),
-            getVoiceUrl(m.player2Id),
-            nextPrep ? getVoiceUrl(nextPrep.player1Id) : null,
-            nextPrep ? getVoiceUrl(nextPrep.player2Id) : null,
-            getPhraseAudioUrl,
-          );
-        }, i * 500);
+        enqueueAnnouncement(() => announceMatch(
+          m.table,
+          getParticipantName(m.player1Id),
+          getParticipantName(m.player2Id),
+          nextPrep ? getParticipantName(nextPrep.player1Id) : undefined,
+          nextPrep ? getParticipantName(nextPrep.player2Id) : undefined,
+          getAnnouncementVoiceUrls(m.player1Id),
+          getAnnouncementVoiceUrls(m.player2Id),
+          nextPrep ? getAnnouncementVoiceUrls(nextPrep.player1Id) : [],
+          nextPrep ? getAnnouncementVoiceUrls(nextPrep.player2Id) : [],
+          getPhraseAudioUrl,
+        ));
       });
     }
 
