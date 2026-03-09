@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { DoublesPair, Match, Player, SetScore, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,9 +34,24 @@ interface Props {
 }
 
 let announcementQueue: Promise<void> = Promise.resolve();
+let queueLength = 0;
 
-const enqueueAnnouncement = (job: () => Promise<void>) => {
-  announcementQueue = announcementQueue.then(job).catch((err) => {
+const enqueueAnnouncement = (job: () => Promise<void>, label: string) => {
+  queueLength++;
+  const position = queueLength;
+  announcementQueue = announcementQueue.then(async () => {
+    const toastId = toast.loading(`🔊 Durchsage: ${label}`, {
+      description: queueLength > 1 ? `Noch ${queueLength - 1} in Warteschlange` : undefined,
+      duration: Infinity,
+    });
+    try {
+      await job();
+    } finally {
+      queueLength--;
+      toast.dismiss(toastId);
+    }
+  }).catch((err) => {
+    queueLength--;
     console.error('Announcement queue error:', err);
   });
   return announcementQueue;
@@ -183,10 +199,12 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
     const match = matches.find(m => m.id === matchId);
     if (match) {
       const next = getNextPendingAfter(matchId);
+      const p1 = getParticipantName(match.player1Id);
+      const p2 = getParticipantName(match.player2Id);
       enqueueAnnouncement(() => announceMatch(
         table,
-        getParticipantName(match.player1Id),
-        getParticipantName(match.player2Id),
+        p1,
+        p2,
         next ? getParticipantName(next.player1Id) : undefined,
         next ? getParticipantName(next.player2Id) : undefined,
         getAnnouncementVoiceUrls(match.player1Id),
@@ -194,7 +212,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
         next ? getAnnouncementVoiceUrls(next.player1Id) : [],
         next ? getAnnouncementVoiceUrls(next.player2Id) : [],
         getPhraseAudioUrl,
-      ));
+      ), `${p1} vs ${p2}${table ? ` · Tisch ${table}` : ''}`);
     }
     if (autoPrint) {
       const match = matches.find(m => m.id === matchId);
@@ -229,10 +247,12 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
 
       assignedMatches.forEach((m, i) => {
         const nextPrep = i === assignedMatches.length - 1 ? remainingPending[0] : undefined;
+        const ap1 = getParticipantName(m.player1Id);
+        const ap2 = getParticipantName(m.player2Id);
         enqueueAnnouncement(() => announceMatch(
           m.table,
-          getParticipantName(m.player1Id),
-          getParticipantName(m.player2Id),
+          ap1,
+          ap2,
           nextPrep ? getParticipantName(nextPrep.player1Id) : undefined,
           nextPrep ? getParticipantName(nextPrep.player2Id) : undefined,
           getAnnouncementVoiceUrls(m.player1Id),
@@ -240,7 +260,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
           nextPrep ? getAnnouncementVoiceUrls(nextPrep.player1Id) : [],
           nextPrep ? getAnnouncementVoiceUrls(nextPrep.player2Id) : [],
           getPhraseAudioUrl,
-        ));
+        ), `${ap1} vs ${ap2}${m.table ? ` · Tisch ${m.table}` : ''}`);
       });
     }
 
