@@ -199,10 +199,12 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
     const match = matches.find(m => m.id === matchId);
     if (match) {
       const next = getNextPendingAfter(matchId);
+      const p1 = getParticipantName(match.player1Id);
+      const p2 = getParticipantName(match.player2Id);
       enqueueAnnouncement(() => announceMatch(
         table,
-        getParticipantName(match.player1Id),
-        getParticipantName(match.player2Id),
+        p1,
+        p2,
         next ? getParticipantName(next.player1Id) : undefined,
         next ? getParticipantName(next.player2Id) : undefined,
         getAnnouncementVoiceUrls(match.player1Id),
@@ -210,7 +212,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
         next ? getAnnouncementVoiceUrls(next.player1Id) : [],
         next ? getAnnouncementVoiceUrls(next.player2Id) : [],
         getPhraseAudioUrl,
-      ));
+      ), `${p1} vs ${p2}${table ? ` · Tisch ${table}` : ''}`);
     }
     if (autoPrint) {
       const match = matches.find(m => m.id === matchId);
