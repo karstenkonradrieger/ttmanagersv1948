@@ -175,3 +175,123 @@ export async function printAllPhotoConsentForms(players: Player[], tournamentNam
     await printPhotoConsentForm({ player, tournamentName, tournamentDate, venueString, logoUrl });
   }
 }
+
+// ---------- General (non-tournament) consent form ----------
+
+interface GeneralConsentPlayer {
+  name: string;
+  club?: string;
+  birthDate?: string | null;
+}
+
+export async function printGeneralPhotoConsentPdf(players: GeneralConsentPlayer[]) {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const w = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 20;
+  const contentW = w - margin * 2;
+
+  for (let idx = 0; idx < players.length; idx++) {
+    if (idx > 0) doc.addPage();
+    const player = players[idx];
+    let y = margin;
+
+    // Title
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0);
+    doc.text('Einwilligungserklärung', w / 2, y, { align: 'center' });
+    y += 7;
+    doc.setFontSize(12);
+    doc.text('Foto- und Videoaufnahmen', w / 2, y, { align: 'center' });
+    y += 12;
+
+    // Player info
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Angaben zur Person:', margin, y);
+    y += 7;
+
+    const fields: [string, string][] = [
+      ['Name:', player.name],
+      ['Verein:', player.club || '–'],
+      ['Geburtsdatum:', player.birthDate ? new Date(player.birthDate).toLocaleDateString('de-DE') : '–'],
+    ];
+    for (const [label, value] of fields) {
+      doc.setFont('helvetica', 'bold');
+      doc.text(label, margin, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(value, margin + 35, y);
+      y += 6;
+    }
+    y += 4;
+
+    // Line
+    doc.setDrawColor(180);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y, w - margin, y);
+    y += 8;
+
+    // Consent text
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('Einwilligungserklärung:', margin, y);
+    y += 7;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    const consentText = [
+      'Hiermit erkläre ich mich damit einverstanden, dass bei Veranstaltungen und Turnieren Foto- und Videoaufnahmen von mir angefertigt und wie folgt verwendet werden dürfen:',
+      '',
+      '• Veröffentlichung auf der Webseite des Vereins / Veranstalters',
+      '• Veröffentlichung in sozialen Medien (z.B. Facebook, Instagram)',
+      '• Verwendung in Vereinspublikationen und Presseberichten',
+      '• Dokumentation von Veranstaltungen und Turnieren',
+      '',
+      'Die Einwilligung erfolgt freiwillig und gilt bis auf Widerruf. Sie kann jederzeit ohne Angabe von Gründen mit Wirkung für die Zukunft widerrufen werden. Bereits veröffentlichte Aufnahmen werden im Falle eines Widerrufs nach Möglichkeit entfernt.',
+      '',
+      'Mir ist bekannt, dass ich ohne diese Einwilligung an Veranstaltungen teilnehmen kann, jedoch auf den Aufnahmen ggf. unkenntlich gemacht werde.',
+    ];
+
+    for (const line of consentText) {
+      if (line === '') { y += 3; continue; }
+      const splitLines = doc.splitTextToSize(line, contentW);
+      doc.text(splitLines, margin, y);
+      y += splitLines.length * 4.5;
+    }
+    y += 10;
+
+    // Checkbox options
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.rect(margin, y - 3.5, 4, 4);
+    doc.text('Ja, ich stimme der Anfertigung und Verwendung von Foto-/Videoaufnahmen zu.', margin + 7, y);
+    y += 10;
+    doc.rect(margin, y - 3.5, 4, 4);
+    doc.text('Nein, ich stimme nicht zu.', margin + 7, y);
+    y += 16;
+
+    // Signature
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y, margin + 60, y);
+    doc.setFontSize(8);
+    doc.text('Ort, Datum', margin, y + 4);
+    doc.line(margin + 80, y, w - margin, y);
+    doc.text('Unterschrift (bei Minderjährigen: Erziehungsberechtigte/r)', margin + 80, y + 4);
+    y += 16;
+
+    // Minor note
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(120);
+    doc.text('Bei minderjährigen Teilnehmern ist die Unterschrift eines/einer Erziehungsberechtigten erforderlich.', margin, y);
+
+    // Footer
+    doc.setTextColor(160);
+    doc.setFontSize(7);
+    doc.text(`Generiert für: ${player.name}${player.club ? ' – ' + player.club : ''}`, w / 2, pageH - 10, { align: 'center' });
+  }
+
+  doc.save(`Fotoerlaubnis_Allgemein.pdf`);
+}
