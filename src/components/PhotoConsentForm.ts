@@ -188,7 +188,7 @@ export async function printGeneralPhotoConsentPdf(players: GeneralConsentPlayer[
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' });
   const w = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
-  const margin = 12;
+  const margin = 18;
   const contentW = w - margin * 2;
 
   for (let idx = 0; idx < players.length; idx++) {
