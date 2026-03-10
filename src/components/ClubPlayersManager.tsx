@@ -249,13 +249,27 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
         </Button>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Button variant="outline" size="sm" onClick={handleExportAll} className="text-xs gap-1" disabled={clubs.length === 0}>
           <Download className="h-3 w-3" /> Alle exportieren
         </Button>
         <input ref={fileInputRef} type="file" accept=".csv,.txt" onChange={handleImportCsv} className="hidden" />
         <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="text-xs gap-1">
           <Upload className="h-3 w-3" /> CSV importieren
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-xs gap-1"
+          disabled={clubPlayers.filter(p => !p.photoConsent).length === 0}
+          onClick={() => {
+            const withoutConsent = clubPlayers.filter(p => !p.photoConsent);
+            if (withoutConsent.length === 0) { toast.info('Alle Spieler haben bereits eine Fotoerlaubnis'); return; }
+            printGeneralPhotoConsentPdf(withoutConsent.map(p => ({ name: p.name, club: p.clubName, birthDate: p.birthDate })));
+            toast.success(`PDF mit ${withoutConsent.length} Formularen erstellt`);
+          }}
+        >
+          <FileText className="h-3 w-3" /> Fotoerlaubnis PDF
         </Button>
       </div>
 
