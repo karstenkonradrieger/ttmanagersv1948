@@ -673,10 +673,11 @@ const Index = () => {
                   ? tournament.doublesPairs.map(dp => ({ id: dp.player1Id, name: dp.pairName, club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' }))
                   : tournament.players
                 }
-                tournamentDate={tournament.tournamentDate}
-                venueString={venueString}
-                motto={tournament.motto}
-              />
+                 tournamentDate={tournament.tournamentDate}
+                 venueString={venueString}
+                 motto={tournament.motto}
+                 mode={tournament.mode}
+               />
             </TabsContent>
 
             <TabsContent value="live">
