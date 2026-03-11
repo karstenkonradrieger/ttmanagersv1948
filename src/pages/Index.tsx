@@ -445,9 +445,10 @@ const Index = () => {
                 matches={tournament.matches}
                 tournamentId={selectedTournamentId}
                 bestOf={tournament.bestOf}
-                totalRounds={tournament.rounds}
-                getPlayer={getPlayer}
-              />
+                 totalRounds={tournament.rounds}
+                 getPlayer={getPlayer}
+                 mode={tournament.mode}
+               />
             </TabsContent>
 
             {isDoubles && (

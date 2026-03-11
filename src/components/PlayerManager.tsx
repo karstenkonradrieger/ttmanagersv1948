@@ -438,6 +438,7 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                           tournamentDate,
                           venueString,
                           motto: '',
+                          mode,
                         });
                         toast.success(`Spielerbericht für ${player.name} wird erstellt…`);
                       }}
