@@ -466,7 +466,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       {/* Rounds */}
       {matchesByRound.map((roundMatches, r) => {
         if (roundMatches.length === 0) return null;
-        const roundName = getRoundName(r, rounds);
+        const roundName = getRoundName(r, rounds, mode);
 
         return (
           <div key={r}>
