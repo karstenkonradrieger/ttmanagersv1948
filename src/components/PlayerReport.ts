@@ -263,7 +263,7 @@ export async function generatePlayerReport({
     doc.setFontSize(9);
     doc.setFont(undefined!, 'bold');
     doc.setTextColor(0);
-    doc.text(`${getRoundName(m.round, totalRounds)}: ${getName(m.player1Id)} vs ${getName(m.player2Id)}`, 10, y);
+    doc.text(`${getRoundName(m.round, totalRounds, mode)}: ${getName(m.player1Id)} vs ${getName(m.player2Id)}`, 10, y);
     y += 4;
 
     doc.setFontSize(14);
