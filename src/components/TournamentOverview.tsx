@@ -641,6 +641,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     tournamentDate,
                     venueString,
                     motto,
+                    mode,
                   })}
                 >
                   <User className="h-4 w-4 mr-2 flex-shrink-0" />
