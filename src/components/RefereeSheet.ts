@@ -88,7 +88,7 @@ export function printRefereeSheet({ match, player1Name, player2Name, tournamentN
     const y = tableY + rowH + row * rowH;
     const label = row === 0 ? 'A' : 'B';
     const pName = row === 0 ? player1Name : player2Name;
-    const truncated = pName.length > 18 ? pName.substring(0, 17) + '…' : pName;
+    const truncated = pName.length > 30 ? pName.substring(0, 29) + '…' : pName;
 
     doc.rect(tableX, y, nameColW, rowH);
     doc.text(`${label}: ${truncated}`, tableX + 2, y + 7);
