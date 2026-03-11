@@ -576,7 +576,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                             onClick={() => generateMatchReport({
                               match: m, player1: p1, player2: p2,
                               tournamentName, tournamentId,
-                              roundName: getRoundName(r, rounds),
+                              roundName: getRoundName(r, rounds, mode),
                               logoUrl, bestOf,
                             })}
                           >
