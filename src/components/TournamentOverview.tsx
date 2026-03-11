@@ -179,7 +179,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       const roundMatches = matchesByRound[r];
       if (!roundMatches || roundMatches.length === 0) continue;
 
-      const roundName = getRoundName(r, rounds);
+      const roundName = getRoundName(r, rounds, mode);
 
       const tableData = roundMatches.map((m, idx) => {
         const p1 = getPlayer(m.player1Id);
