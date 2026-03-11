@@ -625,7 +625,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   );
 }
 
-function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf, rounds, logoUrl, tournamentDate, venueString, motto }: {
+function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf, rounds, logoUrl, tournamentDate, venueString, motto, mode }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   tournamentId: string;
@@ -636,6 +636,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
   tournamentDate?: string | null;
   venueString?: string;
   motto?: string;
+  mode?: string;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
