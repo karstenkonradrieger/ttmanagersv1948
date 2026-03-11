@@ -31,6 +31,7 @@ interface Props {
   isHandicap?: boolean;
   players?: Player[];
   doublesPairs?: DoublesPair[];
+  mode?: string;
 }
 
 let announcementQueue: Promise<void> = Promise.resolve();
