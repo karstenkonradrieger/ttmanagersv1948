@@ -29,6 +29,7 @@ interface Props {
   bestOf?: number;
   totalRounds?: number;
   getPlayer?: (id: string | null) => Player | null;
+  mode?: string;
 }
 
 export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clubs = [], onAddClub, tournamentName = '', tournamentDate, venueString = '', logoUrl, matches = [], tournamentId = '', bestOf = 3, totalRounds = 0, getPlayer }: Props) {
