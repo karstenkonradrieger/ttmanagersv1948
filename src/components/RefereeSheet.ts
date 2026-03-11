@@ -185,7 +185,7 @@ function drawSheet(doc: jsPDF, match: Match, player1Name: string, player2Name: s
 
   const tableY = yPlayers + 16;
   const tableX = 10;
-  const nameColW = 40;
+  const nameColW = 65;
   const resultColW = 16;
   const setColW = (w - 20 - nameColW - resultColW) / maxSets;
   const rowH = 10;
@@ -211,7 +211,7 @@ function drawSheet(doc: jsPDF, match: Match, player1Name: string, player2Name: s
     const y = tableY + rowH + row * rowH;
     const label = row === 0 ? 'A' : 'B';
     const pName = row === 0 ? player1Name : player2Name;
-    const truncated = pName.length > 18 ? pName.substring(0, 17) + '…' : pName;
+    const truncated = pName.length > 30 ? pName.substring(0, 29) + '…' : pName;
     doc.rect(tableX, y, nameColW, rowH);
     doc.text(`${label}: ${truncated}`, tableX + 2, y + 7);
     for (let s = 0; s < maxSets; s++) {
@@ -220,9 +220,21 @@ function drawSheet(doc: jsPDF, match: Match, player1Name: string, player2Name: s
     doc.rect(resX, y, resultColW, rowH);
   }
 
+  // Footer - Winner checkbox
   const footerY = tableY + rowH * 3 + 8;
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Gewinner bitte ankreuzen:', 10, footerY);
+
+  doc.setFont('helvetica', 'normal');
+  const cbSize = 4;
+  const cbY = footerY + 4;
+  doc.rect(10, cbY, cbSize, cbSize);
+  doc.text('A', 16, cbY + 3.5);
+  doc.rect(28, cbY, cbSize, cbSize);
+  doc.text('B', 34, cbY + 3.5);
+
   doc.setFontSize(8);
-  doc.text('Gewinner: ___________________________', 10, footerY);
-  doc.text('Unterschrift SR: ___________________________', w / 2, footerY);
-  doc.text(`Gewinnsätze: ${bestOf} (Best of ${maxSets})`, 10, footerY + 8);
+  doc.text('Unterschrift SR: ___________________________', w / 2, cbY + 3.5);
+  doc.text(`Gewinnsätze: ${bestOf} (Best of ${maxSets})`, 10, cbY + 12);
 }
