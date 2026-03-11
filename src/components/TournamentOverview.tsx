@@ -561,7 +561,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
               if (completedInRound.length === 0) return null;
               return (
                 <div key={`photos-${r}`}>
-                  <h5 className="text-xs font-semibold text-muted-foreground mb-2">{getRoundName(r, rounds)}</h5>
+                  <h5 className="text-xs font-semibold text-muted-foreground mb-2">{getRoundName(r, rounds, mode)}</h5>
                   {completedInRound.map(m => {
                     const p1 = getPlayer(m.player1Id);
                     const p2 = getPlayer(m.player2Id);
