@@ -101,14 +101,25 @@ export function printRefereeSheet({ match, player1Name, player2Name, tournamentN
     doc.rect(resX, y, resultColW, rowH);
   }
 
-  // Footer
+  // Footer - Winner checkbox
   const footerY = tableY + rowH * 3 + 8;
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Gewinner: ___________________________', 10, footerY);
-  doc.text('Unterschrift SR: ___________________________', w / 2, footerY);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Gewinner bitte ankreuzen:', 10, footerY);
 
-  doc.text(`Gewinnsätze: ${bestOf} (Best of ${maxSets})`, 10, footerY + 8);
+  doc.setFont('helvetica', 'normal');
+  const cbSize = 4;
+  const cbY = footerY + 4;
+  // Checkbox A
+  doc.rect(10, cbY, cbSize, cbSize);
+  doc.text('A', 16, cbY + 3.5);
+  // Checkbox B
+  doc.rect(28, cbY, cbSize, cbSize);
+  doc.text('B', 34, cbY + 3.5);
+
+  doc.setFontSize(8);
+  doc.text('Unterschrift SR: ___________________________', w / 2, cbY + 3.5);
+  doc.text(`Gewinnsätze: ${bestOf} (Best of ${maxSets})`, 10, cbY + 12);
 
   // Save as download (avoids popup blockers in Edge)
   const p1Short = player1Name.replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_').substring(0, 15);
