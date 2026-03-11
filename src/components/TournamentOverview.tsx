@@ -20,9 +20,11 @@ interface Props {
   tournamentDate?: string | null;
   venueString?: string;
   motto?: string;
+  mode?: string;
 }
 
-function getRoundName(round: number, totalRounds: number): string {
+function getRoundName(round: number, totalRounds: number, mode?: string): string {
+  if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
   const diff = totalRounds - round;
   if (diff === 1) return 'Finale';
   if (diff === 2) return 'Halbfinale';
@@ -98,7 +100,7 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
   return Math.max(wins.p1, wins.p2) >= 3;
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto }: Props) {
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode }: Props) {
   const [showMatchPhotos, setShowMatchPhotos] = useState(false);
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
@@ -177,7 +179,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       const roundMatches = matchesByRound[r];
       if (!roundMatches || roundMatches.length === 0) continue;
 
-      const roundName = getRoundName(r, rounds);
+      const roundName = getRoundName(r, rounds, mode);
 
       const tableData = roundMatches.map((m, idx) => {
         const p1 = getPlayer(m.player1Id);
@@ -464,7 +466,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       {/* Rounds */}
       {matchesByRound.map((roundMatches, r) => {
         if (roundMatches.length === 0) return null;
-        const roundName = getRoundName(r, rounds);
+        const roundName = getRoundName(r, rounds, mode);
 
         return (
           <div key={r}>
@@ -559,7 +561,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
               if (completedInRound.length === 0) return null;
               return (
                 <div key={`photos-${r}`}>
-                  <h5 className="text-xs font-semibold text-muted-foreground mb-2">{getRoundName(r, rounds)}</h5>
+                  <h5 className="text-xs font-semibold text-muted-foreground mb-2">{getRoundName(r, rounds, mode)}</h5>
                   {completedInRound.map(m => {
                     const p1 = getPlayer(m.player1Id);
                     const p2 = getPlayer(m.player2Id);
@@ -574,7 +576,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                             onClick={() => generateMatchReport({
                               match: m, player1: p1, player2: p2,
                               tournamentName, tournamentId,
-                              roundName: getRoundName(r, rounds),
+                              roundName: getRoundName(r, rounds, mode),
                               logoUrl, bestOf,
                             })}
                           >
@@ -639,6 +641,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     tournamentDate,
                     venueString,
                     motto,
+                    mode,
                   })}
                 >
                   <User className="h-4 w-4 mr-2 flex-shrink-0" />

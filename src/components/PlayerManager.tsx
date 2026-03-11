@@ -29,9 +29,10 @@ interface Props {
   bestOf?: number;
   totalRounds?: number;
   getPlayer?: (id: string | null) => Player | null;
+  mode?: string;
 }
 
-export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clubs = [], onAddClub, tournamentName = '', tournamentDate, venueString = '', logoUrl, matches = [], tournamentId = '', bestOf = 3, totalRounds = 0, getPlayer }: Props) {
+export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clubs = [], onAddClub, tournamentName = '', tournamentDate, venueString = '', logoUrl, matches = [], tournamentId = '', bestOf = 3, totalRounds = 0, getPlayer, mode }: Props) {
   const [name, setName] = useState('');
   const [club, setClub] = useState('');
   const [newClubName, setNewClubName] = useState('');
@@ -437,6 +438,7 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                           tournamentDate,
                           venueString,
                           motto: '',
+                          mode,
                         });
                         toast.success(`Spielerbericht für ${player.name} wird erstellt…`);
                       }}

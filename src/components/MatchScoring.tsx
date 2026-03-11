@@ -31,6 +31,7 @@ interface Props {
   isHandicap?: boolean;
   players?: Player[];
   doublesPairs?: DoublesPair[];
+  mode?: string;
 }
 
 let announcementQueue: Promise<void> = Promise.resolve();
@@ -147,7 +148,7 @@ const announceMatch = async (
   });
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, isHandicap = false, players = [], doublesPairs = [] }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, isHandicap = false, players = [], doublesPairs = [], mode }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
   const { getPhraseAudioUrl } = useAnnouncementPhrases();
 
@@ -367,7 +368,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
       {completedMatches.length > 0 && (
         <Section title="✅ Abgeschlossene Spiele">
           {completedMatches.map(m => (
-            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} motto={motto} />
+            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} motto={motto} mode={mode} />
           ))}
         </Section>
       )}
@@ -624,7 +625,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   );
 }
 
-function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf, rounds, logoUrl, tournamentDate, venueString, motto }: {
+function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf, rounds, logoUrl, tournamentDate, venueString, motto, mode }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   tournamentId: string;
@@ -635,6 +636,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
   tournamentDate?: string | null;
   venueString?: string;
   motto?: string;
+  mode?: string;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
@@ -643,6 +645,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
   const winner = getPlayer(match.winnerId);
 
   const getRoundName = (round: number, totalRounds: number): string => {
+    if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
     const diff = totalRounds - round;
     if (diff === 1) return 'Finale';
     if (diff === 2) return 'Halbfinale';

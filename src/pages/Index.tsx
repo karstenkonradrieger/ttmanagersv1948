@@ -445,9 +445,10 @@ const Index = () => {
                 matches={tournament.matches}
                 tournamentId={selectedTournamentId}
                 bestOf={tournament.bestOf}
-                totalRounds={tournament.rounds}
-                getPlayer={getPlayer}
-              />
+                 totalRounds={tournament.rounds}
+                 getPlayer={getPlayer}
+                 mode={tournament.mode}
+               />
             </TabsContent>
 
             {isDoubles && (
@@ -649,10 +650,11 @@ const Index = () => {
                   tournamentDate={tournament.tournamentDate}
                   venueString={venueString}
                   motto={tournament.motto}
-                  isHandicap={isHandicap}
-                  players={tournament.players}
-                  doublesPairs={tournament.doublesPairs}
-                />
+                   isHandicap={isHandicap}
+                   players={tournament.players}
+                   doublesPairs={tournament.doublesPairs}
+                   mode={tournament.mode}
+                 />
               )}
             </TabsContent>
 
@@ -672,10 +674,11 @@ const Index = () => {
                   ? tournament.doublesPairs.map(dp => ({ id: dp.player1Id, name: dp.pairName, club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' }))
                   : tournament.players
                 }
-                tournamentDate={tournament.tournamentDate}
-                venueString={venueString}
-                motto={tournament.motto}
-              />
+                 tournamentDate={tournament.tournamentDate}
+                 venueString={venueString}
+                 motto={tournament.motto}
+                 mode={tournament.mode}
+               />
             </TabsContent>
 
             <TabsContent value="live">
