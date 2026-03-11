@@ -649,10 +649,11 @@ const Index = () => {
                   tournamentDate={tournament.tournamentDate}
                   venueString={venueString}
                   motto={tournament.motto}
-                  isHandicap={isHandicap}
-                  players={tournament.players}
-                  doublesPairs={tournament.doublesPairs}
-                />
+                   isHandicap={isHandicap}
+                   players={tournament.players}
+                   doublesPairs={tournament.doublesPairs}
+                   mode={tournament.mode}
+                 />
               )}
             </TabsContent>
 
