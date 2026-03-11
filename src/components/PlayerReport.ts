@@ -70,6 +70,7 @@ export async function generatePlayerReport({
   tournamentDate,
   venueString,
   motto,
+  mode,
 }: PlayerReportOptions) {
   const getName = (id: string | null) =>
     getParticipantName ? getParticipantName(id) : (getPlayer(id)?.name || 'Unbekannt');
