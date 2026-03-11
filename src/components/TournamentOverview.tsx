@@ -20,9 +20,11 @@ interface Props {
   tournamentDate?: string | null;
   venueString?: string;
   motto?: string;
+  mode?: string;
 }
 
-function getRoundName(round: number, totalRounds: number): string {
+function getRoundName(round: number, totalRounds: number, mode?: string): string {
+  if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
   const diff = totalRounds - round;
   if (diff === 1) return 'Finale';
   if (diff === 2) return 'Halbfinale';

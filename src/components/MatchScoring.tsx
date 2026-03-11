@@ -643,6 +643,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
   const winner = getPlayer(match.winnerId);
 
   const getRoundName = (round: number, totalRounds: number): string => {
+    if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
     const diff = totalRounds - round;
     if (diff === 1) return 'Finale';
     if (diff === 2) return 'Halbfinale';
