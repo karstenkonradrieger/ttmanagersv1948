@@ -59,10 +59,9 @@ export function printRefereeSheet({ match, player1Name, player2Name, tournamentN
 
   // Score table
   const tableY = yPlayers + 16;
-  const colW = (w - 40) / (maxSets + 2); // +2 for name col and result col
   const rowH = 10;
   const tableX = 10;
-  const nameColW = 40;
+  const nameColW = 65;
   const resultColW = 16;
   const setColW = (w - 20 - nameColW - resultColW) / maxSets;
 
