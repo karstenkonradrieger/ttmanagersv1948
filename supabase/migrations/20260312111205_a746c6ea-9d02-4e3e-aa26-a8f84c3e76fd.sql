@@ -1,0 +1,3 @@
+CREATE POLICY "Public read consent-documents" ON storage.objects FOR SELECT TO public USING (bucket_id = 'consent-documents');
+CREATE POLICY "Authenticated upload consent-documents" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'consent-documents');
+CREATE POLICY "Authenticated delete consent-documents" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'consent-documents');
