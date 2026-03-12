@@ -19,6 +19,7 @@ export interface ClubPlayer {
   email: string;
   photoConsent: boolean;
   voiceNameUrl: string | null;
+  photoConsentUrl: string | null;
 }
 
 export function useClubPlayers() {
