@@ -1,0 +1,1 @@
+INSERT INTO storage.buckets (id, name, public) VALUES ('consent-documents', 'consent-documents', true) ON CONFLICT (id) DO NOTHING;

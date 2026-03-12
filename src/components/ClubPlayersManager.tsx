@@ -7,9 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, UserPlus, Pencil, Check, X, Download, Upload, Mail, Camera, FileText } from 'lucide-react';
+import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, UserPlus, Pencil, Check, X, Download, Upload, Mail, Camera, FileText, Paperclip, FileCheck, ExternalLink } from 'lucide-react';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { printGeneralPhotoConsentPdf } from '@/components/PhotoConsentForm';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface Props {
@@ -111,6 +112,8 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const [clubName, setClubName] = useState('');
   const [addingClub, setAddingClub] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const consentFileRef = useRef<HTMLInputElement>(null);
+  const [uploadingConsentFor, setUploadingConsentFor] = useState<string | null>(null);
   const [openClubs, setOpenClubs] = useState<Set<string>>(new Set());
   const [addingPlayerFor, setAddingPlayerFor] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -183,6 +186,26 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
       next.has(clubId) ? next.delete(clubId) : next.add(clubId);
       return next;
     });
+  };
+
+  const handleConsentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !uploadingConsentFor) return;
+    try {
+      const ext = file.name.split('.').pop() || 'pdf';
+      const path = `consent-${uploadingConsentFor}-${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from('consent-documents').upload(path, file);
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from('consent-documents').getPublicUrl(path);
+      onUpdatePlayer(uploadingConsentFor, { photoConsentUrl: urlData.publicUrl, photoConsent: true });
+      toast.success('Fotoerlaubnis-Dokument hochgeladen');
+    } catch (error) {
+      console.error('Error uploading consent document:', error);
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingConsentFor(null);
+      if (consentFileRef.current) consentFileRef.current.value = '';
+    }
   };
 
   const handleExportAll = () => {
@@ -436,7 +459,14 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   <span className="flex items-center gap-0.5"><Trophy className="h-3 w-3" /> {player.ttr}</span>
                                   {player.phone && <span className="flex items-center gap-0.5"><Phone className="h-3 w-3" /> {player.phone}</span>}
                                   {player.email && <span className="flex items-center gap-0.5"><Mail className="h-3 w-3" /> {player.email}</span>}
-                                  <span className="flex items-center gap-0.5"><Camera className="h-3 w-3" /> {player.photoConsent ? '✓ Foto' : '✗ Foto'}</span>
+                                  <span className="flex items-center gap-0.5">
+                                    <Camera className="h-3 w-3" /> {player.photoConsent ? '✓ Foto' : '✗ Foto'}
+                                    {player.photoConsentUrl && (
+                                      <a href={player.photoConsentUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-0.5" title="Scan anzeigen">
+                                        <ExternalLink className="h-3 w-3" />
+                                      </a>
+                                    )}
+                                  </span>
                                 </div>
                                 {(player.street || player.city) && (
                                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -454,6 +484,15 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   onSaved={(url) => onUpdatePlayer(player.id, { voiceNameUrl: url })}
                                   storagePrefix="voice-names-club"
                                 />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => { setUploadingConsentFor(player.id); consentFileRef.current?.click(); }}
+                                  className={`h-7 w-7 ${player.photoConsentUrl ? 'text-green-600' : 'text-muted-foreground'} hover:text-foreground`}
+                                  title={player.photoConsentUrl ? 'Fotoerlaubnis-Scan ersetzen' : 'Fotoerlaubnis-Scan hochladen'}
+                                >
+                                  <Paperclip className="h-3.5 w-3.5" />
+                                </Button>
                                 <Button variant="ghost" size="icon" onClick={() => startEdit(player)} className="h-7 w-7 text-muted-foreground hover:text-foreground">
                                   <Pencil className="h-3.5 w-3.5" />
                                 </Button>
@@ -491,6 +530,13 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
           );
         })}
       </div>
+      <input
+        ref={consentFileRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,.webp"
+        onChange={handleConsentUpload}
+        className="hidden"
+      />
     </div>
   );
 }

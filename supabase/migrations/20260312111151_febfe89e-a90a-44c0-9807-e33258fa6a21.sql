@@ -1,0 +1,1 @@
+ALTER TABLE public.club_players ADD COLUMN photo_consent_url text DEFAULT NULL;

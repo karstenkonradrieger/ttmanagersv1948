@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { useAuth } from '@/hooks/useAuth';
 import { useClubs } from '@/hooks/useClubs';
@@ -422,8 +423,13 @@ const Index = () => {
                     clubPlayers={clubPlayers}
                     getPlayersForClub={getPlayersForClub}
                     onImportPlayers={(players) => {
+                      const withConsent: string[] = [];
                       for (const p of players) {
                         addPlayer(p.name, p.club, p.ttr, p.gender, p.birthDate, p.postalCode, p.city, p.street, p.houseNumber, p.phone, p.voiceNameUrl || undefined);
+                        if (p.photoConsent) withConsent.push(p.name);
+                      }
+                      if (withConsent.length > 0) {
+                        toast.success(`Fotoerlaubnis für ${withConsent.length} Spieler übernommen`);
                       }
                     }}
                     existingPlayerNames={tournament.players.map(p => p.name)}
