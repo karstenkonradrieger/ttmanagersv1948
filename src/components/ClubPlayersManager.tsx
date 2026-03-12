@@ -188,7 +188,27 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
     });
   };
 
-  const handleExportAll = () => {
+  const handleConsentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !uploadingConsentFor) return;
+    try {
+      const ext = file.name.split('.').pop() || 'pdf';
+      const path = `consent-${uploadingConsentFor}-${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from('consent-documents').upload(path, file);
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from('consent-documents').getPublicUrl(path);
+      onUpdatePlayer(uploadingConsentFor, { photoConsentUrl: urlData.publicUrl, photoConsent: true });
+      toast.success('Fotoerlaubnis-Dokument hochgeladen');
+    } catch (error) {
+      console.error('Error uploading consent document:', error);
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingConsentFor(null);
+      if (consentFileRef.current) consentFileRef.current.value = '';
+    }
+  };
+
+
     if (clubs.length === 0) { toast.error('Keine Vereine zum Exportieren'); return; }
     for (const club of clubs) {
       const players = getPlayersForClub(club.id);
