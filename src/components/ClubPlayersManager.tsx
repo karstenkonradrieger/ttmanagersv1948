@@ -208,7 +208,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
     }
   };
 
-
+  const handleExportAll = () => {
     if (clubs.length === 0) { toast.error('Keine Vereine zum Exportieren'); return; }
     for (const club of clubs) {
       const players = getPlayersForClub(club.id);
