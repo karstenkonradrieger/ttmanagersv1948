@@ -530,6 +530,13 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
           );
         })}
       </div>
+      <input
+        ref={consentFileRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,.webp"
+        onChange={handleConsentUpload}
+        className="hidden"
+      />
     </div>
   );
 }
