@@ -55,6 +55,7 @@ export type Database = {
           name: string
           phone: string
           photo_consent: boolean
+          photo_consent_url: string | null
           postal_code: string
           street: string
           ttr: number
@@ -73,6 +74,7 @@ export type Database = {
           name: string
           phone?: string
           photo_consent?: boolean
+          photo_consent_url?: string | null
           postal_code?: string
           street?: string
           ttr?: number
@@ -91,6 +93,7 @@ export type Database = {
           name?: string
           phone?: string
           photo_consent?: boolean
+          photo_consent_url?: string | null
           postal_code?: string
           street?: string
           ttr?: number
