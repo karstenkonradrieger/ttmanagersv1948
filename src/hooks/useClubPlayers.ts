@@ -51,6 +51,7 @@ export function useClubPlayers() {
           email: row.email || '',
           photoConsent: row.photo_consent ?? false,
           voiceNameUrl: row.voice_name_url || null,
+          photoConsentUrl: row.photo_consent_url || null,
         }))
       );
     } catch (error) {
