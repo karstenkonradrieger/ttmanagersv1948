@@ -112,6 +112,8 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const [clubName, setClubName] = useState('');
   const [addingClub, setAddingClub] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const consentFileRef = useRef<HTMLInputElement>(null);
+  const [uploadingConsentFor, setUploadingConsentFor] = useState<string | null>(null);
   const [openClubs, setOpenClubs] = useState<Set<string>>(new Set());
   const [addingPlayerFor, setAddingPlayerFor] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
