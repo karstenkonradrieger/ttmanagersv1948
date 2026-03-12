@@ -484,6 +484,15 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   onSaved={(url) => onUpdatePlayer(player.id, { voiceNameUrl: url })}
                                   storagePrefix="voice-names-club"
                                 />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => { setUploadingConsentFor(player.id); consentFileRef.current?.click(); }}
+                                  className={`h-7 w-7 ${player.photoConsentUrl ? 'text-green-600' : 'text-muted-foreground'} hover:text-foreground`}
+                                  title={player.photoConsentUrl ? 'Fotoerlaubnis-Scan ersetzen' : 'Fotoerlaubnis-Scan hochladen'}
+                                >
+                                  <Paperclip className="h-3.5 w-3.5" />
+                                </Button>
                                 <Button variant="ghost" size="icon" onClick={() => startEdit(player)} className="h-7 w-7 text-muted-foreground hover:text-foreground">
                                   <Pencil className="h-3.5 w-3.5" />
                                 </Button>
