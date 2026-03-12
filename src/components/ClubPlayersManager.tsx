@@ -459,7 +459,14 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   <span className="flex items-center gap-0.5"><Trophy className="h-3 w-3" /> {player.ttr}</span>
                                   {player.phone && <span className="flex items-center gap-0.5"><Phone className="h-3 w-3" /> {player.phone}</span>}
                                   {player.email && <span className="flex items-center gap-0.5"><Mail className="h-3 w-3" /> {player.email}</span>}
-                                  <span className="flex items-center gap-0.5"><Camera className="h-3 w-3" /> {player.photoConsent ? '✓ Foto' : '✗ Foto'}</span>
+                                  <span className="flex items-center gap-0.5">
+                                    <Camera className="h-3 w-3" /> {player.photoConsent ? '✓ Foto' : '✗ Foto'}
+                                    {player.photoConsentUrl && (
+                                      <a href={player.photoConsentUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-0.5" title="Scan anzeigen">
+                                        <ExternalLink className="h-3 w-3" />
+                                      </a>
+                                    )}
+                                  </span>
                                 </div>
                                 {(player.street || player.city) && (
                                   <p className="text-xs text-muted-foreground mt-0.5">
