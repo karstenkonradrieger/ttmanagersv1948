@@ -23,6 +23,10 @@ interface WizardData {
   googleMapsLink: string;
   logoUrl: string | null;
   certificateText: string;
+  organizerName: string;
+  sponsorName: string;
+  sponsorSignatureUrl: string | null;
+  sponsorConsent: boolean;
   type: TournamentType;
   teamMode: TeamMode;
   mode: TournamentMode;
