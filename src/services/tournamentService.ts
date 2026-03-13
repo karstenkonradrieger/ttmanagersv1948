@@ -29,6 +29,10 @@ export interface DbTournament {
   directions_pdf_url: string | null;
   google_maps_link: string | null;
   certificate_text: string;
+  organizer_name: string;
+  sponsor_name: string;
+  sponsor_signature_url: string | null;
+  sponsor_consent: boolean;
 }
 
 export interface DbPlayer {
@@ -143,6 +147,10 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     directionsPdfUrl: (tournament as any).directions_pdf_url || null,
     googleMapsLink: (tournament as any).google_maps_link || null,
     certificateText: (tournament as any).certificate_text || 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.',
+    organizerName: (tournament as any).organizer_name || '',
+    sponsorName: (tournament as any).sponsor_name || '',
+    sponsorSignatureUrl: (tournament as any).sponsor_signature_url || null,
+    sponsorConsent: (tournament as any).sponsor_consent ?? false,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -213,6 +221,10 @@ export async function createTournament(
     google_maps_link?: string | null;
     logo_url?: string | null;
     certificate_text?: string;
+    organizer_name?: string;
+    sponsor_name?: string;
+    sponsor_signature_url?: string | null;
+    sponsor_consent?: boolean;
   },
 ): Promise<string> {
   const { data, error } = await supabase
@@ -235,6 +247,10 @@ export async function createTournament(
       ...(extras?.google_maps_link ? { google_maps_link: extras.google_maps_link } : {}),
       ...(extras?.logo_url ? { logo_url: extras.logo_url } : {}),
       ...(extras?.certificate_text ? { certificate_text: extras.certificate_text } : {}),
+      ...(extras?.organizer_name !== undefined ? { organizer_name: extras.organizer_name } : {}),
+      ...(extras?.sponsor_name !== undefined ? { sponsor_name: extras.sponsor_name } : {}),
+      ...(extras?.sponsor_signature_url !== undefined ? { sponsor_signature_url: extras.sponsor_signature_url } : {}),
+      ...(extras?.sponsor_consent !== undefined ? { sponsor_consent: extras.sponsor_consent } : {}),
     })
     .select('id')
     .single();
@@ -268,6 +284,10 @@ export async function updateTournament(id: string, updates: Partial<{
   directions_pdf_url: string | null;
   google_maps_link: string | null;
   certificate_text: string;
+  organizer_name: string;
+  sponsor_name: string;
+  sponsor_signature_url: string | null;
+  sponsor_consent: boolean;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')

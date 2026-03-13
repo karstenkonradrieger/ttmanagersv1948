@@ -21,6 +21,10 @@ interface Props {
   venueString?: string;
   motto?: string;
   mode?: string;
+  organizerName?: string;
+  sponsorName?: string;
+  sponsorSignatureUrl?: string | null;
+  sponsorConsent?: boolean;
 }
 
 function getRoundName(round: number, totalRounds: number, mode?: string): string {
@@ -100,7 +104,7 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
   return Math.max(wins.p1, wins.p2) >= 3;
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode }: Props) {
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorConsent }: Props) {
   const [showMatchPhotos, setShowMatchPhotos] = useState(false);
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
@@ -339,6 +343,33 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
     }
 
+    // Pre-load sponsor signature if available
+    let sigData: string | null = null;
+    let sigWidth = 0;
+    let sigHeight = 0;
+    if (sponsorConsent && sponsorSignatureUrl && sponsorName) {
+      try {
+        const sigImg = new Image();
+        sigImg.crossOrigin = 'anonymous';
+        await new Promise<void>((resolve, reject) => {
+          sigImg.onload = () => resolve();
+          sigImg.onerror = () => reject();
+          sigImg.src = sponsorSignatureUrl;
+        });
+        const sigCanvas = document.createElement('canvas');
+        sigCanvas.width = sigImg.naturalWidth;
+        sigCanvas.height = sigImg.naturalHeight;
+        sigCanvas.getContext('2d')!.drawImage(sigImg, 0, 0);
+        sigData = sigCanvas.toDataURL('image/png');
+        const sigMaxH = 20;
+        const sigRatio = sigImg.naturalWidth / sigImg.naturalHeight;
+        sigHeight = sigMaxH;
+        sigWidth = sigMaxH * sigRatio;
+      } catch {
+        // ignore
+      }
+    }
+
     const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
 
     placements.forEach((placement, idx) => {
@@ -408,10 +439,30 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       const sigY = h - 40;
       doc.setDrawColor(150, 150, 150);
       doc.setLineWidth(0.5);
-      doc.line(w / 2 - 50, sigY, w / 2 + 50, sigY);
+
+      // Sponsor signature (left) if consent given
+      if (sponsorConsent && sigData && sponsorName) {
+        doc.addImage(sigData, 'PNG', w / 4 - sigWidth / 2, sigY - sigHeight - 2, sigWidth, sigHeight);
+        doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
+        doc.setFontSize(10);
+        doc.setTextColor(150, 150, 150);
+        doc.text(sponsorName, w / 4, sigY + 7, { align: 'center' });
+        doc.setFontSize(8);
+        doc.text('Sponsor', w / 4, sigY + 13, { align: 'center' });
+      }
+
+      // Organizer / Turnierleitung signature (right or center)
+      const orgX = (sponsorConsent && sigData && sponsorName) ? (3 * w / 4) : (w / 2);
+      doc.line(orgX - 50, sigY, orgX + 50, sigY);
       doc.setFontSize(10);
       doc.setTextColor(150, 150, 150);
-      doc.text('Turnierleitung', w / 2, sigY + 7, { align: 'center' });
+      if (organizerName) {
+        doc.text(organizerName, orgX, sigY + 7, { align: 'center' });
+        doc.setFontSize(8);
+        doc.text('Turnierleitung', orgX, sigY + 13, { align: 'center' });
+      } else {
+        doc.text('Turnierleitung', orgX, sigY + 7, { align: 'center' });
+      }
     });
 
     doc.save(`${tournamentName.replace(/\s+/g, '_')}_Urkunden.pdf`);

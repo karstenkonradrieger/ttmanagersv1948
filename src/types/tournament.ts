@@ -185,4 +185,8 @@ export interface Tournament {
   directionsPdfUrl: string | null;
   googleMapsLink: string | null;
   certificateText: string;
+  organizerName: string;
+  sponsorName: string;
+  sponsorSignatureUrl: string | null;
+  sponsorConsent: boolean;
 }
