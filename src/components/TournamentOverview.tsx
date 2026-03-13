@@ -441,27 +441,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       doc.setLineWidth(0.5);
 
       // Sponsor signature (left) if consent given
-      if (sponsorConsent && sponsorSignatureUrl && sponsorName) {
-        try {
-          const sigImg = new Image();
-          sigImg.crossOrigin = 'anonymous';
-          await new Promise<void>((resolve, reject) => {
-            sigImg.onload = () => resolve();
-            sigImg.onerror = () => reject();
-            sigImg.src = sponsorSignatureUrl;
-          });
-          const sigCanvas = document.createElement('canvas');
-          sigCanvas.width = sigImg.naturalWidth;
-          sigCanvas.height = sigImg.naturalHeight;
-          sigCanvas.getContext('2d')!.drawImage(sigImg, 0, 0);
-          const sigData = sigCanvas.toDataURL('image/png');
-          const sigMaxH = 20;
-          const sigRatio = sigImg.naturalWidth / sigImg.naturalHeight;
-          const sigW = sigMaxH * sigRatio;
-          doc.addImage(sigData, 'PNG', w / 4 - sigW / 2, sigY - sigMaxH - 2, sigW, sigMaxH);
-        } catch {
-          // ignore signature load errors
-        }
+      if (sponsorConsent && sigData && sponsorName) {
+        doc.addImage(sigData, 'PNG', w / 4 - sigWidth / 2, sigY - sigHeight - 2, sigWidth, sigHeight);
         doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
         doc.setFontSize(10);
         doc.setTextColor(150, 150, 150);
