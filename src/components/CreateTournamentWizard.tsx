@@ -212,6 +212,39 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     update({ logoUrl: null });
   };
 
+  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Bitte nur Bilddateien hochladen');
+      return;
+    }
+    setUploadingSignature(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `sig-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('signatures').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('signatures').getPublicUrl(fileName);
+      update({ sponsorSignatureUrl: urlData.publicUrl });
+      toast.success('Unterschrift hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingSignature(false);
+      if (signatureInputRef.current) signatureInputRef.current.value = '';
+    }
+  };
+
+  const removeSignature = async () => {
+    if (data.sponsorSignatureUrl) {
+      const parts = data.sponsorSignatureUrl.split('/');
+      const fileName = parts[parts.length - 1];
+      await supabase.storage.from('signatures').remove([fileName]);
+    }
+    update({ sponsorSignatureUrl: null });
+  };
+
   const canProceedStep1 = data.name.trim().length > 0;
 
   const handleCreate = async () => {
@@ -237,6 +270,10 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           google_maps_link: data.googleMapsLink || null,
           logo_url: data.logoUrl || null,
           certificate_text: data.certificateText,
+          organizer_name: data.organizerName,
+          sponsor_name: data.sponsorName,
+          sponsor_signature_url: data.sponsorSignatureUrl,
+          sponsor_consent: data.sponsorConsent,
         },
       );
       setOpen(false);
