@@ -343,6 +343,33 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
     }
 
+    // Pre-load sponsor signature if available
+    let sigData: string | null = null;
+    let sigWidth = 0;
+    let sigHeight = 0;
+    if (sponsorConsent && sponsorSignatureUrl && sponsorName) {
+      try {
+        const sigImg = new Image();
+        sigImg.crossOrigin = 'anonymous';
+        await new Promise<void>((resolve, reject) => {
+          sigImg.onload = () => resolve();
+          sigImg.onerror = () => reject();
+          sigImg.src = sponsorSignatureUrl;
+        });
+        const sigCanvas = document.createElement('canvas');
+        sigCanvas.width = sigImg.naturalWidth;
+        sigCanvas.height = sigImg.naturalHeight;
+        sigCanvas.getContext('2d')!.drawImage(sigImg, 0, 0);
+        sigData = sigCanvas.toDataURL('image/png');
+        const sigMaxH = 20;
+        const sigRatio = sigImg.naturalWidth / sigImg.naturalHeight;
+        sigHeight = sigMaxH;
+        sigWidth = sigMaxH * sigRatio;
+      } catch {
+        // ignore
+      }
+    }
+
     const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
 
     placements.forEach((placement, idx) => {
