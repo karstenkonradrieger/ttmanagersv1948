@@ -575,8 +575,12 @@ export type Database = {
           mode: string
           motto: string
           name: string
+          organizer_name: string
           phase: string | null
           rounds: number
+          sponsor_consent: boolean
+          sponsor_name: string
+          sponsor_signature_url: string | null
           sport: string
           started: boolean
           table_count: number
@@ -605,8 +609,12 @@ export type Database = {
           mode?: string
           motto?: string
           name?: string
+          organizer_name?: string
           phase?: string | null
           rounds?: number
+          sponsor_consent?: boolean
+          sponsor_name?: string
+          sponsor_signature_url?: string | null
           sport?: string
           started?: boolean
           table_count?: number
@@ -635,8 +643,12 @@ export type Database = {
           mode?: string
           motto?: string
           name?: string
+          organizer_name?: string
           phase?: string | null
           rounds?: number
+          sponsor_consent?: boolean
+          sponsor_name?: string
+          sponsor_signature_url?: string | null
           sport?: string
           started?: boolean
           table_count?: number
