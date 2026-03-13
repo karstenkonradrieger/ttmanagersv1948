@@ -42,6 +42,10 @@ function loadTournament(): Tournament {
     directionsPdfUrl: null,
     googleMapsLink: null,
     certificateText: 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.',
+    organizerName: '',
+    sponsorName: '',
+    sponsorSignatureUrl: null,
+    sponsorConsent: false,
   };
 }
 
