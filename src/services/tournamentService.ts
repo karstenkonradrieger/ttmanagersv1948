@@ -29,6 +29,10 @@ export interface DbTournament {
   directions_pdf_url: string | null;
   google_maps_link: string | null;
   certificate_text: string;
+  organizer_name: string;
+  sponsor_name: string;
+  sponsor_signature_url: string | null;
+  sponsor_consent: boolean;
 }
 
 export interface DbPlayer {
