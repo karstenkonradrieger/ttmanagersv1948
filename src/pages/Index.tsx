@@ -684,7 +684,11 @@ const Index = () => {
                  venueString={venueString}
                  motto={tournament.motto}
                  mode={tournament.mode}
-               />
+                 organizerName={tournament.organizerName}
+                 sponsorName={tournament.sponsorName}
+                 sponsorSignatureUrl={tournament.sponsorSignatureUrl}
+                 sponsorConsent={tournament.sponsorConsent}
+                />
             </TabsContent>
 
             <TabsContent value="live">
