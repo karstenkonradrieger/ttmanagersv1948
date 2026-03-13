@@ -253,6 +253,11 @@ const Index = () => {
               venueCity={tournament.venueCity}
               motto={tournament.motto}
               breakMinutes={tournament.breakMinutes}
+              certificateText={tournament.certificateText}
+              organizerName={tournament.organizerName}
+              sponsorName={tournament.sponsorName}
+              sponsorSignatureUrl={tournament.sponsorSignatureUrl}
+              sponsorConsent={tournament.sponsorConsent}
               started={tournament.started}
               onUpdateMode={updateTournamentMode}
               onUpdateType={updateTournamentType}
