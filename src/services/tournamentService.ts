@@ -147,6 +147,10 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     directionsPdfUrl: (tournament as any).directions_pdf_url || null,
     googleMapsLink: (tournament as any).google_maps_link || null,
     certificateText: (tournament as any).certificate_text || 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.',
+    organizerName: (tournament as any).organizer_name || '',
+    sponsorName: (tournament as any).sponsor_name || '',
+    sponsorSignatureUrl: (tournament as any).sponsor_signature_url || null,
+    sponsorConsent: (tournament as any).sponsor_consent ?? false,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
