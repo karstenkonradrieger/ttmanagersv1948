@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Settings2 } from 'lucide-react';
+import { Settings2, Upload, X, Loader2, PenTool } from 'lucide-react';
 import { TournamentMode, TournamentType, TeamMode } from '@/types/tournament';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface Props {
@@ -20,6 +22,11 @@ interface Props {
   venueCity: string;
   motto: string;
   breakMinutes: number;
+  certificateText: string;
+  organizerName: string;
+  sponsorName: string;
+  sponsorSignatureUrl: string | null;
+  sponsorConsent: boolean;
   onUpdateMode: (mode: TournamentMode) => Promise<void>;
   onUpdateType: (type: TournamentType) => Promise<void>;
   onUpdateBestOf: (bestOf: number) => Promise<void>;
@@ -31,12 +38,18 @@ interface Props {
     venue_city: string;
     motto: string;
     break_minutes: number;
+    certificate_text: string;
+    organizer_name: string;
+    sponsor_name: string;
+    sponsor_signature_url: string | null;
+    sponsor_consent: boolean;
   }) => Promise<void>;
 }
 
 export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
+  certificateText, organizerName, sponsorName, sponsorSignatureUrl, sponsorConsent,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -50,7 +63,14 @@ export function TournamentSettingsDialog({
   const [localCity, setLocalCity] = useState(venueCity);
   const [localMotto, setLocalMotto] = useState(motto);
   const [localBreakMinutes, setLocalBreakMinutes] = useState(breakMinutes);
+  const [localCertText, setLocalCertText] = useState(certificateText);
+  const [localOrganizerName, setLocalOrganizerName] = useState(organizerName);
+  const [localSponsorName, setLocalSponsorName] = useState(sponsorName);
+  const [localSponsorSigUrl, setLocalSponsorSigUrl] = useState(sponsorSignatureUrl);
+  const [localSponsorConsent, setLocalSponsorConsent] = useState(sponsorConsent);
+  const [uploadingSig, setUploadingSig] = useState(false);
   const [saving, setSaving] = useState(false);
+  const sigInputRef = useRef<HTMLInputElement>(null);
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
@@ -64,8 +84,42 @@ export function TournamentSettingsDialog({
       setLocalCity(venueCity);
       setLocalMotto(motto);
       setLocalBreakMinutes(breakMinutes);
+      setLocalCertText(certificateText);
+      setLocalOrganizerName(organizerName);
+      setLocalSponsorName(sponsorName);
+      setLocalSponsorSigUrl(sponsorSignatureUrl);
+      setLocalSponsorConsent(sponsorConsent);
     }
     setOpen(isOpen);
+  };
+
+  const handleSigUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    setUploadingSig(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `sig-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('signatures').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('signatures').getPublicUrl(fileName);
+      setLocalSponsorSigUrl(urlData.publicUrl);
+      toast.success('Unterschrift hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingSig(false);
+      if (sigInputRef.current) sigInputRef.current.value = '';
+    }
+  };
+
+  const removeSig = async () => {
+    if (localSponsorSigUrl) {
+      const parts = localSponsorSigUrl.split('/');
+      const fileName = parts[parts.length - 1];
+      await supabase.storage.from('signatures').remove([fileName]);
+    }
+    setLocalSponsorSigUrl(null);
   };
 
   const hasChanges =
@@ -73,7 +127,10 @@ export function TournamentSettingsDialog({
     (localDate || null) !== (tournamentDate || null) ||
     localStreet !== venueStreet || localHouseNumber !== venueHouseNumber ||
     localPostalCode !== venuePostalCode || localCity !== venueCity ||
-    localMotto !== motto || localBreakMinutes !== breakMinutes;
+    localMotto !== motto || localBreakMinutes !== breakMinutes ||
+    localCertText !== certificateText || localOrganizerName !== organizerName ||
+    localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
+    localSponsorConsent !== sponsorConsent;
 
   const handleSave = async () => {
     setSaving(true);
@@ -86,7 +143,10 @@ export function TournamentSettingsDialog({
         (localDate || null) !== (tournamentDate || null) ||
         localStreet !== venueStreet || localHouseNumber !== venueHouseNumber ||
         localPostalCode !== venuePostalCode || localCity !== venueCity ||
-        localMotto !== motto || localBreakMinutes !== breakMinutes;
+        localMotto !== motto || localBreakMinutes !== breakMinutes ||
+        localCertText !== certificateText || localOrganizerName !== organizerName ||
+        localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
+        localSponsorConsent !== sponsorConsent;
 
       if (detailsChanged) {
         await onUpdateDetails({
@@ -97,6 +157,11 @@ export function TournamentSettingsDialog({
           venue_city: localCity,
           motto: localMotto,
           break_minutes: localBreakMinutes,
+          certificate_text: localCertText,
+          organizer_name: localOrganizerName,
+          sponsor_name: localSponsorName,
+          sponsor_signature_url: localSponsorSigUrl,
+          sponsor_consent: localSponsorConsent,
         });
       }
 
@@ -170,6 +235,78 @@ export function TournamentSettingsDialog({
               ))}
             </RadioGroup>
           </div>
+
+          {/* Certificate Text */}
+          <div>
+            <Label className="text-sm font-semibold mb-1 block">Text für Siegerurkunden</Label>
+            <Textarea
+              value={localCertText}
+              onChange={e => setLocalCertText(e.target.value)}
+              rows={3}
+              className="text-sm"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Platzhalter: <code className="bg-muted px-1 rounded">{'{turniername}'}</code> <code className="bg-muted px-1 rounded">{'{spieler}'}</code> <code className="bg-muted px-1 rounded">{'{verein}'}</code> <code className="bg-muted px-1 rounded">{'{platz}'}</code>
+            </p>
+          </div>
+
+          {/* Organizer */}
+          <div>
+            <Label className="text-sm font-semibold mb-1 block">Veranstalter</Label>
+            <Input
+              placeholder="Name des Veranstalters"
+              value={localOrganizerName}
+              onChange={e => setLocalOrganizerName(e.target.value)}
+            />
+          </div>
+
+          {/* Sponsor */}
+          <div>
+            <Label className="text-sm font-semibold mb-1 block">Sponsor</Label>
+            <Input
+              placeholder="Name des Sponsors"
+              value={localSponsorName}
+              onChange={e => setLocalSponsorName(e.target.value)}
+            />
+          </div>
+
+          {/* Sponsor Signature */}
+          {localSponsorName && (
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">
+                <PenTool className="inline h-4 w-4 mr-1" />
+                Unterschrift des Sponsors
+              </Label>
+              {localSponsorSigUrl ? (
+                <div className="flex items-center gap-2">
+                  <img src={localSponsorSigUrl} alt="Unterschrift" className="h-12 border border-border rounded p-1" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeSig}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <input ref={sigInputRef} type="file" accept="image/*" className="hidden" onChange={handleSigUpload} />
+                  <Button variant="outline" size="sm" onClick={() => sigInputRef.current?.click()} disabled={uploadingSig}>
+                    {uploadingSig ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                    Unterschrift hochladen
+                  </Button>
+                </div>
+              )}
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                  type="checkbox"
+                  id="settings-sponsor-consent"
+                  checked={localSponsorConsent}
+                  onChange={e => setLocalSponsorConsent(e.target.checked)}
+                  className="rounded border-border"
+                />
+                <Label htmlFor="settings-sponsor-consent" className="text-xs text-muted-foreground cursor-pointer">
+                  Der Sponsor stimmt der Veröffentlichung seiner Unterschrift auf der Urkunde zu
+                </Label>
+              </div>
+            </div>
+          )}
 
           {/* Mode */}
           <div className={started ? 'opacity-50' : ''}>
