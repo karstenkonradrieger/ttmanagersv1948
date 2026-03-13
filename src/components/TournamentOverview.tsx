@@ -21,6 +21,10 @@ interface Props {
   venueString?: string;
   motto?: string;
   mode?: string;
+  organizerName?: string;
+  sponsorName?: string;
+  sponsorSignatureUrl?: string | null;
+  sponsorConsent?: boolean;
 }
 
 function getRoundName(round: number, totalRounds: number, mode?: string): string {
