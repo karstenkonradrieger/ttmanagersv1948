@@ -412,10 +412,49 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       const sigY = h - 40;
       doc.setDrawColor(150, 150, 150);
       doc.setLineWidth(0.5);
-      doc.line(w / 2 - 50, sigY, w / 2 + 50, sigY);
+
+      // Sponsor signature (left) if consent given
+      if (sponsorConsent && sponsorSignatureUrl && sponsorName) {
+        try {
+          const sigImg = new Image();
+          sigImg.crossOrigin = 'anonymous';
+          await new Promise<void>((resolve, reject) => {
+            sigImg.onload = () => resolve();
+            sigImg.onerror = () => reject();
+            sigImg.src = sponsorSignatureUrl;
+          });
+          const sigCanvas = document.createElement('canvas');
+          sigCanvas.width = sigImg.naturalWidth;
+          sigCanvas.height = sigImg.naturalHeight;
+          sigCanvas.getContext('2d')!.drawImage(sigImg, 0, 0);
+          const sigData = sigCanvas.toDataURL('image/png');
+          const sigMaxH = 20;
+          const sigRatio = sigImg.naturalWidth / sigImg.naturalHeight;
+          const sigW = sigMaxH * sigRatio;
+          doc.addImage(sigData, 'PNG', w / 4 - sigW / 2, sigY - sigMaxH - 2, sigW, sigMaxH);
+        } catch {
+          // ignore signature load errors
+        }
+        doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
+        doc.setFontSize(10);
+        doc.setTextColor(150, 150, 150);
+        doc.text(sponsorName, w / 4, sigY + 7, { align: 'center' });
+        doc.setFontSize(8);
+        doc.text('Sponsor', w / 4, sigY + 13, { align: 'center' });
+      }
+
+      // Organizer / Turnierleitung signature (right or center)
+      const orgX = (sponsorConsent && sponsorSignatureUrl && sponsorName) ? (3 * w / 4) : (w / 2);
+      doc.line(orgX - 50, sigY, orgX + 50, sigY);
       doc.setFontSize(10);
       doc.setTextColor(150, 150, 150);
-      doc.text('Turnierleitung', w / 2, sigY + 7, { align: 'center' });
+      if (organizerName) {
+        doc.text(organizerName, orgX, sigY + 7, { align: 'center' });
+        doc.setFontSize(8);
+        doc.text('Turnierleitung', orgX, sigY + 13, { align: 'center' });
+      } else {
+        doc.text('Turnierleitung', orgX, sigY + 7, { align: 'center' });
+      }
     });
 
     doc.save(`${tournamentName.replace(/\s+/g, '_')}_Urkunden.pdf`);
