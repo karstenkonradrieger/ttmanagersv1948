@@ -221,6 +221,10 @@ export async function createTournament(
     google_maps_link?: string | null;
     logo_url?: string | null;
     certificate_text?: string;
+    organizer_name?: string;
+    sponsor_name?: string;
+    sponsor_signature_url?: string | null;
+    sponsor_consent?: boolean;
   },
 ): Promise<string> {
   const { data, error } = await supabase
