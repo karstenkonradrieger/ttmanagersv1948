@@ -247,6 +247,10 @@ export async function createTournament(
       ...(extras?.google_maps_link ? { google_maps_link: extras.google_maps_link } : {}),
       ...(extras?.logo_url ? { logo_url: extras.logo_url } : {}),
       ...(extras?.certificate_text ? { certificate_text: extras.certificate_text } : {}),
+      ...(extras?.organizer_name !== undefined ? { organizer_name: extras.organizer_name } : {}),
+      ...(extras?.sponsor_name !== undefined ? { sponsor_name: extras.sponsor_name } : {}),
+      ...(extras?.sponsor_signature_url !== undefined ? { sponsor_signature_url: extras.sponsor_signature_url } : {}),
+      ...(extras?.sponsor_consent !== undefined ? { sponsor_consent: extras.sponsor_consent } : {}),
     })
     .select('id')
     .single();
