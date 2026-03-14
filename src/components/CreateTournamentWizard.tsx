@@ -78,6 +78,7 @@ interface Props {
       sponsor_signature_url?: string | null;
       sponsor_logo_url?: string | null;
       sponsor_consent?: boolean;
+      certificate_bg_url?: string | null;
     },
   ) => Promise<string>;
 }
