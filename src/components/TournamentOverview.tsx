@@ -474,8 +474,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
 
       // Club
       if (placement.player.club) {
-        doc.setFontSize(16);
-        doc.setFont(undefined!, 'normal');
+        doc.setFontSize(Math.round(certificateFontSize * 0.8));
+        doc.setFont(certificateFontFamily, 'normal');
         doc.setTextColor(100, 100, 100);
         doc.text(`(${placement.player.club})`, w / 2, yOffset, { align: 'center' });
         yOffset += 14;
