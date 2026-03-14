@@ -260,6 +260,8 @@ const Index = () => {
               sponsorLogoUrl={tournament.sponsorLogoUrl}
               sponsorConsent={tournament.sponsorConsent}
               certificateBgUrl={tournament.certificateBgUrl}
+              certificateFontFamily={tournament.certificateFontFamily}
+              certificateFontSize={tournament.certificateFontSize}
               started={tournament.started}
               onUpdateMode={updateTournamentMode}
               onUpdateType={updateTournamentType}
