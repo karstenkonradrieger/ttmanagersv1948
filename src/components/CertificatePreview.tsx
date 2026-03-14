@@ -12,8 +12,13 @@ interface Props {
   sponsorLogoUrl?: string | null;
   sponsorConsent?: boolean;
   certificateBgUrl?: string | null;
+  certificateText: string;
   player: Player;
   placementLabel: string;
+}
+
+function resolvePlaceholders(template: string, vars: Record<string, string>): string {
+  return template.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? `{${key}}`);
 }
 
 export function CertificatePreview({
@@ -28,6 +33,7 @@ export function CertificatePreview({
   sponsorLogoUrl,
   sponsorConsent,
   certificateBgUrl,
+  certificateText,
   player,
   placementLabel,
 }: Props) {
@@ -37,9 +43,19 @@ export function CertificatePreview({
 
   const hasSponsorSection = (sponsorConsent && sponsorSignatureUrl && sponsorName) || (sponsorName && sponsorLogoUrl);
 
+  const resolvedText = resolvePlaceholders(certificateText, {
+    turniername: tournamentName,
+    spieler: player.name,
+    verein: player.club || '–',
+    platz: placementLabel,
+  });
+
+  // Split resolved text into lines for rendering
+  const textLines = resolvedText.split('\n').filter(l => l.trim());
+
   return (
     <div
-      className="relative w-full border border-border rounded-lg overflow-hidden"
+      className="relative w-full border border-border rounded-lg overflow-hidden bg-white"
       style={{ aspectRatio: '210 / 297' }}
     >
       {/* Background image */}
@@ -65,28 +81,21 @@ export function CertificatePreview({
           )}
 
           {motto && (
-            <p className="text-xs italic text-muted-foreground">"{motto}"</p>
+            <p className="text-xs italic" style={{ color: '#505050' }}>"{motto}"</p>
           )}
 
-          <p className="text-sm mt-2" style={{ color: '#1e1e1e' }}>
-            Beim "{tournamentName}" hat
-          </p>
-
-          <p className="text-xl font-bold" style={{ color: '#1e1e1e' }}>
-            {player.name}
-          </p>
-
-          {player.club && (
-            <p className="text-xs text-muted-foreground">({player.club})</p>
-          )}
-
-          <p className="text-sm" style={{ color: '#1e1e1e' }}>
-            den {placementLabel} belegt.
-          </p>
+          {/* Resolved certificate text */}
+          <div className="mt-3 space-y-1">
+            {textLines.map((line, i) => (
+              <p key={i} className="text-sm leading-relaxed" style={{ color: '#1e1e1e' }}>
+                {line}
+              </p>
+            ))}
+          </div>
 
           <p className="text-xs mt-4" style={{ color: '#1e1e1e' }}>{certDate}</p>
           {venueString && (
-            <p className="text-xs text-muted-foreground">{venueString}</p>
+            <p className="text-xs" style={{ color: '#646464' }}>{venueString}</p>
           )}
         </div>
 
@@ -102,7 +111,7 @@ export function CertificatePreview({
                   crossOrigin="anonymous"
                 />
               )}
-              <div className="w-20 border-t border-muted-foreground/40" />
+              <div className="w-20 border-t" style={{ borderColor: '#999' }} />
               <div className="flex items-center gap-1">
                 {sponsorLogoUrl && (
                   <img
@@ -113,19 +122,19 @@ export function CertificatePreview({
                   />
                 )}
                 {sponsorName && (
-                  <span className="text-[8px] text-muted-foreground">{sponsorName}</span>
+                  <span className="text-[8px]" style={{ color: '#999' }}>{sponsorName}</span>
                 )}
               </div>
-              <span className="text-[7px] text-muted-foreground">Sponsor</span>
+              <span className="text-[7px]" style={{ color: '#999' }}>Sponsor</span>
             </div>
           )}
 
           <div className="flex flex-col items-center gap-1">
-            <div className="w-24 border-t border-muted-foreground/40" />
+            <div className="w-24 border-t" style={{ borderColor: '#999' }} />
             {organizerName && (
-              <span className="text-[8px] text-muted-foreground">{organizerName}</span>
+              <span className="text-[8px]" style={{ color: '#999' }}>{organizerName}</span>
             )}
-            <span className="text-[7px] text-muted-foreground">Turnierleitung</span>
+            <span className="text-[7px]" style={{ color: '#999' }}>Turnierleitung</span>
           </div>
         </div>
       </div>

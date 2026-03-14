@@ -29,6 +29,8 @@ interface Props {
   sponsorLogoUrl?: string | null;
   sponsorConsent?: boolean;
   certificateBgUrl?: string | null;
+  certificateText?: string;
+  onCertificateTextChange?: (text: string) => void;
 }
 
 function getRoundName(round: number, totalRounds: number, mode?: string): string {
