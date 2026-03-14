@@ -247,6 +247,8 @@ export function TournamentSettingsDialog({
           sponsor_logo_url: localSponsorLogoUrl,
           sponsor_consent: localSponsorConsent,
           certificate_bg_url: localCertBgUrl,
+          certificate_font_family: localFontFamily,
+          certificate_font_size: localFontSize,
         });
       }
 
