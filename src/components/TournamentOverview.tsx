@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { FileDown, Award, FileText, User, ImageIcon, ImageOff } from 'lucide-react';
+import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MatchPhotos } from '@/components/MatchPhotos';
 import { generateMatchReport } from '@/components/MatchReport';
 import { generatePlayerReport } from '@/components/PlayerReport';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { CertificatePreview } from '@/components/CertificatePreview';
 
 interface Props {
   tournamentName: string;
@@ -108,6 +110,8 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
 
 export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent, certificateBgUrl }: Props) {
   const [showMatchPhotos, setShowMatchPhotos] = useState(false);
+  const [showCertPreview, setShowCertPreview] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
   if (matches.length === 0) {
@@ -550,10 +554,16 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         <h3 className="text-lg font-bold">Spielübersicht</h3>
         <div className="flex gap-2">
           {champion && (
-            <Button onClick={exportCertificates} size="sm" variant="outline" className="h-9 font-semibold">
-              <Award className="mr-1 h-4 w-4" />
-              Urkunden
-            </Button>
+            <>
+              <Button onClick={() => setShowCertPreview(true)} size="sm" variant="outline" className="h-9 font-semibold">
+                <Eye className="mr-1 h-4 w-4" />
+                Vorschau
+              </Button>
+              <Button onClick={exportCertificates} size="sm" variant="outline" className="h-9 font-semibold">
+                <Award className="mr-1 h-4 w-4" />
+                Urkunden
+              </Button>
+            </>
           )}
           <Button onClick={exportPdf} size="sm" className="h-9 font-semibold">
             <FileDown className="mr-1 h-4 w-4" />
@@ -831,6 +841,55 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
           </div>
         </div>
       )}
+
+      {/* Certificate Preview Dialog */}
+      {champion && (() => {
+        const placements: { label: string; player: Player }[] = [];
+        if (champion) placements.push({ label: '1. Platz', player: champion });
+        if (secondPlace) placements.push({ label: '2. Platz', player: secondPlace });
+        thirdPlacePlayers.forEach(p => placements.push({ label: '3. Platz', player: p }));
+        const current = placements[previewIndex] || placements[0];
+        if (!current) return null;
+        return (
+          <Dialog open={showCertPreview} onOpenChange={setShowCertPreview}>
+            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Urkundenvorschau</DialogTitle>
+              </DialogHeader>
+              {placements.length > 1 && (
+                <div className="flex gap-1 justify-center">
+                  {placements.map((p, i) => (
+                    <Button
+                      key={i}
+                      variant={i === previewIndex ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPreviewIndex(i)}
+                      className="text-xs"
+                    >
+                      {p.label}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              <CertificatePreview
+                tournamentName={tournamentName}
+                logoUrl={logoUrl}
+                motto={motto}
+                tournamentDate={tournamentDate}
+                venueString={venueString}
+                organizerName={organizerName}
+                sponsorName={sponsorName}
+                sponsorSignatureUrl={sponsorSignatureUrl}
+                sponsorLogoUrl={sponsorLogoUrl}
+                sponsorConsent={sponsorConsent}
+                certificateBgUrl={certificateBgUrl}
+                player={current.player}
+                placementLabel={current.label}
+              />
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
     </div>
   );
 }
