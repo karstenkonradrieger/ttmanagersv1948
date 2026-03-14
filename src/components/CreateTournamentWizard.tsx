@@ -283,6 +283,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           organizer_name: data.organizerName,
           sponsor_name: data.sponsorName,
           sponsor_signature_url: data.sponsorSignatureUrl,
+          sponsor_logo_url: data.sponsorLogoUrl,
           sponsor_consent: data.sponsorConsent,
         },
       );
