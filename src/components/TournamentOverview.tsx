@@ -499,7 +499,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
 
       // Organizer / Turnierleitung signature (right or center)
-      const orgX = (sponsorConsent && sigData && sponsorName) ? (3 * w / 4) : (w / 2);
+      const hasSponsorSection = (sponsorConsent && sigData && sponsorName) || (sponsorName && sponsorLogoData);
+      const orgX = hasSponsorSection ? (3 * w / 4) : (w / 2);
       doc.line(orgX - 50, sigY, orgX + 50, sigY);
       doc.setFontSize(10);
       doc.setTextColor(150, 150, 150);
