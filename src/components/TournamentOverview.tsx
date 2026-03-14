@@ -24,6 +24,7 @@ interface Props {
   organizerName?: string;
   sponsorName?: string;
   sponsorSignatureUrl?: string | null;
+  sponsorLogoUrl?: string | null;
   sponsorConsent?: boolean;
 }
 
