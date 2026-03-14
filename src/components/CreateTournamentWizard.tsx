@@ -91,11 +91,13 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingSignature, setUploadingSignature] = useState(false);
   const [uploadingSponsorLogo, setUploadingSponsorLogo] = useState(false);
+  const [uploadingCertBg, setUploadingCertBg] = useState(false);
   const [customSport, setCustomSport] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const signatureInputRef = useRef<HTMLInputElement>(null);
   const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
+  const certBgInputRef = useRef<HTMLInputElement>(null);
 
   const [data, setData] = useState<WizardData>({
     name: '',
