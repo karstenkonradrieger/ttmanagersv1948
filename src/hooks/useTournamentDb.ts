@@ -40,6 +40,7 @@ const emptyTournament: Tournament = {
   sponsorSignatureUrl: null,
   sponsorLogoUrl: null,
   sponsorConsent: false,
+  certificateBgUrl: null,
 };
 
 export function useTournamentDb(tournamentId: string | null) {
