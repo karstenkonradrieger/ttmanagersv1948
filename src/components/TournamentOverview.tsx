@@ -855,7 +855,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         if (!current) return null;
         return (
           <Dialog open={showCertPreview} onOpenChange={setShowCertPreview}>
-            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[95vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Urkundenvorschau</DialogTitle>
               </DialogHeader>
@@ -874,21 +874,41 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                   ))}
                 </div>
               )}
-              <CertificatePreview
-                tournamentName={tournamentName}
-                logoUrl={logoUrl}
-                motto={motto}
-                tournamentDate={tournamentDate}
-                venueString={venueString}
-                organizerName={organizerName}
-                sponsorName={sponsorName}
-                sponsorSignatureUrl={sponsorSignatureUrl}
-                sponsorLogoUrl={sponsorLogoUrl}
-                sponsorConsent={sponsorConsent}
-                certificateBgUrl={certificateBgUrl}
-                player={current.player}
-                placementLabel={current.label}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">Urkundentext bearbeiten</label>
+                  <textarea
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[120px] resize-y"
+                    value={localCertText}
+                    onChange={e => {
+                      setLocalCertText(e.target.value);
+                      onCertificateTextChange?.(e.target.value);
+                    }}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Platzhalter: <code className="bg-muted px-1 rounded">{'{turniername}'}</code>{' '}
+                    <code className="bg-muted px-1 rounded">{'{spieler}'}</code>{' '}
+                    <code className="bg-muted px-1 rounded">{'{verein}'}</code>{' '}
+                    <code className="bg-muted px-1 rounded">{'{platz}'}</code>
+                  </p>
+                </div>
+                <CertificatePreview
+                  tournamentName={tournamentName}
+                  logoUrl={logoUrl}
+                  motto={motto}
+                  tournamentDate={tournamentDate}
+                  venueString={venueString}
+                  organizerName={organizerName}
+                  sponsorName={sponsorName}
+                  sponsorSignatureUrl={sponsorSignatureUrl}
+                  sponsorLogoUrl={sponsorLogoUrl}
+                  sponsorConsent={sponsorConsent}
+                  certificateBgUrl={certificateBgUrl}
+                  certificateText={localCertText}
+                  player={current.player}
+                  placementLabel={current.label}
+                />
+              </div>
             </DialogContent>
           </Dialog>
         );
