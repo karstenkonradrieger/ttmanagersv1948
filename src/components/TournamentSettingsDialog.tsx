@@ -152,7 +152,7 @@ export function TournamentSettingsDialog({
         localMotto !== motto || localBreakMinutes !== breakMinutes ||
         localCertText !== certificateText || localOrganizerName !== organizerName ||
         localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-        localSponsorConsent !== sponsorConsent;
+        localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent;
 
       if (detailsChanged) {
         await onUpdateDetails({
@@ -167,6 +167,7 @@ export function TournamentSettingsDialog({
           organizer_name: localOrganizerName,
           sponsor_name: localSponsorName,
           sponsor_signature_url: localSponsorSigUrl,
+          sponsor_logo_url: localSponsorLogoUrl,
           sponsor_consent: localSponsorConsent,
         });
       }
