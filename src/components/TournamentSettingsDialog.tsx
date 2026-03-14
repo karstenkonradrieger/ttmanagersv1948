@@ -51,7 +51,7 @@ interface Props {
 export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
-  certificateText, organizerName, sponsorName, sponsorSignatureUrl, sponsorConsent,
+  certificateText, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -69,10 +69,13 @@ export function TournamentSettingsDialog({
   const [localOrganizerName, setLocalOrganizerName] = useState(organizerName);
   const [localSponsorName, setLocalSponsorName] = useState(sponsorName);
   const [localSponsorSigUrl, setLocalSponsorSigUrl] = useState(sponsorSignatureUrl);
+  const [localSponsorLogoUrl, setLocalSponsorLogoUrl] = useState(sponsorLogoUrl);
   const [localSponsorConsent, setLocalSponsorConsent] = useState(sponsorConsent);
   const [uploadingSig, setUploadingSig] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [saving, setSaving] = useState(false);
   const sigInputRef = useRef<HTMLInputElement>(null);
+  const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
