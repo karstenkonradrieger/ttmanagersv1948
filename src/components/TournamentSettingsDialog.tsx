@@ -136,7 +136,7 @@ export function TournamentSettingsDialog({
     localMotto !== motto || localBreakMinutes !== breakMinutes ||
     localCertText !== certificateText || localOrganizerName !== organizerName ||
     localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-    localSponsorConsent !== sponsorConsent;
+    localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent;
 
   const handleSave = async () => {
     setSaving(true);
