@@ -472,11 +472,30 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       if (sponsorConsent && sigData && sponsorName) {
         doc.addImage(sigData, 'PNG', w / 4 - sigWidth / 2, sigY - sigHeight - 2, sigWidth, sigHeight);
         doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
+        // Sponsor logo + name
         doc.setFontSize(10);
         doc.setTextColor(150, 150, 150);
-        doc.text(sponsorName, w / 4, sigY + 7, { align: 'center' });
+        if (sponsorLogoData) {
+          const totalW = sponsorLogoW + 2 + doc.getTextWidth(sponsorName);
+          const startX = w / 4 - totalW / 2;
+          doc.addImage(sponsorLogoData, 'PNG', startX, sigY + 2, sponsorLogoW, sponsorLogoH);
+          doc.text(sponsorName, startX + sponsorLogoW + 2, sigY + 7);
+        } else {
+          doc.text(sponsorName, w / 4, sigY + 7, { align: 'center' });
+        }
         doc.setFontSize(8);
-        doc.text('Sponsor', w / 4, sigY + 13, { align: 'center' });
+        doc.text('Sponsor', w / 4, sigY + (sponsorLogoData ? sponsorLogoH + 5 : 13), { align: 'center' });
+      } else if (sponsorName && sponsorLogoData) {
+        // Show sponsor logo + name even without signature consent
+        doc.setFontSize(10);
+        doc.setTextColor(150, 150, 150);
+        doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
+        const totalW = sponsorLogoW + 2 + doc.getTextWidth(sponsorName);
+        const startX = w / 4 - totalW / 2;
+        doc.addImage(sponsorLogoData, 'PNG', startX, sigY + 2, sponsorLogoW, sponsorLogoH);
+        doc.text(sponsorName, startX + sponsorLogoW + 2, sigY + 7);
+        doc.setFontSize(8);
+        doc.text('Sponsor', w / 4, sigY + sponsorLogoH + 5, { align: 'center' });
       }
 
       // Organizer / Turnierleitung signature (right or center)
