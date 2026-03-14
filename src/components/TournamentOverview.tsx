@@ -554,10 +554,16 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         <h3 className="text-lg font-bold">Spielübersicht</h3>
         <div className="flex gap-2">
           {champion && (
-            <Button onClick={exportCertificates} size="sm" variant="outline" className="h-9 font-semibold">
-              <Award className="mr-1 h-4 w-4" />
-              Urkunden
-            </Button>
+            <>
+              <Button onClick={() => setShowCertPreview(true)} size="sm" variant="outline" className="h-9 font-semibold">
+                <Eye className="mr-1 h-4 w-4" />
+                Vorschau
+              </Button>
+              <Button onClick={exportCertificates} size="sm" variant="outline" className="h-9 font-semibold">
+                <Award className="mr-1 h-4 w-4" />
+                Urkunden
+              </Button>
+            </>
           )}
           <Button onClick={exportPdf} size="sm" className="h-9 font-semibold">
             <FileDown className="mr-1 h-4 w-4" />
