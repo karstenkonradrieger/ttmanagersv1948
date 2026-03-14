@@ -47,6 +47,7 @@ function loadTournament(): Tournament {
     sponsorSignatureUrl: null,
     sponsorLogoUrl: null,
     sponsorConsent: false,
+    certificateBgUrl: null,
   };
 }
 
