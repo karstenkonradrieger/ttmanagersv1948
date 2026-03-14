@@ -23,6 +23,7 @@ interface WizardData {
   googleMapsLink: string;
   logoUrl: string | null;
   certificateText: string;
+  certificateBgUrl: string | null;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
