@@ -265,6 +265,8 @@ export async function createTournament(
       ...(extras?.sponsor_logo_url !== undefined ? { sponsor_logo_url: extras.sponsor_logo_url } : {}),
       ...(extras?.sponsor_consent !== undefined ? { sponsor_consent: extras.sponsor_consent } : {}),
       ...(extras?.certificate_bg_url !== undefined ? { certificate_bg_url: extras.certificate_bg_url } : {}),
+      ...(extras?.certificate_font_family !== undefined ? { certificate_font_family: extras.certificate_font_family } : {}),
+      ...(extras?.certificate_font_size !== undefined ? { certificate_font_size: extras.certificate_font_size } : {}),
     })
     .select('id')
     .single();
