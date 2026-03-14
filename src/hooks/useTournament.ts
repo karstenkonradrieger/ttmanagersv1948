@@ -211,6 +211,7 @@ export function useTournament() {
       sponsorSignatureUrl: null,
       sponsorLogoUrl: null,
       sponsorConsent: false,
+      certificateBgUrl: null,
     });
   }, []);
 
