@@ -459,8 +459,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
 
       // Main text: Beim "Turniername" hat "Spieler" den "Platz" belegt.
-      doc.setFontSize(20);
-      doc.setFont(undefined!, 'normal');
+      doc.setFontSize(certificateFontSize);
+      doc.setFont(certificateFontFamily, 'normal');
       doc.setTextColor(30, 30, 30);
       const mainText = `Beim "${tournamentName}" hat`;
       doc.text(mainText, w / 2, yOffset, { align: 'center' });
