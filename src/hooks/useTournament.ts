@@ -208,6 +208,7 @@ export function useTournament() {
       organizerName: '',
       sponsorName: '',
       sponsorSignatureUrl: null,
+      sponsorLogoUrl: null,
       sponsorConsent: false,
     });
   }, []);
