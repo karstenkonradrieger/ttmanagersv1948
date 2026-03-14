@@ -364,6 +364,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           sponsor_logo_url: data.sponsorLogoUrl,
           sponsor_consent: data.sponsorConsent,
           certificate_bg_url: data.certificateBgUrl,
+          certificate_font_family: data.certificateFontFamily,
+          certificate_font_size: data.certificateFontSize,
         },
       );
       setOpen(false);
