@@ -53,7 +53,7 @@ interface Props {
 export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
-  certificateText, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
+  certificateText, certificateBgUrl, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
   const [open, setOpen] = useState(false);
