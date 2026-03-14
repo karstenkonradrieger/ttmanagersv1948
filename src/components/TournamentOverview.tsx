@@ -482,8 +482,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
 
       // Placement line
-      doc.setFontSize(20);
-      doc.setFont(undefined!, 'normal');
+      doc.setFontSize(certificateFontSize);
+      doc.setFont(certificateFontFamily, 'normal');
       doc.setTextColor(30, 30, 30);
       doc.text(`den ${placement.label} belegt.`, w / 2, yOffset, { align: 'center' });
 
