@@ -79,6 +79,8 @@ export function TournamentSettingsDialog({
   const [localSponsorLogoUrl, setLocalSponsorLogoUrl] = useState(sponsorLogoUrl);
   const [localSponsorConsent, setLocalSponsorConsent] = useState(sponsorConsent);
   const [localCertBgUrl, setLocalCertBgUrl] = useState(certificateBgUrl);
+  const [localFontFamily, setLocalFontFamily] = useState(certificateFontFamily);
+  const [localFontSize, setLocalFontSize] = useState(certificateFontSize);
   const [uploadingSig, setUploadingSig] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCertBg, setUploadingCertBg] = useState(false);
