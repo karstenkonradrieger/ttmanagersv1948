@@ -128,6 +128,35 @@ export function TournamentSettingsDialog({
     setLocalSponsorSigUrl(null);
   };
 
+  const handleSponsorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `sponsor-logo-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+      setLocalSponsorLogoUrl(urlData.publicUrl);
+      toast.success('Sponsor-Logo hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingLogo(false);
+      if (sponsorLogoInputRef.current) sponsorLogoInputRef.current.value = '';
+    }
+  };
+
+  const removeSponsorLogo = async () => {
+    if (localSponsorLogoUrl) {
+      const parts = localSponsorLogoUrl.split('/');
+      const fileName = parts[parts.length - 1];
+      await supabase.storage.from('logos').remove([fileName]);
+    }
+    setLocalSponsorLogoUrl(null);
+  };
+
   const hasChanges =
     localMode !== mode || localType !== type || localBestOf !== bestOf ||
     (localDate || null) !== (tournamentDate || null) ||
