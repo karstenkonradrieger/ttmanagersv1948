@@ -344,6 +344,33 @@ export function TournamentSettingsDialog({
             </div>
           )}
 
+          {/* Sponsor Logo */}
+          {localSponsorName && (
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">
+                <ImagePlus className="inline h-4 w-4 mr-1" />
+                Logo des Sponsors
+              </Label>
+              {localSponsorLogoUrl ? (
+                <div className="flex items-center gap-2">
+                  <img src={localSponsorLogoUrl} alt="Sponsor-Logo" className="h-12 border border-border rounded p-1 object-contain" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeSponsorLogo}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <input ref={sponsorLogoInputRef} type="file" accept="image/*" className="hidden" onChange={handleSponsorLogoUpload} />
+                  <Button variant="outline" size="sm" onClick={() => sponsorLogoInputRef.current?.click()} disabled={uploadingLogo}>
+                    {uploadingLogo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                    Logo hochladen
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Wird auf der Siegerurkunde neben dem Sponsornamen angezeigt</p>
+            </div>
+          )}
+
           {/* Mode */}
           <div className={started ? 'opacity-50' : ''}>
             <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
