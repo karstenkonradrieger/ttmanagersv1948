@@ -163,6 +163,35 @@ export function TournamentSettingsDialog({
     setLocalSponsorLogoUrl(null);
   };
 
+  const handleCertBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    setUploadingCertBg(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `cert-bg-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+      setLocalCertBgUrl(urlData.publicUrl);
+      toast.success('Hintergrundbild hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingCertBg(false);
+      if (certBgInputRef.current) certBgInputRef.current.value = '';
+    }
+  };
+
+  const removeCertBg = async () => {
+    if (localCertBgUrl) {
+      const parts = localCertBgUrl.split('/');
+      const fileName = parts[parts.length - 1];
+      await supabase.storage.from('logos').remove([fileName]);
+    }
+    setLocalCertBgUrl(null);
+  };
+
   const hasChanges =
     localMode !== mode || localType !== type || localBestOf !== bestOf ||
     (localDate || null) !== (tournamentDate || null) ||
@@ -171,7 +200,8 @@ export function TournamentSettingsDialog({
     localMotto !== motto || localBreakMinutes !== breakMinutes ||
     localCertText !== certificateText || localOrganizerName !== organizerName ||
     localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-    localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent;
+    localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
+    localCertBgUrl !== certificateBgUrl;
 
   const handleSave = async () => {
     setSaving(true);
@@ -187,7 +217,8 @@ export function TournamentSettingsDialog({
         localMotto !== motto || localBreakMinutes !== breakMinutes ||
         localCertText !== certificateText || localOrganizerName !== organizerName ||
         localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-        localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent;
+        localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
+        localCertBgUrl !== certificateBgUrl;
 
       if (detailsChanged) {
         await onUpdateDetails({
@@ -204,6 +235,7 @@ export function TournamentSettingsDialog({
           sponsor_signature_url: localSponsorSigUrl,
           sponsor_logo_url: localSponsorLogoUrl,
           sponsor_consent: localSponsorConsent,
+          certificate_bg_url: localCertBgUrl,
         });
       }
 
