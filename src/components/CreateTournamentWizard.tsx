@@ -110,6 +110,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     organizerName: '',
     sponsorName: '',
     sponsorSignatureUrl: null,
+    sponsorLogoUrl: null,
     sponsorConsent: false,
     type: 'singles',
     teamMode: 'bundessystem',
