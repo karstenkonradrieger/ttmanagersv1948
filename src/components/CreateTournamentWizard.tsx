@@ -26,6 +26,7 @@ interface WizardData {
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
+  sponsorLogoUrl: string | null;
   sponsorConsent: boolean;
   type: TournamentType;
   teamMode: TeamMode;
