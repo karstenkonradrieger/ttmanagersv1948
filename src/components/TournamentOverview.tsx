@@ -30,6 +30,8 @@ interface Props {
   sponsorConsent?: boolean;
   certificateBgUrl?: string | null;
   certificateText?: string;
+  certificateFontFamily?: string;
+  certificateFontSize?: number;
   onCertificateTextChange?: (text: string) => void;
 }
 
