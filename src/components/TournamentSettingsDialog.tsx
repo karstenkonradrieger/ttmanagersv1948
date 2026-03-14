@@ -100,6 +100,7 @@ export function TournamentSettingsDialog({
       setLocalSponsorSigUrl(sponsorSignatureUrl);
       setLocalSponsorLogoUrl(sponsorLogoUrl);
       setLocalSponsorConsent(sponsorConsent);
+      setLocalCertBgUrl(certificateBgUrl);
     }
     setOpen(isOpen);
   };
