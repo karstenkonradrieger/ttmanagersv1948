@@ -1,5 +1,11 @@
 import { Player } from '@/types/tournament';
 
+const FONT_FAMILY_MAP: Record<string, string> = {
+  Helvetica: 'Helvetica, Arial, sans-serif',
+  Times: '"Times New Roman", Times, serif',
+  Courier: '"Courier New", Courier, monospace',
+};
+
 interface Props {
   tournamentName: string;
   logoUrl?: string | null;
@@ -15,6 +21,8 @@ interface Props {
   certificateText: string;
   player: Player;
   placementLabel: string;
+  fontFamily?: string;
+  fontSize?: number;
 }
 
 function resolvePlaceholders(template: string, vars: Record<string, string>): string {
