@@ -579,6 +579,7 @@ export type Database = {
           phase: string | null
           rounds: number
           sponsor_consent: boolean
+          sponsor_logo_url: string | null
           sponsor_name: string
           sponsor_signature_url: string | null
           sport: string
@@ -613,6 +614,7 @@ export type Database = {
           phase?: string | null
           rounds?: number
           sponsor_consent?: boolean
+          sponsor_logo_url?: string | null
           sponsor_name?: string
           sponsor_signature_url?: string | null
           sport?: string
@@ -647,6 +649,7 @@ export type Database = {
           phase?: string | null
           rounds?: number
           sponsor_consent?: boolean
+          sponsor_logo_url?: string | null
           sponsor_name?: string
           sponsor_signature_url?: string | null
           sport?: string

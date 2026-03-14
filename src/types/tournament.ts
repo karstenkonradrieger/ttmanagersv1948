@@ -188,5 +188,6 @@ export interface Tournament {
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
+  sponsorLogoUrl: string | null;
   sponsorConsent: boolean;
 }

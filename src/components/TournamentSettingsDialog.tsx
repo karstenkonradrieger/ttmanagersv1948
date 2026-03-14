@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Settings2, Upload, X, Loader2, PenTool } from 'lucide-react';
+import { Settings2, Upload, X, Loader2, PenTool, ImagePlus } from 'lucide-react';
 import { TournamentMode, TournamentType, TeamMode } from '@/types/tournament';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -26,6 +26,7 @@ interface Props {
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
+  sponsorLogoUrl: string | null;
   sponsorConsent: boolean;
   onUpdateMode: (mode: TournamentMode) => Promise<void>;
   onUpdateType: (type: TournamentType) => Promise<void>;
@@ -42,6 +43,7 @@ interface Props {
     organizer_name: string;
     sponsor_name: string;
     sponsor_signature_url: string | null;
+    sponsor_logo_url: string | null;
     sponsor_consent: boolean;
   }) => Promise<void>;
 }
@@ -49,7 +51,7 @@ interface Props {
 export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
-  certificateText, organizerName, sponsorName, sponsorSignatureUrl, sponsorConsent,
+  certificateText, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -67,10 +69,13 @@ export function TournamentSettingsDialog({
   const [localOrganizerName, setLocalOrganizerName] = useState(organizerName);
   const [localSponsorName, setLocalSponsorName] = useState(sponsorName);
   const [localSponsorSigUrl, setLocalSponsorSigUrl] = useState(sponsorSignatureUrl);
+  const [localSponsorLogoUrl, setLocalSponsorLogoUrl] = useState(sponsorLogoUrl);
   const [localSponsorConsent, setLocalSponsorConsent] = useState(sponsorConsent);
   const [uploadingSig, setUploadingSig] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [saving, setSaving] = useState(false);
   const sigInputRef = useRef<HTMLInputElement>(null);
+  const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
@@ -88,6 +93,7 @@ export function TournamentSettingsDialog({
       setLocalOrganizerName(organizerName);
       setLocalSponsorName(sponsorName);
       setLocalSponsorSigUrl(sponsorSignatureUrl);
+      setLocalSponsorLogoUrl(sponsorLogoUrl);
       setLocalSponsorConsent(sponsorConsent);
     }
     setOpen(isOpen);
@@ -122,6 +128,35 @@ export function TournamentSettingsDialog({
     setLocalSponsorSigUrl(null);
   };
 
+  const handleSponsorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `sponsor-logo-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+      setLocalSponsorLogoUrl(urlData.publicUrl);
+      toast.success('Sponsor-Logo hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingLogo(false);
+      if (sponsorLogoInputRef.current) sponsorLogoInputRef.current.value = '';
+    }
+  };
+
+  const removeSponsorLogo = async () => {
+    if (localSponsorLogoUrl) {
+      const parts = localSponsorLogoUrl.split('/');
+      const fileName = parts[parts.length - 1];
+      await supabase.storage.from('logos').remove([fileName]);
+    }
+    setLocalSponsorLogoUrl(null);
+  };
+
   const hasChanges =
     localMode !== mode || localType !== type || localBestOf !== bestOf ||
     (localDate || null) !== (tournamentDate || null) ||
@@ -130,7 +165,7 @@ export function TournamentSettingsDialog({
     localMotto !== motto || localBreakMinutes !== breakMinutes ||
     localCertText !== certificateText || localOrganizerName !== organizerName ||
     localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-    localSponsorConsent !== sponsorConsent;
+    localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent;
 
   const handleSave = async () => {
     setSaving(true);
@@ -146,7 +181,7 @@ export function TournamentSettingsDialog({
         localMotto !== motto || localBreakMinutes !== breakMinutes ||
         localCertText !== certificateText || localOrganizerName !== organizerName ||
         localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-        localSponsorConsent !== sponsorConsent;
+        localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent;
 
       if (detailsChanged) {
         await onUpdateDetails({
@@ -161,6 +196,7 @@ export function TournamentSettingsDialog({
           organizer_name: localOrganizerName,
           sponsor_name: localSponsorName,
           sponsor_signature_url: localSponsorSigUrl,
+          sponsor_logo_url: localSponsorLogoUrl,
           sponsor_consent: localSponsorConsent,
         });
       }
@@ -305,6 +341,33 @@ export function TournamentSettingsDialog({
                   Der Sponsor stimmt der Veröffentlichung seiner Unterschrift auf der Urkunde zu
                 </Label>
               </div>
+            </div>
+          )}
+
+          {/* Sponsor Logo */}
+          {localSponsorName && (
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">
+                <ImagePlus className="inline h-4 w-4 mr-1" />
+                Logo des Sponsors
+              </Label>
+              {localSponsorLogoUrl ? (
+                <div className="flex items-center gap-2">
+                  <img src={localSponsorLogoUrl} alt="Sponsor-Logo" className="h-12 border border-border rounded p-1 object-contain" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeSponsorLogo}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <input ref={sponsorLogoInputRef} type="file" accept="image/*" className="hidden" onChange={handleSponsorLogoUpload} />
+                  <Button variant="outline" size="sm" onClick={() => sponsorLogoInputRef.current?.click()} disabled={uploadingLogo}>
+                    {uploadingLogo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                    Logo hochladen
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Wird auf der Siegerurkunde neben dem Sponsornamen angezeigt</p>
             </div>
           )}
 

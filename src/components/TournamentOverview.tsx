@@ -24,6 +24,7 @@ interface Props {
   organizerName?: string;
   sponsorName?: string;
   sponsorSignatureUrl?: string | null;
+  sponsorLogoUrl?: string | null;
   sponsorConsent?: boolean;
 }
 
@@ -104,7 +105,7 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
   return Math.max(wins.p1, wins.p2) >= 3;
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorConsent }: Props) {
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent }: Props) {
   const [showMatchPhotos, setShowMatchPhotos] = useState(false);
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
@@ -370,6 +371,33 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
     }
 
+    // Pre-load sponsor logo if available
+    let sponsorLogoData: string | null = null;
+    let sponsorLogoW = 0;
+    let sponsorLogoH = 0;
+    if (sponsorLogoUrl && sponsorName) {
+      try {
+        const slImg = new Image();
+        slImg.crossOrigin = 'anonymous';
+        await new Promise<void>((resolve, reject) => {
+          slImg.onload = () => resolve();
+          slImg.onerror = () => reject();
+          slImg.src = sponsorLogoUrl;
+        });
+        const slCanvas = document.createElement('canvas');
+        slCanvas.width = slImg.naturalWidth;
+        slCanvas.height = slImg.naturalHeight;
+        slCanvas.getContext('2d')!.drawImage(slImg, 0, 0);
+        sponsorLogoData = slCanvas.toDataURL('image/png');
+        const slMaxH = 16;
+        const slRatio = slImg.naturalWidth / slImg.naturalHeight;
+        sponsorLogoH = slMaxH;
+        sponsorLogoW = slMaxH * slRatio;
+      } catch {
+        // ignore
+      }
+    }
+
     const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
 
     placements.forEach((placement, idx) => {
@@ -444,15 +472,35 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       if (sponsorConsent && sigData && sponsorName) {
         doc.addImage(sigData, 'PNG', w / 4 - sigWidth / 2, sigY - sigHeight - 2, sigWidth, sigHeight);
         doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
+        // Sponsor logo + name
         doc.setFontSize(10);
         doc.setTextColor(150, 150, 150);
-        doc.text(sponsorName, w / 4, sigY + 7, { align: 'center' });
+        if (sponsorLogoData) {
+          const totalW = sponsorLogoW + 2 + doc.getTextWidth(sponsorName);
+          const startX = w / 4 - totalW / 2;
+          doc.addImage(sponsorLogoData, 'PNG', startX, sigY + 2, sponsorLogoW, sponsorLogoH);
+          doc.text(sponsorName, startX + sponsorLogoW + 2, sigY + 7);
+        } else {
+          doc.text(sponsorName, w / 4, sigY + 7, { align: 'center' });
+        }
         doc.setFontSize(8);
-        doc.text('Sponsor', w / 4, sigY + 13, { align: 'center' });
+        doc.text('Sponsor', w / 4, sigY + (sponsorLogoData ? sponsorLogoH + 5 : 13), { align: 'center' });
+      } else if (sponsorName && sponsorLogoData) {
+        // Show sponsor logo + name even without signature consent
+        doc.setFontSize(10);
+        doc.setTextColor(150, 150, 150);
+        doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
+        const totalW = sponsorLogoW + 2 + doc.getTextWidth(sponsorName);
+        const startX = w / 4 - totalW / 2;
+        doc.addImage(sponsorLogoData, 'PNG', startX, sigY + 2, sponsorLogoW, sponsorLogoH);
+        doc.text(sponsorName, startX + sponsorLogoW + 2, sigY + 7);
+        doc.setFontSize(8);
+        doc.text('Sponsor', w / 4, sigY + sponsorLogoH + 5, { align: 'center' });
       }
 
       // Organizer / Turnierleitung signature (right or center)
-      const orgX = (sponsorConsent && sigData && sponsorName) ? (3 * w / 4) : (w / 2);
+      const hasSponsorSection = (sponsorConsent && sigData && sponsorName) || (sponsorName && sponsorLogoData);
+      const orgX = hasSponsorSection ? (3 * w / 4) : (w / 2);
       doc.line(orgX - 50, sigY, orgX + 50, sigY);
       doc.setFontSize(10);
       doc.setTextColor(150, 150, 150);
