@@ -291,6 +291,7 @@ export async function updateTournament(id: string, updates: Partial<{
   organizer_name: string;
   sponsor_name: string;
   sponsor_signature_url: string | null;
+  sponsor_logo_url: string | null;
   sponsor_consent: boolean;
 }>): Promise<void> {
   const { error } = await supabase
