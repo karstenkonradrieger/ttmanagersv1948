@@ -1125,7 +1125,7 @@ export function useTournamentDb(tournamentId: string | null) {
     return player?.name || '—';
   }, [tournament.players, tournament.doublesPairs, tournament.teams]);
 
-  const updateDetails = useCallback(async (details: {
+  const updateDetails = useCallback(async (details: Partial<{
     tournament_date: string | null;
     venue_street: string;
     venue_house_number: string;
@@ -1139,8 +1139,8 @@ export function useTournamentDb(tournamentId: string | null) {
     sponsor_signature_url: string | null;
     sponsor_logo_url: string | null;
     sponsor_consent: boolean;
-    certificate_bg_url?: string | null;
-  }) => {
+    certificate_bg_url: string | null;
+  }>) => {
     if (!tournamentId) return;
     try {
       await tournamentService.updateTournament(tournamentId, details);
