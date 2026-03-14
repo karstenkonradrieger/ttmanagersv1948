@@ -23,6 +23,7 @@ interface Props {
   motto: string;
   breakMinutes: number;
   certificateText: string;
+  certificateBgUrl: string | null;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
@@ -45,6 +46,7 @@ interface Props {
     sponsor_signature_url: string | null;
     sponsor_logo_url: string | null;
     sponsor_consent: boolean;
+    certificate_bg_url?: string | null;
   }) => Promise<void>;
 }
 
