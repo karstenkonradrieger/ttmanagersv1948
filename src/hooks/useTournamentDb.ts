@@ -38,6 +38,7 @@ const emptyTournament: Tournament = {
   organizerName: '',
   sponsorName: '',
   sponsorSignatureUrl: null,
+  sponsorLogoUrl: null,
   sponsorConsent: false,
 };
 
