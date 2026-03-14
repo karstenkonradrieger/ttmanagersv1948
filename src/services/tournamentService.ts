@@ -151,6 +151,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     organizerName: (tournament as any).organizer_name || '',
     sponsorName: (tournament as any).sponsor_name || '',
     sponsorSignatureUrl: (tournament as any).sponsor_signature_url || null,
+    sponsorLogoUrl: (tournament as any).sponsor_logo_url || null,
     sponsorConsent: (tournament as any).sponsor_consent ?? false,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
