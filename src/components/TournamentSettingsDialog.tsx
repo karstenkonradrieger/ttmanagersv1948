@@ -93,6 +93,7 @@ export function TournamentSettingsDialog({
       setLocalOrganizerName(organizerName);
       setLocalSponsorName(sponsorName);
       setLocalSponsorSigUrl(sponsorSignatureUrl);
+      setLocalSponsorLogoUrl(sponsorLogoUrl);
       setLocalSponsorConsent(sponsorConsent);
     }
     setOpen(isOpen);
