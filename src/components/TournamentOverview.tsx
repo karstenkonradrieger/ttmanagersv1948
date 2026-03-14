@@ -467,8 +467,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       yOffset += 16;
 
       // Player name
-      doc.setFontSize(28);
-      doc.setFont(undefined!, 'bold');
+      doc.setFontSize(Math.round(certificateFontSize * 1.4));
+      doc.setFont(certificateFontFamily, 'bold');
       doc.text(placement.player.name, w / 2, yOffset, { align: 'center' });
       yOffset += 16;
 
