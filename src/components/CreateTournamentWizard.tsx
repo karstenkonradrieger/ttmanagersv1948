@@ -255,6 +255,39 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     update({ sponsorSignatureUrl: null });
   };
 
+  const handleSponsorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Bitte nur Bilddateien hochladen');
+      return;
+    }
+    setUploadingSponsorLogo(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `sponsor-logo-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+      update({ sponsorLogoUrl: urlData.publicUrl });
+      toast.success('Sponsor-Logo hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingSponsorLogo(false);
+      if (sponsorLogoInputRef.current) sponsorLogoInputRef.current.value = '';
+    }
+  };
+
+  const removeSponsorLogo = async () => {
+    if (data.sponsorLogoUrl) {
+      const parts = data.sponsorLogoUrl.split('/');
+      const fileName = parts[parts.length - 1];
+      await supabase.storage.from('logos').remove([fileName]);
+    }
+    update({ sponsorLogoUrl: null });
+  };
+
   const canProceedStep1 = data.name.trim().length > 0;
 
   const handleCreate = async () => {
