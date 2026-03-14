@@ -210,7 +210,8 @@ export function TournamentSettingsDialog({
     localCertText !== certificateText || localOrganizerName !== organizerName ||
     localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
     localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
-    localCertBgUrl !== certificateBgUrl;
+    localCertBgUrl !== certificateBgUrl ||
+    localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize;
 
   const handleSave = async () => {
     setSaving(true);
