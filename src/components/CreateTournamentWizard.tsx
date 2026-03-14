@@ -294,6 +294,39 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     update({ sponsorLogoUrl: null });
   };
 
+  const handleCertBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Bitte nur Bilddateien hochladen');
+      return;
+    }
+    setUploadingCertBg(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `cert-bg-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+      update({ certificateBgUrl: urlData.publicUrl });
+      toast.success('Hintergrundbild hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingCertBg(false);
+      if (certBgInputRef.current) certBgInputRef.current.value = '';
+    }
+  };
+
+  const removeCertBg = async () => {
+    if (data.certificateBgUrl) {
+      const parts = data.certificateBgUrl.split('/');
+      const fileName = parts[parts.length - 1];
+      await supabase.storage.from('logos').remove([fileName]);
+    }
+    update({ certificateBgUrl: null });
+  };
+
   const canProceedStep1 = data.name.trim().length > 0;
 
   const handleCreate = async () => {
