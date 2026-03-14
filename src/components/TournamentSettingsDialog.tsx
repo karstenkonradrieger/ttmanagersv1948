@@ -23,6 +23,7 @@ interface Props {
   motto: string;
   breakMinutes: number;
   certificateText: string;
+  certificateBgUrl: string | null;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
@@ -45,13 +46,14 @@ interface Props {
     sponsor_signature_url: string | null;
     sponsor_logo_url: string | null;
     sponsor_consent: boolean;
+    certificate_bg_url?: string | null;
   }) => Promise<void>;
 }
 
 export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
-  certificateText, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
+  certificateText, certificateBgUrl, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -71,11 +73,14 @@ export function TournamentSettingsDialog({
   const [localSponsorSigUrl, setLocalSponsorSigUrl] = useState(sponsorSignatureUrl);
   const [localSponsorLogoUrl, setLocalSponsorLogoUrl] = useState(sponsorLogoUrl);
   const [localSponsorConsent, setLocalSponsorConsent] = useState(sponsorConsent);
+  const [localCertBgUrl, setLocalCertBgUrl] = useState(certificateBgUrl);
   const [uploadingSig, setUploadingSig] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingCertBg, setUploadingCertBg] = useState(false);
   const [saving, setSaving] = useState(false);
   const sigInputRef = useRef<HTMLInputElement>(null);
   const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
+  const certBgInputRef = useRef<HTMLInputElement>(null);
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
@@ -95,6 +100,7 @@ export function TournamentSettingsDialog({
       setLocalSponsorSigUrl(sponsorSignatureUrl);
       setLocalSponsorLogoUrl(sponsorLogoUrl);
       setLocalSponsorConsent(sponsorConsent);
+      setLocalCertBgUrl(certificateBgUrl);
     }
     setOpen(isOpen);
   };
@@ -157,6 +163,35 @@ export function TournamentSettingsDialog({
     setLocalSponsorLogoUrl(null);
   };
 
+  const handleCertBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    setUploadingCertBg(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `cert-bg-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+      setLocalCertBgUrl(urlData.publicUrl);
+      toast.success('Hintergrundbild hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingCertBg(false);
+      if (certBgInputRef.current) certBgInputRef.current.value = '';
+    }
+  };
+
+  const removeCertBg = async () => {
+    if (localCertBgUrl) {
+      const parts = localCertBgUrl.split('/');
+      const fileName = parts[parts.length - 1];
+      await supabase.storage.from('logos').remove([fileName]);
+    }
+    setLocalCertBgUrl(null);
+  };
+
   const hasChanges =
     localMode !== mode || localType !== type || localBestOf !== bestOf ||
     (localDate || null) !== (tournamentDate || null) ||
@@ -165,7 +200,8 @@ export function TournamentSettingsDialog({
     localMotto !== motto || localBreakMinutes !== breakMinutes ||
     localCertText !== certificateText || localOrganizerName !== organizerName ||
     localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-    localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent;
+    localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
+    localCertBgUrl !== certificateBgUrl;
 
   const handleSave = async () => {
     setSaving(true);
@@ -181,7 +217,8 @@ export function TournamentSettingsDialog({
         localMotto !== motto || localBreakMinutes !== breakMinutes ||
         localCertText !== certificateText || localOrganizerName !== organizerName ||
         localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-        localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent;
+        localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
+        localCertBgUrl !== certificateBgUrl;
 
       if (detailsChanged) {
         await onUpdateDetails({
@@ -198,6 +235,7 @@ export function TournamentSettingsDialog({
           sponsor_signature_url: localSponsorSigUrl,
           sponsor_logo_url: localSponsorLogoUrl,
           sponsor_consent: localSponsorConsent,
+          certificate_bg_url: localCertBgUrl,
         });
       }
 
@@ -284,6 +322,31 @@ export function TournamentSettingsDialog({
             <p className="text-xs text-muted-foreground mt-1">
               Platzhalter: <code className="bg-muted px-1 rounded">{'{turniername}'}</code> <code className="bg-muted px-1 rounded">{'{spieler}'}</code> <code className="bg-muted px-1 rounded">{'{verein}'}</code> <code className="bg-muted px-1 rounded">{'{platz}'}</code>
             </p>
+          </div>
+
+          {/* Certificate Background */}
+          <div>
+            <Label className="text-sm font-semibold mb-1 block">
+              <ImagePlus className="inline h-4 w-4 mr-1" />
+              Hintergrundbild / Rahmen für Urkunden
+            </Label>
+            {localCertBgUrl ? (
+              <div className="flex items-center gap-2">
+                <img src={localCertBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeCertBg}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <input ref={certBgInputRef} type="file" accept="image/*" className="hidden" onChange={handleCertBgUpload} />
+                <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg}>
+                  {uploadingCertBg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                  Bild hochladen
+                </Button>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
           </div>
 
           {/* Organizer */}

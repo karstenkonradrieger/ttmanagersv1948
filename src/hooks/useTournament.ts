@@ -47,6 +47,7 @@ function loadTournament(): Tournament {
     sponsorSignatureUrl: null,
     sponsorLogoUrl: null,
     sponsorConsent: false,
+    certificateBgUrl: null,
   };
 }
 
@@ -210,6 +211,7 @@ export function useTournament() {
       sponsorSignatureUrl: null,
       sponsorLogoUrl: null,
       sponsorConsent: false,
+      certificateBgUrl: null,
     });
   }, []);
 

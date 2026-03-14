@@ -26,6 +26,7 @@ interface Props {
   sponsorSignatureUrl?: string | null;
   sponsorLogoUrl?: string | null;
   sponsorConsent?: boolean;
+  certificateBgUrl?: string | null;
 }
 
 function getRoundName(round: number, totalRounds: number, mode?: string): string {
@@ -105,7 +106,7 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
   return Math.max(wins.p1, wins.p2) >= 3;
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent }: Props) {
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent, certificateBgUrl }: Props) {
   const [showMatchPhotos, setShowMatchPhotos] = useState(false);
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
@@ -398,12 +399,38 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
     }
 
+    // Pre-load certificate background if available
+    let certBgData: string | null = null;
+    if (certificateBgUrl) {
+      try {
+        const bgImg = new Image();
+        bgImg.crossOrigin = 'anonymous';
+        await new Promise<void>((resolve, reject) => {
+          bgImg.onload = () => resolve();
+          bgImg.onerror = () => reject();
+          bgImg.src = certificateBgUrl;
+        });
+        const bgCanvas = document.createElement('canvas');
+        bgCanvas.width = bgImg.naturalWidth;
+        bgCanvas.height = bgImg.naturalHeight;
+        bgCanvas.getContext('2d')!.drawImage(bgImg, 0, 0);
+        certBgData = bgCanvas.toDataURL('image/png');
+      } catch {
+        // ignore
+      }
+    }
+
     const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
 
     placements.forEach((placement, idx) => {
       if (idx > 0) doc.addPage();
       const w = doc.internal.pageSize.getWidth();
       const h = doc.internal.pageSize.getHeight();
+
+      // Background image
+      if (certBgData) {
+        doc.addImage(certBgData, 'PNG', 0, 0, w, h);
+      }
 
       let yOffset = 40;
 

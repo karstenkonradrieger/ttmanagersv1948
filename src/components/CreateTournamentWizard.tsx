@@ -23,6 +23,7 @@ interface WizardData {
   googleMapsLink: string;
   logoUrl: string | null;
   certificateText: string;
+  certificateBgUrl: string | null;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
@@ -77,6 +78,7 @@ interface Props {
       sponsor_signature_url?: string | null;
       sponsor_logo_url?: string | null;
       sponsor_consent?: boolean;
+      certificate_bg_url?: string | null;
     },
   ) => Promise<string>;
 }
@@ -89,11 +91,13 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingSignature, setUploadingSignature] = useState(false);
   const [uploadingSponsorLogo, setUploadingSponsorLogo] = useState(false);
+  const [uploadingCertBg, setUploadingCertBg] = useState(false);
   const [customSport, setCustomSport] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const signatureInputRef = useRef<HTMLInputElement>(null);
   const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
+  const certBgInputRef = useRef<HTMLInputElement>(null);
 
   const [data, setData] = useState<WizardData>({
     name: '',
@@ -108,6 +112,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     googleMapsLink: '',
     logoUrl: null,
     certificateText: DEFAULT_CERTIFICATE_TEXT,
+    certificateBgUrl: null,
     organizerName: '',
     sponsorName: '',
     sponsorSignatureUrl: null,
@@ -137,6 +142,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
         googleMapsLink: '',
         logoUrl: null,
         certificateText: DEFAULT_CERTIFICATE_TEXT,
+        certificateBgUrl: null,
         organizerName: '',
         sponsorName: '',
         sponsorSignatureUrl: null,
@@ -288,6 +294,39 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     update({ sponsorLogoUrl: null });
   };
 
+  const handleCertBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Bitte nur Bilddateien hochladen');
+      return;
+    }
+    setUploadingCertBg(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `cert-bg-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+      update({ certificateBgUrl: urlData.publicUrl });
+      toast.success('Hintergrundbild hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingCertBg(false);
+      if (certBgInputRef.current) certBgInputRef.current.value = '';
+    }
+  };
+
+  const removeCertBg = async () => {
+    if (data.certificateBgUrl) {
+      const parts = data.certificateBgUrl.split('/');
+      const fileName = parts[parts.length - 1];
+      await supabase.storage.from('logos').remove([fileName]);
+    }
+    update({ certificateBgUrl: null });
+  };
+
   const canProceedStep1 = data.name.trim().length > 0;
 
   const handleCreate = async () => {
@@ -318,6 +357,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           sponsor_signature_url: data.sponsorSignatureUrl,
           sponsor_logo_url: data.sponsorLogoUrl,
           sponsor_consent: data.sponsorConsent,
+          certificate_bg_url: data.certificateBgUrl,
         },
       );
       setOpen(false);
@@ -497,6 +537,31 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               <p className="text-xs text-muted-foreground mt-1">
                 Platzhalter: <code className="bg-muted px-1 rounded">{'{turniername}'}</code> <code className="bg-muted px-1 rounded">{'{spieler}'}</code> <code className="bg-muted px-1 rounded">{'{verein}'}</code> <code className="bg-muted px-1 rounded">{'{platz}'}</code>
               </p>
+            </div>
+
+            {/* Certificate Background */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">
+                <ImagePlus className="inline h-4 w-4 mr-1" />
+                Hintergrundbild / Rahmen für Urkunden
+              </Label>
+              {data.certificateBgUrl ? (
+                <div className="flex items-center gap-2">
+                  <img src={data.certificateBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeCertBg}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <input ref={certBgInputRef} type="file" accept="image/*" className="hidden" onChange={handleCertBgUpload} />
+                  <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg}>
+                    {uploadingCertBg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                    Bild hochladen
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
             </div>
 
             {/* Organizer */}

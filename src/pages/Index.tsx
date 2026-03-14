@@ -259,6 +259,7 @@ const Index = () => {
               sponsorSignatureUrl={tournament.sponsorSignatureUrl}
               sponsorLogoUrl={tournament.sponsorLogoUrl}
               sponsorConsent={tournament.sponsorConsent}
+              certificateBgUrl={tournament.certificateBgUrl}
               started={tournament.started}
               onUpdateMode={updateTournamentMode}
               onUpdateType={updateTournamentType}
@@ -695,6 +696,7 @@ const Index = () => {
                  sponsorSignatureUrl={tournament.sponsorSignatureUrl}
                  sponsorLogoUrl={tournament.sponsorLogoUrl}
                  sponsorConsent={tournament.sponsorConsent}
+                 certificateBgUrl={tournament.certificateBgUrl}
                 />
             </TabsContent>
 

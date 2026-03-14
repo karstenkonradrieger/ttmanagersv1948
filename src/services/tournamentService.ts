@@ -34,6 +34,7 @@ export interface DbTournament {
   sponsor_signature_url: string | null;
   sponsor_logo_url: string | null;
   sponsor_consent: boolean;
+  certificate_bg_url: string | null;
 }
 
 export interface DbPlayer {
@@ -153,6 +154,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     sponsorSignatureUrl: (tournament as any).sponsor_signature_url || null,
     sponsorLogoUrl: (tournament as any).sponsor_logo_url || null,
     sponsorConsent: (tournament as any).sponsor_consent ?? false,
+    certificateBgUrl: (tournament as any).certificate_bg_url || null,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -226,9 +228,10 @@ export async function createTournament(
     organizer_name?: string;
     sponsor_name?: string;
     sponsor_signature_url?: string | null;
-    sponsor_logo_url?: string | null;
-    sponsor_consent?: boolean;
-  },
+      sponsor_logo_url?: string | null;
+      sponsor_consent?: boolean;
+      certificate_bg_url?: string | null;
+    },
 ): Promise<string> {
   const { data, error } = await supabase
     .from('tournaments')
@@ -255,6 +258,7 @@ export async function createTournament(
       ...(extras?.sponsor_signature_url !== undefined ? { sponsor_signature_url: extras.sponsor_signature_url } : {}),
       ...(extras?.sponsor_logo_url !== undefined ? { sponsor_logo_url: extras.sponsor_logo_url } : {}),
       ...(extras?.sponsor_consent !== undefined ? { sponsor_consent: extras.sponsor_consent } : {}),
+      ...(extras?.certificate_bg_url !== undefined ? { certificate_bg_url: extras.certificate_bg_url } : {}),
     })
     .select('id')
     .single();
@@ -293,6 +297,7 @@ export async function updateTournament(id: string, updates: Partial<{
   sponsor_signature_url: string | null;
   sponsor_logo_url: string | null;
   sponsor_consent: boolean;
+  certificate_bg_url: string | null;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')
