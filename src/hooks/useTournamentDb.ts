@@ -41,6 +41,8 @@ const emptyTournament: Tournament = {
   sponsorLogoUrl: null,
   sponsorConsent: false,
   certificateBgUrl: null,
+  certificateFontFamily: 'Helvetica',
+  certificateFontSize: 20,
 };
 
 export function useTournamentDb(tournamentId: string | null) {
