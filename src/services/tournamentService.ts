@@ -226,6 +226,7 @@ export async function createTournament(
     organizer_name?: string;
     sponsor_name?: string;
     sponsor_signature_url?: string | null;
+    sponsor_logo_url?: string | null;
     sponsor_consent?: boolean;
   },
 ): Promise<string> {
