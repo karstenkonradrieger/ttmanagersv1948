@@ -35,6 +35,8 @@ export interface DbTournament {
   sponsor_logo_url: string | null;
   sponsor_consent: boolean;
   certificate_bg_url: string | null;
+  certificate_font_family: string;
+  certificate_font_size: number;
 }
 
 export interface DbPlayer {
