@@ -324,6 +324,31 @@ export function TournamentSettingsDialog({
             </p>
           </div>
 
+          {/* Certificate Background */}
+          <div>
+            <Label className="text-sm font-semibold mb-1 block">
+              <ImagePlus className="inline h-4 w-4 mr-1" />
+              Hintergrundbild / Rahmen für Urkunden
+            </Label>
+            {localCertBgUrl ? (
+              <div className="flex items-center gap-2">
+                <img src={localCertBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeCertBg}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <input ref={certBgInputRef} type="file" accept="image/*" className="hidden" onChange={handleCertBgUpload} />
+                <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg}>
+                  {uploadingCertBg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                  Bild hochladen
+                </Button>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
+          </div>
+
           {/* Organizer */}
           <div>
             <Label className="text-sm font-semibold mb-1 block">Veranstalter</Label>
