@@ -909,6 +909,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                   certificateText={localCertText}
                   player={current.player}
                   placementLabel={current.label}
+                  fontFamily={certificateFontFamily}
+                  fontSize={certificateFontSize}
                 />
               </div>
             </DialogContent>

@@ -700,6 +700,8 @@ const Index = () => {
                  sponsorConsent={tournament.sponsorConsent}
                  certificateBgUrl={tournament.certificateBgUrl}
                  certificateText={tournament.certificateText}
+                 certificateFontFamily={tournament.certificateFontFamily}
+                 certificateFontSize={tournament.certificateFontSize}
                  onCertificateTextChange={(text) => updateDetails({ certificate_text: text })}
                 />
             </TabsContent>
