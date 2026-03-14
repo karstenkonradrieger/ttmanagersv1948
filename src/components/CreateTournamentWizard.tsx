@@ -545,7 +545,41 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 <ImagePlus className="inline h-4 w-4 mr-1" />
                 Hintergrundbild / Rahmen für Urkunden
               </Label>
-              {data.certificateBgUrl ? (
+
+              {/* Predefined frames */}
+              <div className="grid grid-cols-5 gap-2 mb-2">
+                {[
+                  { label: 'Keiner', url: null },
+                  { label: 'Klassisch Gold', url: '/certificate-frames/frame-classic-gold.png' },
+                  { label: 'Sport Rot', url: '/certificate-frames/frame-sport-red.png' },
+                  { label: 'Natur Grün', url: '/certificate-frames/frame-nature-green.png' },
+                  { label: 'Modern Blau', url: '/certificate-frames/frame-modern-blue.png' },
+                ].map((frame) => {
+                  const isSelected = frame.url === null
+                    ? !data.certificateBgUrl || data.certificateBgUrl === ''
+                    : data.certificateBgUrl === frame.url;
+                  return (
+                    <button
+                      key={frame.label}
+                      type="button"
+                      className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 transition-colors ${
+                        isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-muted-foreground'
+                      }`}
+                      onClick={() => update({ certificateBgUrl: frame.url })}
+                    >
+                      {frame.url ? (
+                        <img src={frame.url} alt={frame.label} className="h-14 w-10 object-cover rounded" />
+                      ) : (
+                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-muted-foreground text-xs">–</div>
+                      )}
+                      <span className="text-[10px] text-muted-foreground leading-tight text-center">{frame.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Custom upload */}
+              {data.certificateBgUrl && !['/certificate-frames/frame-classic-gold.png', '/certificate-frames/frame-sport-red.png', '/certificate-frames/frame-nature-green.png', '/certificate-frames/frame-modern-blue.png'].includes(data.certificateBgUrl) ? (
                 <div className="flex items-center gap-2">
                   <img src={data.certificateBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeCertBg}>
@@ -557,7 +591,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                   <input ref={certBgInputRef} type="file" accept="image/*" className="hidden" onChange={handleCertBgUpload} />
                   <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg}>
                     {uploadingCertBg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                    Bild hochladen
+                    Eigenes Bild hochladen
                   </Button>
                 </div>
               )}
