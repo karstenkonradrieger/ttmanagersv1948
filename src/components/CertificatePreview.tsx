@@ -44,6 +44,8 @@ export function CertificatePreview({
   certificateText,
   player,
   placementLabel,
+  fontFamily = 'Helvetica',
+  fontSize = 20,
 }: Props) {
   const certDate = tournamentDate
     ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
