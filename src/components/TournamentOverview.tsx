@@ -841,6 +841,55 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
           </div>
         </div>
       )}
+
+      {/* Certificate Preview Dialog */}
+      {champion && (() => {
+        const placements: { label: string; player: Player }[] = [];
+        if (champion) placements.push({ label: '1. Platz', player: champion });
+        if (secondPlace) placements.push({ label: '2. Platz', player: secondPlace });
+        thirdPlacePlayers.forEach(p => placements.push({ label: '3. Platz', player: p }));
+        const current = placements[previewIndex] || placements[0];
+        if (!current) return null;
+        return (
+          <Dialog open={showCertPreview} onOpenChange={setShowCertPreview}>
+            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Urkundenvorschau</DialogTitle>
+              </DialogHeader>
+              {placements.length > 1 && (
+                <div className="flex gap-1 justify-center">
+                  {placements.map((p, i) => (
+                    <Button
+                      key={i}
+                      variant={i === previewIndex ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPreviewIndex(i)}
+                      className="text-xs"
+                    >
+                      {p.label}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              <CertificatePreview
+                tournamentName={tournamentName}
+                logoUrl={logoUrl}
+                motto={motto}
+                tournamentDate={tournamentDate}
+                venueString={venueString}
+                organizerName={organizerName}
+                sponsorName={sponsorName}
+                sponsorSignatureUrl={sponsorSignatureUrl}
+                sponsorLogoUrl={sponsorLogoUrl}
+                sponsorConsent={sponsorConsent}
+                certificateBgUrl={certificateBgUrl}
+                player={current.player}
+                placementLabel={current.label}
+              />
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
     </div>
   );
 }
