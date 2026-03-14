@@ -142,6 +142,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
         googleMapsLink: '',
         logoUrl: null,
         certificateText: DEFAULT_CERTIFICATE_TEXT,
+        certificateBgUrl: null,
         organizerName: '',
         sponsorName: '',
         sponsorSignatureUrl: null,
