@@ -228,6 +228,8 @@ export async function createTournament(
     sponsor_signature_url?: string | null;
     sponsor_logo_url?: string | null;
     sponsor_consent?: boolean;
+  },
+): Promise<string> {
   const { data, error } = await supabase
     .from('tournaments')
     .insert({
