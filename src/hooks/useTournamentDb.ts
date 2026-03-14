@@ -1125,7 +1125,7 @@ export function useTournamentDb(tournamentId: string | null) {
     return player?.name || '—';
   }, [tournament.players, tournament.doublesPairs, tournament.teams]);
 
-  const updateDetails = useCallback(async (details: {
+  const updateDetails = useCallback(async (details: Partial<{
     tournament_date: string | null;
     venue_street: string;
     venue_house_number: string;
@@ -1139,26 +1139,26 @@ export function useTournamentDb(tournamentId: string | null) {
     sponsor_signature_url: string | null;
     sponsor_logo_url: string | null;
     sponsor_consent: boolean;
-    certificate_bg_url?: string | null;
-  }) => {
+    certificate_bg_url: string | null;
+  }>) => {
     if (!tournamentId) return;
     try {
       await tournamentService.updateTournament(tournamentId, details);
       setTournament(prev => ({
         ...prev,
-        tournamentDate: details.tournament_date,
-        venueStreet: details.venue_street,
-        venueHouseNumber: details.venue_house_number,
-        venuePostalCode: details.venue_postal_code,
-        venueCity: details.venue_city,
-        motto: details.motto,
-        breakMinutes: details.break_minutes,
-        certificateText: details.certificate_text,
-        organizerName: details.organizer_name,
-        sponsorName: details.sponsor_name,
-        sponsorSignatureUrl: details.sponsor_signature_url,
-        sponsorLogoUrl: details.sponsor_logo_url,
-        sponsorConsent: details.sponsor_consent,
+        ...(details.tournament_date !== undefined ? { tournamentDate: details.tournament_date } : {}),
+        ...(details.venue_street !== undefined ? { venueStreet: details.venue_street } : {}),
+        ...(details.venue_house_number !== undefined ? { venueHouseNumber: details.venue_house_number } : {}),
+        ...(details.venue_postal_code !== undefined ? { venuePostalCode: details.venue_postal_code } : {}),
+        ...(details.venue_city !== undefined ? { venueCity: details.venue_city } : {}),
+        ...(details.motto !== undefined ? { motto: details.motto } : {}),
+        ...(details.break_minutes !== undefined ? { breakMinutes: details.break_minutes } : {}),
+        ...(details.certificate_text !== undefined ? { certificateText: details.certificate_text } : {}),
+        ...(details.organizer_name !== undefined ? { organizerName: details.organizer_name } : {}),
+        ...(details.sponsor_name !== undefined ? { sponsorName: details.sponsor_name } : {}),
+        ...(details.sponsor_signature_url !== undefined ? { sponsorSignatureUrl: details.sponsor_signature_url } : {}),
+        ...(details.sponsor_logo_url !== undefined ? { sponsorLogoUrl: details.sponsor_logo_url } : {}),
+        ...(details.sponsor_consent !== undefined ? { sponsorConsent: details.sponsor_consent } : {}),
         ...(details.certificate_bg_url !== undefined ? { certificateBgUrl: details.certificate_bg_url } : {}),
       }));
     } catch (error) {

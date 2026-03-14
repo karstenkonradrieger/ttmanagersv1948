@@ -697,6 +697,8 @@ const Index = () => {
                  sponsorLogoUrl={tournament.sponsorLogoUrl}
                  sponsorConsent={tournament.sponsorConsent}
                  certificateBgUrl={tournament.certificateBgUrl}
+                 certificateText={tournament.certificateText}
+                 onCertificateTextChange={(text) => updateDetails({ certificate_text: text })}
                 />
             </TabsContent>
 
