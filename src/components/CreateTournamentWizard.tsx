@@ -606,6 +606,34 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               <p className="text-xs text-muted-foreground mt-1">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
             </div>
 
+            {/* Certificate Font Settings */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-sm font-semibold mb-1 block">Schriftart</Label>
+                <select
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={data.certificateFontFamily}
+                  onChange={e => update({ certificateFontFamily: e.target.value })}
+                >
+                  <option value="Helvetica">Helvetica (Sans-Serif)</option>
+                  <option value="Times">Times (Serif)</option>
+                  <option value="Courier">Courier (Monospace)</option>
+                </select>
+              </div>
+              <div>
+                <Label className="text-sm font-semibold mb-1 block">Schriftgröße</Label>
+                <select
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={data.certificateFontSize}
+                  onChange={e => update({ certificateFontSize: Number(e.target.value) })}
+                >
+                  {[14, 16, 18, 20, 22, 24, 28].map(s => (
+                    <option key={s} value={s}>{s} pt</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             {/* Organizer */}
             <div>
               <Label className="text-sm font-semibold mb-1 block">Veranstalter</Label>
