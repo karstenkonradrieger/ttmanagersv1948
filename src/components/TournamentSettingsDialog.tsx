@@ -24,6 +24,8 @@ interface Props {
   breakMinutes: number;
   certificateText: string;
   certificateBgUrl: string | null;
+  certificateFontFamily: string;
+  certificateFontSize: number;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
