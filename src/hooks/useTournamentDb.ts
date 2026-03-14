@@ -1132,6 +1132,12 @@ export function useTournamentDb(tournamentId: string | null) {
     venue_city: string;
     motto: string;
     break_minutes: number;
+    certificate_text: string;
+    organizer_name: string;
+    sponsor_name: string;
+    sponsor_signature_url: string | null;
+    sponsor_logo_url: string | null;
+    sponsor_consent: boolean;
   }) => {
     if (!tournamentId) return;
     try {
@@ -1145,6 +1151,12 @@ export function useTournamentDb(tournamentId: string | null) {
         venueCity: details.venue_city,
         motto: details.motto,
         breakMinutes: details.break_minutes,
+        certificateText: details.certificate_text,
+        organizerName: details.organizer_name,
+        sponsorName: details.sponsor_name,
+        sponsorSignatureUrl: details.sponsor_signature_url,
+        sponsorLogoUrl: details.sponsor_logo_url,
+        sponsorConsent: details.sponsor_consent,
       }));
     } catch (error) {
       console.error('Error updating details:', error);

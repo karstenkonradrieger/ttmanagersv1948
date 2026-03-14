@@ -26,6 +26,7 @@ interface Props {
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
+  sponsorLogoUrl: string | null;
   sponsorConsent: boolean;
   onUpdateMode: (mode: TournamentMode) => Promise<void>;
   onUpdateType: (type: TournamentType) => Promise<void>;
@@ -42,6 +43,7 @@ interface Props {
     organizer_name: string;
     sponsor_name: string;
     sponsor_signature_url: string | null;
+    sponsor_logo_url: string | null;
     sponsor_consent: boolean;
   }) => Promise<void>;
 }
