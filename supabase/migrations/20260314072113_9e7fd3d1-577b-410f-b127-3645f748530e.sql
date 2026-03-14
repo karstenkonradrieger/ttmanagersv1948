@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN sponsor_logo_url text DEFAULT NULL;
