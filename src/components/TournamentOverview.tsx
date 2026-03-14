@@ -452,7 +452,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       // Motto as subtitle on certificate
       if (motto) {
         doc.setFontSize(Math.round(certificateFontSize * 0.7));
-        doc.setFont(undefined!, 'italic');
+        doc.setFont(certificateFontFamily, 'italic');
         doc.setTextColor(80, 80, 80);
         doc.text(`"${motto}"`, w / 2, yOffset, { align: 'center' });
         yOffset += 12;
