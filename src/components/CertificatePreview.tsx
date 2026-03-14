@@ -1,5 +1,11 @@
 import { Player } from '@/types/tournament';
 
+const FONT_FAMILY_MAP: Record<string, string> = {
+  Helvetica: 'Helvetica, Arial, sans-serif',
+  Times: '"Times New Roman", Times, serif',
+  Courier: '"Courier New", Courier, monospace',
+};
+
 interface Props {
   tournamentName: string;
   logoUrl?: string | null;
@@ -15,6 +21,8 @@ interface Props {
   certificateText: string;
   player: Player;
   placementLabel: string;
+  fontFamily?: string;
+  fontSize?: number;
 }
 
 function resolvePlaceholders(template: string, vars: Record<string, string>): string {
@@ -36,6 +44,8 @@ export function CertificatePreview({
   certificateText,
   player,
   placementLabel,
+  fontFamily = 'Helvetica',
+  fontSize = 20,
 }: Props) {
   const certDate = tournamentDate
     ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -68,7 +78,7 @@ export function CertificatePreview({
       )}
 
       {/* Content overlay */}
-      <div className="relative z-10 flex flex-col items-center justify-between h-full px-6 py-8 text-center">
+      <div className="relative z-10 flex flex-col items-center justify-between h-full px-6 py-8 text-center" style={{ fontFamily: FONT_FAMILY_MAP[fontFamily] || FONT_FAMILY_MAP.Helvetica }}>
         {/* Top section */}
         <div className="flex flex-col items-center gap-2 flex-1 justify-center">
           {logoUrl && (
@@ -87,7 +97,7 @@ export function CertificatePreview({
           {/* Resolved certificate text */}
           <div className="mt-3 space-y-1">
             {textLines.map((line, i) => (
-              <p key={i} className="text-sm leading-relaxed" style={{ color: '#1e1e1e' }}>
+              <p key={i} className="leading-relaxed" style={{ color: '#1e1e1e', fontSize: `${Math.max(8, fontSize * 0.55)}px` }}>
                 {line}
               </p>
             ))}

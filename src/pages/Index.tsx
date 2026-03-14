@@ -260,6 +260,8 @@ const Index = () => {
               sponsorLogoUrl={tournament.sponsorLogoUrl}
               sponsorConsent={tournament.sponsorConsent}
               certificateBgUrl={tournament.certificateBgUrl}
+              certificateFontFamily={tournament.certificateFontFamily}
+              certificateFontSize={tournament.certificateFontSize}
               started={tournament.started}
               onUpdateMode={updateTournamentMode}
               onUpdateType={updateTournamentType}
@@ -698,6 +700,8 @@ const Index = () => {
                  sponsorConsent={tournament.sponsorConsent}
                  certificateBgUrl={tournament.certificateBgUrl}
                  certificateText={tournament.certificateText}
+                 certificateFontFamily={tournament.certificateFontFamily}
+                 certificateFontSize={tournament.certificateFontSize}
                  onCertificateTextChange={(text) => updateDetails({ certificate_text: text })}
                 />
             </TabsContent>

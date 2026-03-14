@@ -48,6 +48,8 @@ function loadTournament(): Tournament {
     sponsorLogoUrl: null,
     sponsorConsent: false,
     certificateBgUrl: null,
+    certificateFontFamily: 'Helvetica',
+    certificateFontSize: 20,
   };
 }
 
@@ -212,6 +214,8 @@ export function useTournament() {
       sponsorLogoUrl: null,
       sponsorConsent: false,
       certificateBgUrl: null,
+      certificateFontFamily: 'Helvetica',
+      certificateFontSize: 20,
     });
   }, []);
 

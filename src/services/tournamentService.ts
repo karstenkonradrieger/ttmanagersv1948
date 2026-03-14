@@ -35,6 +35,8 @@ export interface DbTournament {
   sponsor_logo_url: string | null;
   sponsor_consent: boolean;
   certificate_bg_url: string | null;
+  certificate_font_family: string;
+  certificate_font_size: number;
 }
 
 export interface DbPlayer {
@@ -155,6 +157,8 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     sponsorLogoUrl: (tournament as any).sponsor_logo_url || null,
     sponsorConsent: (tournament as any).sponsor_consent ?? false,
     certificateBgUrl: (tournament as any).certificate_bg_url || null,
+    certificateFontFamily: (tournament as any).certificate_font_family || 'Helvetica',
+    certificateFontSize: (tournament as any).certificate_font_size ?? 20,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -231,6 +235,8 @@ export async function createTournament(
       sponsor_logo_url?: string | null;
       sponsor_consent?: boolean;
       certificate_bg_url?: string | null;
+      certificate_font_family?: string;
+      certificate_font_size?: number;
     },
 ): Promise<string> {
   const { data, error } = await supabase
@@ -259,6 +265,8 @@ export async function createTournament(
       ...(extras?.sponsor_logo_url !== undefined ? { sponsor_logo_url: extras.sponsor_logo_url } : {}),
       ...(extras?.sponsor_consent !== undefined ? { sponsor_consent: extras.sponsor_consent } : {}),
       ...(extras?.certificate_bg_url !== undefined ? { certificate_bg_url: extras.certificate_bg_url } : {}),
+      ...(extras?.certificate_font_family !== undefined ? { certificate_font_family: extras.certificate_font_family } : {}),
+      ...(extras?.certificate_font_size !== undefined ? { certificate_font_size: extras.certificate_font_size } : {}),
     })
     .select('id')
     .single();
@@ -298,6 +306,8 @@ export async function updateTournament(id: string, updates: Partial<{
   sponsor_logo_url: string | null;
   sponsor_consent: boolean;
   certificate_bg_url: string | null;
+  certificate_font_family: string;
+  certificate_font_size: number;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')

@@ -24,6 +24,8 @@ interface Props {
   breakMinutes: number;
   certificateText: string;
   certificateBgUrl: string | null;
+  certificateFontFamily: string;
+  certificateFontSize: number;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
@@ -47,13 +49,16 @@ interface Props {
     sponsor_logo_url: string | null;
     sponsor_consent: boolean;
     certificate_bg_url?: string | null;
+    certificate_font_family?: string;
+    certificate_font_size?: number;
   }) => Promise<void>;
 }
 
 export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
-  certificateText, certificateBgUrl, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
+  certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize,
+  organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -74,6 +79,8 @@ export function TournamentSettingsDialog({
   const [localSponsorLogoUrl, setLocalSponsorLogoUrl] = useState(sponsorLogoUrl);
   const [localSponsorConsent, setLocalSponsorConsent] = useState(sponsorConsent);
   const [localCertBgUrl, setLocalCertBgUrl] = useState(certificateBgUrl);
+  const [localFontFamily, setLocalFontFamily] = useState(certificateFontFamily);
+  const [localFontSize, setLocalFontSize] = useState(certificateFontSize);
   const [uploadingSig, setUploadingSig] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCertBg, setUploadingCertBg] = useState(false);
@@ -101,6 +108,8 @@ export function TournamentSettingsDialog({
       setLocalSponsorLogoUrl(sponsorLogoUrl);
       setLocalSponsorConsent(sponsorConsent);
       setLocalCertBgUrl(certificateBgUrl);
+      setLocalFontFamily(certificateFontFamily);
+      setLocalFontSize(certificateFontSize);
     }
     setOpen(isOpen);
   };
@@ -201,7 +210,8 @@ export function TournamentSettingsDialog({
     localCertText !== certificateText || localOrganizerName !== organizerName ||
     localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
     localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
-    localCertBgUrl !== certificateBgUrl;
+    localCertBgUrl !== certificateBgUrl ||
+    localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize;
 
   const handleSave = async () => {
     setSaving(true);
@@ -218,7 +228,8 @@ export function TournamentSettingsDialog({
         localCertText !== certificateText || localOrganizerName !== organizerName ||
         localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
         localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
-        localCertBgUrl !== certificateBgUrl;
+        localCertBgUrl !== certificateBgUrl ||
+        localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize;
 
       if (detailsChanged) {
         await onUpdateDetails({
@@ -236,6 +247,8 @@ export function TournamentSettingsDialog({
           sponsor_logo_url: localSponsorLogoUrl,
           sponsor_consent: localSponsorConsent,
           certificate_bg_url: localCertBgUrl,
+          certificate_font_family: localFontFamily,
+          certificate_font_size: localFontSize,
         });
       }
 
@@ -383,7 +396,33 @@ export function TournamentSettingsDialog({
             <p className="text-xs text-muted-foreground mt-1">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
           </div>
 
-          {/* Organizer */}
+          {/* Certificate Font Settings */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">Schriftart</Label>
+              <select
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={localFontFamily}
+                onChange={e => setLocalFontFamily(e.target.value)}
+              >
+                <option value="Helvetica">Helvetica (Sans-Serif)</option>
+                <option value="Times">Times (Serif)</option>
+                <option value="Courier">Courier (Monospace)</option>
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">Schriftgröße</Label>
+              <select
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={localFontSize}
+                onChange={e => setLocalFontSize(Number(e.target.value))}
+              >
+                {[14, 16, 18, 20, 22, 24, 28].map(s => (
+                  <option key={s} value={s}>{s} pt</option>
+                ))}
+              </select>
+            </div>
+          </div>
           <div>
             <Label className="text-sm font-semibold mb-1 block">Veranstalter</Label>
             <Input

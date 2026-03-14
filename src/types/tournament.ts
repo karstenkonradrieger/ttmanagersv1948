@@ -191,4 +191,6 @@ export interface Tournament {
   sponsorLogoUrl: string | null;
   sponsorConsent: boolean;
   certificateBgUrl: string | null;
+  certificateFontFamily: string;
+  certificateFontSize: number;
 }
