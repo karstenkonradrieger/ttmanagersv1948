@@ -78,7 +78,7 @@ export function CertificatePreview({
       )}
 
       {/* Content overlay */}
-      <div className="relative z-10 flex flex-col items-center justify-between h-full px-6 py-8 text-center">
+      <div className="relative z-10 flex flex-col items-center justify-between h-full px-6 py-8 text-center" style={{ fontFamily: FONT_FAMILY_MAP[fontFamily] || FONT_FAMILY_MAP.Helvetica }}>
         {/* Top section */}
         <div className="flex flex-col items-center gap-2 flex-1 justify-center">
           {logoUrl && (
