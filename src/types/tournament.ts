@@ -190,4 +190,5 @@ export interface Tournament {
   sponsorSignatureUrl: string | null;
   sponsorLogoUrl: string | null;
   sponsorConsent: boolean;
+  certificateBgUrl: string | null;
 }

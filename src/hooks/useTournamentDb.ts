@@ -1159,6 +1159,7 @@ export function useTournamentDb(tournamentId: string | null) {
         sponsorSignatureUrl: details.sponsor_signature_url,
         sponsorLogoUrl: details.sponsor_logo_url,
         sponsorConsent: details.sponsor_consent,
+        ...(details.certificate_bg_url !== undefined ? { certificateBgUrl: details.certificate_bg_url } : {}),
       }));
     } catch (error) {
       console.error('Error updating details:', error);
