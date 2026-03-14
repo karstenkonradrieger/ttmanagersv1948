@@ -258,6 +258,7 @@ export async function createTournament(
       ...(extras?.sponsor_signature_url !== undefined ? { sponsor_signature_url: extras.sponsor_signature_url } : {}),
       ...(extras?.sponsor_logo_url !== undefined ? { sponsor_logo_url: extras.sponsor_logo_url } : {}),
       ...(extras?.sponsor_consent !== undefined ? { sponsor_consent: extras.sponsor_consent } : {}),
+      ...(extras?.certificate_bg_url !== undefined ? { certificate_bg_url: extras.certificate_bg_url } : {}),
     })
     .select('id')
     .single();
