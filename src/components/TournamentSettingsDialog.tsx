@@ -73,11 +73,14 @@ export function TournamentSettingsDialog({
   const [localSponsorSigUrl, setLocalSponsorSigUrl] = useState(sponsorSignatureUrl);
   const [localSponsorLogoUrl, setLocalSponsorLogoUrl] = useState(sponsorLogoUrl);
   const [localSponsorConsent, setLocalSponsorConsent] = useState(sponsorConsent);
+  const [localCertBgUrl, setLocalCertBgUrl] = useState(certificateBgUrl);
   const [uploadingSig, setUploadingSig] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingCertBg, setUploadingCertBg] = useState(false);
   const [saving, setSaving] = useState(false);
   const sigInputRef = useRef<HTMLInputElement>(null);
   const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
+  const certBgInputRef = useRef<HTMLInputElement>(null);
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
