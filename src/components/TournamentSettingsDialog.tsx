@@ -108,6 +108,8 @@ export function TournamentSettingsDialog({
       setLocalSponsorLogoUrl(sponsorLogoUrl);
       setLocalSponsorConsent(sponsorConsent);
       setLocalCertBgUrl(certificateBgUrl);
+      setLocalFontFamily(certificateFontFamily);
+      setLocalFontSize(certificateFontSize);
     }
     setOpen(isOpen);
   };
