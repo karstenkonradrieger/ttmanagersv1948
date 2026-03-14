@@ -110,6 +110,8 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
 
 export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent, certificateBgUrl }: Props) {
   const [showMatchPhotos, setShowMatchPhotos] = useState(false);
+  const [showCertPreview, setShowCertPreview] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
   if (matches.length === 0) {
