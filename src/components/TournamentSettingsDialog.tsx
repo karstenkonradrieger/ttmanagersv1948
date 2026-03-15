@@ -239,7 +239,7 @@ export function TournamentSettingsDialog({
         localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
         localCertBgUrl !== certificateBgUrl ||
         localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
-        localTextColor !== certificateTextColor;
+        localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold;
 
       if (detailsChanged) {
         await onUpdateDetails({
