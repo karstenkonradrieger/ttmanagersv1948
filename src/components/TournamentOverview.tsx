@@ -1086,6 +1086,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     fontFamily={certificateFontFamily}
                     fontSize={certificateFontSize}
                     textColor={certificateTextColor}
+                    fontBold={!!localExtraSizes.fontBold}
                     lineSizes={localLineSizes}
                     extraSizes={localExtraSizes}
                     hiddenFields={localHiddenFields}
