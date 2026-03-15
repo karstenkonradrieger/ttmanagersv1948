@@ -34,8 +34,14 @@ interface Props {
   certificateFontSize?: number;
   certificateTextColor?: string;
   certificateLineSizes?: number[];
+  certificateExtraSizes?: Record<string, number>;
   onCertificateTextChange?: (text: string) => void;
   onCertificateLineSizesChange?: (sizes: number[]) => void;
+  onCertificateExtraSizesChange?: (sizes: Record<string, number>) => void;
+  onMottoChange?: (motto: string) => void;
+  onVenueStringChange?: (venue: string) => void;
+  onOrganizerNameChange?: (name: string) => void;
+  onSponsorNameChange?: (name: string) => void;
 }
 
 function getRoundName(round: number, totalRounds: number, mode?: string): string {
