@@ -196,4 +196,5 @@ export interface Tournament {
   certificateTextColor: string;
   certificateLineSizes: number[];
   certificateExtraSizes: Record<string, number>;
+  certificateHiddenFields: string[];
 }
