@@ -376,6 +376,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           certificate_font_family: data.certificateFontFamily,
           certificate_font_size: data.certificateFontSize,
           certificate_text_color: data.certificateTextColor,
+          certificate_extra_sizes: { fontBold: data.certificateFontBold ? 1 : 0 },
         },
       );
       setOpen(false);
