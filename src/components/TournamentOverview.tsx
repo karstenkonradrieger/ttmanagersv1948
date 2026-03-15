@@ -905,25 +905,27 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     <code className="bg-muted px-1 rounded">{'{platz}'}</code>
                   </p>
                 </div>
-                <CertificatePreview
-                  tournamentName={tournamentName}
-                  logoUrl={logoUrl}
-                  motto={motto}
-                  tournamentDate={tournamentDate}
-                  venueString={venueString}
-                  organizerName={organizerName}
-                  sponsorName={sponsorName}
-                  sponsorSignatureUrl={sponsorSignatureUrl}
-                  sponsorLogoUrl={sponsorLogoUrl}
-                  sponsorConsent={sponsorConsent}
-                  certificateBgUrl={certificateBgUrl}
-                  certificateText={localCertText}
-                  player={current.player}
-                  placementLabel={current.label}
-                  fontFamily={certificateFontFamily}
-                  fontSize={certificateFontSize}
-                  textColor={certificateTextColor}
-                />
+                <div id="cert-preview-print">
+                  <CertificatePreview
+                    tournamentName={tournamentName}
+                    logoUrl={logoUrl}
+                    motto={motto}
+                    tournamentDate={tournamentDate}
+                    venueString={venueString}
+                    organizerName={organizerName}
+                    sponsorName={sponsorName}
+                    sponsorSignatureUrl={sponsorSignatureUrl}
+                    sponsorLogoUrl={sponsorLogoUrl}
+                    sponsorConsent={sponsorConsent}
+                    certificateBgUrl={certificateBgUrl}
+                    certificateText={localCertText}
+                    player={current.player}
+                    placementLabel={current.label}
+                    fontFamily={certificateFontFamily}
+                    fontSize={certificateFontSize}
+                    textColor={certificateTextColor}
+                  />
+                </div>
               </div>
               <Button
                 variant="outline"
