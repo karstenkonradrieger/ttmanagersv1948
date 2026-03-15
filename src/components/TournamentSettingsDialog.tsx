@@ -53,6 +53,7 @@ interface Props {
     certificate_font_family?: string;
     certificate_font_size?: number;
     certificate_text_color?: string;
+    certificate_extra_sizes?: Record<string, number>;
   }) => Promise<void>;
 }
 
