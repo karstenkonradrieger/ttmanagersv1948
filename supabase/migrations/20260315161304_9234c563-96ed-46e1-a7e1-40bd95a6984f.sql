@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN certificate_hidden_fields jsonb NOT NULL DEFAULT '[]'::jsonb;

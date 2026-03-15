@@ -32,6 +32,7 @@ interface Props {
   textColor?: string;
   lineSizes?: number[];
   extraSizes?: Record<string, number>;
+  hiddenFields?: string[];
 }
 
 function resolvePlaceholders(template: string, vars: Record<string, string>): string {
@@ -58,6 +59,7 @@ export function CertificatePreview({
   textColor = '#1e1e1e',
   lineSizes = [],
   extraSizes = {},
+  hiddenFields = [],
 }: Props) {
   const certDate = tournamentDate
     ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -102,7 +104,7 @@ export function CertificatePreview({
             />
           )}
 
-          {motto && (
+          {!hiddenFields.includes('motto') && motto && (
             <p className="italic" style={{ color: mutedColor, fontSize: `${Math.max(6, (extraSizes.motto ?? 12) * 0.55)}px` }}>"{motto}"</p>
           )}
 
@@ -117,14 +119,16 @@ export function CertificatePreview({
             })}
           </div>
 
-          <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.date ?? 12) * 0.55)}px` }} className="mt-4">{certDate}</p>
-          {venueString && (
+          {!hiddenFields.includes('date') && (
+            <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.date ?? 12) * 0.55)}px` }} className="mt-4">{certDate}</p>
+          )}
+          {!hiddenFields.includes('venue') && venueString && (
             <p style={{ color: mutedColor, fontSize: `${Math.max(6, (extraSizes.venue ?? 12) * 0.55)}px` }}>{venueString}</p>
           )}
         </div>
 
         <div className="w-full flex items-end justify-center gap-8 mt-4">
-          {hasSponsorSection && (
+          {!hiddenFields.includes('sponsor') && hasSponsorSection && (
             <div className="flex flex-col items-center gap-1">
               {sponsorConsent && sponsorSignatureUrl && (
                 <img
@@ -145,20 +149,22 @@ export function CertificatePreview({
                   />
                 )}
                 {sponsorName && (
-                  <span style={{ color: mutedColor, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>{sponsorName}</span>
+                  <span style={{ color: textColor, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>{sponsorName}</span>
                 )}
               </div>
-              <span className="text-[7px]" style={{ color: mutedColor }}>Sponsor</span>
+              <span className="text-[7px]" style={{ color: textColor, opacity: 0.7 }}>Sponsor</span>
             </div>
           )}
 
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-24 border-t" style={{ borderColor: subtleColor }} />
-            {organizerName && (
-              <span style={{ color: mutedColor, fontSize: `${Math.max(5, (extraSizes.organizer ?? 8) * 0.55)}px` }}>{organizerName}</span>
-            )}
-            <span className="text-[7px]" style={{ color: mutedColor }}>Turnierleitung</span>
-          </div>
+          {!hiddenFields.includes('organizer') && (
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-24 border-t" style={{ borderColor: subtleColor }} />
+              {organizerName && (
+                <span style={{ color: textColor, fontSize: `${Math.max(5, (extraSizes.organizer ?? 8) * 0.55)}px` }}>{organizerName}</span>
+              )}
+              <span className="text-[7px]" style={{ color: textColor, opacity: 0.7 }}>Turnierleitung</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

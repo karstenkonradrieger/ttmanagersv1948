@@ -706,16 +706,21 @@ const Index = () => {
                  certificateTextColor={tournament.certificateTextColor}
                  certificateLineSizes={tournament.certificateLineSizes}
                  certificateExtraSizes={tournament.certificateExtraSizes}
-                 onCertificateTextChange={(text) => updateDetails({ certificate_text: text })}
-                 onCertificateLineSizesChange={(sizes) => updateDetails({ certificate_line_sizes: sizes } as any)}
-                 onCertificateExtraSizesChange={(sizes) => updateDetails({ certificate_extra_sizes: sizes } as any)}
-                 onMottoChange={(m) => updateDetails({ motto: m })}
-                 onVenueStringChange={(v) => {
-                   const parts = v.split(',').map(s => s.trim());
-                   updateDetails({ venue_street: parts[0] || '', venue_city: parts.slice(1).join(', ') || '' } as any);
+                 certificateHiddenFields={tournament.certificateHiddenFields}
+                 onSaveCertificateSettings={(settings) => {
+                   const parts = settings.venueString.split(',').map(s => s.trim());
+                   updateDetails({
+                     certificate_text: settings.certificateText,
+                     certificate_line_sizes: settings.certificateLineSizes,
+                     certificate_extra_sizes: settings.certificateExtraSizes,
+                     certificate_hidden_fields: settings.certificateHiddenFields,
+                     motto: settings.motto,
+                     venue_street: parts[0] || '',
+                     venue_city: parts.slice(1).join(', ') || '',
+                     organizer_name: settings.organizerName,
+                     sponsor_name: settings.sponsorName,
+                   } as any);
                  }}
-                 onOrganizerNameChange={(n) => updateDetails({ organizer_name: n })}
-                 onSponsorNameChange={(n) => updateDetails({ sponsor_name: n })}
                 />
             </TabsContent>
 

@@ -53,6 +53,7 @@ function loadTournament(): Tournament {
     certificateTextColor: '#1e1e1e',
     certificateLineSizes: [],
     certificateExtraSizes: {},
+    certificateHiddenFields: [],
   };
 }
 
@@ -222,6 +223,7 @@ export function useTournament() {
       certificateTextColor: '#1e1e1e',
       certificateLineSizes: [],
       certificateExtraSizes: {},
+      certificateHiddenFields: [],
     });
   }, []);
 
