@@ -453,6 +453,28 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
 
     const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
 
+    const resolvePlaceholders = (template: string, vars: Record<string, string>): string => {
+      return template.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? `{${key}}`);
+    };
+
+    const hexToRgb = (hex: string) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return [r, g, b] as const;
+    };
+    const [tr, tg, tb] = hexToRgb(certificateTextColor);
+    // Muted version of textColor (70% opacity simulated)
+    const mutedRgb: [number, number, number] = [
+      Math.round(tr + (255 - tr) * 0.3),
+      Math.round(tg + (255 - tg) * 0.3),
+      Math.round(tb + (255 - tb) * 0.3),
+    ];
+
+    const certDate = tournamentDate
+      ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
+      : new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+
     placements.forEach((placement, idx) => {
       if (idx > 0) doc.addPage();
       const w = doc.internal.pageSize.getWidth();
@@ -463,7 +485,33 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         doc.addImage(certBgData, 'PNG', 0, 0, w, h);
       }
 
-      let yOffset = 40;
+      // Resolve certificate text with placeholders
+      const resolvedText = resolvePlaceholders(certificateText, {
+        turniername: tournamentName,
+        spieler: placement.player.name,
+        verein: placement.player.club || '–',
+        platz: placement.label,
+      });
+      const textLines = resolvedText.split('\n').filter(l => l.trim());
+
+      // Calculate vertical center for content
+      // Content area: from top margin to signature area
+      const sigY = h - 40;
+      const topMargin = 40;
+      const contentAreaH = sigY - topMargin - 20;
+
+      // Calculate total content height
+      let totalContentH = 0;
+      if (logoData) totalContentH += logoHeight + 12;
+      if (!hiddenFields.includes('motto') && motto) totalContentH += (certificateExtraSizes.motto ?? 12) * 0.7 + 8;
+      textLines.forEach((_, i) => {
+        const lineSize = certificateLineSizes[i] ?? certificateFontSize;
+        totalContentH += lineSize * 0.6 + 4;
+      });
+      if (!hiddenFields.includes('date')) totalContentH += (certificateExtraSizes.organizer ?? 12) * 0.6 + 10;
+      if (!hiddenFields.includes('venue') && venueString) totalContentH += (certificateExtraSizes.venue ?? 12) * 0.6 + 4;
+
+      let yOffset = topMargin + Math.max(0, (contentAreaH - totalContentH) / 2);
 
       // Logo
       if (logoData) {
@@ -471,113 +519,91 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         yOffset += logoHeight + 12;
       }
 
-      // Parse text color
-      const hexToRgb = (hex: string) => {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return [r, g, b] as const;
-      };
-      const [tr, tg, tb] = hexToRgb(certificateTextColor);
-
-      // Motto as subtitle on certificate
-      if (motto) {
-        doc.setFontSize(Math.round(certificateFontSize * 0.7));
+      // Motto
+      if (!hiddenFields.includes('motto') && motto) {
+        const mottoSize = certificateExtraSizes.motto ?? 12;
+        doc.setFontSize(mottoSize);
         doc.setFont(certificateFontFamily, 'italic');
         doc.setTextColor(tr, tg, tb);
         doc.text(`"${motto}"`, w / 2, yOffset, { align: 'center' });
-        yOffset += 12;
+        yOffset += mottoSize * 0.7 + 8;
       }
 
-      // Main text: Beim "Turniername" hat "Spieler" den "Platz" belegt.
-      doc.setFontSize(certificateFontSize);
+      // Main certificate text lines with individual sizes
       doc.setFont(certificateFontFamily, 'normal');
-      doc.setTextColor(tr, tg, tb);
-      const mainText = `Beim "${tournamentName}" hat`;
-      doc.text(mainText, w / 2, yOffset, { align: 'center' });
-      yOffset += 16;
+      textLines.forEach((line, i) => {
+        const lineSize = certificateLineSizes[i] ?? certificateFontSize;
+        doc.setFontSize(lineSize);
+        doc.setTextColor(tr, tg, tb);
+        doc.text(line, w / 2, yOffset, { align: 'center' });
+        yOffset += lineSize * 0.6 + 4;
+      });
 
-      // Player name
-      doc.setFontSize(Math.round(certificateFontSize * 1.4));
-      doc.setFont(certificateFontFamily, 'bold');
-      doc.text(placement.player.name, w / 2, yOffset, { align: 'center' });
-      yOffset += 16;
-
-      // Club
-      if (placement.player.club) {
-        doc.setFontSize(Math.round(certificateFontSize * 0.8));
+      // Date
+      if (!hiddenFields.includes('date')) {
+        const dateSize = certificateExtraSizes.organizer ?? 12;
+        doc.setFontSize(dateSize);
         doc.setFont(certificateFontFamily, 'normal');
         doc.setTextColor(tr, tg, tb);
-        doc.text(`(${placement.player.club})`, w / 2, yOffset, { align: 'center' });
-        yOffset += 14;
+        yOffset += 8;
+        doc.text(certDate, w / 2, yOffset, { align: 'center' });
+        yOffset += dateSize * 0.5 + 4;
       }
 
-      // Placement line
-      doc.setFontSize(certificateFontSize);
-      doc.setFont(certificateFontFamily, 'normal');
-      doc.setTextColor(tr, tg, tb);
-      doc.text(`den ${placement.label} belegt.`, w / 2, yOffset, { align: 'center' });
-
-      // Date + Venue
-      doc.setFontSize(13);
-      doc.setTextColor(tr, tg, tb);
-      const certDate = tournamentDate
-        ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
-        : new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
-      doc.text(certDate, w / 2, yOffset + 24, { align: 'center' });
-      if (venueString) {
-        doc.setFontSize(11);
+      // Venue
+      if (!hiddenFields.includes('venue') && venueString) {
+        const venueSize = certificateExtraSizes.venue ?? 12;
+        doc.setFontSize(venueSize);
         doc.setTextColor(tr, tg, tb);
-        doc.text(venueString, w / 2, yOffset + 34, { align: 'center' });
+        doc.text(venueString, w / 2, yOffset, { align: 'center' });
       }
 
-      // Signature line
-      const sigY = h - 40;
-      doc.setDrawColor(150, 150, 150);
+      // Footer / Signature area
+      const hasSponsorSection = (!hiddenFields.includes('sponsor')) &&
+        ((sponsorConsent && sigData && sponsorName) || (sponsorName && sponsorLogoData));
+
+      doc.setDrawColor(...mutedRgb);
       doc.setLineWidth(0.5);
 
-      // Sponsor signature (left) if consent given
-      if (sponsorConsent && sigData && sponsorName) {
-        doc.addImage(sigData, 'PNG', w / 4 - sigWidth / 2, sigY - sigHeight - 2, sigWidth, sigHeight);
+      // Sponsor section (left)
+      if (hasSponsorSection) {
+        if (sponsorConsent && sigData && sponsorName) {
+          doc.addImage(sigData, 'PNG', w / 4 - sigWidth / 2, sigY - sigHeight - 2, sigWidth, sigHeight);
+        }
         doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
-        // Sponsor logo + name
-        doc.setFontSize(10);
-        doc.setTextColor(150, 150, 150);
-        if (sponsorLogoData) {
+        const sponsorSize = certificateExtraSizes.sponsor ?? 8;
+        doc.setFontSize(sponsorSize);
+        doc.setTextColor(tr, tg, tb);
+        if (sponsorLogoData && sponsorName) {
           const totalW = sponsorLogoW + 2 + doc.getTextWidth(sponsorName);
           const startX = w / 4 - totalW / 2;
           doc.addImage(sponsorLogoData, 'PNG', startX, sigY + 2, sponsorLogoW, sponsorLogoH);
           doc.text(sponsorName, startX + sponsorLogoW + 2, sigY + 7);
-        } else {
+        } else if (sponsorName) {
           doc.text(sponsorName, w / 4, sigY + 7, { align: 'center' });
         }
-        doc.setFontSize(8);
+        doc.setFontSize(Math.max(6, sponsorSize * 0.8));
+        doc.setTextColor(...mutedRgb);
         doc.text('Sponsor', w / 4, sigY + (sponsorLogoData ? sponsorLogoH + 5 : 13), { align: 'center' });
-      } else if (sponsorName && sponsorLogoData) {
-        // Show sponsor logo + name even without signature consent
-        doc.setFontSize(10);
-        doc.setTextColor(150, 150, 150);
-        doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
-        const totalW = sponsorLogoW + 2 + doc.getTextWidth(sponsorName);
-        const startX = w / 4 - totalW / 2;
-        doc.addImage(sponsorLogoData, 'PNG', startX, sigY + 2, sponsorLogoW, sponsorLogoH);
-        doc.text(sponsorName, startX + sponsorLogoW + 2, sigY + 7);
-        doc.setFontSize(8);
-        doc.text('Sponsor', w / 4, sigY + sponsorLogoH + 5, { align: 'center' });
       }
 
-      // Organizer / Turnierleitung signature (right or center)
-      const hasSponsorSection = (sponsorConsent && sigData && sponsorName) || (sponsorName && sponsorLogoData);
-      const orgX = hasSponsorSection ? (3 * w / 4) : (w / 2);
-      doc.line(orgX - 50, sigY, orgX + 50, sigY);
-      doc.setFontSize(10);
-      doc.setTextColor(150, 150, 150);
-      if (organizerName) {
-        doc.text(organizerName, orgX, sigY + 7, { align: 'center' });
-        doc.setFontSize(8);
-        doc.text('Turnierleitung', orgX, sigY + 13, { align: 'center' });
-      } else {
-        doc.text('Turnierleitung', orgX, sigY + 7, { align: 'center' });
+      // Organizer / Turnierleitung (right or center)
+      if (!hiddenFields.includes('organizer')) {
+        const orgX = hasSponsorSection ? (3 * w / 4) : (w / 2);
+        doc.line(orgX - 50, sigY, orgX + 50, sigY);
+        const orgSize = certificateExtraSizes.organizer ?? 8;
+        doc.setTextColor(tr, tg, tb);
+        if (organizerName) {
+          doc.setFontSize(orgSize);
+          doc.text(organizerName, orgX, sigY + 7, { align: 'center' });
+          doc.setFontSize(Math.max(6, orgSize * 0.8));
+          doc.setTextColor(...mutedRgb);
+          doc.text('Turnierleitung', orgX, sigY + 13, { align: 'center' });
+        } else {
+          doc.setFontSize(orgSize);
+          doc.setTextColor(...mutedRgb);
+          doc.text('Turnierleitung', orgX, sigY + 7, { align: 'center' });
+        }
       }
     });
 
