@@ -58,7 +58,7 @@ interface Props {
 export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
-  certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize,
+  certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize, certificateTextColor,
   organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
