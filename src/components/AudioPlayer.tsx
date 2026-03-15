@@ -76,13 +76,21 @@ export function AudioPlayer() {
   const nextTrack = () => setTrackIndex((i) => (i + 1) % playlist.length);
   const prevTrack = () => setTrackIndex((i) => (i - 1 + playlist.length) % playlist.length);
 
+  const gongDoneTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const playGongAndMute = useCallback((isAutomatic: boolean) => {
-    if (announcing) return;
+    // Allow re-entry for queued automatic announcements
     setAnnouncing(true);
-    savedVolumeRef.current = volume;
+    savedVolumeRef.current = muted ? savedVolumeRef.current : volume;
 
     if (audioRef.current) {
       audioRef.current.volume = 0;
+    }
+
+    // Clear any pending gong-done timer
+    if (gongDoneTimerRef.current) {
+      clearTimeout(gongDoneTimerRef.current);
+      gongDoneTimerRef.current = null;
     }
 
     const gong = gongRef.current;
@@ -91,16 +99,32 @@ export function AudioPlayer() {
       gong.currentTime = 0;
       setGongPlaying(true);
       gong.play().catch(() => {});
+
+      if (isAutomatic) {
+        // Fire gong-done at 50% of gong duration to reduce delay
+        const onCanPlay = () => {
+          gong.removeEventListener('canplaythrough', onCanPlay);
+          const halfDuration = (gong.duration && isFinite(gong.duration))
+            ? (gong.duration * 500) // 50% in ms
+            : 800; // fallback 800ms
+          gongDoneTimerRef.current = setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('announcement-gong-done'));
+          }, halfDuration);
+        };
+        if (gong.readyState >= 4) {
+          onCanPlay();
+        } else {
+          gong.addEventListener('canplaythrough', onCanPlay, { once: true });
+        }
+      }
+
       gong.onended = () => {
         setGongPlaying(false);
-        if (isAutomatic) {
-          window.dispatchEvent(new CustomEvent('announcement-gong-done'));
-        }
       };
     } else if (isAutomatic) {
       window.dispatchEvent(new CustomEvent('announcement-gong-done'));
     }
-  }, [announcing, volume, gongSrc]);
+  }, [volume, muted, gongSrc]);
 
   const fadeBackIn = useCallback(() => {
     setAnnouncing(false);
