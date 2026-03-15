@@ -254,6 +254,7 @@ export function TournamentSettingsDialog({
           certificate_bg_url: localCertBgUrl,
           certificate_font_family: localFontFamily,
           certificate_font_size: localFontSize,
+          certificate_text_color: localTextColor,
         });
       }
 
