@@ -19,7 +19,7 @@ interface Props {
   onSetActive: (matchId: string, table?: number) => void;
   tableCount: number;
   onTableCountChange: (count: number) => void;
-  onAutoAssign: () => void;
+  onAutoAssign: () => Promise<Array<{ id: string; table: number }>>;
   bestOf: number;
   tournamentName: string;
   rounds: number;
