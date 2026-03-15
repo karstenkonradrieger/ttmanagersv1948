@@ -543,7 +543,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
 
       // Main certificate text lines with individual sizes
-      doc.setFont(certificateFontFamily, 'normal');
+      const fontStyle = certificateExtraSizes.fontBold ? 'bold' : 'normal';
+      doc.setFont(certificateFontFamily, fontStyle);
       textLines.forEach((line, i) => {
         const lineSize = certificateLineSizes[i] ?? certificateFontSize;
         doc.setFontSize(lineSize);
