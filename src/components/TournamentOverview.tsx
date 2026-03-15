@@ -559,7 +559,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
 
       // Footer / Signature area
-      const hasSponsorSection = (!hiddenFields.includes('sponsor')) &&
+      const hasSponsorSection = (!certificateHiddenFields.includes('sponsor')) &&
         ((sponsorConsent && sigData && sponsorName) || (sponsorName && sponsorLogoData));
 
       doc.setDrawColor(...mutedRgb);
