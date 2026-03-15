@@ -233,7 +233,8 @@ export function TournamentSettingsDialog({
         localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
         localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
         localCertBgUrl !== certificateBgUrl ||
-        localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize;
+        localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
+        localTextColor !== certificateTextColor;
 
       if (detailsChanged) {
         await onUpdateDetails({
