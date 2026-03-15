@@ -193,4 +193,5 @@ export interface Tournament {
   certificateBgUrl: string | null;
   certificateFontFamily: string;
   certificateFontSize: number;
+  certificateTextColor: string;
 }

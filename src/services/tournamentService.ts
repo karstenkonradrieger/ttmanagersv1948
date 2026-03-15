@@ -160,6 +160,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     certificateBgUrl: (tournament as any).certificate_bg_url || null,
     certificateFontFamily: (tournament as any).certificate_font_family || 'Helvetica',
     certificateFontSize: (tournament as any).certificate_font_size ?? 20,
+    certificateTextColor: (tournament as any).certificate_text_color || '#1e1e1e',
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,

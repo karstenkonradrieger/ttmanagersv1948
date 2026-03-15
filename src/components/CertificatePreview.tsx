@@ -105,7 +105,7 @@ export function CertificatePreview({
             ))}
           </div>
 
-          <p className="text-xs mt-4" style={{ color: '#1e1e1e' }}>{certDate}</p>
+          <p className="text-xs mt-4" style={{ color: textColor }}>{certDate}</p>
           {venueString && (
             <p className="text-xs" style={{ color: '#646464' }}>{venueString}</p>
           )}
