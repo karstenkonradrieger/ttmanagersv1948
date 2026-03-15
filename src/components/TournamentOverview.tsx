@@ -32,6 +32,7 @@ interface Props {
   certificateText?: string;
   certificateFontFamily?: string;
   certificateFontSize?: number;
+  certificateTextColor?: string;
   onCertificateTextChange?: (text: string) => void;
 }
 
