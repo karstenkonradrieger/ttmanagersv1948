@@ -362,7 +362,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
             .filter(m => m.status === 'pending')
             .map(m => {
               const handicapInfo = isHandicap ? computeHandicap(m, getPlayer) : null;
-              return <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={handleSetActive} freeTables={freeTables} handicapInfo={handicapInfo} />;
+              return <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={handleSetActive} freeTables={freeTables} handicapInfo={handicapInfo} allMatches={matches} breakMinutes={breakMinutes} />;
             })}
         </Section>
       )}
