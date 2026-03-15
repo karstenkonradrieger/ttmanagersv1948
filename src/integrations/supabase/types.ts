@@ -564,6 +564,7 @@ export type Database = {
           best_of: number
           break_minutes: number
           certificate_bg_url: string | null
+          certificate_extra_sizes: Json
           certificate_font_family: string
           certificate_font_size: number
           certificate_line_sizes: Json
@@ -604,6 +605,7 @@ export type Database = {
           best_of?: number
           break_minutes?: number
           certificate_bg_url?: string | null
+          certificate_extra_sizes?: Json
           certificate_font_family?: string
           certificate_font_size?: number
           certificate_line_sizes?: Json
@@ -644,6 +646,7 @@ export type Database = {
           best_of?: number
           break_minutes?: number
           certificate_bg_url?: string | null
+          certificate_extra_sizes?: Json
           certificate_font_family?: string
           certificate_font_size?: number
           certificate_line_sizes?: Json

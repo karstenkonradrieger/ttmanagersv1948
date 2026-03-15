@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN certificate_extra_sizes jsonb NOT NULL DEFAULT '{}'::jsonb;

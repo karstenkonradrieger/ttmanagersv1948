@@ -31,6 +31,7 @@ interface Props {
   fontSize?: number;
   textColor?: string;
   lineSizes?: number[];
+  extraSizes?: Record<string, number>;
 }
 
 function resolvePlaceholders(template: string, vars: Record<string, string>): string {
@@ -56,6 +57,7 @@ export function CertificatePreview({
   fontSize = 20,
   textColor = '#1e1e1e',
   lineSizes = [],
+  extraSizes = {},
 }: Props) {
   const certDate = tournamentDate
     ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -101,7 +103,7 @@ export function CertificatePreview({
           )}
 
           {motto && (
-            <p className="text-xs italic" style={{ color: mutedColor }}>"{motto}"</p>
+            <p className="italic" style={{ color: mutedColor, fontSize: `${Math.max(6, (extraSizes.motto ?? 12) * 0.55)}px` }}>"{motto}"</p>
           )}
 
           <div className="mt-3 space-y-1">
@@ -115,9 +117,9 @@ export function CertificatePreview({
             })}
           </div>
 
-          <p className="text-xs mt-4" style={{ color: textColor }}>{certDate}</p>
+          <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.date ?? 12) * 0.55)}px` }} className="mt-4">{certDate}</p>
           {venueString && (
-            <p className="text-xs" style={{ color: mutedColor }}>{venueString}</p>
+            <p style={{ color: mutedColor, fontSize: `${Math.max(6, (extraSizes.venue ?? 12) * 0.55)}px` }}>{venueString}</p>
           )}
         </div>
 
@@ -143,7 +145,7 @@ export function CertificatePreview({
                   />
                 )}
                 {sponsorName && (
-                  <span className="text-[8px]" style={{ color: mutedColor }}>{sponsorName}</span>
+                  <span style={{ color: mutedColor, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>{sponsorName}</span>
                 )}
               </div>
               <span className="text-[7px]" style={{ color: mutedColor }}>Sponsor</span>
@@ -153,7 +155,7 @@ export function CertificatePreview({
           <div className="flex flex-col items-center gap-1">
             <div className="w-24 border-t" style={{ borderColor: subtleColor }} />
             {organizerName && (
-              <span className="text-[8px]" style={{ color: mutedColor }}>{organizerName}</span>
+              <span style={{ color: mutedColor, fontSize: `${Math.max(5, (extraSizes.organizer ?? 8) * 0.55)}px` }}>{organizerName}</span>
             )}
             <span className="text-[7px]" style={{ color: mutedColor }}>Turnierleitung</span>
           </div>
