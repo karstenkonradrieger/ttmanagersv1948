@@ -567,6 +567,7 @@ export type Database = {
           certificate_font_family: string
           certificate_font_size: number
           certificate_text: string
+          certificate_text_color: string
           created_at: string
           created_by: string | null
           directions_pdf_url: string | null
@@ -605,6 +606,7 @@ export type Database = {
           certificate_font_family?: string
           certificate_font_size?: number
           certificate_text?: string
+          certificate_text_color?: string
           created_at?: string
           created_by?: string | null
           directions_pdf_url?: string | null
@@ -643,6 +645,7 @@ export type Database = {
           certificate_font_family?: string
           certificate_font_size?: number
           certificate_text?: string
+          certificate_text_color?: string
           created_at?: string
           created_by?: string | null
           directions_pdf_url?: string | null

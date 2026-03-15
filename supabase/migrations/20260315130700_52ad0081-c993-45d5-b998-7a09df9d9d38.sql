@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN IF NOT EXISTS certificate_text_color text NOT NULL DEFAULT '#1e1e1e';
