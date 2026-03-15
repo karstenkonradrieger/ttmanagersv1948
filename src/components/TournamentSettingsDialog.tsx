@@ -26,6 +26,7 @@ interface Props {
   certificateBgUrl: string | null;
   certificateFontFamily: string;
   certificateFontSize: number;
+  certificateTextColor: string;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
