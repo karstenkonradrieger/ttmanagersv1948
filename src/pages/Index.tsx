@@ -705,8 +705,17 @@ const Index = () => {
                  certificateFontSize={tournament.certificateFontSize}
                  certificateTextColor={tournament.certificateTextColor}
                  certificateLineSizes={tournament.certificateLineSizes}
+                 certificateExtraSizes={tournament.certificateExtraSizes}
                  onCertificateTextChange={(text) => updateDetails({ certificate_text: text })}
                  onCertificateLineSizesChange={(sizes) => updateDetails({ certificate_line_sizes: sizes } as any)}
+                 onCertificateExtraSizesChange={(sizes) => updateDetails({ certificate_extra_sizes: sizes } as any)}
+                 onMottoChange={(m) => updateDetails({ motto: m })}
+                 onVenueStringChange={(v) => {
+                   const parts = v.split(',').map(s => s.trim());
+                   updateDetails({ venue_street: parts[0] || '', venue_city: parts.slice(1).join(', ') || '' } as any);
+                 }}
+                 onOrganizerNameChange={(n) => updateDetails({ organizer_name: n })}
+                 onSponsorNameChange={(n) => updateDetails({ sponsor_name: n })}
                 />
             </TabsContent>
 
