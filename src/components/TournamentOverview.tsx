@@ -503,7 +503,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       // Calculate total content height
       let totalContentH = 0;
       if (logoData) totalContentH += logoHeight + 12;
-      if (!hiddenFields.includes('motto') && motto) totalContentH += (certificateExtraSizes.motto ?? 12) * 0.7 + 8;
+      if (!certificateHiddenFields.includes('motto') && motto) totalContentH += (certificateExtraSizes.motto ?? 12) * 0.7 + 8;
       textLines.forEach((_, i) => {
         const lineSize = certificateLineSizes[i] ?? certificateFontSize;
         totalContentH += lineSize * 0.6 + 4;
