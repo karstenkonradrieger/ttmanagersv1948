@@ -139,6 +139,19 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
   const [localExtraSizes, setLocalExtraSizes] = useState<Record<string, number>>(certificateExtraSizes);
   const [localHiddenFields, setLocalHiddenFields] = useState<string[]>(certificateHiddenFields);
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
+
+  // Sync local state when props change (e.g. after DB load)
+  useEffect(() => {
+    setLocalCertText(certificateText);
+    setLocalLineSizes(certificateLineSizes);
+    setLocalMotto(motto || '');
+    setLocalVenue(venueString || '');
+    setLocalOrganizer(organizerName || '');
+    setLocalSponsor(sponsorName || '');
+    setLocalExtraSizes(certificateExtraSizes);
+    setLocalHiddenFields(certificateHiddenFields);
+    setHasPendingChanges(false);
+  }, [certificateText, certificateLineSizes, motto, venueString, organizerName, sponsorName, certificateExtraSizes, certificateHiddenFields]);
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
   if (matches.length === 0) {
