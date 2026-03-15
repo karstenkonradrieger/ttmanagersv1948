@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye } from 'lucide-react';
+import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MatchPhotos } from '@/components/MatchPhotos';
@@ -905,26 +905,59 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     <code className="bg-muted px-1 rounded">{'{platz}'}</code>
                   </p>
                 </div>
-                <CertificatePreview
-                  tournamentName={tournamentName}
-                  logoUrl={logoUrl}
-                  motto={motto}
-                  tournamentDate={tournamentDate}
-                  venueString={venueString}
-                  organizerName={organizerName}
-                  sponsorName={sponsorName}
-                  sponsorSignatureUrl={sponsorSignatureUrl}
-                  sponsorLogoUrl={sponsorLogoUrl}
-                  sponsorConsent={sponsorConsent}
-                  certificateBgUrl={certificateBgUrl}
-                  certificateText={localCertText}
-                  player={current.player}
-                  placementLabel={current.label}
-                  fontFamily={certificateFontFamily}
-                  fontSize={certificateFontSize}
-                  textColor={certificateTextColor}
-                />
+                <div id="cert-preview-print">
+                  <CertificatePreview
+                    tournamentName={tournamentName}
+                    logoUrl={logoUrl}
+                    motto={motto}
+                    tournamentDate={tournamentDate}
+                    venueString={venueString}
+                    organizerName={organizerName}
+                    sponsorName={sponsorName}
+                    sponsorSignatureUrl={sponsorSignatureUrl}
+                    sponsorLogoUrl={sponsorLogoUrl}
+                    sponsorConsent={sponsorConsent}
+                    certificateBgUrl={certificateBgUrl}
+                    certificateText={localCertText}
+                    player={current.player}
+                    placementLabel={current.label}
+                    fontFamily={certificateFontFamily}
+                    fontSize={certificateFontSize}
+                    textColor={certificateTextColor}
+                  />
+                </div>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full mt-2"
+                onClick={() => {
+                  const printContent = document.getElementById('cert-preview-print');
+                  if (!printContent) return;
+                  const win = window.open('', '_blank');
+                  if (!win) return;
+                  win.document.write(`<!DOCTYPE html><html><head><title>Urkunde drucken</title><style>
+                    @page { size: A4 portrait; margin: 0; }
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { width: 210mm; height: 297mm; }
+                    .cert-root { width: 210mm; height: 297mm; position: relative; overflow: hidden; }
+                    .cert-root img.cert-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+                    .cert-root .cert-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%; padding: 20mm 15mm; text-align: center; }
+                    .cert-root .cert-content > div { display: flex; flex-direction: column; align-items: center; gap: 4mm; flex: 1; justify-content: center; }
+                    .cert-footer { width: 100%; display: flex; justify-content: center; gap: 20mm; align-items: flex-end; margin-top: 10mm; }
+                    .cert-footer .sig-block { display: flex; flex-direction: column; align-items: center; gap: 2mm; }
+                    .cert-footer .sig-line { width: 50mm; border-top: 0.5px solid #999; }
+                    .cert-footer .sig-line-sm { width: 40mm; border-top: 0.5px solid #999; }
+                  </style></head><body>`);
+                  win.document.write(printContent.innerHTML);
+                  win.document.write('</body></html>');
+                  win.document.close();
+                  win.onload = () => { win.print(); win.close(); };
+                }}
+              >
+                <Printer className="h-4 w-4 mr-2" />
+                Urkunde drucken
+              </Button>
             </DialogContent>
           </Dialog>
         );
