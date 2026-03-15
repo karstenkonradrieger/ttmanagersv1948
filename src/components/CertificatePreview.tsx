@@ -58,6 +58,7 @@ export function CertificatePreview({
   fontFamily = 'Helvetica',
   fontSize = 20,
   textColor = '#1e1e1e',
+  fontBold = false,
   lineSizes = [],
   extraSizes = {},
   hiddenFields = [],
