@@ -916,7 +916,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     value={localCertText}
                     onChange={e => {
                       setLocalCertText(e.target.value);
-                      onCertificateTextChange?.(e.target.value);
+                      setHasPendingChanges(true);
                     }}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -948,7 +948,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                                   while (newSizes.length <= i) newSizes.push(certificateFontSize);
                                   newSizes[i] = Number(e.target.value);
                                   setLocalLineSizes(newSizes);
-                                  onCertificateLineSizesChange?.(newSizes);
+                                  setHasPendingChanges(true);
                                 }}
                               >
                                 {[10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36].map(s => (
@@ -962,25 +962,50 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     );
                   })()}
 
-                  {/* Extra fields editor */}
+                  {/* Extra fields editor with visibility toggles */}
                   <div className="border-t border-border pt-3 space-y-2">
                     <label className="text-xs font-semibold text-muted-foreground">Weitere Urkundenfelder</label>
                     
+                    {/* Date visibility toggle */}
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={!localHiddenFields.includes('date')}
+                        onCheckedChange={(checked) => {
+                          const newHidden = checked
+                            ? localHiddenFields.filter(f => f !== 'date')
+                            : [...localHiddenFields, 'date'];
+                          setLocalHiddenFields(newHidden);
+                          setHasPendingChanges(true);
+                        }}
+                      />
+                      <span className="text-xs text-muted-foreground">Datum anzeigen</span>
+                    </div>
+
                     {[
-                      { key: 'motto', label: 'Motto', value: localMotto, setter: setLocalMotto, onChange: onMottoChange },
-                      { key: 'venue', label: 'Austragungsort', value: localVenue, setter: setLocalVenue, onChange: onVenueStringChange },
-                      { key: 'organizer', label: 'Veranstalter', value: localOrganizer, setter: setLocalOrganizer, onChange: onOrganizerNameChange },
-                      { key: 'sponsor', label: 'Sponsor', value: localSponsor, setter: setLocalSponsor, onChange: onSponsorNameChange },
+                      { key: 'motto', label: 'Motto', value: localMotto, setter: setLocalMotto },
+                      { key: 'venue', label: 'Austragungsort', value: localVenue, setter: setLocalVenue },
+                      { key: 'organizer', label: 'Veranstalter', value: localOrganizer, setter: setLocalOrganizer },
+                      { key: 'sponsor', label: 'Sponsor', value: localSponsor, setter: setLocalSponsor },
                     ].map(field => (
                       <div key={field.key} className="space-y-1">
                         <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={!localHiddenFields.includes(field.key)}
+                            onCheckedChange={(checked) => {
+                              const newHidden = checked
+                                ? localHiddenFields.filter(f => f !== field.key)
+                                : [...localHiddenFields, field.key];
+                              setLocalHiddenFields(newHidden);
+                              setHasPendingChanges(true);
+                            }}
+                          />
                           <input
                             className="flex-1 h-8 rounded-md border border-input bg-background px-2 text-sm"
                             value={field.value}
                             placeholder={field.label}
                             onChange={e => {
                               field.setter(e.target.value);
-                              field.onChange?.(e.target.value);
+                              setHasPendingChanges(true);
                             }}
                           />
                           <select
@@ -989,7 +1014,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                             onChange={e => {
                               const newSizes = { ...localExtraSizes, [field.key]: Number(e.target.value) };
                               setLocalExtraSizes(newSizes);
-                              onCertificateExtraSizesChange?.(newSizes);
+                              setHasPendingChanges(true);
                             }}
                           >
                             {[8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36].map(s => (
@@ -1023,40 +1048,64 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     textColor={certificateTextColor}
                     lineSizes={localLineSizes}
                     extraSizes={localExtraSizes}
+                    hiddenFields={localHiddenFields}
                   />
                 </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full mt-2"
-                onClick={() => {
-                  const printContent = document.getElementById('cert-preview-print');
-                  if (!printContent) return;
-                  const win = window.open('', '_blank');
-                  if (!win) return;
-                  win.document.write(`<!DOCTYPE html><html><head><title>Urkunde drucken</title><style>
-                    @page { size: A4 portrait; margin: 0; }
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body { width: 210mm; height: 297mm; }
-                    .cert-root { width: 210mm; height: 297mm; position: relative; overflow: hidden; }
-                    .cert-root img.cert-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-                    .cert-root .cert-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%; padding: 20mm 15mm; text-align: center; }
-                    .cert-root .cert-content > div { display: flex; flex-direction: column; align-items: center; gap: 4mm; flex: 1; justify-content: center; }
-                    .cert-footer { width: 100%; display: flex; justify-content: center; gap: 20mm; align-items: flex-end; margin-top: 10mm; }
-                    .cert-footer .sig-block { display: flex; flex-direction: column; align-items: center; gap: 2mm; }
-                    .cert-footer .sig-line { width: 50mm; border-top: 0.5px solid #999; }
-                    .cert-footer .sig-line-sm { width: 40mm; border-top: 0.5px solid #999; }
-                  </style></head><body>`);
-                  win.document.write(printContent.innerHTML);
-                  win.document.write('</body></html>');
-                  win.document.close();
-                  win.onload = () => { win.print(); win.close(); };
-                }}
-              >
-                <Printer className="h-4 w-4 mr-2" />
-                Urkunde drucken
-              </Button>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  disabled={!hasPendingChanges}
+                  onClick={() => {
+                    onSaveCertificateSettings?.({
+                      certificateText: localCertText,
+                      certificateLineSizes: localLineSizes,
+                      certificateExtraSizes: localExtraSizes,
+                      certificateHiddenFields: localHiddenFields,
+                      motto: localMotto,
+                      venueString: localVenue,
+                      organizerName: localOrganizer,
+                      sponsorName: localSponsor,
+                    });
+                    setHasPendingChanges(false);
+                  }}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Änderungen speichern
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => {
+                    const printContent = document.getElementById('cert-preview-print');
+                    if (!printContent) return;
+                    const win = window.open('', '_blank');
+                    if (!win) return;
+                    win.document.write(`<!DOCTYPE html><html><head><title>Urkunde drucken</title><style>
+                      @page { size: A4 portrait; margin: 0; }
+                      * { margin: 0; padding: 0; box-sizing: border-box; }
+                      body { width: 210mm; height: 297mm; }
+                      .cert-root { width: 210mm; height: 297mm; position: relative; overflow: hidden; }
+                      .cert-root img.cert-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+                      .cert-root .cert-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%; padding: 20mm 15mm; text-align: center; }
+                      .cert-root .cert-content > div { display: flex; flex-direction: column; align-items: center; gap: 4mm; flex: 1; justify-content: center; }
+                      .cert-footer { width: 100%; display: flex; justify-content: center; gap: 20mm; align-items: flex-end; margin-top: 10mm; }
+                      .cert-footer .sig-block { display: flex; flex-direction: column; align-items: center; gap: 2mm; }
+                      .cert-footer .sig-line { width: 50mm; border-top: 0.5px solid #999; }
+                      .cert-footer .sig-line-sm { width: 40mm; border-top: 0.5px solid #999; }
+                    </style></head><body>`);
+                    win.document.write(printContent.innerHTML);
+                    win.document.write('</body></html>');
+                    win.document.close();
+                    win.onload = () => { win.print(); win.close(); };
+                  }}
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  Urkunde drucken
+                </Button>
+              </div>
             </DialogContent>
           </Dialog>
         );
