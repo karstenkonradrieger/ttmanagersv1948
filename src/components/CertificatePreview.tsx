@@ -30,6 +30,7 @@ interface Props {
   fontFamily?: string;
   fontSize?: number;
   textColor?: string;
+  fontBold?: boolean;
   lineSizes?: number[];
   extraSizes?: Record<string, number>;
   hiddenFields?: string[];
