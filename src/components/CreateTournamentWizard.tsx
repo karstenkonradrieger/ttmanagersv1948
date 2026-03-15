@@ -27,6 +27,7 @@ interface WizardData {
   certificateFontFamily: string;
   certificateFontSize: number;
   certificateTextColor: string;
+  certificateFontBold: boolean;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
