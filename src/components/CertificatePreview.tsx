@@ -99,7 +99,7 @@ export function CertificatePreview({
           {/* Resolved certificate text */}
           <div className="mt-3 space-y-1">
             {textLines.map((line, i) => (
-              <p key={i} className="leading-relaxed" style={{ color: '#1e1e1e', fontSize: `${Math.max(8, fontSize * 0.55)}px` }}>
+              <p key={i} className="leading-relaxed" style={{ color: textColor, fontSize: `${Math.max(8, fontSize * 0.55)}px` }}>
                 {line}
               </p>
             ))}
