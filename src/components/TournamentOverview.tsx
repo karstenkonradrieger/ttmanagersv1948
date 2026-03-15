@@ -32,6 +32,7 @@ interface Props {
   certificateText?: string;
   certificateFontFamily?: string;
   certificateFontSize?: number;
+  certificateTextColor?: string;
   onCertificateTextChange?: (text: string) => void;
 }
 
@@ -112,7 +113,7 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
   return Math.max(wins.p1, wins.p2) >= 3;
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent, certificateBgUrl, certificateText = 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.', certificateFontFamily = 'Helvetica', certificateFontSize = 20, onCertificateTextChange }: Props) {
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent, certificateBgUrl, certificateText = 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.', certificateFontFamily = 'Helvetica', certificateFontSize = 20, certificateTextColor = '#1e1e1e', onCertificateTextChange }: Props) {
   const [showMatchPhotos, setShowMatchPhotos] = useState(false);
   const [showCertPreview, setShowCertPreview] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
@@ -449,11 +450,20 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         yOffset += logoHeight + 12;
       }
 
+      // Parse text color
+      const hexToRgb = (hex: string) => {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return [r, g, b] as const;
+      };
+      const [tr, tg, tb] = hexToRgb(certificateTextColor);
+
       // Motto as subtitle on certificate
       if (motto) {
         doc.setFontSize(Math.round(certificateFontSize * 0.7));
         doc.setFont(certificateFontFamily, 'italic');
-        doc.setTextColor(80, 80, 80);
+        doc.setTextColor(tr, tg, tb);
         doc.text(`"${motto}"`, w / 2, yOffset, { align: 'center' });
         yOffset += 12;
       }
@@ -461,7 +471,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       // Main text: Beim "Turniername" hat "Spieler" den "Platz" belegt.
       doc.setFontSize(certificateFontSize);
       doc.setFont(certificateFontFamily, 'normal');
-      doc.setTextColor(30, 30, 30);
+      doc.setTextColor(tr, tg, tb);
       const mainText = `Beim "${tournamentName}" hat`;
       doc.text(mainText, w / 2, yOffset, { align: 'center' });
       yOffset += 16;
@@ -476,7 +486,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       if (placement.player.club) {
         doc.setFontSize(Math.round(certificateFontSize * 0.8));
         doc.setFont(certificateFontFamily, 'normal');
-        doc.setTextColor(100, 100, 100);
+        doc.setTextColor(tr, tg, tb);
         doc.text(`(${placement.player.club})`, w / 2, yOffset, { align: 'center' });
         yOffset += 14;
       }
@@ -484,18 +494,19 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       // Placement line
       doc.setFontSize(certificateFontSize);
       doc.setFont(certificateFontFamily, 'normal');
-      doc.setTextColor(30, 30, 30);
+      doc.setTextColor(tr, tg, tb);
       doc.text(`den ${placement.label} belegt.`, w / 2, yOffset, { align: 'center' });
 
       // Date + Venue
       doc.setFontSize(13);
+      doc.setTextColor(tr, tg, tb);
       const certDate = tournamentDate
         ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
         : new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
       doc.text(certDate, w / 2, yOffset + 24, { align: 'center' });
       if (venueString) {
         doc.setFontSize(11);
-        doc.setTextColor(100, 100, 100);
+        doc.setTextColor(tr, tg, tb);
         doc.text(venueString, w / 2, yOffset + 34, { align: 'center' });
       }
 
@@ -911,6 +922,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                   placementLabel={current.label}
                   fontFamily={certificateFontFamily}
                   fontSize={certificateFontSize}
+                  textColor={certificateTextColor}
                 />
               </div>
             </DialogContent>

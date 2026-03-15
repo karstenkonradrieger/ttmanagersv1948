@@ -26,6 +26,7 @@ interface Props {
   certificateBgUrl: string | null;
   certificateFontFamily: string;
   certificateFontSize: number;
+  certificateTextColor: string;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
@@ -51,13 +52,14 @@ interface Props {
     certificate_bg_url?: string | null;
     certificate_font_family?: string;
     certificate_font_size?: number;
+    certificate_text_color?: string;
   }) => Promise<void>;
 }
 
 export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
-  certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize,
+  certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize, certificateTextColor,
   organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
@@ -81,6 +83,7 @@ export function TournamentSettingsDialog({
   const [localCertBgUrl, setLocalCertBgUrl] = useState(certificateBgUrl);
   const [localFontFamily, setLocalFontFamily] = useState(certificateFontFamily);
   const [localFontSize, setLocalFontSize] = useState(certificateFontSize);
+  const [localTextColor, setLocalTextColor] = useState(certificateTextColor);
   const [uploadingSig, setUploadingSig] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCertBg, setUploadingCertBg] = useState(false);
@@ -110,6 +113,7 @@ export function TournamentSettingsDialog({
       setLocalCertBgUrl(certificateBgUrl);
       setLocalFontFamily(certificateFontFamily);
       setLocalFontSize(certificateFontSize);
+      setLocalTextColor(certificateTextColor);
     }
     setOpen(isOpen);
   };
@@ -211,7 +215,8 @@ export function TournamentSettingsDialog({
     localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
     localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
     localCertBgUrl !== certificateBgUrl ||
-    localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize;
+    localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
+    localTextColor !== certificateTextColor;
 
   const handleSave = async () => {
     setSaving(true);
@@ -229,7 +234,8 @@ export function TournamentSettingsDialog({
         localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
         localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
         localCertBgUrl !== certificateBgUrl ||
-        localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize;
+        localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
+        localTextColor !== certificateTextColor;
 
       if (detailsChanged) {
         await onUpdateDetails({
@@ -249,6 +255,7 @@ export function TournamentSettingsDialog({
           certificate_bg_url: localCertBgUrl,
           certificate_font_family: localFontFamily,
           certificate_font_size: localFontSize,
+          certificate_text_color: localTextColor,
         });
       }
 
@@ -421,6 +428,24 @@ export function TournamentSettingsDialog({
                   <option key={s} value={s}>{s} pt</option>
                 ))}
               </select>
+            </div>
+          </div>
+          {/* Text Color */}
+          <div>
+            <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={localTextColor}
+                onChange={e => setLocalTextColor(e.target.value)}
+                className="w-10 h-10 rounded border border-input cursor-pointer"
+              />
+              <Input
+                value={localTextColor}
+                onChange={e => setLocalTextColor(e.target.value)}
+                className="w-28 font-mono text-sm"
+                maxLength={7}
+              />
             </div>
           </div>
           <div>

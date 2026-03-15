@@ -50,6 +50,7 @@ function loadTournament(): Tournament {
     certificateBgUrl: null,
     certificateFontFamily: 'Helvetica',
     certificateFontSize: 20,
+    certificateTextColor: '#1e1e1e',
   };
 }
 
@@ -216,6 +217,7 @@ export function useTournament() {
       certificateBgUrl: null,
       certificateFontFamily: 'Helvetica',
       certificateFontSize: 20,
+      certificateTextColor: '#1e1e1e',
     });
   }, []);
 

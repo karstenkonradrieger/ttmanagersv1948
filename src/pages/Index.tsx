@@ -262,6 +262,7 @@ const Index = () => {
               certificateBgUrl={tournament.certificateBgUrl}
               certificateFontFamily={tournament.certificateFontFamily}
               certificateFontSize={tournament.certificateFontSize}
+              certificateTextColor={tournament.certificateTextColor}
               started={tournament.started}
               onUpdateMode={updateTournamentMode}
               onUpdateType={updateTournamentType}
@@ -702,6 +703,7 @@ const Index = () => {
                  certificateText={tournament.certificateText}
                  certificateFontFamily={tournament.certificateFontFamily}
                  certificateFontSize={tournament.certificateFontSize}
+                 certificateTextColor={tournament.certificateTextColor}
                  onCertificateTextChange={(text) => updateDetails({ certificate_text: text })}
                 />
             </TabsContent>

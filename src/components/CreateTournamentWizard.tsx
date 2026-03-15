@@ -26,6 +26,7 @@ interface WizardData {
   certificateBgUrl: string | null;
   certificateFontFamily: string;
   certificateFontSize: number;
+  certificateTextColor: string;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
@@ -83,6 +84,7 @@ interface Props {
       certificate_bg_url?: string | null;
       certificate_font_family?: string;
       certificate_font_size?: number;
+      certificate_text_color?: string;
     },
   ) => Promise<string>;
 }
@@ -119,6 +121,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     certificateBgUrl: null,
     certificateFontFamily: 'Helvetica',
     certificateFontSize: 20,
+    certificateTextColor: '#1e1e1e',
     organizerName: '',
     sponsorName: '',
     sponsorSignatureUrl: null,
@@ -151,6 +154,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
         certificateBgUrl: null,
         certificateFontFamily: 'Helvetica',
         certificateFontSize: 20,
+        certificateTextColor: '#1e1e1e',
         organizerName: '',
         sponsorName: '',
         sponsorSignatureUrl: null,
@@ -368,6 +372,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           certificate_bg_url: data.certificateBgUrl,
           certificate_font_family: data.certificateFontFamily,
           certificate_font_size: data.certificateFontSize,
+          certificate_text_color: data.certificateTextColor,
         },
       );
       setOpen(false);
@@ -633,6 +638,24 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                     <option key={s} value={s}>{s} pt</option>
                   ))}
                 </select>
+              </div>
+            </div>
+            {/* Text Color */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={data.certificateTextColor}
+                  onChange={e => update({ certificateTextColor: e.target.value })}
+                  className="w-10 h-10 rounded border border-input cursor-pointer"
+                />
+                <input
+                  className="w-28 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
+                  value={data.certificateTextColor}
+                  onChange={e => update({ certificateTextColor: e.target.value })}
+                  maxLength={7}
+                />
               </div>
             </div>
 

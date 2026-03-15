@@ -23,6 +23,7 @@ interface Props {
   placementLabel: string;
   fontFamily?: string;
   fontSize?: number;
+  textColor?: string;
 }
 
 function resolvePlaceholders(template: string, vars: Record<string, string>): string {
@@ -46,6 +47,7 @@ export function CertificatePreview({
   placementLabel,
   fontFamily = 'Helvetica',
   fontSize = 20,
+  textColor = '#1e1e1e',
 }: Props) {
   const certDate = tournamentDate
     ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -97,13 +99,13 @@ export function CertificatePreview({
           {/* Resolved certificate text */}
           <div className="mt-3 space-y-1">
             {textLines.map((line, i) => (
-              <p key={i} className="leading-relaxed" style={{ color: '#1e1e1e', fontSize: `${Math.max(8, fontSize * 0.55)}px` }}>
+              <p key={i} className="leading-relaxed" style={{ color: textColor, fontSize: `${Math.max(8, fontSize * 0.55)}px` }}>
                 {line}
               </p>
             ))}
           </div>
 
-          <p className="text-xs mt-4" style={{ color: '#1e1e1e' }}>{certDate}</p>
+          <p className="text-xs mt-4" style={{ color: textColor }}>{certDate}</p>
           {venueString && (
             <p className="text-xs" style={{ color: '#646464' }}>{venueString}</p>
           )}
