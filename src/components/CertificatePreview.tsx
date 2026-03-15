@@ -23,6 +23,7 @@ interface Props {
   placementLabel: string;
   fontFamily?: string;
   fontSize?: number;
+  textColor?: string;
 }
 
 function resolvePlaceholders(template: string, vars: Record<string, string>): string {
