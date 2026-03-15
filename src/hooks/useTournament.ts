@@ -221,6 +221,7 @@ export function useTournament() {
       certificateFontSize: 20,
       certificateTextColor: '#1e1e1e',
       certificateLineSizes: [],
+      certificateExtraSizes: {},
     });
   }, []);
 
