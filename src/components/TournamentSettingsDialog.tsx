@@ -220,7 +220,7 @@ export function TournamentSettingsDialog({
     localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
     localCertBgUrl !== certificateBgUrl ||
     localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
-    localTextColor !== certificateTextColor;
+    localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold;
 
   const handleSave = async () => {
     setSaving(true);
@@ -239,7 +239,7 @@ export function TournamentSettingsDialog({
         localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
         localCertBgUrl !== certificateBgUrl ||
         localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
-        localTextColor !== certificateTextColor;
+        localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold;
 
       if (detailsChanged) {
         await onUpdateDetails({
@@ -260,7 +260,7 @@ export function TournamentSettingsDialog({
           certificate_font_family: localFontFamily,
           certificate_font_size: localFontSize,
           certificate_text_color: localTextColor,
-          certificate_extra_sizes: { fontBold: localFontBold ? 1 : 0 },
+          certificate_extra_sizes: { ...certificateExtraSizes, fontBold: localFontBold ? 1 : 0 },
         });
       }
 
