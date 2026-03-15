@@ -540,7 +540,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       });
 
       // Date
-      if (!hiddenFields.includes('date')) {
+      if (!certificateHiddenFields.includes('date')) {
         const dateSize = certificateExtraSizes.organizer ?? 12;
         doc.setFontSize(dateSize);
         doc.setFont(certificateFontFamily, 'normal');
