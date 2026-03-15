@@ -117,9 +117,9 @@ export function CertificatePreview({
             })}
           </div>
 
-          <p className="text-xs mt-4" style={{ color: textColor }}>{certDate}</p>
+          <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.date ?? 12) * 0.55)}px` }} className="mt-4">{certDate}</p>
           {venueString && (
-            <p className="text-xs" style={{ color: mutedColor }}>{venueString}</p>
+            <p style={{ color: mutedColor, fontSize: `${Math.max(6, (extraSizes.venue ?? 12) * 0.55)}px` }}>{venueString}</p>
           )}
         </div>
 
