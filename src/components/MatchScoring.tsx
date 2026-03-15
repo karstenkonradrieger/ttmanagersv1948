@@ -32,6 +32,7 @@ interface Props {
   players?: Player[];
   doublesPairs?: DoublesPair[];
   mode?: string;
+  breakMinutes?: number;
 }
 
 let announcementQueue: Promise<void> = Promise.resolve();
