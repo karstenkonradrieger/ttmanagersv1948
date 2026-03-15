@@ -145,7 +145,7 @@ export function CertificatePreview({
                   />
                 )}
                 {sponsorName && (
-                  <span className="text-[8px]" style={{ color: mutedColor }}>{sponsorName}</span>
+                  <span style={{ color: mutedColor, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>{sponsorName}</span>
                 )}
               </div>
               <span className="text-[7px]" style={{ color: mutedColor }}>Sponsor</span>
