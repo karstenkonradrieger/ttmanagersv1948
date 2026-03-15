@@ -117,6 +117,7 @@ export function TournamentSettingsDialog({
       setLocalFontFamily(certificateFontFamily);
       setLocalFontSize(certificateFontSize);
       setLocalTextColor(certificateTextColor);
+      setLocalFontBold(!!certificateExtraSizes.fontBold);
     }
     setOpen(isOpen);
   };
