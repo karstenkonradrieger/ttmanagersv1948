@@ -245,6 +245,7 @@ export async function createTournament(
       certificate_font_size?: number;
       certificate_text_color?: string;
       certificate_line_sizes?: number[];
+      certificate_extra_sizes?: Record<string, number>;
     },
 ): Promise<string> {
   const { data, error } = await supabase
