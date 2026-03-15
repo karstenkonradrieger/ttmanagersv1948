@@ -112,6 +112,7 @@ export function TournamentSettingsDialog({
       setLocalCertBgUrl(certificateBgUrl);
       setLocalFontFamily(certificateFontFamily);
       setLocalFontSize(certificateFontSize);
+      setLocalTextColor(certificateTextColor);
     }
     setOpen(isOpen);
   };
