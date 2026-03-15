@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { DoublesPair, Match, Player, SetScore, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
