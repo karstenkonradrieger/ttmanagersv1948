@@ -551,7 +551,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
 
       // Venue
-      if (!hiddenFields.includes('venue') && venueString) {
+      if (!certificateHiddenFields.includes('venue') && venueString) {
         const venueSize = certificateExtraSizes.venue ?? 12;
         doc.setFontSize(venueSize);
         doc.setTextColor(tr, tg, tb);
