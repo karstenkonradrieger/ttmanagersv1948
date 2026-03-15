@@ -86,7 +86,7 @@ export function TournamentSettingsDialog({
   const [localFontFamily, setLocalFontFamily] = useState(certificateFontFamily);
   const [localFontSize, setLocalFontSize] = useState(certificateFontSize);
   const [localTextColor, setLocalTextColor] = useState(certificateTextColor);
-  const [localFontBold, setLocalFontBold] = useState(false);
+  const [localFontBold, setLocalFontBold] = useState(!!certificateExtraSizes.fontBold);
   const [uploadingSig, setUploadingSig] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCertBg, setUploadingCertBg] = useState(false);
