@@ -1017,7 +1017,6 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     lineSizes={localLineSizes}
                     extraSizes={localExtraSizes}
                   />
-                  />
                 </div>
               </div>
               <Button
