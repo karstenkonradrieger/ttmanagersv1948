@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye } from 'lucide-react';
+import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MatchPhotos } from '@/components/MatchPhotos';
