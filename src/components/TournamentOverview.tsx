@@ -907,6 +907,43 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     <code className="bg-muted px-1 rounded">{'{verein}'}</code>{' '}
                     <code className="bg-muted px-1 rounded">{'{platz}'}</code>
                   </p>
+
+                  {/* Per-line font size editor */}
+                  {(() => {
+                    const lines = localCertText.split('\n').filter(l => l.trim());
+                    if (lines.length === 0) return null;
+                    return (
+                      <div className="space-y-1 mt-3">
+                        <label className="text-xs font-semibold text-muted-foreground">Schriftgröße je Zeile</label>
+                        {lines.map((line, i) => {
+                          const currentSize = localLineSizes[i] ?? certificateFontSize;
+                          return (
+                            <div key={i} className="flex items-center gap-2">
+                              <span className="text-xs truncate max-w-[120px] text-muted-foreground" title={line}>
+                                {line.length > 20 ? line.slice(0, 20) + '…' : line}
+                              </span>
+                              <select
+                                className="h-7 rounded border border-input bg-background px-1 text-xs flex-shrink-0"
+                                value={currentSize}
+                                onChange={e => {
+                                  const newSizes = [...localLineSizes];
+                                  // Ensure array is long enough
+                                  while (newSizes.length <= i) newSizes.push(certificateFontSize);
+                                  newSizes[i] = Number(e.target.value);
+                                  setLocalLineSizes(newSizes);
+                                  onCertificateLineSizesChange?.(newSizes);
+                                }}
+                              >
+                                {[10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36].map(s => (
+                                  <option key={s} value={s}>{s}pt</option>
+                                ))}
+                              </select>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                 </div>
                 <div id="cert-preview-print">
                   <CertificatePreview
@@ -927,6 +964,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     fontFamily={certificateFontFamily}
                     fontSize={certificateFontSize}
                     textColor={certificateTextColor}
+                    lineSizes={localLineSizes}
                   />
                 </div>
               </div>
