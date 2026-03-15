@@ -103,7 +103,7 @@ export function CertificatePreview({
           )}
 
           {motto && (
-            <p className="text-xs italic" style={{ color: mutedColor }}>"{motto}"</p>
+            <p className="italic" style={{ color: mutedColor, fontSize: `${Math.max(6, (extraSizes.motto ?? 12) * 0.55)}px` }}>"{motto}"</p>
           )}
 
           <div className="mt-3 space-y-1">
