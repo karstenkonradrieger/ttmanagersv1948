@@ -900,7 +900,7 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId]);
 
-  const autoAssignTables = useCallback(async () => {
+  const autoAssignTables = useCallback(async (): Promise<Array<{ id: string; table: number }>> => {
     const activeTables = new Set(
       tournament.matches.filter(m => m.status === 'active' && m.table).map(m => m.table)
     );
@@ -958,7 +958,7 @@ export function useTournamentDb(tournamentId: string | null) {
       if (pendingReadyMatches.length > 0 && freeTables.length > 0) {
         toast.info(`Spieler benötigen noch eine Pause (mind. ${tournament.breakMinutes} Min.) oder spielen gerade.`);
       }
-      return;
+      return [];
     }
 
     try {
@@ -979,9 +979,11 @@ export function useTournamentDb(tournamentId: string | null) {
           return m;
         }),
       }));
+      return updates;
     } catch (error) {
       console.error('Error auto-assigning tables:', error);
       toast.error('Fehler bei der Tischzuweisung');
+      return [];
     }
   }, [tournament.matches, tournament.tableCount]);
 

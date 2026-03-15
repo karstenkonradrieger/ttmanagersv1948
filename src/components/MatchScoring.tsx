@@ -19,7 +19,7 @@ interface Props {
   onSetActive: (matchId: string, table?: number) => void;
   tableCount: number;
   onTableCountChange: (count: number) => void;
-  onAutoAssign: () => void;
+  onAutoAssign: () => Promise<Array<{ id: string; table: number }>>;
   bestOf: number;
   tournamentName: string;
   rounds: number;
@@ -231,19 +231,20 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
   };
 
   // Wrap onAutoAssign to auto-print all newly assigned sheets
-  const handleAutoAssign = () => {
-    const pendingReady = matches.filter(m => m.status === 'pending' && m.player1Id && m.player2Id);
-    const assignCount = Math.min(pendingReady.length, freeTables.length);
-    const assignedMatches = pendingReady.slice(0, assignCount).map((m, i) => ({
-      ...m,
-      table: freeTables[i],
-      status: 'active' as const,
-    }));
+  const handleAutoAssign = async () => {
+    const assignedUpdates = await onAutoAssign();
+    if (!assignedUpdates || assignedUpdates.length === 0) return;
 
-    onAutoAssign();
+    // Build assigned matches from the actual results
+    const assignedMatches = assignedUpdates.map(u => {
+      const m = matches.find(match => match.id === u.id);
+      return m ? { ...m, table: u.table, status: 'active' as const } : null;
+    }).filter((m): m is Match & { table: number; status: 'active' } => m !== null);
+
     if (assignedMatches.length > 0) {
+      const assignedIds = new Set(assignedMatches.map(m => m.id));
       const remainingPending = matches.filter(
-        m => m.status === 'pending' && m.player1Id && m.player2Id && !assignedMatches.find(a => a.id === m.id)
+        m => m.status === 'pending' && m.player1Id && m.player2Id && !assignedIds.has(m.id)
       );
 
       assignedMatches.forEach((m, i) => {
