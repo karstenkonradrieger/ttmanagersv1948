@@ -638,6 +638,24 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 </select>
               </div>
             </div>
+            {/* Text Color */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={data.certificateTextColor}
+                  onChange={e => update({ certificateTextColor: e.target.value })}
+                  className="w-10 h-10 rounded border border-input cursor-pointer"
+                />
+                <input
+                  className="w-28 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
+                  value={data.certificateTextColor}
+                  onChange={e => update({ certificateTextColor: e.target.value })}
+                  maxLength={7}
+                />
+              </div>
+            </div>
 
             {/* Organizer */}
             <div>

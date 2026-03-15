@@ -429,6 +429,24 @@ export function TournamentSettingsDialog({
               </select>
             </div>
           </div>
+          {/* Text Color */}
+          <div>
+            <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={localTextColor}
+                onChange={e => setLocalTextColor(e.target.value)}
+                className="w-10 h-10 rounded border border-input cursor-pointer"
+              />
+              <Input
+                value={localTextColor}
+                onChange={e => setLocalTextColor(e.target.value)}
+                className="w-28 font-mono text-sm"
+                maxLength={7}
+              />
+            </div>
+          </div>
           <div>
             <Label className="text-sm font-semibold mb-1 block">Veranstalter</Label>
             <Input
