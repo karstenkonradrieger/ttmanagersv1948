@@ -703,6 +703,7 @@ const Index = () => {
                  certificateText={tournament.certificateText}
                  certificateFontFamily={tournament.certificateFontFamily}
                  certificateFontSize={tournament.certificateFontSize}
+                 certificateTextColor={tournament.certificateTextColor}
                  onCertificateTextChange={(text) => updateDetails({ certificate_text: text })}
                 />
             </TabsContent>
