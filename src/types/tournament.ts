@@ -194,4 +194,5 @@ export interface Tournament {
   certificateFontFamily: string;
   certificateFontSize: number;
   certificateTextColor: string;
+  certificateLineSizes: number[];
 }
