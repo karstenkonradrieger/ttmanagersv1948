@@ -128,7 +128,7 @@ export function CertificatePreview({
         </div>
 
         <div className="w-full flex items-end justify-center gap-8 mt-4">
-          {hasSponsorSection && (
+          {!hiddenFields.includes('sponsor') && hasSponsorSection && (
             <div className="flex flex-col items-center gap-1">
               {sponsorConsent && sponsorSignatureUrl && (
                 <img
@@ -149,20 +149,22 @@ export function CertificatePreview({
                   />
                 )}
                 {sponsorName && (
-                  <span style={{ color: mutedColor, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>{sponsorName}</span>
+                  <span style={{ color: textColor, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>{sponsorName}</span>
                 )}
               </div>
-              <span className="text-[7px]" style={{ color: mutedColor }}>Sponsor</span>
+              <span className="text-[7px]" style={{ color: textColor, opacity: 0.7 }}>Sponsor</span>
             </div>
           )}
 
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-24 border-t" style={{ borderColor: subtleColor }} />
-            {organizerName && (
-              <span style={{ color: mutedColor, fontSize: `${Math.max(5, (extraSizes.organizer ?? 8) * 0.55)}px` }}>{organizerName}</span>
-            )}
-            <span className="text-[7px]" style={{ color: mutedColor }}>Turnierleitung</span>
-          </div>
+          {!hiddenFields.includes('organizer') && (
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-24 border-t" style={{ borderColor: subtleColor }} />
+              {organizerName && (
+                <span style={{ color: textColor, fontSize: `${Math.max(5, (extraSizes.organizer ?? 8) * 0.55)}px` }}>{organizerName}</span>
+              )}
+              <span className="text-[7px]" style={{ color: textColor, opacity: 0.7 }}>Turnierleitung</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
