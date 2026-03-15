@@ -401,27 +401,70 @@ function Section({ title, children, action }: { title: string; children: React.R
   );
 }
 
-function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo }: {
+function getPlayerBreakRemaining(playerId: string | null, allMatches: Match[], breakMinutes: number): number {
+  if (!playerId || breakMinutes <= 0) return 0;
+  const pauseMs = breakMinutes * 60 * 1000;
+  const now = Date.now();
+  let maxRemaining = 0;
+  for (const m of allMatches) {
+    if (m.status === 'completed' && m.completedAt &&
+      (m.player1Id === playerId || m.player2Id === playerId)) {
+      const elapsed = now - new Date(m.completedAt).getTime();
+      const remaining = pauseMs - elapsed;
+      if (remaining > maxRemaining) maxRemaining = remaining;
+    }
+  }
+  return maxRemaining;
+}
+
+function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo, allMatches, breakMinutes }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   onSetActive: (id: string, table?: number) => void;
   freeTables: number[];
   handicapInfo?: { player1Handicap: number; player2Handicap: number } | null;
+  allMatches: Match[];
+  breakMinutes: number;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
   const [selectedTable, setSelectedTable] = useState<number | ''>(freeTables[0] || '');
+  const [, setTick] = useState(0);
+
+  const p1Break = getPlayerBreakRemaining(match.player1Id, allMatches, breakMinutes);
+  const p2Break = getPlayerBreakRemaining(match.player2Id, allMatches, breakMinutes);
+  const maxBreak = Math.max(p1Break, p2Break);
+
+  // Re-render every second while break is active
+  useEffect(() => {
+    if (maxBreak <= 0) return;
+    const interval = setInterval(() => setTick(t => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, [maxBreak > 0]);
+
+  const formatBreak = (ms: number) => {
+    if (ms <= 0) return '';
+    const mins = Math.floor(ms / 60000);
+    const secs = Math.floor((ms % 60000) / 1000);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
-    <div className="bg-card rounded-lg p-4 card-shadow">
+    <div className={`bg-card rounded-lg p-4 card-shadow ${maxBreak > 0 ? 'border border-destructive/40' : ''}`}>
       <div className="flex items-center justify-between mb-3">
         <div className="text-sm">
           <span className="font-semibold">{p1?.name}</span>
+          {p1Break > 0 && (
+            <span className="ml-1 text-xs bg-destructive/15 text-destructive px-1.5 py-0.5 rounded-full font-mono">⏸ {formatBreak(p1Break)}</span>
+          )}
           {handicapInfo && handicapInfo.player1Handicap > 0 && (
             <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded">+{handicapInfo.player1Handicap}</span>
           )}
           <span className="text-muted-foreground mx-2">vs</span>
           <span className="font-semibold">{p2?.name}</span>
+          {p2Break > 0 && (
+            <span className="ml-1 text-xs bg-destructive/15 text-destructive px-1.5 py-0.5 rounded-full font-mono">⏸ {formatBreak(p2Break)}</span>
+          )}
           {handicapInfo && handicapInfo.player2Handicap > 0 && (
             <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded">+{handicapInfo.player2Handicap}</span>
           )}
@@ -444,7 +487,7 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo 
           disabled={freeTables.length === 0}
         >
           <Play className="mr-2 h-4 w-4" />
-          {freeTables.length === 0 ? 'Kein Tisch frei' : 'Spiel starten'}
+          {freeTables.length === 0 ? 'Kein Tisch frei' : maxBreak > 0 ? `Pause (${formatBreak(maxBreak)})` : 'Spiel starten'}
         </Button>
       </div>
     </div>
