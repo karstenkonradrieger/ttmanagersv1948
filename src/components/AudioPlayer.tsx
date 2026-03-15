@@ -83,6 +83,12 @@ export function AudioPlayer() {
     setAnnouncing(true);
     savedVolumeRef.current = muted ? savedVolumeRef.current : volume;
 
+    // Cancel any running fade-back from a previous announcement
+    if (fadeIntervalRef.current) {
+      clearInterval(fadeIntervalRef.current);
+      fadeIntervalRef.current = null;
+    }
+
     if (audioRef.current) {
       audioRef.current.volume = 0;
     }
