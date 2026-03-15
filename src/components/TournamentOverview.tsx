@@ -33,7 +33,9 @@ interface Props {
   certificateFontFamily?: string;
   certificateFontSize?: number;
   certificateTextColor?: string;
+  certificateLineSizes?: number[];
   onCertificateTextChange?: (text: string) => void;
+  onCertificateLineSizesChange?: (sizes: number[]) => void;
 }
 
 function getRoundName(round: number, totalRounds: number, mode?: string): string {
