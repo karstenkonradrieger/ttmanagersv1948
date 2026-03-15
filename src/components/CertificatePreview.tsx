@@ -155,7 +155,7 @@ export function CertificatePreview({
           <div className="flex flex-col items-center gap-1">
             <div className="w-24 border-t" style={{ borderColor: subtleColor }} />
             {organizerName && (
-              <span className="text-[8px]" style={{ color: mutedColor }}>{organizerName}</span>
+              <span style={{ color: mutedColor, fontSize: `${Math.max(5, (extraSizes.organizer ?? 8) * 0.55)}px` }}>{organizerName}</span>
             )}
             <span className="text-[7px]" style={{ color: mutedColor }}>Turnierleitung</span>
           </div>
