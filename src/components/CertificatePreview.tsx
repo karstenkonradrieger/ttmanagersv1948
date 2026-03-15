@@ -31,6 +31,7 @@ interface Props {
   fontSize?: number;
   textColor?: string;
   lineSizes?: number[];
+  extraSizes?: Record<string, number>;
 }
 
 function resolvePlaceholders(template: string, vars: Record<string, string>): string {
