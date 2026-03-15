@@ -84,6 +84,7 @@ interface Props {
       certificate_bg_url?: string | null;
       certificate_font_family?: string;
       certificate_font_size?: number;
+      certificate_text_color?: string;
     },
   ) => Promise<string>;
 }
