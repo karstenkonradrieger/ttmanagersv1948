@@ -263,6 +263,7 @@ const Index = () => {
               certificateFontFamily={tournament.certificateFontFamily}
               certificateFontSize={tournament.certificateFontSize}
               certificateTextColor={tournament.certificateTextColor}
+              certificateExtraSizes={tournament.certificateExtraSizes}
               started={tournament.started}
               onUpdateMode={updateTournamentMode}
               onUpdateType={updateTournamentType}

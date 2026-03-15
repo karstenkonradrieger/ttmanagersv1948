@@ -27,6 +27,7 @@ interface Props {
   certificateFontFamily: string;
   certificateFontSize: number;
   certificateTextColor: string;
+  certificateExtraSizes?: Record<string, number>;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
