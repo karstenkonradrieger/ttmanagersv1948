@@ -588,7 +588,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
 
       // Organizer / Turnierleitung (right or center)
-      if (!hiddenFields.includes('organizer')) {
+      if (!certificateHiddenFields.includes('organizer')) {
         const orgX = hasSponsorSection ? (3 * w / 4) : (w / 2);
         doc.line(orgX - 50, sigY, orgX + 50, sigY);
         const orgSize = certificateExtraSizes.organizer ?? 8;
