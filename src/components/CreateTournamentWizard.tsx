@@ -370,6 +370,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           certificate_bg_url: data.certificateBgUrl,
           certificate_font_family: data.certificateFontFamily,
           certificate_font_size: data.certificateFontSize,
+          certificate_text_color: data.certificateTextColor,
         },
       );
       setOpen(false);
