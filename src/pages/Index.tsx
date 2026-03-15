@@ -262,6 +262,7 @@ const Index = () => {
               certificateBgUrl={tournament.certificateBgUrl}
               certificateFontFamily={tournament.certificateFontFamily}
               certificateFontSize={tournament.certificateFontSize}
+              certificateTextColor={tournament.certificateTextColor}
               started={tournament.started}
               onUpdateMode={updateTournamentMode}
               onUpdateType={updateTournamentType}
