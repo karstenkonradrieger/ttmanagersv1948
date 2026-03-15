@@ -508,7 +508,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         const lineSize = certificateLineSizes[i] ?? certificateFontSize;
         totalContentH += lineSize * 0.6 + 4;
       });
-      if (!hiddenFields.includes('date')) totalContentH += (certificateExtraSizes.organizer ?? 12) * 0.6 + 10;
+      if (!certificateHiddenFields.includes('date')) totalContentH += (certificateExtraSizes.organizer ?? 12) * 0.6 + 10;
       if (!hiddenFields.includes('venue') && venueString) totalContentH += (certificateExtraSizes.venue ?? 12) * 0.6 + 4;
 
       let yOffset = topMargin + Math.max(0, (contentAreaH - totalContentH) / 2);
