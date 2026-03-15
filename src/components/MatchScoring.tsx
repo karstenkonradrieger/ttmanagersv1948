@@ -149,7 +149,7 @@ const announceMatch = async (
   });
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, isHandicap = false, players = [], doublesPairs = [], mode }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, isHandicap = false, players = [], doublesPairs = [], mode, breakMinutes = 0 }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
   const { getPhraseAudioUrl } = useAnnouncementPhrases();
 
