@@ -59,6 +59,7 @@ export function CertificatePreview({
   textColor = '#1e1e1e',
   lineSizes = [],
   extraSizes = {},
+  hiddenFields = [],
 }: Props) {
   const certDate = tournamentDate
     ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
