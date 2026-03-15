@@ -46,6 +46,7 @@ const emptyTournament: Tournament = {
   certificateTextColor: '#1e1e1e',
   certificateLineSizes: [],
   certificateExtraSizes: {},
+  certificateHiddenFields: [],
 };
 
 export function useTournamentDb(tournamentId: string | null) {

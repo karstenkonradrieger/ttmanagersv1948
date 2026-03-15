@@ -164,6 +164,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     certificateTextColor: (tournament as any).certificate_text_color || '#1e1e1e',
     certificateLineSizes: Array.isArray((tournament as any).certificate_line_sizes) ? (tournament as any).certificate_line_sizes : [],
     certificateExtraSizes: (tournament as any).certificate_extra_sizes && typeof (tournament as any).certificate_extra_sizes === 'object' ? (tournament as any).certificate_extra_sizes : {},
+    certificateHiddenFields: Array.isArray((tournament as any).certificate_hidden_fields) ? (tournament as any).certificate_hidden_fields : [],
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
