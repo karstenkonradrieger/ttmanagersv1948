@@ -152,7 +152,7 @@ export function CertificatePreview({
                   <span style={{ color: textColor, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>{sponsorName}</span>
                 )}
               </div>
-              <span className="text-[7px]" style={{ color: textColor, opacity: 0.7 }}>Sponsor</span>
+              <span style={{ color: textColor, opacity: 0.7, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>Sponsor</span>
             </div>
           )}
 
