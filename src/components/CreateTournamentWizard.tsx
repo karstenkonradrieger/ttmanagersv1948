@@ -157,6 +157,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
         certificateFontFamily: 'Helvetica',
         certificateFontSize: 20,
         certificateTextColor: '#1e1e1e',
+        certificateFontBold: false,
         organizerName: '',
         sponsorName: '',
         sponsorSignatureUrl: null,
