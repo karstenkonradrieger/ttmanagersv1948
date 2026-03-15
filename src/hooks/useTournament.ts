@@ -51,6 +51,7 @@ function loadTournament(): Tournament {
     certificateFontFamily: 'Helvetica',
     certificateFontSize: 20,
     certificateTextColor: '#1e1e1e',
+    certificateLineSizes: [],
   };
 }
 
