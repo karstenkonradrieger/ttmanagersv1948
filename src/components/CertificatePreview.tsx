@@ -4,6 +4,12 @@ const FONT_FAMILY_MAP: Record<string, string> = {
   Helvetica: 'Helvetica, Arial, sans-serif',
   Times: '"Times New Roman", Times, serif',
   Courier: '"Courier New", Courier, monospace',
+  'Dancing Script': '"Dancing Script", cursive',
+  'Great Vibes': '"Great Vibes", cursive',
+  'Playfair Display': '"Playfair Display", serif',
+  Montserrat: 'Montserrat, sans-serif',
+  Lora: 'Lora, serif',
+  Raleway: 'Raleway, sans-serif',
 };
 
 interface Props {

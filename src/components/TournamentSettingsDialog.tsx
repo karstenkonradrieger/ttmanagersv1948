@@ -415,6 +415,12 @@ export function TournamentSettingsDialog({
                 <option value="Helvetica">Helvetica (Sans-Serif)</option>
                 <option value="Times">Times (Serif)</option>
                 <option value="Courier">Courier (Monospace)</option>
+                <option value="Dancing Script">Dancing Script (Schreibschrift)</option>
+                <option value="Great Vibes">Great Vibes (Kalligraphie)</option>
+                <option value="Playfair Display">Playfair Display (Elegant Serif)</option>
+                <option value="Montserrat">Montserrat (Modern Sans)</option>
+                <option value="Lora">Lora (Buch-Serif)</option>
+                <option value="Raleway">Raleway (Dünn Sans)</option>
               </select>
             </div>
             <div>
