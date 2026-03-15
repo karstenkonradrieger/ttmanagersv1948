@@ -104,7 +104,7 @@ export function CertificatePreview({
             />
           )}
 
-          {motto && (
+          {!hiddenFields.includes('motto') && motto && (
             <p className="italic" style={{ color: mutedColor, fontSize: `${Math.max(6, (extraSizes.motto ?? 12) * 0.55)}px` }}>"{motto}"</p>
           )}
 
@@ -119,8 +119,10 @@ export function CertificatePreview({
             })}
           </div>
 
-          <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.date ?? 12) * 0.55)}px` }} className="mt-4">{certDate}</p>
-          {venueString && (
+          {!hiddenFields.includes('date') && (
+            <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.date ?? 12) * 0.55)}px` }} className="mt-4">{certDate}</p>
+          )}
+          {!hiddenFields.includes('venue') && venueString && (
             <p style={{ color: mutedColor, fontSize: `${Math.max(6, (extraSizes.venue ?? 12) * 0.55)}px` }}>{venueString}</p>
           )}
         </div>
