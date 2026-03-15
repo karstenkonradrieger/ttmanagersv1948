@@ -499,13 +499,14 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
 
       // Date + Venue
       doc.setFontSize(13);
+      doc.setTextColor(tr, tg, tb);
       const certDate = tournamentDate
         ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
         : new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
       doc.text(certDate, w / 2, yOffset + 24, { align: 'center' });
       if (venueString) {
         doc.setFontSize(11);
-        doc.setTextColor(100, 100, 100);
+        doc.setTextColor(tr, tg, tb);
         doc.text(venueString, w / 2, yOffset + 34, { align: 'center' });
       }
 
