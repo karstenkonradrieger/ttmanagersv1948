@@ -120,7 +120,7 @@ export function CertificatePreview({
           </div>
 
           {!hiddenFields.includes('date') && (
-            <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.date ?? 12) * 0.55)}px` }} className="mt-4">{certDate}</p>
+            <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.organizer ?? 12) * 0.55)}px` }} className="mt-4">{certDate}</p>
           )}
           {!hiddenFields.includes('venue') && venueString && (
             <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.venue ?? 12) * 0.55)}px` }}>{venueString}</p>
@@ -162,7 +162,7 @@ export function CertificatePreview({
               {organizerName && (
                 <span style={{ color: textColor, fontSize: `${Math.max(5, (extraSizes.organizer ?? 8) * 0.55)}px` }}>{organizerName}</span>
               )}
-              <span className="text-[7px]" style={{ color: textColor, opacity: 0.7 }}>Turnierleitung</span>
+              <span style={{ color: textColor, opacity: 0.7, fontSize: `${Math.max(5, (extraSizes.organizer ?? 8) * 0.55)}px` }}>Turnierleitung</span>
             </div>
           )}
         </div>
