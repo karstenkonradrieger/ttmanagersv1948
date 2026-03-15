@@ -436,6 +436,16 @@ export function TournamentSettingsDialog({
               </select>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="cert-font-bold-settings"
+              checked={!!localFontBold}
+              onChange={e => setLocalFontBold(e.target.checked)}
+              className="h-4 w-4 rounded border-input"
+            />
+            <Label htmlFor="cert-font-bold-settings" className="text-sm font-semibold cursor-pointer">Fettdruck</Label>
+          </div>
           {/* Text Color */}
           <div>
             <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>

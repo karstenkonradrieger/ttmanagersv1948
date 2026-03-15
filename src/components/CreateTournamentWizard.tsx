@@ -646,6 +646,16 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 </select>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="cert-font-bold-wizard"
+                checked={!!data.certificateExtraSizes?.fontBold}
+                onChange={e => update({ certificateExtraSizes: { ...data.certificateExtraSizes, fontBold: e.target.checked ? 1 : 0 } })}
+                className="h-4 w-4 rounded border-input"
+              />
+              <Label htmlFor="cert-font-bold-wizard" className="text-sm font-semibold cursor-pointer">Fettdruck</Label>
+            </div>
             {/* Text Color */}
             <div>
               <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>
