@@ -1148,6 +1148,10 @@ export function useTournamentDb(tournamentId: string | null) {
     sponsor_logo_url: string | null;
     sponsor_consent: boolean;
     certificate_bg_url: string | null;
+    certificate_font_family: string;
+    certificate_font_size: number;
+    certificate_text_color: string;
+    certificate_extra_sizes: Record<string, number>;
   }>) => {
     if (!tournamentId) return;
     try {
