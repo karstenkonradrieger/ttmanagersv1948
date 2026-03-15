@@ -314,6 +314,7 @@ export async function updateTournament(id: string, updates: Partial<{
   certificate_font_family: string;
   certificate_font_size: number;
   certificate_text_color: string;
+  certificate_line_sizes: number[];
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')
