@@ -1148,6 +1148,10 @@ export function useTournamentDb(tournamentId: string | null) {
     sponsor_logo_url: string | null;
     sponsor_consent: boolean;
     certificate_bg_url: string | null;
+    certificate_font_family: string;
+    certificate_font_size: number;
+    certificate_text_color: string;
+    certificate_extra_sizes: Record<string, number>;
   }>) => {
     if (!tournamentId) return;
     try {
@@ -1168,6 +1172,10 @@ export function useTournamentDb(tournamentId: string | null) {
         ...(details.sponsor_logo_url !== undefined ? { sponsorLogoUrl: details.sponsor_logo_url } : {}),
         ...(details.sponsor_consent !== undefined ? { sponsorConsent: details.sponsor_consent } : {}),
         ...(details.certificate_bg_url !== undefined ? { certificateBgUrl: details.certificate_bg_url } : {}),
+        ...(details.certificate_font_family !== undefined ? { certificateFontFamily: details.certificate_font_family } : {}),
+        ...(details.certificate_font_size !== undefined ? { certificateFontSize: details.certificate_font_size } : {}),
+        ...(details.certificate_text_color !== undefined ? { certificateTextColor: details.certificate_text_color } : {}),
+        ...(details.certificate_extra_sizes !== undefined ? { certificateExtraSizes: details.certificate_extra_sizes } : {}),
       }));
     } catch (error) {
       console.error('Error updating details:', error);

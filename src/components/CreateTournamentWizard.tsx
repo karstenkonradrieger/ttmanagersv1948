@@ -27,6 +27,7 @@ interface WizardData {
   certificateFontFamily: string;
   certificateFontSize: number;
   certificateTextColor: string;
+  certificateFontBold: boolean;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
@@ -85,6 +86,7 @@ interface Props {
       certificate_font_family?: string;
       certificate_font_size?: number;
       certificate_text_color?: string;
+      certificate_extra_sizes?: Record<string, number>;
     },
   ) => Promise<string>;
 }
@@ -122,6 +124,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     certificateFontFamily: 'Helvetica',
     certificateFontSize: 20,
     certificateTextColor: '#1e1e1e',
+    certificateFontBold: false,
     organizerName: '',
     sponsorName: '',
     sponsorSignatureUrl: null,
@@ -155,6 +158,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
         certificateFontFamily: 'Helvetica',
         certificateFontSize: 20,
         certificateTextColor: '#1e1e1e',
+        certificateFontBold: false,
         organizerName: '',
         sponsorName: '',
         sponsorSignatureUrl: null,
@@ -373,6 +377,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           certificate_font_family: data.certificateFontFamily,
           certificate_font_size: data.certificateFontSize,
           certificate_text_color: data.certificateTextColor,
+          certificate_extra_sizes: { fontBold: data.certificateFontBold ? 1 : 0 },
         },
       );
       setOpen(false);
@@ -645,6 +650,16 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                   ))}
                 </select>
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="cert-font-bold-wizard"
+                checked={data.certificateFontBold}
+                onChange={e => update({ certificateFontBold: e.target.checked })}
+                className="h-4 w-4 rounded border-input"
+              />
+              <Label htmlFor="cert-font-bold-wizard" className="text-sm font-semibold cursor-pointer">Fettdruck</Label>
             </div>
             {/* Text Color */}
             <div>

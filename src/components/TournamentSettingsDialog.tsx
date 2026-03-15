@@ -27,6 +27,7 @@ interface Props {
   certificateFontFamily: string;
   certificateFontSize: number;
   certificateTextColor: string;
+  certificateExtraSizes?: Record<string, number>;
   organizerName: string;
   sponsorName: string;
   sponsorSignatureUrl: string | null;
@@ -53,13 +54,14 @@ interface Props {
     certificate_font_family?: string;
     certificate_font_size?: number;
     certificate_text_color?: string;
+    certificate_extra_sizes?: Record<string, number>;
   }) => Promise<void>;
 }
 
 export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
-  certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize, certificateTextColor,
+  certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize, certificateTextColor, certificateExtraSizes = {},
   organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
@@ -84,6 +86,7 @@ export function TournamentSettingsDialog({
   const [localFontFamily, setLocalFontFamily] = useState(certificateFontFamily);
   const [localFontSize, setLocalFontSize] = useState(certificateFontSize);
   const [localTextColor, setLocalTextColor] = useState(certificateTextColor);
+  const [localFontBold, setLocalFontBold] = useState(!!certificateExtraSizes.fontBold);
   const [uploadingSig, setUploadingSig] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCertBg, setUploadingCertBg] = useState(false);
@@ -114,6 +117,7 @@ export function TournamentSettingsDialog({
       setLocalFontFamily(certificateFontFamily);
       setLocalFontSize(certificateFontSize);
       setLocalTextColor(certificateTextColor);
+      setLocalFontBold(!!certificateExtraSizes.fontBold);
     }
     setOpen(isOpen);
   };
@@ -256,6 +260,7 @@ export function TournamentSettingsDialog({
           certificate_font_family: localFontFamily,
           certificate_font_size: localFontSize,
           certificate_text_color: localTextColor,
+          certificate_extra_sizes: { fontBold: localFontBold ? 1 : 0 },
         });
       }
 
@@ -435,6 +440,16 @@ export function TournamentSettingsDialog({
                 ))}
               </select>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="cert-font-bold-settings"
+              checked={!!localFontBold}
+              onChange={e => setLocalFontBold(e.target.checked)}
+              className="h-4 w-4 rounded border-input"
+            />
+            <Label htmlFor="cert-font-bold-settings" className="text-sm font-semibold cursor-pointer">Fettdruck</Label>
           </div>
           {/* Text Color */}
           <div>
