@@ -120,7 +120,7 @@ export function CertificatePreview({
           </div>
 
           {!hiddenFields.includes('date') && (
-            <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.date ?? 12) * 0.55)}px` }} className="mt-4">{certDate}</p>
+            <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.organizer ?? 12) * 0.55)}px` }} className="mt-4">{certDate}</p>
           )}
           {!hiddenFields.includes('venue') && venueString && (
             <p style={{ color: textColor, fontSize: `${Math.max(6, (extraSizes.venue ?? 12) * 0.55)}px` }}>{venueString}</p>
