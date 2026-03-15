@@ -902,7 +902,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
                   <label className="text-sm font-semibold">Urkundentext bearbeiten</label>
                   <textarea
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[120px] resize-y"
@@ -938,7 +938,6 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                                 value={currentSize}
                                 onChange={e => {
                                   const newSizes = [...localLineSizes];
-                                  // Ensure array is long enough
                                   while (newSizes.length <= i) newSizes.push(certificateFontSize);
                                   newSizes[i] = Number(e.target.value);
                                   setLocalLineSizes(newSizes);
@@ -955,16 +954,56 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       </div>
                     );
                   })()}
+
+                  {/* Extra fields editor */}
+                  <div className="border-t border-border pt-3 space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground">Weitere Urkundenfelder</label>
+                    
+                    {[
+                      { key: 'motto', label: 'Motto', value: localMotto, setter: setLocalMotto, onChange: onMottoChange },
+                      { key: 'venue', label: 'Austragungsort', value: localVenue, setter: setLocalVenue, onChange: onVenueStringChange },
+                      { key: 'organizer', label: 'Veranstalter', value: localOrganizer, setter: setLocalOrganizer, onChange: onOrganizerNameChange },
+                      { key: 'sponsor', label: 'Sponsor', value: localSponsor, setter: setLocalSponsor, onChange: onSponsorNameChange },
+                    ].map(field => (
+                      <div key={field.key} className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <input
+                            className="flex-1 h-8 rounded-md border border-input bg-background px-2 text-sm"
+                            value={field.value}
+                            placeholder={field.label}
+                            onChange={e => {
+                              field.setter(e.target.value);
+                              field.onChange?.(e.target.value);
+                            }}
+                          />
+                          <select
+                            className="h-8 rounded border border-input bg-background px-1 text-xs flex-shrink-0 w-[70px]"
+                            value={localExtraSizes[field.key] ?? certificateFontSize}
+                            onChange={e => {
+                              const newSizes = { ...localExtraSizes, [field.key]: Number(e.target.value) };
+                              setLocalExtraSizes(newSizes);
+                              onCertificateExtraSizesChange?.(newSizes);
+                            }}
+                          >
+                            {[8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36].map(s => (
+                              <option key={s} value={s}>{s}pt</option>
+                            ))}
+                          </select>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{field.label}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div id="cert-preview-print">
                   <CertificatePreview
                     tournamentName={tournamentName}
                     logoUrl={logoUrl}
-                    motto={motto}
+                    motto={localMotto}
                     tournamentDate={tournamentDate}
-                    venueString={venueString}
-                    organizerName={organizerName}
-                    sponsorName={sponsorName}
+                    venueString={localVenue}
+                    organizerName={localOrganizer}
+                    sponsorName={localSponsor}
                     sponsorSignatureUrl={sponsorSignatureUrl}
                     sponsorLogoUrl={sponsorLogoUrl}
                     sponsorConsent={sponsorConsent}
@@ -976,6 +1015,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     fontSize={certificateFontSize}
                     textColor={certificateTextColor}
                     lineSizes={localLineSizes}
+                    extraSizes={localExtraSizes}
+                  />
                   />
                 </div>
               </div>
