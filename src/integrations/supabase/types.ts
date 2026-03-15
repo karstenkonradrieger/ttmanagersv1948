@@ -566,6 +566,7 @@ export type Database = {
           certificate_bg_url: string | null
           certificate_font_family: string
           certificate_font_size: number
+          certificate_line_sizes: Json
           certificate_text: string
           certificate_text_color: string
           created_at: string
@@ -605,6 +606,7 @@ export type Database = {
           certificate_bg_url?: string | null
           certificate_font_family?: string
           certificate_font_size?: number
+          certificate_line_sizes?: Json
           certificate_text?: string
           certificate_text_color?: string
           created_at?: string
@@ -644,6 +646,7 @@ export type Database = {
           certificate_bg_url?: string | null
           certificate_font_family?: string
           certificate_font_size?: number
+          certificate_line_sizes?: Json
           certificate_text?: string
           certificate_text_color?: string
           created_at?: string

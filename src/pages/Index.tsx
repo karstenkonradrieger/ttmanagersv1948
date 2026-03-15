@@ -704,7 +704,9 @@ const Index = () => {
                  certificateFontFamily={tournament.certificateFontFamily}
                  certificateFontSize={tournament.certificateFontSize}
                  certificateTextColor={tournament.certificateTextColor}
+                 certificateLineSizes={tournament.certificateLineSizes}
                  onCertificateTextChange={(text) => updateDetails({ certificate_text: text })}
+                 onCertificateLineSizesChange={(sizes) => updateDetails({ certificate_line_sizes: sizes } as any)}
                 />
             </TabsContent>
 

@@ -44,6 +44,7 @@ const emptyTournament: Tournament = {
   certificateFontFamily: 'Helvetica',
   certificateFontSize: 20,
   certificateTextColor: '#1e1e1e',
+  certificateLineSizes: [],
 };
 
 export function useTournamentDb(tournamentId: string | null) {

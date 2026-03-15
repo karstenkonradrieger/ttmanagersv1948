@@ -38,6 +38,7 @@ export interface DbTournament {
   certificate_font_family: string;
   certificate_font_size: number;
   certificate_text_color: string;
+  certificate_line_sizes: number[];
 }
 
 export interface DbPlayer {
@@ -161,6 +162,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     certificateFontFamily: (tournament as any).certificate_font_family || 'Helvetica',
     certificateFontSize: (tournament as any).certificate_font_size ?? 20,
     certificateTextColor: (tournament as any).certificate_text_color || '#1e1e1e',
+    certificateLineSizes: Array.isArray((tournament as any).certificate_line_sizes) ? (tournament as any).certificate_line_sizes : [],
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -240,6 +242,7 @@ export async function createTournament(
       certificate_font_family?: string;
       certificate_font_size?: number;
       certificate_text_color?: string;
+      certificate_line_sizes?: number[];
     },
 ): Promise<string> {
   const { data, error } = await supabase
@@ -271,6 +274,7 @@ export async function createTournament(
       ...(extras?.certificate_font_family !== undefined ? { certificate_font_family: extras.certificate_font_family } : {}),
       ...(extras?.certificate_font_size !== undefined ? { certificate_font_size: extras.certificate_font_size } : {}),
       ...(extras?.certificate_text_color !== undefined ? { certificate_text_color: extras.certificate_text_color } : {}),
+      ...(extras?.certificate_line_sizes !== undefined ? { certificate_line_sizes: extras.certificate_line_sizes } : {}),
     })
     .select('id')
     .single();
@@ -313,6 +317,7 @@ export async function updateTournament(id: string, updates: Partial<{
   certificate_font_family: string;
   certificate_font_size: number;
   certificate_text_color: string;
+  certificate_line_sizes: number[];
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')
