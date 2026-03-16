@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save } from 'lucide-react';
@@ -271,7 +272,93 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         },
       });
 
-      startY = (doc as any).lastAutoTable.finalY + 10;
+      startY = (doc as any).lastAutoTable.finalY + 4;
+
+      // Load and render photos for completed matches in this round
+      const completedInRound = roundMatches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id);
+      if (completedInRound.length > 0) {
+        const matchIds = completedInRound.map(m => m.id);
+        const { data: roundPhotos } = await supabase
+          .from('match_photos')
+          .select('*')
+          .eq('tournament_id', tournamentId)
+          .eq('photo_type', 'match')
+          .in('match_id', matchIds)
+          .order('created_at', { ascending: true });
+
+        if (roundPhotos && roundPhotos.length > 0) {
+          // Group photos by match
+          const photosByMatch = new Map<string, typeof roundPhotos>();
+          for (const photo of roundPhotos) {
+            if (!photo.match_id) continue;
+            const existing = photosByMatch.get(photo.match_id) || [];
+            existing.push(photo);
+            photosByMatch.set(photo.match_id, existing);
+          }
+
+          const pageH = doc.internal.pageSize.getHeight();
+          const photoRatio = 4 / 3;
+          const photoW = 55; // compact width per photo
+          const photoH = photoW / photoRatio;
+          const gap = 3;
+
+          for (const [matchId, photos] of photosByMatch) {
+            const matchObj = completedInRound.find(m => m.id === matchId);
+            if (!matchObj) continue;
+
+            // Check if we need a new page
+            if (startY + photoH + 6 > pageH - 10) {
+              doc.addPage();
+              startY = 20;
+            }
+
+            // Match label
+            const p1 = getPlayer(matchObj.player1Id);
+            const p2 = getPlayer(matchObj.player2Id);
+            doc.setFontSize(6);
+            doc.setTextColor(120);
+            doc.text(`${p1?.name || '?'} vs ${p2?.name || '?'}`, 14, startY + 2);
+            doc.setTextColor(0);
+            startY += 4;
+
+            // Load and render up to 2 photos side by side
+            const loaded: string[] = [];
+            for (const photo of photos.slice(0, 2)) {
+              try {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                await new Promise<void>((resolve, reject) => {
+                  img.onload = () => resolve();
+                  img.onerror = () => reject();
+                  img.src = photo.photo_url;
+                });
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                canvas.getContext('2d')!.drawImage(img, 0, 0);
+                loaded.push(canvas.toDataURL('image/jpeg', 0.8));
+              } catch {
+                // skip
+              }
+            }
+
+            if (loaded.length === 1) {
+              const x = (pageW - photoW) / 2;
+              doc.addImage(loaded[0], 'JPEG', x, startY, photoW, photoH);
+            } else if (loaded.length >= 2) {
+              const totalW = photoW * 2 + gap;
+              const startX = (pageW - totalW) / 2;
+              doc.addImage(loaded[0], 'JPEG', startX, startY, photoW, photoH);
+              doc.addImage(loaded[1], 'JPEG', startX + photoW + gap, startY, photoW, photoH);
+            }
+
+            if (loaded.length > 0) {
+              startY += photoH + gap;
+            }
+          }
+          startY += 4;
+        }
+      }
 
       if (startY > 170 && r < rounds - 1) {
         doc.addPage();
