@@ -830,6 +830,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
             <ImageIcon className="mr-1 h-4 w-4" />
             Foto-Report
           </Button>
+        </div>
       </div>
 
       {/* Champion banner */}
