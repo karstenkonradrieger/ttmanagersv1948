@@ -156,8 +156,14 @@ export async function generatePhotoReport({
       doc.setFontSize(12);
       doc.setFont(undefined!, 'bold');
       doc.setTextColor(0);
-      doc.text(`📸 ${roundName}`, margin, y);
-      y += 8;
+      doc.text(roundName, margin, y);
+      y += 3;
+      // Decorative line under heading
+      doc.setDrawColor(34, 197, 94);
+      doc.setLineWidth(0.5);
+      doc.line(margin, y, margin + doc.getTextWidth(roundName), y);
+      doc.setDrawColor(0);
+      y += 5;
 
       for (const match of roundMatches) {
         const photos = photosByMatch.get(match.id);
@@ -210,8 +216,13 @@ export async function generatePhotoReport({
     doc.setFontSize(12);
     doc.setFont(undefined!, 'bold');
     doc.setTextColor(0);
-    doc.text('🏆 Siegerehrung', margin, y);
-    y += 8;
+    doc.text('Siegerehrung', margin, y);
+    y += 3;
+    doc.setDrawColor(59, 130, 246);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, margin + doc.getTextWidth('Siegerehrung'), y);
+    doc.setDrawColor(0);
+    y += 5;
 
     const loaded: string[] = [];
     for (const photo of ceremonyPhotos) {
