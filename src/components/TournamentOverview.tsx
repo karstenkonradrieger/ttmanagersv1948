@@ -423,6 +423,75 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       });
     }
 
+    // Ceremony photos at the end
+    const { data: ceremonyPhotos } = await supabase
+      .from('match_photos')
+      .select('*')
+      .eq('tournament_id', tournamentId)
+      .eq('photo_type', 'ceremony')
+      .is('match_id', null)
+      .order('created_at', { ascending: true });
+
+    if (ceremonyPhotos && ceremonyPhotos.length > 0) {
+      let cerY = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 10 : startY + 10;
+      const pageH = doc.internal.pageSize.getHeight();
+      const photoRatio = 4 / 3;
+      const photoW = 55;
+      const photoH = photoW / photoRatio;
+      const gap = 3;
+
+      if (cerY + photoH + 10 > pageH - 10) {
+        doc.addPage();
+        cerY = 20;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined!, 'bold');
+      doc.setTextColor(0);
+      doc.text('Siegerehrung', 14, cerY);
+      cerY += 6;
+
+      // Load all ceremony photos
+      const loaded: string[] = [];
+      for (const photo of ceremonyPhotos) {
+        try {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+            img.src = photo.photo_url;
+          });
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          canvas.getContext('2d')!.drawImage(img, 0, 0);
+          loaded.push(canvas.toDataURL('image/jpeg', 0.8));
+        } catch {
+          // skip
+        }
+      }
+
+      // Render photos in pairs side by side
+      for (let i = 0; i < loaded.length; i += 2) {
+        if (cerY + photoH > pageH - 10) {
+          doc.addPage();
+          cerY = 20;
+        }
+
+        if (i + 1 < loaded.length) {
+          const totalW = photoW * 2 + gap;
+          const startX = (pageW - totalW) / 2;
+          doc.addImage(loaded[i], 'JPEG', startX, cerY, photoW, photoH);
+          doc.addImage(loaded[i + 1], 'JPEG', startX + photoW + gap, cerY, photoW, photoH);
+        } else {
+          const x = (pageW - photoW) / 2;
+          doc.addImage(loaded[i], 'JPEG', x, cerY, photoW, photoH);
+        }
+        cerY += photoH + gap;
+      }
+    }
+
     doc.save(`${tournamentName.replace(/\s+/g, '_')}_Ergebnisse.pdf`);
   };
 
