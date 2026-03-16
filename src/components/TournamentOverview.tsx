@@ -820,7 +820,6 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                   mode,
                 });
               } catch (err: any) {
-                const { toast } = await import('sonner');
                 toast.error(err.message || 'Fehler beim Erstellen des Foto-Reports');
               }
             }}
