@@ -803,7 +803,33 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
             <FileDown className="mr-1 h-4 w-4" />
             PDF Export
           </Button>
-        </div>
+          <Button
+            onClick={async () => {
+              try {
+                await generatePhotoReport({
+                  tournamentId,
+                  tournamentName,
+                  tournamentDate,
+                  venueString,
+                  motto,
+                  logoUrl,
+                  matches,
+                  getPlayer,
+                  rounds,
+                  mode,
+                });
+              } catch (err: any) {
+                const { toast } = await import('sonner');
+                toast.error(err.message || 'Fehler beim Erstellen des Foto-Reports');
+              }
+            }}
+            size="sm"
+            variant="outline"
+            className="h-9 font-semibold"
+          >
+            <ImageIcon className="mr-1 h-4 w-4" />
+            Foto-Report
+          </Button>
       </div>
 
       {/* Champion banner */}
