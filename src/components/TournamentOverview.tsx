@@ -7,6 +7,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MatchPhotos } from '@/components/MatchPhotos';
 import { generateMatchReport } from '@/components/MatchReport';
+import { generatePhotoReport } from '@/components/PhotoReport';
 import { generatePlayerReport } from '@/components/PlayerReport';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CertificatePreview } from '@/components/CertificatePreview';
@@ -801,6 +802,33 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
           <Button onClick={exportPdf} size="sm" className="h-9 font-semibold">
             <FileDown className="mr-1 h-4 w-4" />
             PDF Export
+          </Button>
+          <Button
+            onClick={async () => {
+              try {
+                await generatePhotoReport({
+                  tournamentId,
+                  tournamentName,
+                  tournamentDate,
+                  venueString,
+                  motto,
+                  logoUrl,
+                  matches,
+                  getPlayer,
+                  rounds,
+                  mode,
+                });
+              } catch (err: any) {
+                const { toast } = await import('sonner');
+                toast.error(err.message || 'Fehler beim Erstellen des Foto-Reports');
+              }
+            }}
+            size="sm"
+            variant="outline"
+            className="h-9 font-semibold"
+          >
+            <ImageIcon className="mr-1 h-4 w-4" />
+            Foto-Report
           </Button>
         </div>
       </div>
