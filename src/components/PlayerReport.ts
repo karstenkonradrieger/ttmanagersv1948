@@ -300,20 +300,35 @@ export async function generatePlayerReport({
       .order('created_at', { ascending: true });
 
     if (photos && photos.length > 0) {
-      const photoWidth = 150;
-      const photoHeight = 112.5;
+      const photoRatio = 4 / 3;
+      const maxPhotoW = 80; // compact width
+      const photoW = maxPhotoW;
+      const photoH = photoW / photoRatio;
+      const gap = 3;
 
+      // Place photos side by side if two, centered if one
+      const loaded: string[] = [];
       for (const photo of photos.slice(0, 2)) {
         const imgData = await loadImage(photo.photo_url);
-        if (imgData) {
-          if (y + photoHeight > pageH - 15) {
-            doc.addPage();
-            y = 15;
-          }
-          const x = (w - photoWidth) / 2;
-          doc.addImage(imgData, 'JPEG', x, y, photoWidth, photoHeight);
-          y += photoHeight + 4;
+        if (imgData) loaded.push(imgData);
+      }
+
+      if (loaded.length > 0) {
+        if (y + photoH > pageH - 15) {
+          doc.addPage();
+          y = 15;
         }
+
+        if (loaded.length === 1) {
+          const x = (w - photoW) / 2;
+          doc.addImage(loaded[0], 'JPEG', x, y, photoW, photoH);
+        } else {
+          const totalW = photoW * 2 + gap;
+          const startX = (w - totalW) / 2;
+          doc.addImage(loaded[0], 'JPEG', startX, y, photoW, photoH);
+          doc.addImage(loaded[1], 'JPEG', startX + photoW + gap, y, photoW, photoH);
+        }
+        y += photoH + 4;
       }
     }
   }
