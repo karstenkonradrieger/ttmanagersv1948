@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save } from 'lucide-react';
+import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MatchPhotos } from '@/components/MatchPhotos';
