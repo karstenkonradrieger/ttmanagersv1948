@@ -7,6 +7,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MatchPhotos } from '@/components/MatchPhotos';
 import { generateMatchReport } from '@/components/MatchReport';
+import { generatePhotoReport } from '@/components/PhotoReport';
 import { generatePlayerReport } from '@/components/PlayerReport';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CertificatePreview } from '@/components/CertificatePreview';
