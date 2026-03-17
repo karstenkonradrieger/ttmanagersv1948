@@ -431,6 +431,7 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                           player,
                           matches,
                           getPlayer,
+                          getParticipantName,
                           tournamentName,
                           tournamentId,
                           totalRounds,
