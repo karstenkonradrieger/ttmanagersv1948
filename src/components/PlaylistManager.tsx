@@ -201,7 +201,7 @@ export function PlaylistManager() {
           <Music className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Music className="h-5 w-5" /> Playlist & Gong verwalten
@@ -290,11 +290,11 @@ export function PlaylistManager() {
             <Bell className="h-4 w-4" /> Gong-Sound
           </h3>
           {gongTrack ? (
-            <div className="flex items-center justify-between bg-secondary/50 rounded-md p-2.5 text-sm">
-              <span className="truncate">{gongTrack.title}</span>
-              <div className="flex items-center gap-1">
-                <audio src={getPublicUrl(gongTrack.file_path)} controls className="h-8 w-32" />
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(gongTrack)}>
+            <div className="flex items-center gap-2 bg-secondary/50 rounded-md p-2.5 text-sm min-w-0">
+              <span className="truncate flex-1 min-w-0">{gongTrack.title}</span>
+              <div className="flex items-center gap-1 shrink-0">
+                <audio src={getPublicUrl(gongTrack.file_path)} controls className="h-8 w-24" />
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive shrink-0" onClick={() => handleDelete(gongTrack)}>
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -367,14 +367,14 @@ function SortableTrackItem({ track, index, audioSrc, onDelete }: {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 bg-secondary/50 rounded-md p-2 text-sm"
+      className="flex items-center gap-2 bg-secondary/50 rounded-md p-2 text-sm min-w-0"
     >
       <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground">
         <GripVertical className="h-4 w-4" />
       </button>
       <span className="text-muted-foreground text-xs w-5 text-center font-mono">{index + 1}</span>
       <span className="truncate flex-1">{track.title}</span>
-      <audio src={audioSrc} controls className="h-8 w-28 shrink-0" />
+      <audio src={audioSrc} controls className="h-8 w-24 shrink-0" />
       <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive shrink-0" onClick={onDelete}>
         <Trash2 className="h-3.5 w-3.5" />
       </Button>
