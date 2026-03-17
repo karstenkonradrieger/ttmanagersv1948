@@ -44,7 +44,7 @@ interface UploadItem {
 }
 
 export function PlaylistManager() {
-  const { tracks, gongTrack, loading, uploadTrack, deleteTrack, reorderTrack, getPublicUrl, refetch } = usePlaylistTracks();
+  const { tracks, gongTrack, loading, uploadTrack, deleteTrack, reorderAll, getPublicUrl, refetch } = usePlaylistTracks();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [isGong, setIsGong] = useState(false);
