@@ -1336,6 +1336,53 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       Raleway: 'Raleway, sans-serif',
                     };
                     const printFontFamily = FONT_FAMILY_MAP[certificateFontFamily] || 'Helvetica, Arial, sans-serif';
+                    
+                    // Clone and inline all computed styles to avoid Tailwind dependency
+                    const sourceEl = printContent.firstElementChild as HTMLElement;
+                    if (!sourceEl) return;
+
+                    // Recursively inline styles
+                    function inlineStyles(source: Element, target: Element) {
+                      const computed = window.getComputedStyle(source);
+                      const el = target as HTMLElement;
+                      // Copy all computed styles
+                      el.style.cssText = '';
+                      for (let i = 0; i < computed.length; i++) {
+                        const prop = computed[i];
+                        el.style.setProperty(prop, computed.getPropertyValue(prop));
+                      }
+                      // Remove Tailwind classes to avoid conflicts
+                      el.removeAttribute('class');
+                      
+                      const sourceChildren = source.children;
+                      const targetChildren = target.children;
+                      for (let i = 0; i < sourceChildren.length; i++) {
+                        if (targetChildren[i]) {
+                          inlineStyles(sourceChildren[i], targetChildren[i]);
+                        }
+                      }
+                    }
+
+                    const clone = sourceEl.cloneNode(true) as HTMLElement;
+                    // Temporarily append clone to body to compute styles
+                    document.body.appendChild(clone);
+                    clone.style.position = 'absolute';
+                    clone.style.left = '-9999px';
+                    // Now inline styles from the visible original
+                    inlineStyles(sourceEl, clone);
+                    document.body.removeChild(clone);
+
+                    // Force the root container to fill exactly one A4 page
+                    clone.style.width = '210mm';
+                    clone.style.height = '297mm';
+                    clone.style.position = 'relative';
+                    clone.style.overflow = 'hidden';
+                    clone.style.aspectRatio = 'auto';
+                    clone.style.borderRadius = '0';
+                    clone.style.border = 'none';
+                    clone.style.pageBreakAfter = 'avoid';
+                    clone.style.pageBreakInside = 'avoid';
+
                     win.document.write(`<!DOCTYPE html><html><head><title>Urkunde drucken</title>
                       <link rel="preconnect" href="https://fonts.googleapis.com" />
                       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1343,17 +1390,9 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       <style>
                       @page { size: A4 portrait; margin: 0; }
                       * { margin: 0; padding: 0; box-sizing: border-box; font-family: ${printFontFamily}; }
-                      body { width: 210mm; height: 297mm; }
-                      .cert-root { width: 210mm; height: 297mm; position: relative; overflow: hidden; }
-                      .cert-root img.cert-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-                      .cert-root .cert-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100%; padding: 20mm 15mm; text-align: center; }
-                      .cert-root .cert-content > div { display: flex; flex-direction: column; align-items: center; gap: 4mm; flex: 1; justify-content: center; }
-                      .cert-footer { width: 100%; display: flex; justify-content: center; gap: 20mm; align-items: flex-end; margin-top: 10mm; }
-                      .cert-footer .sig-block { display: flex; flex-direction: column; align-items: center; gap: 2mm; }
-                      .cert-footer .sig-line { width: 50mm; border-top: 0.5px solid #999; }
-                      .cert-footer .sig-line-sm { width: 40mm; border-top: 0.5px solid #999; }
+                      html, body { width: 210mm; height: 297mm; overflow: hidden; }
                     </style></head><body>`);
-                    win.document.write(printContent.innerHTML);
+                    win.document.write(clone.outerHTML);
                     win.document.write('</body></html>');
                     win.document.close();
                     win.onload = () => { setTimeout(() => { win.print(); win.close(); }, 500); };
