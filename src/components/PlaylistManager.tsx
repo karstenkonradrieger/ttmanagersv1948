@@ -1,9 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
-import { Upload, Trash2, ChevronUp, ChevronDown, Music, Bell, Loader2, X, FileAudio } from 'lucide-react';
+import { Upload, Trash2, GripVertical, Music, Bell, Loader2, X, FileAudio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { usePlaylistTracks, PlaylistTrack } from '@/hooks/usePlaylistTracks';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +15,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface UploadItem {
   id: string;
