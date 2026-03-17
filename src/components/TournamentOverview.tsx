@@ -623,6 +623,20 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
     }
 
+    // Map font families to jsPDF built-in fonts
+    const JSPDF_FONT_MAP: Record<string, string> = {
+      Helvetica: 'helvetica',
+      Times: 'times',
+      Courier: 'courier',
+      'Dancing Script': 'times',
+      'Great Vibes': 'times',
+      'Playfair Display': 'times',
+      Montserrat: 'helvetica',
+      Lora: 'times',
+      Raleway: 'helvetica',
+    };
+    const pdfFont = JSPDF_FONT_MAP[certificateFontFamily] || 'helvetica';
+
     const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
 
     const resolvePlaceholders = (template: string, vars: Record<string, string>): string => {
@@ -695,7 +709,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       if (!certificateHiddenFields.includes('motto') && motto) {
         const mottoSize = certificateExtraSizes.motto ?? 12;
         doc.setFontSize(mottoSize);
-        doc.setFont(certificateFontFamily, 'italic');
+        doc.setFont(pdfFont, 'italic');
         doc.setTextColor(tr, tg, tb);
         doc.text(`"${motto}"`, w / 2, yOffset, { align: 'center' });
         yOffset += mottoSize * 0.7 + 8;
@@ -703,7 +717,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
 
       // Main certificate text lines with individual sizes
       const fontStyle = certificateExtraSizes.fontBold ? 'bold' : 'normal';
-      doc.setFont(certificateFontFamily, fontStyle);
+      doc.setFont(pdfFont, fontStyle);
       textLines.forEach((line, i) => {
         const lineSize = certificateLineSizes[i] ?? certificateFontSize;
         doc.setFontSize(lineSize);
@@ -716,7 +730,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       if (!certificateHiddenFields.includes('date')) {
         const dateSize = certificateExtraSizes.organizer ?? 12;
         doc.setFontSize(dateSize);
-        doc.setFont(certificateFontFamily, 'normal');
+        doc.setFont(pdfFont, 'normal');
         doc.setTextColor(tr, tg, tb);
         yOffset += 8;
         doc.text(certDate, w / 2, yOffset, { align: 'center' });
@@ -1310,9 +1324,25 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     if (!printContent) return;
                     const win = window.open('', '_blank');
                     if (!win) return;
-                    win.document.write(`<!DOCTYPE html><html><head><title>Urkunde drucken</title><style>
+                    const FONT_FAMILY_MAP: Record<string, string> = {
+                      Helvetica: 'Helvetica, Arial, sans-serif',
+                      Times: '"Times New Roman", Times, serif',
+                      Courier: '"Courier New", Courier, monospace',
+                      'Dancing Script': '"Dancing Script", cursive',
+                      'Great Vibes': '"Great Vibes", cursive',
+                      'Playfair Display': '"Playfair Display", serif',
+                      Montserrat: 'Montserrat, sans-serif',
+                      Lora: 'Lora, serif',
+                      Raleway: 'Raleway, sans-serif',
+                    };
+                    const printFontFamily = FONT_FAMILY_MAP[certificateFontFamily] || 'Helvetica, Arial, sans-serif';
+                    win.document.write(`<!DOCTYPE html><html><head><title>Urkunde drucken</title>
+                      <link rel="preconnect" href="https://fonts.googleapis.com" />
+                      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+                      <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600;700&family=Lora:ital,wght@0,400;0,700;1,400&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet" />
+                      <style>
                       @page { size: A4 portrait; margin: 0; }
-                      * { margin: 0; padding: 0; box-sizing: border-box; }
+                      * { margin: 0; padding: 0; box-sizing: border-box; font-family: ${printFontFamily}; }
                       body { width: 210mm; height: 297mm; }
                       .cert-root { width: 210mm; height: 297mm; position: relative; overflow: hidden; }
                       .cert-root img.cert-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -1326,7 +1356,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     win.document.write(printContent.innerHTML);
                     win.document.write('</body></html>');
                     win.document.close();
-                    win.onload = () => { win.print(); win.close(); };
+                    win.onload = () => { setTimeout(() => { win.print(); win.close(); }, 500); };
                   }}
                 >
                   <Printer className="h-4 w-4 mr-2" />
