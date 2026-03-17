@@ -374,7 +374,7 @@ function SortableTrackItem({ track, index, audioSrc, onDelete }: {
       </button>
       <span className="text-muted-foreground text-xs w-5 text-center font-mono">{index + 1}</span>
       <span className="truncate flex-1">{track.title}</span>
-      <audio src={audioSrc} controls className="h-8 w-28 shrink-0" />
+      <audio src={audioSrc} controls className="h-8 w-24 shrink-0" />
       <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive shrink-0" onClick={onDelete}>
         <Trash2 className="h-3.5 w-3.5" />
       </Button>
