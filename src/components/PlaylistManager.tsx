@@ -290,11 +290,11 @@ export function PlaylistManager() {
             <Bell className="h-4 w-4" /> Gong-Sound
           </h3>
           {gongTrack ? (
-            <div className="flex items-center justify-between bg-secondary/50 rounded-md p-2.5 text-sm">
-              <span className="truncate">{gongTrack.title}</span>
-              <div className="flex items-center gap-1">
-                <audio src={getPublicUrl(gongTrack.file_path)} controls className="h-8 w-32" />
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(gongTrack)}>
+            <div className="flex items-center gap-2 bg-secondary/50 rounded-md p-2.5 text-sm min-w-0">
+              <span className="truncate flex-1 min-w-0">{gongTrack.title}</span>
+              <div className="flex items-center gap-1 shrink-0">
+                <audio src={getPublicUrl(gongTrack.file_path)} controls className="h-8 w-24" />
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive shrink-0" onClick={() => handleDelete(gongTrack)}>
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
