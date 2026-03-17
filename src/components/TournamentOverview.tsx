@@ -730,7 +730,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       if (!certificateHiddenFields.includes('date')) {
         const dateSize = certificateExtraSizes.organizer ?? 12;
         doc.setFontSize(dateSize);
-        doc.setFont(certificateFontFamily, 'normal');
+        doc.setFont(pdfFont, 'normal');
         doc.setTextColor(tr, tg, tb);
         yOffset += 8;
         doc.text(certDate, w / 2, yOffset, { align: 'center' });
