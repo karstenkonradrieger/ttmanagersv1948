@@ -201,7 +201,7 @@ export function PlaylistManager() {
           <Music className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Music className="h-5 w-5" /> Playlist & Gong verwalten
