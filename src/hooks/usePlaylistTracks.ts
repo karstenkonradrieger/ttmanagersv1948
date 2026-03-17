@@ -92,5 +92,22 @@ export function usePlaylistTracks() {
     await fetchTracks();
   }, [tracks, fetchTracks]);
 
-  return { tracks, gongTrack, loading, uploadTrack, deleteTrack, reorderTrack, getPublicUrl, refetch: fetchTracks };
+  const reorderAll = useCallback(async (orderedIds: string[]) => {
+    // Optimistic update
+    const reordered = orderedIds.map((id, i) => {
+      const t = tracks.find(tr => tr.id === id);
+      return t ? { ...t, sort_order: i } : null;
+    }).filter(Boolean) as PlaylistTrack[];
+    setTracks(reordered);
+
+    // Persist
+    await Promise.all(
+      orderedIds.map((id, i) =>
+        supabase.from('playlist_tracks').update({ sort_order: i }).eq('id', id)
+      )
+    );
+    await fetchTracks();
+  }, [tracks, fetchTracks]);
+
+  return { tracks, gongTrack, loading, uploadTrack, deleteTrack, reorderTrack, reorderAll, getPublicUrl, refetch: fetchTracks };
 }
