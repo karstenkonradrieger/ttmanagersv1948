@@ -19,6 +19,7 @@ interface Props {
   matches: Match[];
   rounds: number;
   getPlayer: (id: string | null) => Player | null;
+  getParticipantName?: (id: string | null) => string;
   players: Player[];
   logoUrl?: string | null;
   bestOf: number;
