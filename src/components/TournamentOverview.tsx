@@ -623,6 +623,20 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
     }
 
+    // Map font families to jsPDF built-in fonts
+    const JSPDF_FONT_MAP: Record<string, string> = {
+      Helvetica: 'helvetica',
+      Times: 'times',
+      Courier: 'courier',
+      'Dancing Script': 'times',
+      'Great Vibes': 'times',
+      'Playfair Display': 'times',
+      Montserrat: 'helvetica',
+      Lora: 'times',
+      Raleway: 'helvetica',
+    };
+    const pdfFont = JSPDF_FONT_MAP[certificateFontFamily] || 'helvetica';
+
     const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
 
     const resolvePlaceholders = (template: string, vars: Record<string, string>): string => {
