@@ -464,6 +464,7 @@ const Index = () => {
                 bestOf={tournament.bestOf}
                  totalRounds={tournament.rounds}
                  getPlayer={getPlayer}
+                 getParticipantName={getParticipantName}
                  mode={tournament.mode}
                />
             </TabsContent>
@@ -688,6 +689,7 @@ const Index = () => {
                   ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
                   : getPlayer
                 }
+                getParticipantName={getParticipantName}
                 players={isDoubles
                   ? tournament.doublesPairs.map(dp => ({ id: dp.player1Id, name: dp.pairName, club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' }))
                   : tournament.players
