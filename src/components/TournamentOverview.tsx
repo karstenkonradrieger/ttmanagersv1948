@@ -1356,7 +1356,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     win.document.write(printContent.innerHTML);
                     win.document.write('</body></html>');
                     win.document.close();
-                    win.onload = () => { win.print(); win.close(); };
+                    win.onload = () => { setTimeout(() => { win.print(); win.close(); }, 500); };
                   }}
                 >
                   <Printer className="h-4 w-4 mr-2" />
