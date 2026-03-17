@@ -130,7 +130,7 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
   return Math.max(wins.p1, wins.p2) >= 3;
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent, certificateBgUrl, certificateText = 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.', certificateFontFamily = 'Helvetica', certificateFontSize = 20, certificateTextColor = '#1e1e1e', certificateLineSizes = [], certificateExtraSizes = {}, certificateHiddenFields = [], onSaveCertificateSettings }: Props) {
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, getParticipantName, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent, certificateBgUrl, certificateText = 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.', certificateFontFamily = 'Helvetica', certificateFontSize = 20, certificateTextColor = '#1e1e1e', certificateLineSizes = [], certificateExtraSizes = {}, certificateHiddenFields = [], onSaveCertificateSettings }: Props) {
   const [showMatchPhotos, setShowMatchPhotos] = useState(false);
   const [showCertPreview, setShowCertPreview] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
