@@ -1324,9 +1324,25 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     if (!printContent) return;
                     const win = window.open('', '_blank');
                     if (!win) return;
-                    win.document.write(`<!DOCTYPE html><html><head><title>Urkunde drucken</title><style>
+                    const FONT_FAMILY_MAP: Record<string, string> = {
+                      Helvetica: 'Helvetica, Arial, sans-serif',
+                      Times: '"Times New Roman", Times, serif',
+                      Courier: '"Courier New", Courier, monospace',
+                      'Dancing Script': '"Dancing Script", cursive',
+                      'Great Vibes': '"Great Vibes", cursive',
+                      'Playfair Display': '"Playfair Display", serif',
+                      Montserrat: 'Montserrat, sans-serif',
+                      Lora: 'Lora, serif',
+                      Raleway: 'Raleway, sans-serif',
+                    };
+                    const printFontFamily = FONT_FAMILY_MAP[certificateFontFamily] || 'Helvetica, Arial, sans-serif';
+                    win.document.write(`<!DOCTYPE html><html><head><title>Urkunde drucken</title>
+                      <link rel="preconnect" href="https://fonts.googleapis.com" />
+                      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+                      <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600;700&family=Lora:ital,wght@0,400;0,700;1,400&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet" />
+                      <style>
                       @page { size: A4 portrait; margin: 0; }
-                      * { margin: 0; padding: 0; box-sizing: border-box; }
+                      * { margin: 0; padding: 0; box-sizing: border-box; font-family: ${printFontFamily}; }
                       body { width: 210mm; height: 297mm; }
                       .cert-root { width: 210mm; height: 297mm; position: relative; overflow: hidden; }
                       .cert-root img.cert-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
