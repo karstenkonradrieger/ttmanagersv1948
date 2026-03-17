@@ -606,7 +606,7 @@ export function TournamentSettingsDialog({
               </div>
             </RadioGroup>
           </div>
-          <Button onClick={handleSave} disabled={!hasChanges || saving} className="w-full">
+          <Button onClick={handleSave} disabled={saving} className="w-full">
             {saving ? 'Speichern...' : 'Speichern'}
           </Button>
         </div>
