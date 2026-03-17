@@ -709,7 +709,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       if (!certificateHiddenFields.includes('motto') && motto) {
         const mottoSize = certificateExtraSizes.motto ?? 12;
         doc.setFontSize(mottoSize);
-        doc.setFont(certificateFontFamily, 'italic');
+        doc.setFont(pdfFont, 'italic');
         doc.setTextColor(tr, tg, tb);
         doc.text(`"${motto}"`, w / 2, yOffset, { align: 'center' });
         yOffset += mottoSize * 0.7 + 8;
