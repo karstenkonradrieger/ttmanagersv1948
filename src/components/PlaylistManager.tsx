@@ -367,7 +367,7 @@ function SortableTrackItem({ track, index, audioSrc, onDelete }: {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 bg-secondary/50 rounded-md p-2 text-sm"
+      className="flex items-center gap-2 bg-secondary/50 rounded-md p-2 text-sm min-w-0"
     >
       <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground">
         <GripVertical className="h-4 w-4" />
