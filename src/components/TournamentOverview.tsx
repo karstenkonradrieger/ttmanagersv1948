@@ -1337,65 +1337,61 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     };
                     const printFontFamily = FONT_FAMILY_MAP[certificateFontFamily] || 'Helvetica, Arial, sans-serif';
                     
-                    // Clone and inline all computed styles to avoid Tailwind dependency
+                    // Get the preview element and measure its actual size
                     const sourceEl = printContent.firstElementChild as HTMLElement;
                     if (!sourceEl) return;
+                    const previewRect = sourceEl.getBoundingClientRect();
 
-                    // Recursively inline styles
-                    function inlineStyles(source: Element, target: Element) {
-                      const computed = window.getComputedStyle(source);
-                      const el = target as HTMLElement;
-                      // Copy all computed styles
-                      el.style.cssText = '';
-                      for (let i = 0; i < computed.length; i++) {
-                        const prop = computed[i];
-                        el.style.setProperty(prop, computed.getPropertyValue(prop));
-                      }
-                      // Remove Tailwind classes to avoid conflicts
-                      el.removeAttribute('class');
-                      
-                      const sourceChildren = source.children;
-                      const targetChildren = target.children;
-                      for (let i = 0; i < sourceChildren.length; i++) {
-                        if (targetChildren[i]) {
-                          inlineStyles(sourceChildren[i], targetChildren[i]);
-                        }
-                      }
-                    }
-
+                    // Clone the preview HTML
                     const clone = sourceEl.cloneNode(true) as HTMLElement;
-                    // Temporarily append clone to body to compute styles
-                    document.body.appendChild(clone);
-                    clone.style.position = 'absolute';
-                    clone.style.left = '-9999px';
-                    // Now inline styles from the visible original
-                    inlineStyles(sourceEl, clone);
-                    document.body.removeChild(clone);
 
-                    // Force the root container to fill exactly one A4 page
-                    clone.style.width = '210mm';
-                    clone.style.height = '297mm';
-                    clone.style.position = 'relative';
-                    clone.style.overflow = 'hidden';
-                    clone.style.aspectRatio = 'auto';
-                    clone.style.borderRadius = '0';
-                    clone.style.border = 'none';
-                    clone.style.pageBreakAfter = 'avoid';
-                    clone.style.pageBreakInside = 'avoid';
-
+                    // Build the print window with a CSS transform to scale the small preview up to A4
+                    // A4 = 210mm x 297mm. We scale the preview proportionally.
                     win.document.write(`<!DOCTYPE html><html><head><title>Urkunde drucken</title>
                       <link rel="preconnect" href="https://fonts.googleapis.com" />
                       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
                       <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600;700&family=Lora:ital,wght@0,400;0,700;1,400&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet" />
                       <style>
-                      @page { size: A4 portrait; margin: 0; }
-                      * { margin: 0; padding: 0; box-sizing: border-box; font-family: ${printFontFamily}; }
-                      html, body { width: 210mm; height: 297mm; overflow: hidden; }
-                    </style></head><body>`);
-                    win.document.write(clone.outerHTML);
-                    win.document.write('</body></html>');
+                        @page { size: A4 portrait; margin: 0; }
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        html, body { width: 210mm; height: 297mm; overflow: hidden; }
+                        .cert-wrapper {
+                          width: ${previewRect.width}px;
+                          height: ${previewRect.height}px;
+                          transform-origin: top left;
+                          /* scale preview to fill 210mm width; 210mm ≈ 793.7px at 96dpi */
+                          transform: scale(calc(793.7 / ${previewRect.width}));
+                        }
+                        .cert-wrapper img { display: block; }
+                      </style>
+                      ${document.querySelector('style') ? '' : ''}
+                    </head><body><div class="cert-wrapper">`);
+
+                    // Copy Tailwind/app stylesheets into print window
+                    const sheets = Array.from(document.styleSheets);
+                    let cssText = '';
+                    for (const sheet of sheets) {
+                      try {
+                        for (const rule of Array.from(sheet.cssRules)) {
+                          cssText += rule.cssText + '\n';
+                        }
+                      } catch { /* cross-origin sheets */ }
+                    }
+                    const styleEl = win.document.createElement('style');
+                    styleEl.textContent = cssText;
+                    win.document.head.appendChild(styleEl);
+
+                    win.document.write(sourceEl.innerHTML);
+                    win.document.write('</div></body></html>');
                     win.document.close();
-                    win.onload = () => { setTimeout(() => { win.print(); win.close(); }, 500); };
+
+                    // Copy classes from original onto wrapper's first child
+                    const wrapperChild = win.document.querySelector('.cert-wrapper > *') as HTMLElement;
+                    if (wrapperChild && sourceEl.firstElementChild) {
+                      wrapperChild.className = (sourceEl.firstElementChild as HTMLElement).className;
+                    }
+
+                    win.onload = () => { setTimeout(() => { win.print(); win.close(); }, 600); };
                   }}
                 >
                   <Printer className="h-4 w-4 mr-2" />
