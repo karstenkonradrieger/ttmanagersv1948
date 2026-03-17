@@ -464,6 +464,7 @@ const Index = () => {
                 bestOf={tournament.bestOf}
                  totalRounds={tournament.rounds}
                  getPlayer={getPlayer}
+                 getParticipantName={getParticipantName}
                  mode={tournament.mode}
                />
             </TabsContent>
