@@ -29,6 +29,7 @@ interface Props {
   bestOf?: number;
   totalRounds?: number;
   getPlayer?: (id: string | null) => Player | null;
+  getParticipantName?: (id: string | null) => string;
   mode?: string;
 }
 
