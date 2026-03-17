@@ -302,7 +302,7 @@ export function PlaylistManager() {
           </div>
         </div>
 
-        {/* Playlist Tracks */}
+        {/* Playlist Tracks with Drag & Drop */}
         <div className="space-y-2">
           <h3 className="text-sm font-semibold flex items-center gap-1.5">
             <Music className="h-4 w-4" /> Playlist-Tracks ({tracks.length})
@@ -312,29 +312,56 @@ export function PlaylistManager() {
           ) : tracks.length === 0 ? (
             <p className="text-xs text-muted-foreground">Keine Tracks vorhanden – Standard-Platzhalter werden verwendet.</p>
           ) : (
-            <div className="space-y-1">
-              {tracks.map((track, idx) => (
-                <div key={track.id} className="flex items-center gap-2 bg-secondary/50 rounded-md p-2 text-sm">
-                  <span className="text-muted-foreground text-xs w-5 text-center">{idx + 1}</span>
-                  <span className="truncate flex-1">{track.title}</span>
-                  <audio src={getPublicUrl(track.file_path)} controls className="h-8 w-28 shrink-0" />
-                  <div className="flex items-center gap-0.5 shrink-0">
-                    <Button variant="ghost" size="icon" className="h-6 w-6" disabled={idx === 0} onClick={() => reorderTrack(track.id, 'up')}>
-                      <ChevronUp className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" disabled={idx === tracks.length - 1} onClick={() => reorderTrack(track.id, 'down')}>
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleDelete(track)}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={tracks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-1">
+                  {tracks.map((track, idx) => (
+                    <SortableTrackItem
+                      key={track.id}
+                      track={track}
+                      index={idx}
+                      audioSrc={getPublicUrl(track.file_path)}
+                      onDelete={() => handleDelete(track)}
+                    />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           )}
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function SortableTrackItem({ track, index, audioSrc, onDelete }: {
+  track: PlaylistTrack;
+  index: number;
+  audioSrc: string;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: track.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2 bg-secondary/50 rounded-md p-2 text-sm"
+    >
+      <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground">
+        <GripVertical className="h-4 w-4" />
+      </button>
+      <span className="text-muted-foreground text-xs w-5 text-center font-mono">{index + 1}</span>
+      <span className="truncate flex-1">{track.title}</span>
+      <audio src={audioSrc} controls className="h-8 w-28 shrink-0" />
+      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive shrink-0" onClick={onDelete}>
+        <Trash2 className="h-3.5 w-3.5" />
+      </Button>
+    </div>
   );
 }
