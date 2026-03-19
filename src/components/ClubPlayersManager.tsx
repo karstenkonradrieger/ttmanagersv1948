@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, UserPlus, Pencil, Check, X, Download, Upload, Mail, Camera, FileText, Paperclip, FileCheck, ExternalLink } from 'lucide-react';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { printGeneralPhotoConsentPdf } from '@/components/PhotoConsentForm';
@@ -118,6 +119,8 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const [addingPlayerFor, setAddingPlayerFor] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<ClubPlayer>>({});
+  const [consentViewUrl, setConsentViewUrl] = useState<string | null>(null);
+  const [consentViewName, setConsentViewName] = useState<string>('');
 
   // New player form state
   const [pName, setPName] = useState('');
@@ -462,9 +465,13 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   <span className="flex items-center gap-0.5">
                                     <Camera className="h-3 w-3" /> {player.photoConsent ? '✓ Foto' : '✗ Foto'}
                                     {player.photoConsentUrl && (
-                                      <a href={player.photoConsentUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-0.5" title="Scan anzeigen">
+                                      <button
+                                        onClick={() => { setConsentViewUrl(player.photoConsentUrl); setConsentViewName(player.name); }}
+                                        className="text-primary hover:underline ml-0.5 inline-flex"
+                                        title="Scan anzeigen"
+                                      >
                                         <ExternalLink className="h-3 w-3" />
-                                      </a>
+                                      </button>
                                     )}
                                   </span>
                                 </div>
@@ -537,6 +544,20 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
         onChange={handleConsentUpload}
         className="hidden"
       />
+      <Dialog open={!!consentViewUrl} onOpenChange={(open) => { if (!open) { setConsentViewUrl(null); setConsentViewName(''); } }}>
+        <DialogContent className="max-w-3xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Fotoerlaubnis — {consentViewName}</DialogTitle>
+          </DialogHeader>
+          {consentViewUrl && (
+            consentViewUrl.match(/\.(jpg|jpeg|png|webp)(\?|$)/i) ? (
+              <img src={consentViewUrl} alt="Fotoerlaubnis" className="w-full h-auto rounded" />
+            ) : (
+              <iframe src={consentViewUrl} className="w-full h-[70vh] rounded border-0" title="Fotoerlaubnis" />
+            )
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
