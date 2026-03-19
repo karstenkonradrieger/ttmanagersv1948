@@ -391,6 +391,10 @@ const Index = () => {
               <ClipboardList className="h-4 w-4" />
               <span className="hidden sm:inline">Übersicht</span>
             </TabsTrigger>
+            <TabsTrigger value="media" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
+              <Film className="h-4 w-4" />
+              <span className="hidden sm:inline">Medien</span>
+            </TabsTrigger>
             <TabsTrigger value="live" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <Monitor className="h-4 w-4" />
               <span className="hidden sm:inline">Live</span>
