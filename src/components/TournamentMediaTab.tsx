@@ -257,23 +257,31 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
               </div>
             </div>
           ) : (
-            <Button
-              onClick={handleGenerateVideo}
-              disabled={generatingVideo}
-              className="gap-2"
-            >
-              {generatingVideo ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Video wird erzeugt...
-                </>
-              ) : (
-                <>
-                  <Film className="h-4 w-4" />
-                  Videoclip erzeugen
-                </>
+            <div className="space-y-3">
+              <Button
+                onClick={handleGenerateVideo}
+                disabled={generatingVideo}
+                className="gap-2"
+              >
+                {generatingVideo ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Video wird erzeugt...
+                  </>
+                ) : (
+                  <>
+                    <Film className="h-4 w-4" />
+                    Videoclip erzeugen
+                  </>
+                )}
+              </Button>
+              {generatingVideo && videoProgress > 0 && (
+                <div className="max-w-md space-y-1">
+                  <Progress value={videoProgress} className="h-2" />
+                  <p className="text-xs text-muted-foreground">{videoProgress}% abgeschlossen</p>
+                </div>
               )}
-            </Button>
+            </div>
           )}
         </CardContent>
       </Card>
