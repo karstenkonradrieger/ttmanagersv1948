@@ -18,8 +18,22 @@ interface Props {
   started?: boolean;
 }
 
-export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, mode, phase, players = [], groupCount = 0 }: Props) {
+export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, mode, phase, players = [], groupCount = 0, tournamentDate, started }: Props) {
   const getName = (id: string | null) => getParticipantName ? getParticipantName(id) : (getPlayer(id)?.name || '—');
+
+  // Birthday check
+  const birthdayPlayers = useMemo(() => {
+    if (!tournamentDate) return [];
+    const td = new Date(tournamentDate);
+    const tMonth = td.getMonth();
+    const tDay = td.getDate();
+    return players.filter(p => {
+      if (!p.birthDate) return false;
+      const bd = new Date(p.birthDate);
+      return bd.getMonth() === tMonth && bd.getDate() === tDay;
+    });
+  }, [players, tournamentDate]);
+
   const activeMatches = matches.filter(m => m.status === 'active');
   const nextPending = matches
     .filter(m => m.status === 'pending' && m.player1Id && m.player2Id)
