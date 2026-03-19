@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Club } from '@/hooks/useClubs';
 import { ClubPlayer } from '@/hooks/useClubPlayers';
 import { Button } from '@/components/ui/button';
