@@ -2,7 +2,8 @@ import { useMemo, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save } from 'lucide-react';
+import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save, Download } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -1396,6 +1397,36 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                 >
                   <Printer className="h-4 w-4 mr-2" />
                   Urkunde drucken
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={async () => {
+                    const sourceEl = document.getElementById('cert-preview-print')?.firstElementChild as HTMLElement;
+                    if (!sourceEl) return;
+                    toast.info('PDF wird erstellt…');
+                    try {
+                      // Render preview at high resolution
+                      const canvas = await html2canvas(sourceEl, {
+                        scale: 3,
+                        useCORS: true,
+                        allowTaint: false,
+                        backgroundColor: '#ffffff',
+                      });
+                      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                      const pdf = new jsPDF({ orientation: 'portrait', format: 'a4', unit: 'mm' });
+                      pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+                      pdf.save(`Urkunde_${current.player.name.replace(/\s+/g, '_')}.pdf`);
+                      toast.success('PDF gespeichert');
+                    } catch (err) {
+                      console.error(err);
+                      toast.error('PDF-Export fehlgeschlagen');
+                    }
+                  }}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  PDF Export
                 </Button>
               </div>
             </DialogContent>
