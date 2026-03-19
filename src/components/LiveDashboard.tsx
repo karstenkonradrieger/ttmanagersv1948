@@ -3,7 +3,7 @@ import { Match, Player, TournamentMode, SetScore } from '@/types/tournament';
 import { TournamentBracket } from './TournamentBracket';
 import { GroupStageView } from './GroupStageView';
 import { DoubleEliminationBracket } from './DoubleEliminationBracket';
-import { Monitor, Trophy, Crown } from 'lucide-react';
+import { Monitor, Trophy, Crown, Cake } from 'lucide-react';
 
 interface Props {
   matches: Match[];
