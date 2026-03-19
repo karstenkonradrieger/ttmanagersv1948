@@ -465,9 +465,13 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   <span className="flex items-center gap-0.5">
                                     <Camera className="h-3 w-3" /> {player.photoConsent ? '✓ Foto' : '✗ Foto'}
                                     {player.photoConsentUrl && (
-                                      <a href={player.photoConsentUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-0.5" title="Scan anzeigen">
+                                      <button
+                                        onClick={() => { setConsentViewUrl(player.photoConsentUrl); setConsentViewName(player.name); }}
+                                        className="text-primary hover:underline ml-0.5 inline-flex"
+                                        title="Scan anzeigen"
+                                      >
                                         <ExternalLink className="h-3 w-3" />
-                                      </a>
+                                      </button>
                                     )}
                                   </span>
                                 </div>
