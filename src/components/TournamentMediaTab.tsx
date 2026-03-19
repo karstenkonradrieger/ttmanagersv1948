@@ -41,13 +41,13 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
 
   const fetchTournamentVideo = async () => {
     const { data } = await supabase
-      .from('tournament_videos')
+      .from('tournament_videos' as any)
       .select('*')
       .eq('tournament_id', tournamentId)
       .order('created_at', { ascending: false })
       .limit(1);
     if (data && data.length > 0) {
-      setVideoUrl((data[0] as TournamentVideoRow).video_url);
+      setVideoUrl((data[0] as any).video_url);
     } else {
       setVideoUrl(null);
     }
