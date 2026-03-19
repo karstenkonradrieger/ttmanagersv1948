@@ -29,7 +29,7 @@ function isVideoUrl(url: string): boolean {
 interface Props {
   tournamentId: string;
   matchId?: string | null;
-  photoType: 'match' | 'ceremony';
+  photoType: 'match' | 'ceremony' | 'pre_tournament';
   maxPhotos?: number;
   maxVideos?: number;
   readOnly?: boolean;

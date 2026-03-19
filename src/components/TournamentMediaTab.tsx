@@ -78,7 +78,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
     if (!window.confirm('Videoclip wirklich löschen?')) return;
     try {
       await supabase
-        .from('tournament_videos')
+        .from('tournament_videos' as any)
         .delete()
         .eq('tournament_id', tournamentId);
       
