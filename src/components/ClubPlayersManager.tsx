@@ -467,7 +467,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                     <Camera className="h-3 w-3" /> {player.photoConsent ? '✓ Foto' : '✗ Foto'}
                                     {player.photoConsentUrl && (
                                       <button
-                                        onClick={() => { setConsentViewUrl(player.photoConsentUrl); setConsentViewName(player.name); }}
+                                        onClick={() => { setConsentViewUrl(player.photoConsentUrl); setConsentViewName(player.name); setConsentViewPlayerId(player.id); }}
                                         className="text-primary hover:underline ml-0.5 inline-flex"
                                         title="Scan anzeigen"
                                       >
