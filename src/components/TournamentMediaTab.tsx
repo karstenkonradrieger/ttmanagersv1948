@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Camera, PartyPopper, Film, Loader2, Download, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Progress } from '@/components/ui/progress';
+import { collectTournamentMedia, generateSlideshowVideo, uploadGeneratedVideo } from '@/services/videoGenerationService';
 
 interface Props {
   tournamentId: string;
