@@ -61,7 +61,7 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
 
     if (matchId) {
       query = query.eq('match_id', matchId);
-    } else if (photoType === 'ceremony') {
+    } else if (photoType === 'ceremony' || photoType === 'pre_tournament') {
       query = query.is('match_id', null);
     }
 
