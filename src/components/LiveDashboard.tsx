@@ -14,6 +14,8 @@ interface Props {
   phase?: 'group' | 'knockout' | null;
   players?: Player[];
   groupCount?: number;
+  tournamentDate?: string | null;
+  started?: boolean;
 }
 
 export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, mode, phase, players = [], groupCount = 0 }: Props) {
