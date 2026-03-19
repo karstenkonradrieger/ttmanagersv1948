@@ -733,6 +733,17 @@ const Index = () => {
                 />
             </TabsContent>
 
+            <TabsContent value="media">
+              <TournamentMediaTab
+                tournamentId={selectedTournamentId!}
+                tournamentName={tournament.name}
+                matches={tournament.matches}
+                getParticipantName={getParticipantName}
+                started={tournament.started}
+                logoUrl={tournament.logoUrl}
+              />
+            </TabsContent>
+
             <TabsContent value="live">
               <LiveDashboard
                 matches={tournament.matches}
