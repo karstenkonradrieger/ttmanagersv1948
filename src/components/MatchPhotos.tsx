@@ -221,18 +221,17 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
       <div className={`flex gap-2 flex-wrap ${readOnly ? 'gap-3' : ''}`}>
         {videos.map((vid) => (
           <div key={vid.id} className="relative group">
-            <video
+            <VideoThumbnail
               src={vid.photo_url}
-              controls
-              preload="metadata"
               className={`rounded-lg border border-border ${
-                readOnly ? 'h-48 w-72' : 'h-24 w-36'
+                readOnly ? 'h-32 w-48' : 'h-16 w-24'
               }`}
+              onClick={() => setVideoPlayerUrl(vid.photo_url)}
             />
             {!readOnly && (
               <button
-                onClick={() => handleDelete(vid)}
-                className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full h-5 w-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => { e.stopPropagation(); handleDelete(vid); }}
+                className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full h-5 w-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
               >
                 <X className="h-3 w-3" />
               </button>
