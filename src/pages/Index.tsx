@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useClubs } from '@/hooks/useClubs';
 import { useClubPlayers } from '@/hooks/useClubPlayers';
 import { TournamentSelector } from '@/components/TournamentSelector';
+import { TournamentMediaTab } from '@/components/TournamentMediaTab';
 import { PlayerManager } from '@/components/PlayerManager';
 import { PlayerImportExport } from '@/components/PlayerImportExport';
 import { ImportFromClubPlayers } from '@/components/ImportFromClubPlayers';
