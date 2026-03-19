@@ -631,10 +631,9 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
         onChange={handleConsentUpload}
         className="hidden"
       />
-      <ConsentViewDialog
+      <ConsentDocumentDialog
         url={consentViewUrl}
         name={consentViewName}
-        playerId={consentViewPlayerId}
         onClose={() => { setConsentViewUrl(null); setConsentViewName(''); setConsentViewPlayerId(null); }}
         onDelete={async () => {
           if (!consentViewPlayerId || !consentViewUrl) return;

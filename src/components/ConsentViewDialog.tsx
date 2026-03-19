@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 
 GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
-interface ConsentViewDialogProps {
+interface ConsentDocumentDialogProps {
   url: string | null;
   name: string;
   onClose: () => void;
@@ -22,7 +22,7 @@ function isPdfUrl(url: string) {
   return /\.pdf(\?|$)/i.test(url);
 }
 
-export function ConsentViewDialog({ url, name, onClose, onDelete }: ConsentViewDialogProps) {
+export function ConsentDocumentDialog({ url, name, onClose, onDelete }: ConsentDocumentDialogProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pdfPages, setPdfPages] = useState<string[]>([]);
@@ -75,7 +75,7 @@ export function ConsentViewDialog({ url, name, onClose, onDelete }: ConsentViewD
           canvas.width = Math.ceil(viewport.width);
           canvas.height = Math.ceil(viewport.height);
 
-          await page.render({ canvasContext: context, viewport }).promise;
+          await page.render({ canvas, canvasContext: context, viewport }).promise;
           renderedPages.push(canvas.toDataURL('image/png'));
         }
 
