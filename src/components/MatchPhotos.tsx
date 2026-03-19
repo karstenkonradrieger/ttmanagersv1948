@@ -264,6 +264,19 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
         onOpenChange={setLightboxOpen}
       />
 
+      <Dialog open={!!videoPlayerUrl} onOpenChange={(open) => !open && setVideoPlayerUrl(null)}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none overflow-hidden flex items-center justify-center">
+          {videoPlayerUrl && (
+            <video
+              src={videoPlayerUrl}
+              controls
+              autoPlay
+              className="max-w-full max-h-[90vh] rounded"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
       <input
         ref={photoInputRef}
         type="file"
