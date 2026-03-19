@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, UserPlus, Pencil, Check, X, Download, Upload, Mail, Camera, FileText, Paperclip, FileCheck, ExternalLink } from 'lucide-react';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { printGeneralPhotoConsentPdf } from '@/components/PhotoConsentForm';
+import { ConsentDocumentDialog } from '@/components/ConsentViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -630,10 +631,9 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
         onChange={handleConsentUpload}
         className="hidden"
       />
-      <ConsentViewDialog
+      <ConsentDocumentDialog
         url={consentViewUrl}
         name={consentViewName}
-        playerId={consentViewPlayerId}
         onClose={() => { setConsentViewUrl(null); setConsentViewName(''); setConsentViewPlayerId(null); }}
         onDelete={async () => {
           if (!consentViewPlayerId || !consentViewUrl) return;
