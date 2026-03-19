@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Camera, Video, X, Loader2, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { PhotoLightbox } from '@/components/PhotoLightbox';
+import { VideoThumbnail } from '@/components/VideoThumbnail';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface MatchMedia {
   id: string;
