@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useClubs } from '@/hooks/useClubs';
 import { useClubPlayers } from '@/hooks/useClubPlayers';
 import { TournamentSelector } from '@/components/TournamentSelector';
+import { TournamentMediaTab } from '@/components/TournamentMediaTab';
 import { PlayerManager } from '@/components/PlayerManager';
 import { PlayerImportExport } from '@/components/PlayerImportExport';
 import { ImportFromClubPlayers } from '@/components/ImportFromClubPlayers';
@@ -28,7 +29,7 @@ import { TeamEncounterScoring } from '@/components/TeamEncounterScoring';
 import { KaiserScoring } from '@/components/KaiserScoring';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings } from 'lucide-react';
+import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings, Film } from 'lucide-react';
 import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
 
@@ -197,7 +198,7 @@ const Index = () => {
   const modeLabel = isRoundRobin ? 'Jeder gg. Jeden' : isGroupKnockout ? 'Gruppen+KO' : isDoubleKnockout ? 'Doppel-KO' : isSwiss ? 'Schweizer' : isKaiser ? 'Kaiser' : isHandicap ? 'Vorgabe' : 'KO';
   const typeLabel = isTeam ? 'Mannschaft' : isDoubles ? 'Doppel' : 'Einzel';
 
-  const tabCount = isTeam ? 7 : isDoubles ? 7 : 6;
+  const tabCount = isTeam ? 8 : isDoubles ? 8 : 7;
 
   return (
     <div className="min-h-screen bg-background">
@@ -389,6 +390,10 @@ const Index = () => {
             <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <ClipboardList className="h-4 w-4" />
               <span className="hidden sm:inline">Übersicht</span>
+            </TabsTrigger>
+            <TabsTrigger value="media" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
+              <Film className="h-4 w-4" />
+              <span className="hidden sm:inline">Medien</span>
             </TabsTrigger>
             <TabsTrigger value="live" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
               <Monitor className="h-4 w-4" />
@@ -726,6 +731,17 @@ const Index = () => {
                    } as any);
                  }}
                 />
+            </TabsContent>
+
+            <TabsContent value="media">
+              <TournamentMediaTab
+                tournamentId={selectedTournamentId!}
+                tournamentName={tournament.name}
+                matches={tournament.matches}
+                getParticipantName={getParticipantName}
+                started={tournament.started}
+                logoUrl={tournament.logoUrl}
+              />
             </TabsContent>
 
             <TabsContent value="live">

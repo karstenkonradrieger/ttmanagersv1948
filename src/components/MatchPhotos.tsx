@@ -29,7 +29,7 @@ function isVideoUrl(url: string): boolean {
 interface Props {
   tournamentId: string;
   matchId?: string | null;
-  photoType: 'match' | 'ceremony';
+  photoType: 'match' | 'ceremony' | 'pre_tournament';
   maxPhotos?: number;
   maxVideos?: number;
   readOnly?: boolean;
@@ -61,7 +61,7 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
 
     if (matchId) {
       query = query.eq('match_id', matchId);
-    } else if (photoType === 'ceremony') {
+    } else if (photoType === 'ceremony' || photoType === 'pre_tournament') {
       query = query.is('match_id', null);
     }
 
