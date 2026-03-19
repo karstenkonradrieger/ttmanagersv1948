@@ -198,7 +198,7 @@ const Index = () => {
   const modeLabel = isRoundRobin ? 'Jeder gg. Jeden' : isGroupKnockout ? 'Gruppen+KO' : isDoubleKnockout ? 'Doppel-KO' : isSwiss ? 'Schweizer' : isKaiser ? 'Kaiser' : isHandicap ? 'Vorgabe' : 'KO';
   const typeLabel = isTeam ? 'Mannschaft' : isDoubles ? 'Doppel' : 'Einzel';
 
-  const tabCount = isTeam ? 7 : isDoubles ? 7 : 6;
+  const tabCount = isTeam ? 8 : isDoubles ? 8 : 7;
 
   return (
     <div className="min-h-screen bg-background">
