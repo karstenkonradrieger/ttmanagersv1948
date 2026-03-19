@@ -1,13 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { MatchPhotos } from '@/components/MatchPhotos';
-import { Match, Player } from '@/types/tournament';
+import { Match } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Camera, PartyPopper, Film, Loader2, Download, Trash2 } from 'lucide-react';
+import { Camera, PartyPopper, Film, Loader2, Download, Trash2, Music, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
-import { collectTournamentMedia, generateSlideshowVideo, uploadGeneratedVideo } from '@/services/videoGenerationService';
+import {
+  collectTournamentMedia,
+  generateSlideshowVideo,
+  uploadGeneratedVideo,
+  uploadSoundtrack,
+  getSoundtrackUrl,
+  removeSoundtrack,
+} from '@/services/videoGenerationService';
 
 interface Props {
   tournamentId: string;
@@ -16,12 +23,6 @@ interface Props {
   getParticipantName?: (id: string | null) => string;
   started: boolean;
   logoUrl?: string | null;
-}
-
-interface TournamentVideoRow {
-  id: string;
-  video_url: string;
-  created_at: string;
 }
 
 function getRoundLabel(round: number, totalRounds: number, mode?: string): string {
@@ -37,9 +38,13 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
   const [generatingVideo, setGeneratingVideo] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [soundtrackUrl, setSoundtrackUrl] = useState<string | null>(null);
+  const [uploadingSoundtrack, setUploadingSoundtrack] = useState(false);
+  const soundtrackInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchTournamentVideo();
+    loadSoundtrack();
   }, [tournamentId]);
 
   const fetchTournamentVideo = async () => {
@@ -56,23 +61,64 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
     }
   };
 
+  const loadSoundtrack = async () => {
+    const url = await getSoundtrackUrl(tournamentId);
+    setSoundtrackUrl(url);
+  };
+
+  const handleSoundtrackUpload = async (file: File) => {
+    if (!file.type.startsWith('audio/')) {
+      toast.error('Nur Audiodateien sind erlaubt (MP3, WAV, etc.)');
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('Datei zu groß (max. 50 MB)');
+      return;
+    }
+
+    setUploadingSoundtrack(true);
+    try {
+      const url = await uploadSoundtrack(tournamentId, file);
+      setSoundtrackUrl(url);
+      toast.success('Soundtrack hochgeladen');
+    } catch (err) {
+      console.error('Soundtrack upload error:', err);
+      toast.error('Fehler beim Hochladen des Soundtracks');
+    } finally {
+      setUploadingSoundtrack(false);
+      if (soundtrackInputRef.current) soundtrackInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveSoundtrack = async () => {
+    try {
+      await removeSoundtrack(tournamentId);
+      setSoundtrackUrl(null);
+      toast.success('Soundtrack entfernt');
+    } catch {
+      toast.error('Fehler beim Entfernen');
+    }
+  };
+
   const handleGenerateVideo = async () => {
     setGeneratingVideo(true);
     setVideoProgress(0);
     try {
       const media = await collectTournamentMedia(tournamentId);
-      const images = media.filter(m => m.type === 'image');
-      
-      if (images.length === 0) {
-        toast.error('Keine Fotos vorhanden. Bitte zuerst Fotos aufnehmen.');
+
+      if (media.length === 0) {
+        toast.error('Keine Medien vorhanden. Bitte zuerst Fotos oder Videos aufnehmen.');
         return;
       }
 
-      toast.info(`Erzeuge Video aus ${images.length} Fotos...`);
-      
+      const imageCount = media.filter(m => m.type === 'image').length;
+      const videoCount = media.filter(m => m.type === 'video').length;
+      toast.info(`Erzeuge Video aus ${imageCount} Fotos und ${videoCount} Videos...`);
+
       const videoBlob = await generateSlideshowVideo(
         media,
         tournamentName,
+        soundtrackUrl,
         (pct) => setVideoProgress(pct)
       );
 
@@ -95,7 +141,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
         .from('tournament_videos' as any)
         .delete()
         .eq('tournament_id', tournamentId);
-      
+
       if (videoUrl) {
         try {
           const url = new URL(videoUrl);
@@ -105,7 +151,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
           }
         } catch {}
       }
-      
+
       setVideoUrl(null);
       toast.success('Videoclip gelöscht');
     } catch {
@@ -206,6 +252,75 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
         </CardContent>
       </Card>
 
+      {/* Soundtrack */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Music className="h-4 w-4 text-primary" />
+            Soundtrack
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Lade eine Audiodatei hoch, die als musikalische Untermalung im Videoclip verwendet wird.
+          </p>
+
+          {soundtrackUrl ? (
+            <div className="space-y-2">
+              <audio src={soundtrackUrl} controls className="w-full max-w-md" />
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => soundtrackInputRef.current?.click()}
+                  disabled={uploadingSoundtrack}
+                  className="gap-1"
+                >
+                  {uploadingSoundtrack ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                  Ersetzen
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemoveSoundtrack}
+                  className="gap-1 text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Entfernen
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={() => soundtrackInputRef.current?.click()}
+              disabled={uploadingSoundtrack}
+              className="gap-2"
+            >
+              {uploadingSoundtrack ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Wird hochgeladen...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  Soundtrack hochladen
+                </>
+              )}
+            </Button>
+          )}
+
+          <input
+            ref={soundtrackInputRef}
+            type="file"
+            accept="audio/*"
+            onChange={(e) => e.target.files?.[0] && handleSoundtrackUpload(e.target.files[0])}
+            className="hidden"
+          />
+        </CardContent>
+      </Card>
+
       {/* Video generation */}
       <Card>
         <CardHeader className="pb-3">
@@ -217,6 +332,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
         <CardContent className="space-y-4">
           <p className="text-xs text-muted-foreground">
             Erstelle einen professionellen Videoclip aus allen gesammelten Fotos und Videos des Turniers.
+            {soundtrackUrl && ' Der hochgeladene Soundtrack wird als Hintergrundmusik eingebunden.'}
           </p>
 
           {videoUrl ? (
