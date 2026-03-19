@@ -40,6 +40,7 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
   const [uploading, setUploading] = useState<'photo' | 'video' | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [videoPlayerUrl, setVideoPlayerUrl] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
