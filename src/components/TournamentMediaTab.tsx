@@ -58,22 +58,33 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
 
   const handleGenerateVideo = async () => {
     setGeneratingVideo(true);
+    setVideoProgress(0);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-tournament-video', {
-        body: { tournamentId },
-      });
-
-      if (error) throw error;
-
-      if (data?.videoUrl) {
-        setVideoUrl(data.videoUrl);
-        toast.success('Videoclip wurde erfolgreich erzeugt!');
+      const media = await collectTournamentMedia(tournamentId);
+      const images = media.filter(m => m.type === 'image');
+      
+      if (images.length === 0) {
+        toast.error('Keine Fotos vorhanden. Bitte zuerst Fotos aufnehmen.');
+        return;
       }
+
+      toast.info(`Erzeuge Video aus ${images.length} Fotos...`);
+      
+      const videoBlob = await generateSlideshowVideo(
+        media,
+        tournamentName,
+        (pct) => setVideoProgress(pct)
+      );
+
+      const url = await uploadGeneratedVideo(tournamentId, videoBlob);
+      setVideoUrl(url);
+      toast.success('Videoclip wurde erfolgreich erzeugt!');
     } catch (err) {
       console.error('Video generation error:', err);
       toast.error('Fehler beim Erzeugen des Videoclips');
     } finally {
       setGeneratingVideo(false);
+      setVideoProgress(0);
     }
   };
 
