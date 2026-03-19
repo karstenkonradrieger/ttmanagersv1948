@@ -3,7 +3,7 @@ import { Match, Player, TournamentMode, SetScore } from '@/types/tournament';
 import { TournamentBracket } from './TournamentBracket';
 import { GroupStageView } from './GroupStageView';
 import { DoubleEliminationBracket } from './DoubleEliminationBracket';
-import { Monitor, Trophy, Crown } from 'lucide-react';
+import { Monitor, Trophy, Crown, Cake } from 'lucide-react';
 
 interface Props {
   matches: Match[];
@@ -14,10 +14,26 @@ interface Props {
   phase?: 'group' | 'knockout' | null;
   players?: Player[];
   groupCount?: number;
+  tournamentDate?: string | null;
+  started?: boolean;
 }
 
-export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, mode, phase, players = [], groupCount = 0 }: Props) {
+export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, mode, phase, players = [], groupCount = 0, tournamentDate, started }: Props) {
   const getName = (id: string | null) => getParticipantName ? getParticipantName(id) : (getPlayer(id)?.name || '—');
+
+  // Birthday check
+  const birthdayPlayers = useMemo(() => {
+    if (!tournamentDate) return [];
+    const td = new Date(tournamentDate);
+    const tMonth = td.getMonth();
+    const tDay = td.getDate();
+    return players.filter(p => {
+      if (!p.birthDate) return false;
+      const bd = new Date(p.birthDate);
+      return bd.getMonth() === tMonth && bd.getDate() === tDay;
+    });
+  }, [players, tournamentDate]);
+
   const activeMatches = matches.filter(m => m.status === 'active');
   const nextPending = matches
     .filter(m => m.status === 'pending' && m.player1Id && m.player2Id)
@@ -59,6 +75,21 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
 
   return (
     <div className="space-y-6 animate-slide-up">
+      {birthdayPlayers.length > 0 && !started && (
+        <div className="bg-gradient-to-r from-pink-500/20 to-yellow-400/20 border-2 border-pink-400 rounded-xl p-5 text-center space-y-2">
+          <Cake className="h-10 w-10 mx-auto text-pink-500" />
+          <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">🎉 Geburtstagskind{birthdayPlayers.length > 1 ? 'er' : ''} 🎉</p>
+          {birthdayPlayers.map(p => (
+            <div key={p.id}>
+              <p className="text-xl font-extrabold text-pink-600 dark:text-pink-400">
+                Alles Gute zum Geburtstag, {p.name}! 🎂
+              </p>
+              {p.club && <p className="text-sm text-muted-foreground">{p.club}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+
       {championPlayer && (
         <div className="bg-gradient-to-r from-primary/20 to-tt-gold/20 border-2 border-tt-gold rounded-xl p-6 text-center">
           <Trophy className="h-12 w-12 mx-auto mb-2 text-tt-gold" />
