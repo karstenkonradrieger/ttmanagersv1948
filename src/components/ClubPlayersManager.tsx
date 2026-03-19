@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Club } from '@/hooks/useClubs';
 import { ClubPlayer } from '@/hooks/useClubPlayers';
 import { Button } from '@/components/ui/button';
@@ -107,6 +107,91 @@ function parseCsvForClubPlayers(text: string): CsvParsedPlayer[] {
     });
   }
   return result;
+}
+
+function ConsentViewDialog({ url, name, playerId, onClose, onDelete }: {
+  url: string | null;
+  name: string;
+  playerId: string | null;
+  onClose: () => void;
+  onDelete: () => void;
+}) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const isImage = url ? /\.(jpg|jpeg|png|webp)(\?|$)/i.test(url) : false;
+
+  useEffect(() => {
+    if (!url || isImage) { setBlobUrl(null); return; }
+    let revoked = false;
+    setLoading(true);
+    fetch(url)
+      .then(res => res.blob())
+      .then(blob => {
+        if (revoked) return;
+        const objUrl = URL.createObjectURL(blob);
+        setBlobUrl(objUrl);
+      })
+      .catch(() => setBlobUrl(null))
+      .finally(() => setLoading(false));
+    return () => { revoked = true; if (blobUrl) URL.revokeObjectURL(blobUrl); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url, isImage]);
+
+  // Cleanup blob URL on unmount
+  useEffect(() => {
+    return () => { if (blobUrl) URL.revokeObjectURL(blobUrl); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <Dialog open={!!url} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-3xl max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle>Fotoerlaubnis — {name}</DialogTitle>
+        </DialogHeader>
+        {url && (
+          isImage ? (
+            <img src={url} alt="Fotoerlaubnis" className="w-full h-auto rounded" />
+          ) : loading ? (
+            <div className="flex items-center justify-center h-[70vh] text-muted-foreground">Dokument wird geladen…</div>
+          ) : blobUrl ? (
+            <iframe src={blobUrl} className="w-full h-[70vh] rounded border-0" title="Fotoerlaubnis" />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-[40vh] gap-3 text-muted-foreground">
+              <p>Das Dokument konnte nicht angezeigt werden.</p>
+              <a href={url} download className="text-primary hover:underline text-sm">Dokument herunterladen</a>
+            </div>
+          )
+        )}
+        <div className="flex justify-end">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" className="gap-1">
+                <Trash2 className="h-3.5 w-3.5" /> Dokument löschen
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Fotoerlaubnis löschen?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Das hinterlegte Dokument von <strong>{name}</strong> wird unwiderruflich gelöscht. Der Fotoerlaubnis-Status wird zurückgesetzt.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={onDelete}
+                >
+                  Löschen
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub, onAddPlayer, onUpdatePlayer, onRemovePlayer, getPlayersForClub }: Props) {
@@ -545,63 +630,29 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
         onChange={handleConsentUpload}
         className="hidden"
       />
-      <Dialog open={!!consentViewUrl} onOpenChange={(open) => { if (!open) { setConsentViewUrl(null); setConsentViewName(''); setConsentViewPlayerId(null); } }}>
-        <DialogContent className="max-w-3xl max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>Fotoerlaubnis — {consentViewName}</DialogTitle>
-          </DialogHeader>
-          {consentViewUrl && (
-            consentViewUrl.match(/\.(jpg|jpeg|png|webp)(\?|$)/i) ? (
-              <img src={consentViewUrl} alt="Fotoerlaubnis" className="w-full h-auto rounded" />
-            ) : (
-              <iframe src={consentViewUrl} className="w-full h-[70vh] rounded border-0" title="Fotoerlaubnis" />
-            )
-          )}
-          <div className="flex justify-end">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" className="gap-1">
-                  <Trash2 className="h-3.5 w-3.5" /> Dokument löschen
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Fotoerlaubnis löschen?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Das hinterlegte Dokument von <strong>{consentViewName}</strong> wird unwiderruflich gelöscht. Der Fotoerlaubnis-Status wird zurückgesetzt.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    onClick={async () => {
-                      if (!consentViewPlayerId || !consentViewUrl) return;
-                      try {
-                        // Extract storage path from URL
-                        const match = consentViewUrl.match(/consent-documents\/(.+?)(\?|$)/);
-                        if (match) {
-                          await supabase.storage.from('consent-documents').remove([match[1]]);
-                        }
-                        onUpdatePlayer(consentViewPlayerId, { photoConsentUrl: null, photoConsent: false });
-                        toast.success('Fotoerlaubnis-Dokument gelöscht');
-                      } catch (error) {
-                        console.error('Error deleting consent document:', error);
-                        toast.error('Fehler beim Löschen');
-                      }
-                      setConsentViewUrl(null);
-                      setConsentViewName('');
-                      setConsentViewPlayerId(null);
-                    }}
-                  >
-                    Löschen
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ConsentViewDialog
+        url={consentViewUrl}
+        name={consentViewName}
+        playerId={consentViewPlayerId}
+        onClose={() => { setConsentViewUrl(null); setConsentViewName(''); setConsentViewPlayerId(null); }}
+        onDelete={async () => {
+          if (!consentViewPlayerId || !consentViewUrl) return;
+          try {
+            const match = consentViewUrl.match(/consent-documents\/(.+?)(\?|$)/);
+            if (match) {
+              await supabase.storage.from('consent-documents').remove([match[1]]);
+            }
+            onUpdatePlayer(consentViewPlayerId, { photoConsentUrl: null, photoConsent: false });
+            toast.success('Fotoerlaubnis-Dokument gelöscht');
+          } catch (error) {
+            console.error('Error deleting consent document:', error);
+            toast.error('Fehler beim Löschen');
+          }
+          setConsentViewUrl(null);
+          setConsentViewName('');
+          setConsentViewPlayerId(null);
+        }}
+      />
     </div>
   );
 }
