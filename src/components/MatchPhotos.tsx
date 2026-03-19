@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Camera, Video, X, Loader2, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { PhotoLightbox } from '@/components/PhotoLightbox';
+import { VideoThumbnail } from '@/components/VideoThumbnail';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface MatchMedia {
   id: string;
@@ -38,6 +40,7 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
   const [uploading, setUploading] = useState<'photo' | 'video' | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [videoPlayerUrl, setVideoPlayerUrl] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -218,18 +221,17 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
       <div className={`flex gap-2 flex-wrap ${readOnly ? 'gap-3' : ''}`}>
         {videos.map((vid) => (
           <div key={vid.id} className="relative group">
-            <video
+            <VideoThumbnail
               src={vid.photo_url}
-              controls
-              preload="metadata"
               className={`rounded-lg border border-border ${
-                readOnly ? 'h-48 w-72' : 'h-24 w-36'
+                readOnly ? 'h-32 w-48' : 'h-16 w-24'
               }`}
+              onClick={() => setVideoPlayerUrl(vid.photo_url)}
             />
             {!readOnly && (
               <button
-                onClick={() => handleDelete(vid)}
-                className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full h-5 w-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => { e.stopPropagation(); handleDelete(vid); }}
+                className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full h-5 w-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -261,6 +263,19 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
         open={lightboxOpen}
         onOpenChange={setLightboxOpen}
       />
+
+      <Dialog open={!!videoPlayerUrl} onOpenChange={(open) => !open && setVideoPlayerUrl(null)}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none overflow-hidden flex items-center justify-center">
+          {videoPlayerUrl && (
+            <video
+              src={videoPlayerUrl}
+              controls
+              autoPlay
+              className="max-w-full max-h-[90vh] rounded"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <input
         ref={photoInputRef}
