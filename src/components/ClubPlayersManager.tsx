@@ -121,6 +121,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const [editData, setEditData] = useState<Partial<ClubPlayer>>({});
   const [consentViewUrl, setConsentViewUrl] = useState<string | null>(null);
   const [consentViewName, setConsentViewName] = useState<string>('');
+  const [consentViewPlayerId, setConsentViewPlayerId] = useState<string | null>(null);
 
   // New player form state
   const [pName, setPName] = useState('');
@@ -466,7 +467,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                     <Camera className="h-3 w-3" /> {player.photoConsent ? '✓ Foto' : '✗ Foto'}
                                     {player.photoConsentUrl && (
                                       <button
-                                        onClick={() => { setConsentViewUrl(player.photoConsentUrl); setConsentViewName(player.name); }}
+                                        onClick={() => { setConsentViewUrl(player.photoConsentUrl); setConsentViewName(player.name); setConsentViewPlayerId(player.id); }}
                                         className="text-primary hover:underline ml-0.5 inline-flex"
                                         title="Scan anzeigen"
                                       >
@@ -544,7 +545,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
         onChange={handleConsentUpload}
         className="hidden"
       />
-      <Dialog open={!!consentViewUrl} onOpenChange={(open) => { if (!open) { setConsentViewUrl(null); setConsentViewName(''); } }}>
+      <Dialog open={!!consentViewUrl} onOpenChange={(open) => { if (!open) { setConsentViewUrl(null); setConsentViewName(''); setConsentViewPlayerId(null); } }}>
         <DialogContent className="max-w-3xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Fotoerlaubnis — {consentViewName}</DialogTitle>
@@ -556,6 +557,49 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
               <iframe src={consentViewUrl} className="w-full h-[70vh] rounded border-0" title="Fotoerlaubnis" />
             )
           )}
+          <div className="flex justify-end">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="gap-1">
+                  <Trash2 className="h-3.5 w-3.5" /> Dokument löschen
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Fotoerlaubnis löschen?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Das hinterlegte Dokument von <strong>{consentViewName}</strong> wird unwiderruflich gelöscht. Der Fotoerlaubnis-Status wird zurückgesetzt.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={async () => {
+                      if (!consentViewPlayerId || !consentViewUrl) return;
+                      try {
+                        // Extract storage path from URL
+                        const match = consentViewUrl.match(/consent-documents\/(.+?)(\?|$)/);
+                        if (match) {
+                          await supabase.storage.from('consent-documents').remove([match[1]]);
+                        }
+                        onUpdatePlayer(consentViewPlayerId, { photoConsentUrl: null, photoConsent: false });
+                        toast.success('Fotoerlaubnis-Dokument gelöscht');
+                      } catch (error) {
+                        console.error('Error deleting consent document:', error);
+                        toast.error('Fehler beim Löschen');
+                      }
+                      setConsentViewUrl(null);
+                      setConsentViewName('');
+                      setConsentViewPlayerId(null);
+                    }}
+                  >
+                    Löschen
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
