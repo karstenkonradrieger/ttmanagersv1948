@@ -119,6 +119,8 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const [addingPlayerFor, setAddingPlayerFor] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<ClubPlayer>>({});
+  const [consentViewUrl, setConsentViewUrl] = useState<string | null>(null);
+  const [consentViewName, setConsentViewName] = useState<string>('');
 
   // New player form state
   const [pName, setPName] = useState('');
