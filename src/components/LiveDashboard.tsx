@@ -75,6 +75,21 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
 
   return (
     <div className="space-y-6 animate-slide-up">
+      {birthdayPlayers.length > 0 && !started && (
+        <div className="bg-gradient-to-r from-pink-500/20 to-yellow-400/20 border-2 border-pink-400 rounded-xl p-5 text-center space-y-2">
+          <Cake className="h-10 w-10 mx-auto text-pink-500" />
+          <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">🎉 Geburtstagskind{birthdayPlayers.length > 1 ? 'er' : ''} 🎉</p>
+          {birthdayPlayers.map(p => (
+            <div key={p.id}>
+              <p className="text-xl font-extrabold text-pink-600 dark:text-pink-400">
+                Alles Gute zum Geburtstag, {p.name}! 🎂
+              </p>
+              {p.club && <p className="text-sm text-muted-foreground">{p.club}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+
       {championPlayer && (
         <div className="bg-gradient-to-r from-primary/20 to-tt-gold/20 border-2 border-tt-gold rounded-xl p-6 text-center">
           <Trophy className="h-12 w-12 mx-auto mb-2 text-tt-gold" />
