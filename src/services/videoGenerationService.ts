@@ -212,7 +212,7 @@ async function drawImageSlide(
 }
 
 function waitFrame(): Promise<void> {
-  return new Promise(resolve => requestAnimationFrame(resolve));
+  return new Promise(resolve => requestAnimationFrame(() => resolve()));
 }
 
 export async function uploadGeneratedVideo(
