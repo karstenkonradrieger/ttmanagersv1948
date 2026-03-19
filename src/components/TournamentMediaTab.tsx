@@ -35,6 +35,7 @@ function getRoundLabel(round: number, totalRounds: number, mode?: string): strin
 
 export function TournamentMediaTab({ tournamentId, tournamentName, matches, getParticipantName, started, logoUrl }: Props) {
   const [generatingVideo, setGeneratingVideo] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
