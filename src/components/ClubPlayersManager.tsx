@@ -544,6 +544,20 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
         onChange={handleConsentUpload}
         className="hidden"
       />
+      <Dialog open={!!consentViewUrl} onOpenChange={(open) => { if (!open) { setConsentViewUrl(null); setConsentViewName(''); } }}>
+        <DialogContent className="max-w-3xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Fotoerlaubnis — {consentViewName}</DialogTitle>
+          </DialogHeader>
+          {consentViewUrl && (
+            consentViewUrl.match(/\.(jpg|jpeg|png|webp)(\?|$)/i) ? (
+              <img src={consentViewUrl} alt="Fotoerlaubnis" className="w-full h-auto rounded" />
+            ) : (
+              <iframe src={consentViewUrl} className="w-full h-[70vh] rounded border-0" title="Fotoerlaubnis" />
+            )
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
