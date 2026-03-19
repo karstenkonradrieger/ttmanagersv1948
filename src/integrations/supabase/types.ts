@@ -559,6 +559,35 @@ export type Database = {
           },
         ]
       }
+      tournament_videos: {
+        Row: {
+          created_at: string
+          id: string
+          tournament_id: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          tournament_id: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          tournament_id?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_videos_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournaments: {
         Row: {
           best_of: number
