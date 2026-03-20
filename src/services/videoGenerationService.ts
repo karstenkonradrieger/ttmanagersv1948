@@ -5,6 +5,12 @@ interface MediaItem {
   type: 'image' | 'video';
   label: string;
   section: 'pre_tournament' | 'match' | 'ceremony';
+  overlay?: {
+    player1?: string;
+    player2?: string;
+    score?: string;
+    roundLabel?: string;
+  };
 }
 
 const VIDEO_EXTENSIONS = ['.mp4', '.mov', '.webm', '.avi', '.mkv', '.m4v', '.3gp'];
@@ -16,7 +22,10 @@ function isVideoUrl(url: string): boolean {
   } catch { return false; }
 }
 
-export async function collectTournamentMedia(tournamentId: string): Promise<MediaItem[]> {
+export async function collectTournamentMedia(
+  tournamentId: string,
+  getParticipantName?: (id: string | null) => string
+): Promise<MediaItem[]> {
   const { data: photos } = await supabase
     .from('match_photos')
     .select('*')
@@ -25,13 +34,47 @@ export async function collectTournamentMedia(tournamentId: string): Promise<Medi
 
   if (!photos) return [];
 
-  return photos.map(p => ({
-    url: p.photo_url,
-    type: isVideoUrl(p.photo_url) ? 'video' as const : 'image' as const,
-    label: p.photo_type === 'pre_tournament' ? 'Vor dem Turnier' :
-           p.photo_type === 'ceremony' ? 'Siegerehrung' : 'Spielfoto',
-    section: p.photo_type as MediaItem['section'],
-  }));
+  // Load match data for overlay info
+  let matchMap: Record<string, any> = {};
+  if (getParticipantName) {
+    const { data: matches } = await supabase
+      .from('matches')
+      .select('*')
+      .eq('tournament_id', tournamentId);
+    if (matches) {
+      for (const m of matches) {
+        matchMap[m.id] = m;
+      }
+    }
+  }
+
+  return photos.map(p => {
+    const match = p.match_id ? matchMap[p.match_id] : null;
+    let overlay: MediaItem['overlay'] = undefined;
+
+    if (match && getParticipantName) {
+      const sets = (match.sets || []) as Array<{ player1: number; player2: number }>;
+      let w1 = 0, w2 = 0;
+      for (const s of sets) {
+        if (s.player1 >= 11 && s.player1 - s.player2 >= 2) w1++;
+        else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) w2++;
+      }
+      overlay = {
+        player1: getParticipantName(match.player1_id),
+        player2: getParticipantName(match.player2_id),
+        score: match.winner_id ? `${w1} : ${w2}` : undefined,
+      };
+    }
+
+    return {
+      url: p.photo_url,
+      type: isVideoUrl(p.photo_url) ? 'video' as const : 'image' as const,
+      label: p.photo_type === 'pre_tournament' ? 'Vor dem Turnier' :
+             p.photo_type === 'ceremony' ? 'Siegerehrung' : 'Spielfoto',
+      section: p.photo_type as MediaItem['section'],
+      overlay,
+    };
+  });
 }
 
 /**
@@ -138,10 +181,10 @@ export async function generateSlideshowVideo(
     for (const item of sectionMedia) {
       try {
         if (item.type === 'video') {
-          await drawVideoClip(ctx, canvas.width, canvas.height, item.url);
+          await drawVideoClip(ctx, canvas.width, canvas.height, item.url, item.overlay, tournamentName);
         } else {
           const img = await loadImage(item.url);
-          await drawImageSlide(ctx, canvas.width, canvas.height, img, 3000);
+          await drawImageSlide(ctx, canvas.width, canvas.height, img, 3000, item.overlay, tournamentName);
         }
       } catch (e) {
         console.warn('Failed to process media:', item.url, e);
@@ -196,7 +239,9 @@ function loadVideo(url: string): Promise<HTMLVideoElement> {
 async function drawVideoClip(
   ctx: CanvasRenderingContext2D,
   w: number, h: number,
-  url: string
+  url: string,
+  overlay?: MediaItem['overlay'],
+  tournamentName?: string
 ) {
   const video = await loadVideo(url);
   const maxDuration = Math.min(video.duration, 10); // cap at 10s
@@ -235,6 +280,8 @@ async function drawVideoClip(
 
     ctx.drawImage(video, x, y, drawW, drawH);
     ctx.globalAlpha = 1;
+
+    drawOverlay(ctx, w, h, overlay, tournamentName);
 
     await waitFrame();
   }
@@ -284,7 +331,9 @@ async function drawImageSlide(
   ctx: CanvasRenderingContext2D,
   w: number, h: number,
   img: HTMLImageElement,
-  durationMs: number
+  durationMs: number,
+  overlay?: MediaItem['overlay'],
+  tournamentName?: string
 ) {
   const frames = Math.round((durationMs / 1000) * 30);
   for (let f = 0; f < frames; f++) {
@@ -316,8 +365,78 @@ async function drawImageSlide(
     ctx.drawImage(img, x, y, drawW, drawH);
     ctx.globalAlpha = 1;
 
+    drawOverlay(ctx, w, h, overlay, tournamentName);
+
     await waitFrame();
   }
+}
+
+/**
+ * Draws overlay text: tournament name (top-right), player names + score (bottom bar)
+ */
+function drawOverlay(
+  ctx: CanvasRenderingContext2D,
+  w: number, h: number,
+  overlay?: MediaItem['overlay'],
+  tournamentName?: string
+) {
+  ctx.save();
+
+  // Tournament name watermark (top-right)
+  if (tournamentName) {
+    ctx.font = 'bold 28px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillText(tournamentName, w - 28, 28);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText(tournamentName, w - 30, 26);
+  }
+
+  // Match info bar (bottom)
+  if (overlay && (overlay.player1 || overlay.player2)) {
+    const barH = 80;
+    const barY = h - barH;
+
+    // Semi-transparent gradient bar
+    const grad = ctx.createLinearGradient(0, barY, 0, h);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.3, 'rgba(0,0,0,0.7)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.85)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, barY, w, barH);
+
+    const textY = h - 28;
+
+    // Player 1 name (left)
+    if (overlay.player1) {
+      ctx.font = 'bold 32px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(overlay.player1, 40, textY);
+    }
+
+    // Score (center)
+    if (overlay.score) {
+      ctx.font = 'bold 40px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#fbbf24'; // amber accent
+      ctx.fillText(overlay.score, w / 2, textY);
+    }
+
+    // Player 2 name (right)
+    if (overlay.player2) {
+      ctx.font = 'bold 32px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(overlay.player2, w - 40, textY);
+    }
+  }
+
+  ctx.restore();
 }
 
 function waitFrame(): Promise<void> {
