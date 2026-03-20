@@ -22,7 +22,10 @@ function isVideoUrl(url: string): boolean {
   } catch { return false; }
 }
 
-export async function collectTournamentMedia(tournamentId: string): Promise<MediaItem[]> {
+export async function collectTournamentMedia(
+  tournamentId: string,
+  getParticipantName?: (id: string | null) => string
+): Promise<MediaItem[]> {
   const { data: photos } = await supabase
     .from('match_photos')
     .select('*')
@@ -31,13 +34,47 @@ export async function collectTournamentMedia(tournamentId: string): Promise<Medi
 
   if (!photos) return [];
 
-  return photos.map(p => ({
-    url: p.photo_url,
-    type: isVideoUrl(p.photo_url) ? 'video' as const : 'image' as const,
-    label: p.photo_type === 'pre_tournament' ? 'Vor dem Turnier' :
-           p.photo_type === 'ceremony' ? 'Siegerehrung' : 'Spielfoto',
-    section: p.photo_type as MediaItem['section'],
-  }));
+  // Load match data for overlay info
+  let matchMap: Record<string, any> = {};
+  if (getParticipantName) {
+    const { data: matches } = await supabase
+      .from('matches')
+      .select('*')
+      .eq('tournament_id', tournamentId);
+    if (matches) {
+      for (const m of matches) {
+        matchMap[m.id] = m;
+      }
+    }
+  }
+
+  return photos.map(p => {
+    const match = p.match_id ? matchMap[p.match_id] : null;
+    let overlay: MediaItem['overlay'] = undefined;
+
+    if (match && getParticipantName) {
+      const sets = (match.sets || []) as Array<{ player1: number; player2: number }>;
+      let w1 = 0, w2 = 0;
+      for (const s of sets) {
+        if (s.player1 >= 11 && s.player1 - s.player2 >= 2) w1++;
+        else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) w2++;
+      }
+      overlay = {
+        player1: getParticipantName(match.player1_id),
+        player2: getParticipantName(match.player2_id),
+        score: match.winner_id ? `${w1} : ${w2}` : undefined,
+      };
+    }
+
+    return {
+      url: p.photo_url,
+      type: isVideoUrl(p.photo_url) ? 'video' as const : 'image' as const,
+      label: p.photo_type === 'pre_tournament' ? 'Vor dem Turnier' :
+             p.photo_type === 'ceremony' ? 'Siegerehrung' : 'Spielfoto',
+      section: p.photo_type as MediaItem['section'],
+      overlay,
+    };
+  });
 }
 
 /**
