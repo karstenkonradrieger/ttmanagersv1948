@@ -239,7 +239,9 @@ function loadVideo(url: string): Promise<HTMLVideoElement> {
 async function drawVideoClip(
   ctx: CanvasRenderingContext2D,
   w: number, h: number,
-  url: string
+  url: string,
+  overlay?: MediaItem['overlay'],
+  tournamentName?: string
 ) {
   const video = await loadVideo(url);
   const maxDuration = Math.min(video.duration, 10); // cap at 10s
@@ -278,6 +280,8 @@ async function drawVideoClip(
 
     ctx.drawImage(video, x, y, drawW, drawH);
     ctx.globalAlpha = 1;
+
+    drawOverlay(ctx, w, h, overlay, tournamentName);
 
     await waitFrame();
   }
