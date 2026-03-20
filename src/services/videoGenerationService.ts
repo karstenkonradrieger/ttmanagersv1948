@@ -181,10 +181,10 @@ export async function generateSlideshowVideo(
     for (const item of sectionMedia) {
       try {
         if (item.type === 'video') {
-          await drawVideoClip(ctx, canvas.width, canvas.height, item.url);
+          await drawVideoClip(ctx, canvas.width, canvas.height, item.url, item.overlay, tournamentName);
         } else {
           const img = await loadImage(item.url);
-          await drawImageSlide(ctx, canvas.width, canvas.height, img, 3000);
+          await drawImageSlide(ctx, canvas.width, canvas.height, img, 3000, item.overlay, tournamentName);
         }
       } catch (e) {
         console.warn('Failed to process media:', item.url, e);
