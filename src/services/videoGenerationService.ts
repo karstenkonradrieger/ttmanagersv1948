@@ -5,6 +5,12 @@ interface MediaItem {
   type: 'image' | 'video';
   label: string;
   section: 'pre_tournament' | 'match' | 'ceremony';
+  overlay?: {
+    player1?: string;
+    player2?: string;
+    score?: string;
+    roundLabel?: string;
+  };
 }
 
 const VIDEO_EXTENSIONS = ['.mp4', '.mov', '.webm', '.avi', '.mkv', '.m4v', '.3gp'];
