@@ -331,7 +331,9 @@ async function drawImageSlide(
   ctx: CanvasRenderingContext2D,
   w: number, h: number,
   img: HTMLImageElement,
-  durationMs: number
+  durationMs: number,
+  overlay?: MediaItem['overlay'],
+  tournamentName?: string
 ) {
   const frames = Math.round((durationMs / 1000) * 30);
   for (let f = 0; f < frames; f++) {
@@ -363,8 +365,78 @@ async function drawImageSlide(
     ctx.drawImage(img, x, y, drawW, drawH);
     ctx.globalAlpha = 1;
 
+    drawOverlay(ctx, w, h, overlay, tournamentName);
+
     await waitFrame();
   }
+}
+
+/**
+ * Draws overlay text: tournament name (top-right), player names + score (bottom bar)
+ */
+function drawOverlay(
+  ctx: CanvasRenderingContext2D,
+  w: number, h: number,
+  overlay?: MediaItem['overlay'],
+  tournamentName?: string
+) {
+  ctx.save();
+
+  // Tournament name watermark (top-right)
+  if (tournamentName) {
+    ctx.font = 'bold 28px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillText(tournamentName, w - 28, 28);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText(tournamentName, w - 30, 26);
+  }
+
+  // Match info bar (bottom)
+  if (overlay && (overlay.player1 || overlay.player2)) {
+    const barH = 80;
+    const barY = h - barH;
+
+    // Semi-transparent gradient bar
+    const grad = ctx.createLinearGradient(0, barY, 0, h);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.3, 'rgba(0,0,0,0.7)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.85)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, barY, w, barH);
+
+    const textY = h - 28;
+
+    // Player 1 name (left)
+    if (overlay.player1) {
+      ctx.font = 'bold 32px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(overlay.player1, 40, textY);
+    }
+
+    // Score (center)
+    if (overlay.score) {
+      ctx.font = 'bold 40px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#fbbf24'; // amber accent
+      ctx.fillText(overlay.score, w / 2, textY);
+    }
+
+    // Player 2 name (right)
+    if (overlay.player2) {
+      ctx.font = 'bold 32px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(overlay.player2, w - 40, textY);
+    }
+  }
+
+  ctx.restore();
 }
 
 function waitFrame(): Promise<void> {
