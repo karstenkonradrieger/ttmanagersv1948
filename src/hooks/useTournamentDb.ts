@@ -1153,6 +1153,7 @@ export function useTournamentDb(tournamentId: string | null) {
     certificate_font_size: number;
     certificate_text_color: string;
     certificate_extra_sizes: Record<string, number>;
+    opening_video_url: string | null;
   }>) => {
     if (!tournamentId) return;
     try {
