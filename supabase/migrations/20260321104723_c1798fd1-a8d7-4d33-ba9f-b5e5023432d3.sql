@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN opening_video_url text DEFAULT NULL;

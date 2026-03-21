@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Settings2, Upload, X, Loader2, PenTool, ImagePlus } from 'lucide-react';
+import { Settings2, Upload, X, Loader2, PenTool, ImagePlus, Video, Play } from 'lucide-react';
 import { TournamentMode, TournamentType, TeamMode } from '@/types/tournament';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -33,6 +33,8 @@ interface Props {
   sponsorSignatureUrl: string | null;
   sponsorLogoUrl: string | null;
   sponsorConsent: boolean;
+  openingVideoUrl: string | null;
+  tournamentId: string;
   onUpdateMode: (mode: TournamentMode) => Promise<void>;
   onUpdateType: (type: TournamentType) => Promise<void>;
   onUpdateBestOf: (bestOf: number) => Promise<void>;
@@ -55,6 +57,7 @@ interface Props {
     certificate_font_size?: number;
     certificate_text_color?: string;
     certificate_extra_sizes?: Record<string, number>;
+    opening_video_url?: string | null;
   }) => Promise<void>;
 }
 
@@ -63,6 +66,7 @@ export function TournamentSettingsDialog({
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
   certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize, certificateTextColor, certificateExtraSizes = {},
   organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
+  openingVideoUrl, tournamentId,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -90,10 +94,14 @@ export function TournamentSettingsDialog({
   const [uploadingSig, setUploadingSig] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCertBg, setUploadingCertBg] = useState(false);
+  const [uploadingOpeningVideo, setUploadingOpeningVideo] = useState(false);
+  const [localOpeningVideoUrl, setLocalOpeningVideoUrl] = useState(openingVideoUrl);
+  const [openingVideoPlayerOpen, setOpeningVideoPlayerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const sigInputRef = useRef<HTMLInputElement>(null);
   const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
   const certBgInputRef = useRef<HTMLInputElement>(null);
+  const openingVideoInputRef = useRef<HTMLInputElement>(null);
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
@@ -118,6 +126,7 @@ export function TournamentSettingsDialog({
       setLocalFontSize(certificateFontSize);
       setLocalTextColor(certificateTextColor);
       setLocalFontBold(!!certificateExtraSizes.fontBold);
+      setLocalOpeningVideoUrl(openingVideoUrl);
     }
     setOpen(isOpen);
   };
@@ -209,6 +218,46 @@ export function TournamentSettingsDialog({
     setLocalCertBgUrl(null);
   };
 
+  const handleOpeningVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('video/')) {
+      toast.error('Nur Videos sind erlaubt');
+      return;
+    }
+    if (file.size > 200 * 1024 * 1024) {
+      toast.error('Datei zu groß (max. 200 MB)');
+      return;
+    }
+    setUploadingOpeningVideo(true);
+    try {
+      const ext = file.name.split('.').pop() || 'mp4';
+      const fileName = `opening-${tournamentId}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('tournament-videos').upload(fileName, file);
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('tournament-videos').getPublicUrl(fileName);
+      setLocalOpeningVideoUrl(urlData.publicUrl);
+      toast.success('Eröffnungsvideo hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingOpeningVideo(false);
+      if (openingVideoInputRef.current) openingVideoInputRef.current.value = '';
+    }
+  };
+
+  const removeOpeningVideo = async () => {
+    if (localOpeningVideoUrl) {
+      try {
+        const url = new URL(localOpeningVideoUrl);
+        const pathParts = url.pathname.split('/tournament-videos/');
+        if (pathParts[1]) {
+          await supabase.storage.from('tournament-videos').remove([decodeURIComponent(pathParts[1])]);
+        }
+      } catch {}
+    }
+    setLocalOpeningVideoUrl(null);
+  };
+
   const hasChanges =
     localMode !== mode || localType !== type || localBestOf !== bestOf ||
     (localDate || null) !== (tournamentDate || null) ||
@@ -220,7 +269,8 @@ export function TournamentSettingsDialog({
     localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
     localCertBgUrl !== certificateBgUrl ||
     localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
-    localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold;
+    localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold ||
+    localOpeningVideoUrl !== openingVideoUrl;
 
   const handleSave = async () => {
     setSaving(true);
@@ -239,7 +289,8 @@ export function TournamentSettingsDialog({
         localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
         localCertBgUrl !== certificateBgUrl ||
         localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
-        localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold;
+        localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold ||
+        localOpeningVideoUrl !== openingVideoUrl;
 
       if (detailsChanged) {
         await onUpdateDetails({
@@ -261,6 +312,7 @@ export function TournamentSettingsDialog({
           certificate_font_size: localFontSize,
           certificate_text_color: localTextColor,
           certificate_extra_sizes: { ...certificateExtraSizes, fontBold: localFontBold ? 1 : 0 },
+          opening_video_url: localOpeningVideoUrl,
         });
       }
 
@@ -274,6 +326,7 @@ export function TournamentSettingsDialog({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
@@ -303,6 +356,34 @@ export function TournamentSettingsDialog({
               value={localMotto}
               onChange={e => setLocalMotto(e.target.value)}
             />
+          </div>
+
+          {/* Opening Video */}
+          <div>
+            <Label className="text-sm font-semibold mb-1 block">
+              <Video className="inline h-4 w-4 mr-1" />
+              Eröffnungsvideo
+            </Label>
+            {localOpeningVideoUrl ? (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setOpeningVideoPlayerOpen(true)}>
+                  <Play className="mr-1 h-4 w-4" />
+                  Abspielen
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeOpeningVideo}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <input ref={openingVideoInputRef} type="file" accept="video/*" className="hidden" onChange={handleOpeningVideoUpload} />
+                <Button variant="outline" size="sm" onClick={() => openingVideoInputRef.current?.click()} disabled={uploadingOpeningVideo}>
+                  {uploadingOpeningVideo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                  Video hochladen
+                </Button>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">Wird vor dem Turnier in einem separaten Fenster abgespielt (max. 200 MB)</p>
           </div>
 
           {/* Venue */}
@@ -612,5 +693,19 @@ export function TournamentSettingsDialog({
         </div>
       </DialogContent>
     </Dialog>
+
+    <Dialog open={openingVideoPlayerOpen} onOpenChange={setOpeningVideoPlayerOpen}>
+      <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none overflow-hidden flex items-center justify-center">
+        {openingVideoPlayerOpen && localOpeningVideoUrl && (
+          <video
+            src={localOpeningVideoUrl}
+            controls
+            autoPlay
+            className="max-w-full max-h-[90vh] rounded"
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

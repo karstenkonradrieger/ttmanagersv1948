@@ -29,7 +29,8 @@ import { TeamEncounterScoring } from '@/components/TeamEncounterScoring';
 import { KaiserScoring } from '@/components/KaiserScoring';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings, Film } from 'lucide-react';
+import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings, Film, Video } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
 
@@ -91,6 +92,7 @@ const Index = () => {
   const isKaiser = tournament.mode === 'kaiser';
   const isHandicap = tournament.mode === 'handicap';
   const venueString = [tournament.venueStreet, tournament.venueHouseNumber, tournament.venuePostalCode, tournament.venueCity].filter(Boolean).join(' ') || undefined;
+  const [openingVideoPlayerOpen, setOpeningVideoPlayerOpen] = useState(false);
 
   const handleImportClubsWithPlayers = useCallback(async (data: Array<{ clubName: string; players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }> }>) => {
     for (const entry of data) {
@@ -266,11 +268,18 @@ const Index = () => {
               certificateTextColor={tournament.certificateTextColor}
               certificateExtraSizes={tournament.certificateExtraSizes}
               started={tournament.started}
+              openingVideoUrl={tournament.openingVideoUrl || null}
+              tournamentId={tournament.id}
               onUpdateMode={updateTournamentMode}
               onUpdateType={updateTournamentType}
               onUpdateBestOf={updateBestOf}
               onUpdateDetails={updateDetails}
             />
+            {tournament.openingVideoUrl && (
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setOpeningVideoPlayerOpen(true)} title="Eröffnungsvideo abspielen">
+                <Video className="h-4 w-4" />
+              </Button>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {canStart && (
@@ -762,6 +771,19 @@ const Index = () => {
           </div>
         </Tabs>
       </div>
+
+      <Dialog open={openingVideoPlayerOpen} onOpenChange={setOpeningVideoPlayerOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none overflow-hidden flex items-center justify-center">
+          {openingVideoPlayerOpen && tournament.openingVideoUrl && (
+            <video
+              src={tournament.openingVideoUrl}
+              controls
+              autoPlay
+              className="max-w-full max-h-[90vh] rounded"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
