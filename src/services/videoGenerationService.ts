@@ -244,7 +244,7 @@ async function drawVideoClip(
   tournamentName?: string
 ) {
   const video = await loadVideo(url);
-  const maxDuration = Math.min(video.duration, 10); // cap at 10s
+  const maxDuration = Math.min(video.duration, 30); // cap at 30s
   const totalFrames = Math.round(maxDuration * 30);
 
   video.currentTime = 0;
