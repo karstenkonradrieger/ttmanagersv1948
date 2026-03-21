@@ -93,10 +93,14 @@ export function TournamentSettingsDialog({
   const [uploadingSig, setUploadingSig] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCertBg, setUploadingCertBg] = useState(false);
+  const [uploadingOpeningVideo, setUploadingOpeningVideo] = useState(false);
+  const [localOpeningVideoUrl, setLocalOpeningVideoUrl] = useState(openingVideoUrl);
+  const [openingVideoPlayerOpen, setOpeningVideoPlayerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const sigInputRef = useRef<HTMLInputElement>(null);
   const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
   const certBgInputRef = useRef<HTMLInputElement>(null);
+  const openingVideoInputRef = useRef<HTMLInputElement>(null);
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
