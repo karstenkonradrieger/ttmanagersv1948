@@ -217,6 +217,46 @@ export function TournamentSettingsDialog({
     setLocalCertBgUrl(null);
   };
 
+  const handleOpeningVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('video/')) {
+      toast.error('Nur Videos sind erlaubt');
+      return;
+    }
+    if (file.size > 200 * 1024 * 1024) {
+      toast.error('Datei zu groß (max. 200 MB)');
+      return;
+    }
+    setUploadingOpeningVideo(true);
+    try {
+      const ext = file.name.split('.').pop() || 'mp4';
+      const fileName = `opening-${tournamentId}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('tournament-videos').upload(fileName, file);
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('tournament-videos').getPublicUrl(fileName);
+      setLocalOpeningVideoUrl(urlData.publicUrl);
+      toast.success('Eröffnungsvideo hochgeladen');
+    } catch {
+      toast.error('Fehler beim Hochladen');
+    } finally {
+      setUploadingOpeningVideo(false);
+      if (openingVideoInputRef.current) openingVideoInputRef.current.value = '';
+    }
+  };
+
+  const removeOpeningVideo = async () => {
+    if (localOpeningVideoUrl) {
+      try {
+        const url = new URL(localOpeningVideoUrl);
+        const pathParts = url.pathname.split('/tournament-videos/');
+        if (pathParts[1]) {
+          await supabase.storage.from('tournament-videos').remove([decodeURIComponent(pathParts[1])]);
+        }
+      } catch {}
+    }
+    setLocalOpeningVideoUrl(null);
+  };
+
   const hasChanges =
     localMode !== mode || localType !== type || localBestOf !== bestOf ||
     (localDate || null) !== (tournamentDate || null) ||
