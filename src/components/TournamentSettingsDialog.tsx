@@ -288,7 +288,8 @@ export function TournamentSettingsDialog({
         localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
         localCertBgUrl !== certificateBgUrl ||
         localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
-        localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold;
+        localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold ||
+        localOpeningVideoUrl !== openingVideoUrl;
 
       if (detailsChanged) {
         await onUpdateDetails({
@@ -310,12 +311,8 @@ export function TournamentSettingsDialog({
           certificate_font_size: localFontSize,
           certificate_text_color: localTextColor,
           certificate_extra_sizes: { ...certificateExtraSizes, fontBold: localFontBold ? 1 : 0 },
+          opening_video_url: localOpeningVideoUrl,
         });
-      }
-
-      // Save opening video URL directly
-      if (localOpeningVideoUrl !== openingVideoUrl) {
-        await supabase.from('tournaments').update({ opening_video_url: localOpeningVideoUrl } as any).eq('id', tournamentId);
       }
 
       toast.success('Einstellungen gespeichert');
