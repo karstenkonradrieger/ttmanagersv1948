@@ -1178,6 +1178,7 @@ export function useTournamentDb(tournamentId: string | null) {
         ...(details.certificate_font_size !== undefined ? { certificateFontSize: details.certificate_font_size } : {}),
         ...(details.certificate_text_color !== undefined ? { certificateTextColor: details.certificate_text_color } : {}),
         ...(details.certificate_extra_sizes !== undefined ? { certificateExtraSizes: details.certificate_extra_sizes } : {}),
+        ...(details.opening_video_url !== undefined ? { openingVideoUrl: details.opening_video_url } : {}),
       }));
     } catch (error) {
       console.error('Error updating details:', error);
