@@ -225,6 +225,7 @@ export function useTournament() {
       certificateLineSizes: [],
       certificateExtraSizes: {},
       certificateHiddenFields: [],
+      openingVideoUrl: null,
     });
   }, []);
 
