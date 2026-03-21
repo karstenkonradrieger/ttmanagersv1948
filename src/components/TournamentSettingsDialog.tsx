@@ -33,6 +33,8 @@ interface Props {
   sponsorSignatureUrl: string | null;
   sponsorLogoUrl: string | null;
   sponsorConsent: boolean;
+  openingVideoUrl: string | null;
+  tournamentId: string;
   onUpdateMode: (mode: TournamentMode) => Promise<void>;
   onUpdateType: (type: TournamentType) => Promise<void>;
   onUpdateBestOf: (bestOf: number) => Promise<void>;
