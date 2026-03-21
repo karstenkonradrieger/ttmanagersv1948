@@ -313,6 +313,11 @@ export function TournamentSettingsDialog({
         });
       }
 
+      // Save opening video URL directly
+      if (localOpeningVideoUrl !== openingVideoUrl) {
+        await supabase.from('tournaments').update({ opening_video_url: localOpeningVideoUrl } as any).eq('id', tournamentId);
+      }
+
       toast.success('Einstellungen gespeichert');
       setOpen(false);
     } catch {
