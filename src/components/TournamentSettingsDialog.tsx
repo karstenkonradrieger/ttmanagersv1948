@@ -228,7 +228,8 @@ export function TournamentSettingsDialog({
     localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
     localCertBgUrl !== certificateBgUrl ||
     localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
-    localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold;
+    localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold ||
+    localOpeningVideoUrl !== openingVideoUrl;
 
   const handleSave = async () => {
     setSaving(true);
