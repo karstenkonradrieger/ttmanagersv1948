@@ -359,6 +359,34 @@ export function TournamentSettingsDialog({
             />
           </div>
 
+          {/* Opening Video */}
+          <div>
+            <Label className="text-sm font-semibold mb-1 block">
+              <Video className="inline h-4 w-4 mr-1" />
+              Eröffnungsvideo
+            </Label>
+            {localOpeningVideoUrl ? (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setOpeningVideoPlayerOpen(true)}>
+                  <Play className="mr-1 h-4 w-4" />
+                  Abspielen
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeOpeningVideo}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <input ref={openingVideoInputRef} type="file" accept="video/*" className="hidden" onChange={handleOpeningVideoUpload} />
+                <Button variant="outline" size="sm" onClick={() => openingVideoInputRef.current?.click()} disabled={uploadingOpeningVideo}>
+                  {uploadingOpeningVideo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                  Video hochladen
+                </Button>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">Wird vor dem Turnier in einem separaten Fenster abgespielt (max. 200 MB)</p>
+          </div>
+
           {/* Venue */}
           <div>
             <Label className="text-sm font-semibold mb-1 block">Veranstaltungsort</Label>
