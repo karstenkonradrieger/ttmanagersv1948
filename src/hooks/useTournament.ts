@@ -54,6 +54,7 @@ function loadTournament(): Tournament {
     certificateLineSizes: [],
     certificateExtraSizes: {},
     certificateHiddenFields: [],
+    openingVideoUrl: null,
   };
 }
 

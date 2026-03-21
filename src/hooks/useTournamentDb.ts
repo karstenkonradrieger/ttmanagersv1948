@@ -47,6 +47,7 @@ const emptyTournament: Tournament = {
   certificateLineSizes: [],
   certificateExtraSizes: {},
   certificateHiddenFields: [],
+  openingVideoUrl: null,
 };
 
 export function useTournamentDb(tournamentId: string | null) {

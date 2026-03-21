@@ -197,4 +197,5 @@ export interface Tournament {
   certificateLineSizes: number[];
   certificateExtraSizes: Record<string, number>;
   certificateHiddenFields: string[];
+  openingVideoUrl: string | null;
 }

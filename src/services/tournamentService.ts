@@ -165,6 +165,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     certificateLineSizes: Array.isArray((tournament as any).certificate_line_sizes) ? (tournament as any).certificate_line_sizes : [],
     certificateExtraSizes: (tournament as any).certificate_extra_sizes && typeof (tournament as any).certificate_extra_sizes === 'object' ? (tournament as any).certificate_extra_sizes : {},
     certificateHiddenFields: Array.isArray((tournament as any).certificate_hidden_fields) ? (tournament as any).certificate_hidden_fields : [],
+    openingVideoUrl: (tournament as any).opening_video_url || null,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
