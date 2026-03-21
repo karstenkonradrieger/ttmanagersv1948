@@ -611,6 +611,7 @@ export type Database = {
           mode: string
           motto: string
           name: string
+          opening_video_url: string | null
           organizer_name: string
           phase: string | null
           rounds: number
@@ -653,6 +654,7 @@ export type Database = {
           mode?: string
           motto?: string
           name?: string
+          opening_video_url?: string | null
           organizer_name?: string
           phase?: string | null
           rounds?: number
@@ -695,6 +697,7 @@ export type Database = {
           mode?: string
           motto?: string
           name?: string
+          opening_video_url?: string | null
           organizer_name?: string
           phase?: string | null
           rounds?: number
