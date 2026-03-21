@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Settings2, Upload, X, Loader2, PenTool, ImagePlus } from 'lucide-react';
+import { Settings2, Upload, X, Loader2, PenTool, ImagePlus, Video, Play } from 'lucide-react';
 import { TournamentMode, TournamentType, TeamMode } from '@/types/tournament';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
