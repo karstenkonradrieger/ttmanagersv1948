@@ -92,6 +92,7 @@ const Index = () => {
   const isKaiser = tournament.mode === 'kaiser';
   const isHandicap = tournament.mode === 'handicap';
   const venueString = [tournament.venueStreet, tournament.venueHouseNumber, tournament.venuePostalCode, tournament.venueCity].filter(Boolean).join(' ') || undefined;
+  const [openingVideoPlayerOpen, setOpeningVideoPlayerOpen] = useState(false);
 
   const handleImportClubsWithPlayers = useCallback(async (data: Array<{ clubName: string; players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }> }>) => {
     for (const entry of data) {
