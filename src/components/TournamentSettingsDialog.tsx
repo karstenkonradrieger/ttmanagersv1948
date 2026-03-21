@@ -328,6 +328,7 @@ export function TournamentSettingsDialog({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
