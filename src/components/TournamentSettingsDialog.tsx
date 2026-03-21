@@ -125,6 +125,7 @@ export function TournamentSettingsDialog({
       setLocalFontSize(certificateFontSize);
       setLocalTextColor(certificateTextColor);
       setLocalFontBold(!!certificateExtraSizes.fontBold);
+      setLocalOpeningVideoUrl(openingVideoUrl);
     }
     setOpen(isOpen);
   };

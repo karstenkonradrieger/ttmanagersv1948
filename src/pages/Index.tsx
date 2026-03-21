@@ -266,6 +266,8 @@ const Index = () => {
               certificateTextColor={tournament.certificateTextColor}
               certificateExtraSizes={tournament.certificateExtraSizes}
               started={tournament.started}
+              openingVideoUrl={tournament.openingVideoUrl || null}
+              tournamentId={tournament.id}
               onUpdateMode={updateTournamentMode}
               onUpdateType={updateTournamentType}
               onUpdateBestOf={updateBestOf}
