@@ -57,6 +57,7 @@ interface Props {
     certificate_font_size?: number;
     certificate_text_color?: string;
     certificate_extra_sizes?: Record<string, number>;
+    opening_video_url?: string | null;
   }) => Promise<void>;
 }
 
