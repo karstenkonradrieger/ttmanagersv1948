@@ -773,6 +773,24 @@ const Index = () => {
       </div>
     </div>
   );
+
+  return (
+    <>
+      {content}
+      <Dialog open={openingVideoPlayerOpen} onOpenChange={setOpeningVideoPlayerOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none overflow-hidden flex items-center justify-center">
+          {openingVideoPlayerOpen && tournament.openingVideoUrl && (
+            <video
+              src={tournament.openingVideoUrl}
+              controls
+              autoPlay
+              className="max-w-full max-h-[90vh] rounded"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 };
 
 export default Index;
