@@ -275,6 +275,11 @@ const Index = () => {
               onUpdateBestOf={updateBestOf}
               onUpdateDetails={updateDetails}
             />
+            {tournament.openingVideoUrl && (
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setOpeningVideoPlayerOpen(true)} title="Eröffnungsvideo abspielen">
+                <Video className="h-4 w-4" />
+              </Button>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {canStart && (
