@@ -416,7 +416,8 @@ function drawOverlay(
 
   // Match info bar (bottom)
   if (overlay && (overlay.player1 || overlay.player2)) {
-    const barH = 80;
+    const hasRoundLabel = !!overlay.roundLabel;
+    const barH = hasRoundLabel ? 110 : 80;
     const barY = h - barH;
 
     // Semi-transparent gradient bar
@@ -426,6 +427,15 @@ function drawOverlay(
     grad.addColorStop(1, 'rgba(0,0,0,0.85)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, barY, w, barH);
+
+    // Round label (above player names)
+    if (overlay.roundLabel) {
+      ctx.font = 'bold 24px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#94a3b8'; // slate-400
+      ctx.fillText(overlay.roundLabel, w / 2, h - 68);
+    }
 
     const textY = h - 28;
 
