@@ -40,6 +40,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [soundtrackUrl, setSoundtrackUrl] = useState<string | null>(null);
   const [uploadingSoundtrack, setUploadingSoundtrack] = useState(false);
+  const [soundtrackVolume, setSoundtrackVolume] = useState<number>(0.4);
   const soundtrackInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -119,7 +120,8 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
         media,
         tournamentName,
         soundtrackUrl,
-        (pct) => setVideoProgress(pct)
+        (pct) => setVideoProgress(pct),
+        soundtrackVolume
       );
 
       const url = await uploadGeneratedVideo(tournamentId, videoBlob);
@@ -264,6 +266,28 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
           <p className="text-xs text-muted-foreground">
             Lade eine Audiodatei hoch, die als musikalische Untermalung im Videoclip verwendet wird.
           </p>
+
+          {/* Volume selection */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium">Lautstärke im Videoclip</label>
+            <div className="flex gap-2">
+              {[
+                { label: 'Leise', value: 0.2 },
+                { label: 'Mittel', value: 0.4 },
+                { label: 'Laut', value: 0.7 },
+              ].map((opt) => (
+                <Button
+                  key={opt.value}
+                  variant={soundtrackVolume === opt.value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSoundtrackVolume(opt.value)}
+                >
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
 
           {soundtrackUrl ? (
             <div className="space-y-2">

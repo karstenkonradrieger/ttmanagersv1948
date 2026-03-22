@@ -85,7 +85,8 @@ export async function generateSlideshowVideo(
   media: MediaItem[],
   tournamentName: string,
   soundtrackUrl?: string | null,
-  onProgress?: (pct: number) => void
+  onProgress?: (pct: number) => void,
+  soundtrackVolume: number = 0.4
 ): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = 1920;
@@ -112,7 +113,7 @@ export async function generateSlideshowVideo(
 
       // Add a gain node to control volume
       const gainNode = audioCtx.createGain();
-      gainNode.gain.value = 0.4; // 40% volume for background music
+      gainNode.gain.value = soundtrackVolume;
       audioSource.connect(gainNode);
       gainNode.connect(audioDestination);
     } catch (e) {
