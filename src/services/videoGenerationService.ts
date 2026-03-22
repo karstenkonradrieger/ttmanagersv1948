@@ -36,6 +36,8 @@ export async function collectTournamentMedia(
 
   // Load match data for overlay info
   let matchMap: Record<string, any> = {};
+  let totalRounds = 0;
+  let tournamentMode = 'knockout';
   if (getParticipantName) {
     const { data: matches } = await supabase
       .from('matches')
@@ -44,8 +46,15 @@ export async function collectTournamentMedia(
     if (matches) {
       for (const m of matches) {
         matchMap[m.id] = m;
+        if (m.round > totalRounds) totalRounds = m.round;
       }
     }
+    const { data: tournament } = await supabase
+      .from('tournaments')
+      .select('mode')
+      .eq('id', tournamentId)
+      .single();
+    if (tournament) tournamentMode = tournament.mode;
   }
 
   return photos.map(p => {
