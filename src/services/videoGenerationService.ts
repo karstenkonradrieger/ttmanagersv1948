@@ -22,6 +22,15 @@ function isVideoUrl(url: string): boolean {
   } catch { return false; }
 }
 
+function getRoundLabel(round: number, totalRounds: number, mode?: string): string {
+  if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
+  const diff = totalRounds - round;
+  if (diff === 1) return 'Finale';
+  if (diff === 2) return 'Halbfinale';
+  if (diff === 3) return 'Viertelfinale';
+  return `Runde ${round + 1}`;
+}
+
 export async function collectTournamentMedia(
   tournamentId: string,
   getParticipantName?: (id: string | null) => string
