@@ -267,6 +267,28 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
             Lade eine Audiodatei hoch, die als musikalische Untermalung im Videoclip verwendet wird.
           </p>
 
+          {/* Volume selection */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium">Lautstärke im Videoclip</label>
+            <div className="flex gap-2">
+              {[
+                { label: 'Leise', value: 0.2 },
+                { label: 'Mittel', value: 0.4 },
+                { label: 'Laut', value: 0.7 },
+              ].map((opt) => (
+                <Button
+                  key={opt.value}
+                  variant={soundtrackVolume === opt.value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSoundtrackVolume(opt.value)}
+                >
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+          </p>
+
           {soundtrackUrl ? (
             <div className="space-y-2">
               <audio src={soundtrackUrl} controls className="w-full max-w-md" />
