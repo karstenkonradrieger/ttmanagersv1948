@@ -287,7 +287,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
               ))}
             </div>
           </div>
-          </p>
+
 
           {soundtrackUrl ? (
             <div className="space-y-2">
