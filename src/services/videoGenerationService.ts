@@ -22,6 +22,15 @@ function isVideoUrl(url: string): boolean {
   } catch { return false; }
 }
 
+function getRoundLabel(round: number, totalRounds: number, mode?: string): string {
+  if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
+  const diff = totalRounds - round;
+  if (diff === 1) return 'Finale';
+  if (diff === 2) return 'Halbfinale';
+  if (diff === 3) return 'Viertelfinale';
+  return `Runde ${round + 1}`;
+}
+
 export async function collectTournamentMedia(
   tournamentId: string,
   getParticipantName?: (id: string | null) => string
@@ -36,6 +45,8 @@ export async function collectTournamentMedia(
 
   // Load match data for overlay info
   let matchMap: Record<string, any> = {};
+  let totalRounds = 0;
+  let tournamentMode = 'knockout';
   if (getParticipantName) {
     const { data: matches } = await supabase
       .from('matches')
@@ -44,8 +55,15 @@ export async function collectTournamentMedia(
     if (matches) {
       for (const m of matches) {
         matchMap[m.id] = m;
+        if (m.round > totalRounds) totalRounds = m.round;
       }
     }
+    const { data: tournament } = await supabase
+      .from('tournaments')
+      .select('mode')
+      .eq('id', tournamentId)
+      .single();
+    if (tournament) tournamentMode = tournament.mode;
   }
 
   return photos.map(p => {
@@ -59,10 +77,12 @@ export async function collectTournamentMedia(
         if (s.player1 >= 11 && s.player1 - s.player2 >= 2) w1++;
         else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) w2++;
       }
+      const roundLabel = getRoundLabel(match.round, totalRounds + 1, tournamentMode);
       overlay = {
         player1: getParticipantName(match.player1_id),
         player2: getParticipantName(match.player2_id),
         score: match.winner_id ? `${w1} : ${w2}` : undefined,
+        roundLabel,
       };
     }
 
@@ -396,7 +416,8 @@ function drawOverlay(
 
   // Match info bar (bottom)
   if (overlay && (overlay.player1 || overlay.player2)) {
-    const barH = 80;
+    const hasRoundLabel = !!overlay.roundLabel;
+    const barH = hasRoundLabel ? 110 : 80;
     const barY = h - barH;
 
     // Semi-transparent gradient bar
@@ -406,6 +427,15 @@ function drawOverlay(
     grad.addColorStop(1, 'rgba(0,0,0,0.85)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, barY, w, barH);
+
+    // Round label (above player names)
+    if (overlay.roundLabel) {
+      ctx.font = 'bold 24px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#94a3b8'; // slate-400
+      ctx.fillText(overlay.roundLabel, w / 2, h - 68);
+    }
 
     const textY = h - 28;
 
