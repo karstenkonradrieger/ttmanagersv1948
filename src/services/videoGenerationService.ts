@@ -85,7 +85,8 @@ export async function generateSlideshowVideo(
   media: MediaItem[],
   tournamentName: string,
   soundtrackUrl?: string | null,
-  onProgress?: (pct: number) => void
+  onProgress?: (pct: number) => void,
+  soundtrackVolume: number = 0.4
 ): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = 1920;
