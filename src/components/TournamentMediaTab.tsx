@@ -120,7 +120,8 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
         media,
         tournamentName,
         soundtrackUrl,
-        (pct) => setVideoProgress(pct)
+        (pct) => setVideoProgress(pct),
+        soundtrackVolume
       );
 
       const url = await uploadGeneratedVideo(tournamentId, videoBlob);
