@@ -31,17 +31,22 @@ function getRoundLabel(round: number, totalRounds: number, mode?: string): strin
   return `Runde ${round + 1}`;
 }
 
+interface PlacementEntry {
+  rank: number;
+  name: string;
+}
+
 export async function collectTournamentMedia(
   tournamentId: string,
   getParticipantName?: (id: string | null) => string
-): Promise<MediaItem[]> {
+): Promise<{ media: MediaItem[]; placements: PlacementEntry[] }> {
   const { data: photos } = await supabase
     .from('match_photos')
     .select('*')
     .eq('tournament_id', tournamentId)
     .order('created_at', { ascending: true });
 
-  if (!photos) return [];
+  if (!photos) return { media: [], placements: [] };
 
   // Load match data for overlay info
   let matchMap: Record<string, any> = {};
@@ -68,7 +73,7 @@ export async function collectTournamentMedia(
     if (tournament) tournamentMode = tournament.mode;
   }
 
-  return photos.map(p => {
+  const media = photos.map(p => {
     const match = p.match_id ? matchMap[p.match_id] : null;
     let overlay: MediaItem['overlay'] = undefined;
 
@@ -97,6 +102,70 @@ export async function collectTournamentMedia(
       overlay,
     };
   });
+
+  // Compute placements from completed matches
+  const placements = computePlacements(matchList, tournamentMode, getParticipantName);
+
+  return { media, placements };
+}
+
+function computePlacements(
+  matches: any[],
+  mode: string,
+  getName?: (id: string | null) => string
+): PlacementEntry[] {
+  if (!getName || matches.length === 0) return [];
+  const completed = matches.filter(m => m.status === 'completed' && m.winner_id);
+  if (completed.length === 0) return [];
+
+  if (mode === 'round_robin' || mode === 'swiss') {
+    // Standings-based ranking
+    const stats = new Map<string, { won: number; setsWon: number; setsLost: number; pointsWon: number; pointsLost: number }>();
+    const ensure = (id: string) => {
+      if (!stats.has(id)) stats.set(id, { won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
+      return stats.get(id)!;
+    };
+    for (const m of completed) {
+      if (!m.player1_id || !m.player2_id) continue;
+      const s1 = ensure(m.player1_id);
+      const s2 = ensure(m.player2_id);
+      if (m.winner_id === m.player1_id) s1.won++;
+      else s2.won++;
+      const sets = (m.sets || []) as Array<{ player1: number; player2: number }>;
+      for (const s of sets) {
+        s1.pointsWon += s.player1; s1.pointsLost += s.player2;
+        s2.pointsWon += s.player2; s2.pointsLost += s.player1;
+        if (s.player1 >= 11 && s.player1 - s.player2 >= 2) { s1.setsWon++; s2.setsLost++; }
+        else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) { s2.setsWon++; s1.setsLost++; }
+      }
+    }
+    const sorted = [...stats.entries()].sort((a, b) =>
+      b[1].won - a[1].won ||
+      (b[1].setsWon - b[1].setsLost) - (a[1].setsWon - a[1].setsLost) ||
+      (b[1].pointsWon - b[1].pointsLost) - (a[1].pointsWon - a[1].pointsLost)
+    );
+    return sorted.map(([id], i) => ({ rank: i + 1, name: getName(id) }));
+  }
+
+  // Knockout: derive from bracket
+  const maxRound = Math.max(0, ...completed.map(m => m.round));
+  const finalMatch = completed.find(m => m.round === maxRound);
+  if (!finalMatch) return [];
+
+  const result: PlacementEntry[] = [];
+  // 1st: winner of final
+  result.push({ rank: 1, name: getName(finalMatch.winner_id) });
+  // 2nd: loser of final
+  const loserId = finalMatch.player1_id === finalMatch.winner_id ? finalMatch.player2_id : finalMatch.player1_id;
+  result.push({ rank: 2, name: getName(loserId) });
+  // 3rd/4th: losers of semifinal
+  const semis = completed.filter(m => m.round === maxRound - 1);
+  let rank = 3;
+  for (const s of semis) {
+    const sLoser = s.player1_id === s.winner_id ? s.player2_id : s.player1_id;
+    if (sLoser) result.push({ rank: rank++, name: getName(sLoser) });
+  }
+  return result;
 }
 
 /**
