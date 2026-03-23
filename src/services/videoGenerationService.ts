@@ -177,7 +177,8 @@ export async function generateSlideshowVideo(
   tournamentName: string,
   soundtrackUrl?: string | null,
   onProgress?: (pct: number) => void,
-  soundtrackVolume: number = 0.4
+  soundtrackVolume: number = 0.4,
+  placements: PlacementEntry[] = []
 ): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = 1920;
