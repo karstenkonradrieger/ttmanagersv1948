@@ -105,7 +105,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
     setGeneratingVideo(true);
     setVideoProgress(0);
     try {
-      const media = await collectTournamentMedia(tournamentId, getParticipantName);
+      const { media, placements } = await collectTournamentMedia(tournamentId, getParticipantName);
 
       if (media.length === 0) {
         toast.error('Keine Medien vorhanden. Bitte zuerst Fotos oder Videos aufnehmen.');
@@ -121,7 +121,8 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
         tournamentName,
         soundtrackUrl,
         (pct) => setVideoProgress(pct),
-        soundtrackVolume
+        soundtrackVolume,
+        placements
       );
 
       const url = await uploadGeneratedVideo(tournamentId, videoBlob);

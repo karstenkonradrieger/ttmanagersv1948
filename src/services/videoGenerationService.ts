@@ -31,20 +31,26 @@ function getRoundLabel(round: number, totalRounds: number, mode?: string): strin
   return `Runde ${round + 1}`;
 }
 
+interface PlacementEntry {
+  rank: number;
+  name: string;
+}
+
 export async function collectTournamentMedia(
   tournamentId: string,
   getParticipantName?: (id: string | null) => string
-): Promise<MediaItem[]> {
+): Promise<{ media: MediaItem[]; placements: PlacementEntry[] }> {
   const { data: photos } = await supabase
     .from('match_photos')
     .select('*')
     .eq('tournament_id', tournamentId)
     .order('created_at', { ascending: true });
 
-  if (!photos) return [];
+  if (!photos) return { media: [], placements: [] };
 
   // Load match data for overlay info
   let matchMap: Record<string, any> = {};
+  let matchList: any[] = [];
   let totalRounds = 0;
   let tournamentMode = 'knockout';
   if (getParticipantName) {
@@ -53,6 +59,7 @@ export async function collectTournamentMedia(
       .select('*')
       .eq('tournament_id', tournamentId);
     if (matches) {
+      matchList = matches;
       for (const m of matches) {
         matchMap[m.id] = m;
         if (m.round > totalRounds) totalRounds = m.round;
@@ -66,7 +73,7 @@ export async function collectTournamentMedia(
     if (tournament) tournamentMode = tournament.mode;
   }
 
-  return photos.map(p => {
+  const media = photos.map(p => {
     const match = p.match_id ? matchMap[p.match_id] : null;
     let overlay: MediaItem['overlay'] = undefined;
 
@@ -95,6 +102,70 @@ export async function collectTournamentMedia(
       overlay,
     };
   });
+
+  // Compute placements from completed matches
+  const placements = computePlacements(matchList, tournamentMode, getParticipantName);
+
+  return { media, placements };
+}
+
+function computePlacements(
+  matches: any[],
+  mode: string,
+  getName?: (id: string | null) => string
+): PlacementEntry[] {
+  if (!getName || matches.length === 0) return [];
+  const completed = matches.filter(m => m.status === 'completed' && m.winner_id);
+  if (completed.length === 0) return [];
+
+  if (mode === 'round_robin' || mode === 'swiss') {
+    // Standings-based ranking
+    const stats = new Map<string, { won: number; setsWon: number; setsLost: number; pointsWon: number; pointsLost: number }>();
+    const ensure = (id: string) => {
+      if (!stats.has(id)) stats.set(id, { won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
+      return stats.get(id)!;
+    };
+    for (const m of completed) {
+      if (!m.player1_id || !m.player2_id) continue;
+      const s1 = ensure(m.player1_id);
+      const s2 = ensure(m.player2_id);
+      if (m.winner_id === m.player1_id) s1.won++;
+      else s2.won++;
+      const sets = (m.sets || []) as Array<{ player1: number; player2: number }>;
+      for (const s of sets) {
+        s1.pointsWon += s.player1; s1.pointsLost += s.player2;
+        s2.pointsWon += s.player2; s2.pointsLost += s.player1;
+        if (s.player1 >= 11 && s.player1 - s.player2 >= 2) { s1.setsWon++; s2.setsLost++; }
+        else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) { s2.setsWon++; s1.setsLost++; }
+      }
+    }
+    const sorted = [...stats.entries()].sort((a, b) =>
+      b[1].won - a[1].won ||
+      (b[1].setsWon - b[1].setsLost) - (a[1].setsWon - a[1].setsLost) ||
+      (b[1].pointsWon - b[1].pointsLost) - (a[1].pointsWon - a[1].pointsLost)
+    );
+    return sorted.map(([id], i) => ({ rank: i + 1, name: getName(id) }));
+  }
+
+  // Knockout: derive from bracket
+  const maxRound = Math.max(0, ...completed.map(m => m.round));
+  const finalMatch = completed.find(m => m.round === maxRound);
+  if (!finalMatch) return [];
+
+  const result: PlacementEntry[] = [];
+  // 1st: winner of final
+  result.push({ rank: 1, name: getName(finalMatch.winner_id) });
+  // 2nd: loser of final
+  const loserId = finalMatch.player1_id === finalMatch.winner_id ? finalMatch.player2_id : finalMatch.player1_id;
+  result.push({ rank: 2, name: getName(loserId) });
+  // 3rd/4th: losers of semifinal
+  const semis = completed.filter(m => m.round === maxRound - 1);
+  let rank = 3;
+  for (const s of semis) {
+    const sLoser = s.player1_id === s.winner_id ? s.player2_id : s.player1_id;
+    if (sLoser) result.push({ rank: rank++, name: getName(sLoser) });
+  }
+  return result;
 }
 
 /**
@@ -106,7 +177,8 @@ export async function generateSlideshowVideo(
   tournamentName: string,
   soundtrackUrl?: string | null,
   onProgress?: (pct: number) => void,
-  soundtrackVolume: number = 0.4
+  soundtrackVolume: number = 0.4,
+  placements: PlacementEntry[] = []
 ): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = 1920;
@@ -182,7 +254,8 @@ export async function generateSlideshowVideo(
     { key: 'ceremony', title: '🏆 Siegerehrung' },
   ];
   const activeSections = sections.filter(s => media.some(m => m.section === s.key));
-  const totalSteps = allItems + activeSections.length + 2; // +2 for intro/outro
+  const hasCredits = placements.length > 0;
+  const totalSteps = allItems + activeSections.length + 2 + (hasCredits ? 1 : 0);
   let step = 0;
 
   // Intro slide
@@ -213,6 +286,13 @@ export async function generateSlideshowVideo(
       step++;
       onProgress?.(Math.round((step / totalSteps) * 100));
     }
+  }
+
+  // Credits slide with placements
+  if (hasCredits) {
+    await drawCreditsSlide(ctx, canvas.width, canvas.height, tournamentName, placements);
+    step++;
+    onProgress?.(Math.round((step / totalSteps) * 100));
   }
 
   // Outro slide
@@ -341,6 +421,71 @@ async function drawTextSlide(
       ctx.font = '36px sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
       ctx.fillText(subtitle, w / 2, h / 2 + 50);
+    }
+
+    ctx.globalAlpha = 1;
+    await waitFrame();
+  }
+}
+
+async function drawCreditsSlide(
+  ctx: CanvasRenderingContext2D,
+  w: number, h: number,
+  tournamentName: string,
+  placements: PlacementEntry[]
+) {
+  const medals = ['🥇', '🥈', '🥉'];
+  const displayCount = Math.min(placements.length, 8);
+  const durationMs = 4000 + displayCount * 500;
+  const frames = Math.round((durationMs / 1000) * 30);
+
+  for (let f = 0; f < frames; f++) {
+    const progress = f / frames;
+
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, '#1a1a2e');
+    grad.addColorStop(0.5, '#0f3460');
+    grad.addColorStop(1, '#1a1a2e');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    const alpha = progress < 0.1 ? progress / 0.1 :
+                  progress > 0.9 ? (1 - progress) / 0.1 : 1;
+    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = 'bold 56px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🏆 Platzierungen', w / 2, 120);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = '28px sans-serif';
+    ctx.fillText(tournamentName, w / 2, 175);
+
+    const startY = 260;
+    const lineH = 70;
+
+    for (let i = 0; i < displayCount; i++) {
+      const p = placements[i];
+      const itemProgress = Math.max(0, Math.min(1, (progress - 0.05 - i * 0.06) / 0.12));
+      if (itemProgress <= 0) continue;
+
+      ctx.globalAlpha = Math.max(0, Math.min(1, alpha)) * itemProgress;
+      const y = startY + i * lineH;
+      const slideX = (1 - itemProgress) * 100;
+
+      const medal = medals[i] || '';
+      const rankText = medal || `${p.rank}.`;
+      ctx.font = i < 3 ? 'bold 44px sans-serif' : 'bold 36px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillStyle = i === 0 ? '#fbbf24' : i === 1 ? '#cbd5e1' : i === 2 ? '#d97706' : '#94a3b8';
+      ctx.fillText(rankText, w / 2 - 80 + slideX, y);
+
+      ctx.font = i < 3 ? 'bold 40px sans-serif' : '34px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = i < 3 ? '#ffffff' : '#e2e8f0';
+      ctx.fillText(p.name, w / 2 - 50 + slideX, y);
     }
 
     ctx.globalAlpha = 1;
