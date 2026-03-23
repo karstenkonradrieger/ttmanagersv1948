@@ -491,6 +491,7 @@ async function drawCreditsSlide(
     ctx.globalAlpha = 1;
     await waitFrame();
   }
+}
 
 async function drawImageSlide(
   ctx: CanvasRenderingContext2D,
