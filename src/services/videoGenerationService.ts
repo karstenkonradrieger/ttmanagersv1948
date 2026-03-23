@@ -428,6 +428,70 @@ async function drawTextSlide(
   }
 }
 
+async function drawCreditsSlide(
+  ctx: CanvasRenderingContext2D,
+  w: number, h: number,
+  tournamentName: string,
+  placements: PlacementEntry[]
+) {
+  const medals = ['🥇', '🥈', '🥉'];
+  const displayCount = Math.min(placements.length, 8);
+  const durationMs = 4000 + displayCount * 500;
+  const frames = Math.round((durationMs / 1000) * 30);
+
+  for (let f = 0; f < frames; f++) {
+    const progress = f / frames;
+
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, '#1a1a2e');
+    grad.addColorStop(0.5, '#0f3460');
+    grad.addColorStop(1, '#1a1a2e');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    const alpha = progress < 0.1 ? progress / 0.1 :
+                  progress > 0.9 ? (1 - progress) / 0.1 : 1;
+    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = 'bold 56px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🏆 Platzierungen', w / 2, 120);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = '28px sans-serif';
+    ctx.fillText(tournamentName, w / 2, 175);
+
+    const startY = 260;
+    const lineH = 70;
+
+    for (let i = 0; i < displayCount; i++) {
+      const p = placements[i];
+      const itemProgress = Math.max(0, Math.min(1, (progress - 0.05 - i * 0.06) / 0.12));
+      if (itemProgress <= 0) continue;
+
+      ctx.globalAlpha = Math.max(0, Math.min(1, alpha)) * itemProgress;
+      const y = startY + i * lineH;
+      const slideX = (1 - itemProgress) * 100;
+
+      const medal = medals[i] || '';
+      const rankText = medal || `${p.rank}.`;
+      ctx.font = i < 3 ? 'bold 44px sans-serif' : 'bold 36px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillStyle = i === 0 ? '#fbbf24' : i === 1 ? '#cbd5e1' : i === 2 ? '#d97706' : '#94a3b8';
+      ctx.fillText(rankText, w / 2 - 80 + slideX, y);
+
+      ctx.font = i < 3 ? 'bold 40px sans-serif' : '34px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = i < 3 ? '#ffffff' : '#e2e8f0';
+      ctx.fillText(p.name, w / 2 - 50 + slideX, y);
+    }
+
+    ctx.globalAlpha = 1;
+    await waitFrame();
+  }
+
 async function drawImageSlide(
   ctx: CanvasRenderingContext2D,
   w: number, h: number,
