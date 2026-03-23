@@ -254,7 +254,8 @@ export async function generateSlideshowVideo(
     { key: 'ceremony', title: '🏆 Siegerehrung' },
   ];
   const activeSections = sections.filter(s => media.some(m => m.section === s.key));
-  const totalSteps = allItems + activeSections.length + 2; // +2 for intro/outro
+  const hasCredits = placements.length > 0;
+  const totalSteps = allItems + activeSections.length + 2 + (hasCredits ? 1 : 0);
   let step = 0;
 
   // Intro slide
@@ -285,6 +286,13 @@ export async function generateSlideshowVideo(
       step++;
       onProgress?.(Math.round((step / totalSteps) * 100));
     }
+  }
+
+  // Credits slide with placements
+  if (hasCredits) {
+    await drawCreditsSlide(ctx, canvas.width, canvas.height, tournamentName, placements);
+    step++;
+    onProgress?.(Math.round((step / totalSteps) * 100));
   }
 
   // Outro slide
