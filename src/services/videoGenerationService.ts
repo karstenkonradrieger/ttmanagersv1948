@@ -45,6 +45,7 @@ export async function collectTournamentMedia(
 
   // Load match data for overlay info
   let matchMap: Record<string, any> = {};
+  let matchList: any[] = [];
   let totalRounds = 0;
   let tournamentMode = 'knockout';
   if (getParticipantName) {
@@ -53,6 +54,7 @@ export async function collectTournamentMedia(
       .select('*')
       .eq('tournament_id', tournamentId);
     if (matches) {
+      matchList = matches;
       for (const m of matches) {
         matchMap[m.id] = m;
         if (m.round > totalRounds) totalRounds = m.round;
