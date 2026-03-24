@@ -169,8 +169,28 @@ function computePlacements(
 }
 
 /**
- * Generates a WebM video slideshow from images AND video clips using
+ * Picks the best supported video MIME type for MediaRecorder.
+ * Prefers MP4 (h264) for broad device/player compatibility, falls back to WebM.
+ */
+function pickMimeType(): { mimeType: string; extension: string } {
+  const candidates = [
+    { mimeType: 'video/mp4;codecs=avc1,opus', extension: 'mp4' },
+    { mimeType: 'video/mp4;codecs=avc1,mp4a.40.2', extension: 'mp4' },
+    { mimeType: 'video/mp4', extension: 'mp4' },
+    { mimeType: 'video/webm;codecs=vp9,opus', extension: 'webm' },
+    { mimeType: 'video/webm;codecs=vp8,opus', extension: 'webm' },
+    { mimeType: 'video/webm', extension: 'webm' },
+  ];
+  for (const c of candidates) {
+    if (MediaRecorder.isTypeSupported(c.mimeType)) return c;
+  }
+  return { mimeType: 'video/webm', extension: 'webm' };
+}
+
+/**
+ * Generates a video slideshow from images AND video clips using
  * Canvas + MediaRecorder (client-side). Optionally mixes in a soundtrack.
+ * Outputs MP4 when the browser supports it, WebM otherwise.
  */
 export async function generateSlideshowVideo(
   media: MediaItem[],
@@ -223,8 +243,11 @@ export async function generateSlideshowVideo(
     audioDestination.stream.getAudioTracks().forEach(t => combinedStream.addTrack(t));
   }
 
+  const { mimeType: recorderMime, extension: videoExtension } = pickMimeType();
+  console.log(`MediaRecorder using: ${recorderMime} (.${videoExtension})`);
+
   const recorder = new MediaRecorder(combinedStream, {
-    mimeType: 'video/webm;codecs=vp9,opus',
+    mimeType: recorderMime,
     videoBitsPerSecond: 5_000_000,
   });
 
@@ -235,7 +258,8 @@ export async function generateSlideshowVideo(
 
   const finished = new Promise<Blob>((resolve) => {
     recorder.onstop = () => {
-      resolve(new Blob(chunks, { type: 'video/webm' }));
+      const contentType = videoExtension === 'mp4' ? 'video/mp4' : 'video/webm';
+      resolve(new Blob(chunks, { type: contentType }));
     };
   });
 
@@ -623,11 +647,14 @@ export async function uploadGeneratedVideo(
   tournamentId: string,
   videoBlob: Blob
 ): Promise<string> {
-  const fileName = `${tournamentId}/${Date.now()}.webm`;
+  const isMP4 = videoBlob.type.includes('mp4');
+  const ext = isMP4 ? 'mp4' : 'webm';
+  const contentType = isMP4 ? 'video/mp4' : 'video/webm';
+  const fileName = `${tournamentId}/${Date.now()}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from('tournament-videos')
-    .upload(fileName, videoBlob, { contentType: 'video/webm' });
+    .upload(fileName, videoBlob, { contentType });
 
   if (uploadError) throw uploadError;
 
