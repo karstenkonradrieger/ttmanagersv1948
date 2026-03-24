@@ -303,7 +303,7 @@ export async function generateSlideshowVideo(
           await drawVideoClip(ctx, canvas.width, canvas.height, item.url, item.overlay, tournamentName);
         } else {
           const img = await loadImage(item.url);
-          await drawImageSlide(ctx, canvas.width, canvas.height, img, 3000, item.overlay, tournamentName);
+          await drawImageSlide(ctx, canvas.width, canvas.height, img, photoDurationMs, item.overlay, tournamentName);
         }
       } catch (e) {
         console.warn('Failed to process media:', item.url, e);
