@@ -293,8 +293,28 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
             </div>
           </div>
 
+          {/* Photo duration selection */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium">Anzeigedauer pro Foto</label>
+            <div className="flex gap-2">
+              {[
+                { label: '3 Sek.', value: 3000 },
+                { label: '5 Sek.', value: 5000 },
+                { label: '8 Sek.', value: 8000 },
+              ].map((opt) => (
+                <Button
+                  key={opt.value}
+                  variant={photoDuration === opt.value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPhotoDuration(opt.value)}
+                >
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
+          </div>
 
-          {soundtrackUrl ? (
+
             <div className="space-y-2">
               <audio src={soundtrackUrl} controls className="w-full max-w-md" />
               <div className="flex gap-2">
