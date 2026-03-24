@@ -258,7 +258,8 @@ export async function generateSlideshowVideo(
 
   const finished = new Promise<Blob>((resolve) => {
     recorder.onstop = () => {
-      resolve(new Blob(chunks, { type: 'video/webm' }));
+      const contentType = videoExtension === 'mp4' ? 'video/mp4' : 'video/webm';
+      resolve(new Blob(chunks, { type: contentType }));
     };
   });
 
