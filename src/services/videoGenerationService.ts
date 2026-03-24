@@ -198,7 +198,8 @@ export async function generateSlideshowVideo(
   soundtrackUrl?: string | null,
   onProgress?: (pct: number) => void,
   soundtrackVolume: number = 0.4,
-  placements: PlacementEntry[] = []
+  placements: PlacementEntry[] = [],
+  photoDurationMs: number = 3000
 ): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = 1920;
