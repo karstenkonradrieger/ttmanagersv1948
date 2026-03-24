@@ -38,6 +38,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
   const [generatingVideo, setGeneratingVideo] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
   const [soundtrackUrl, setSoundtrackUrl] = useState<string | null>(null);
   const [uploadingSoundtrack, setUploadingSoundtrack] = useState(false);
   const [soundtrackVolume, setSoundtrackVolume] = useState<number>(0.4);
