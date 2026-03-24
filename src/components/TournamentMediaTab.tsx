@@ -368,7 +368,16 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
                 controls
                 className="w-full max-w-2xl rounded-lg border border-border"
               />
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setVideoDialogOpen(true)}
+                  className="gap-1"
+                >
+                  <Play className="h-3.5 w-3.5" />
+                  Abspielen
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
