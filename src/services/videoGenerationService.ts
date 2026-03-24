@@ -169,8 +169,28 @@ function computePlacements(
 }
 
 /**
- * Generates a WebM video slideshow from images AND video clips using
+ * Picks the best supported video MIME type for MediaRecorder.
+ * Prefers MP4 (h264) for broad device/player compatibility, falls back to WebM.
+ */
+function pickMimeType(): { mimeType: string; extension: string } {
+  const candidates = [
+    { mimeType: 'video/mp4;codecs=avc1,opus', extension: 'mp4' },
+    { mimeType: 'video/mp4;codecs=avc1,mp4a.40.2', extension: 'mp4' },
+    { mimeType: 'video/mp4', extension: 'mp4' },
+    { mimeType: 'video/webm;codecs=vp9,opus', extension: 'webm' },
+    { mimeType: 'video/webm;codecs=vp8,opus', extension: 'webm' },
+    { mimeType: 'video/webm', extension: 'webm' },
+  ];
+  for (const c of candidates) {
+    if (MediaRecorder.isTypeSupported(c.mimeType)) return c;
+  }
+  return { mimeType: 'video/webm', extension: 'webm' };
+}
+
+/**
+ * Generates a video slideshow from images AND video clips using
  * Canvas + MediaRecorder (client-side). Optionally mixes in a soundtrack.
+ * Outputs MP4 when the browser supports it, WebM otherwise.
  */
 export async function generateSlideshowVideo(
   media: MediaItem[],
