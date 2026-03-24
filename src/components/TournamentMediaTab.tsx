@@ -43,6 +43,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
   const [soundtrackUrl, setSoundtrackUrl] = useState<string | null>(null);
   const [uploadingSoundtrack, setUploadingSoundtrack] = useState(false);
   const [soundtrackVolume, setSoundtrackVolume] = useState<number>(0.4);
+  const [photoDuration, setPhotoDuration] = useState<number>(3000);
   const soundtrackInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
