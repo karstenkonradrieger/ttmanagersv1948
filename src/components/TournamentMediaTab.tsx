@@ -43,6 +43,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
   const [soundtrackUrl, setSoundtrackUrl] = useState<string | null>(null);
   const [uploadingSoundtrack, setUploadingSoundtrack] = useState(false);
   const [soundtrackVolume, setSoundtrackVolume] = useState<number>(0.4);
+  const [photoDuration, setPhotoDuration] = useState<number>(3000);
   const soundtrackInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -124,7 +125,8 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
         soundtrackUrl,
         (pct) => setVideoProgress(pct),
         soundtrackVolume,
-        placements
+        placements,
+        photoDuration
       );
 
       const url = await uploadGeneratedVideo(tournamentId, videoBlob);
@@ -291,6 +293,26 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
             </div>
           </div>
 
+          {/* Photo duration selection */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium">Anzeigedauer pro Foto</label>
+            <div className="flex gap-2">
+              {[
+                { label: '3 Sek.', value: 3000 },
+                { label: '5 Sek.', value: 5000 },
+                { label: '8 Sek.', value: 8000 },
+              ].map((opt) => (
+                <Button
+                  key={opt.value}
+                  variant={photoDuration === opt.value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPhotoDuration(opt.value)}
+                >
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
+          </div>
 
           {soundtrackUrl ? (
             <div className="space-y-2">

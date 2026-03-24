@@ -198,7 +198,8 @@ export async function generateSlideshowVideo(
   soundtrackUrl?: string | null,
   onProgress?: (pct: number) => void,
   soundtrackVolume: number = 0.4,
-  placements: PlacementEntry[] = []
+  placements: PlacementEntry[] = [],
+  photoDurationMs: number = 3000
 ): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = 1920;
@@ -302,7 +303,7 @@ export async function generateSlideshowVideo(
           await drawVideoClip(ctx, canvas.width, canvas.height, item.url, item.overlay, tournamentName);
         } else {
           const img = await loadImage(item.url);
-          await drawImageSlide(ctx, canvas.width, canvas.height, img, 3000, item.overlay, tournamentName);
+          await drawImageSlide(ctx, canvas.width, canvas.height, img, photoDurationMs, item.overlay, tournamentName);
         }
       } catch (e) {
         console.warn('Failed to process media:', item.url, e);
