@@ -4,7 +4,8 @@ import { MatchPhotos } from '@/components/MatchPhotos';
 import { Match } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Camera, PartyPopper, Film, Loader2, Download, Trash2, Music, Upload, X } from 'lucide-react';
+import { Camera, PartyPopper, Film, Loader2, Download, Trash2, Music, Upload, X, Play } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -38,6 +39,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
   const [generatingVideo, setGeneratingVideo] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
   const [soundtrackUrl, setSoundtrackUrl] = useState<string | null>(null);
   const [uploadingSoundtrack, setUploadingSoundtrack] = useState(false);
   const [soundtrackVolume, setSoundtrackVolume] = useState<number>(0.4);
@@ -367,7 +369,16 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
                 controls
                 className="w-full max-w-2xl rounded-lg border border-border"
               />
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setVideoDialogOpen(true)}
+                  className="gap-1"
+                >
+                  <Play className="h-3.5 w-3.5" />
+                  Abspielen
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -426,6 +437,20 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
           )}
         </CardContent>
       </Card>
+
+      {/* Video playback dialog */}
+      <Dialog open={videoDialogOpen} onOpenChange={setVideoDialogOpen}>
+        <DialogContent className="max-w-4xl w-[95vw] p-0 bg-black border-none">
+          {videoUrl && (
+            <video
+              src={videoUrl}
+              controls
+              autoPlay
+              className="w-full h-auto max-h-[85vh] rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
