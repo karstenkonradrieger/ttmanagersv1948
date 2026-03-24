@@ -647,11 +647,14 @@ export async function uploadGeneratedVideo(
   tournamentId: string,
   videoBlob: Blob
 ): Promise<string> {
-  const fileName = `${tournamentId}/${Date.now()}.webm`;
+  const isMP4 = videoBlob.type.includes('mp4');
+  const ext = isMP4 ? 'mp4' : 'webm';
+  const contentType = isMP4 ? 'video/mp4' : 'video/webm';
+  const fileName = `${tournamentId}/${Date.now()}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from('tournament-videos')
-    .upload(fileName, videoBlob, { contentType: 'video/webm' });
+    .upload(fileName, videoBlob, { contentType });
 
   if (uploadError) throw uploadError;
 
