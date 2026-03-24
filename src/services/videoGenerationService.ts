@@ -243,8 +243,11 @@ export async function generateSlideshowVideo(
     audioDestination.stream.getAudioTracks().forEach(t => combinedStream.addTrack(t));
   }
 
+  const { mimeType: recorderMime, extension: videoExtension } = pickMimeType();
+  console.log(`MediaRecorder using: ${recorderMime} (.${videoExtension})`);
+
   const recorder = new MediaRecorder(combinedStream, {
-    mimeType: 'video/webm;codecs=vp9,opus',
+    mimeType: recorderMime,
     videoBitsPerSecond: 5_000_000,
   });
 
