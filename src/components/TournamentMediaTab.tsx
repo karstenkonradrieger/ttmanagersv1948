@@ -451,19 +451,6 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
         </CardContent>
       </Card>
 
-      {/* Video playback dialog */}
-      <Dialog open={videoDialogOpen} onOpenChange={setVideoDialogOpen}>
-        <DialogContent className="max-w-4xl w-[95vw] p-0 bg-black border-none">
-          {videoUrl && (
-            <video
-              src={videoUrl}
-              controls
-              autoPlay
-              className="w-full h-auto max-h-[85vh] rounded-lg"
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
