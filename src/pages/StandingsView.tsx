@@ -18,15 +18,15 @@ const StandingsView = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="gradient-sport border-b border-border">
+      <header className="glass border-b border-border/50">
         <div className="container py-3 flex items-center gap-2">
           {tournament.logoUrl && (
-            <img src={tournament.logoUrl} alt="Logo" className="h-10 w-10 rounded-md object-cover" />
+            <img src={tournament.logoUrl} alt="Logo" className="h-10 w-10 rounded-lg object-cover" />
           )}
-          <h1 className="text-lg font-extrabold tracking-tight">
+          <h1 className="text-lg font-bold tracking-tight font-display">
             {tournament.name || 'Turnier'}
           </h1>
-          <span className="ml-auto text-xs text-muted-foreground">Tabelle</span>
+          <span className="ml-auto text-xs text-muted-foreground font-medium">Tabelle</span>
         </div>
       </header>
       <div className="container py-6">
