@@ -207,14 +207,14 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="gradient-sport border-b border-border sticky top-0 z-50">
+      <header className="glass border-b border-border/50 sticky top-0 z-50">
         <div className="container py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSelectedTournamentId(null)}
-              className="h-8 w-8 flex-shrink-0"
+              className="h-8 w-8 flex-shrink-0 text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -231,20 +231,20 @@ const Index = () => {
                   onChange={e => setNameValue(e.target.value)}
                   onBlur={() => { updateName(nameValue); setEditingName(false); }}
                   onKeyDown={e => { if (e.key === 'Enter') { updateName(nameValue); setEditingName(false); } if (e.key === 'Escape') setEditingName(false); }}
-                  className="h-7 text-sm sm:text-lg font-extrabold w-48 sm:w-64"
+                  className="h-7 text-sm sm:text-lg font-bold w-48 sm:w-64 font-display"
                 />
               ) : (
                 <div className="flex items-center gap-1 group cursor-pointer" onClick={() => { setNameValue(tournament.name); setEditingName(true); }}>
-                  <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-tight truncate">
+                  <h1 className="text-sm sm:text-lg font-bold tracking-tight leading-tight truncate font-display">
                     {tournament.name || 'Turnier'}
                   </h1>
                   <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                 </div>
               )}
-              <div className="flex gap-1.5">
-                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{modeLabel}</span>
-                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{typeLabel}</span>
-                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">Bo{tournament.bestOf * 2 - 1}</span>
+              <div className="flex gap-1.5 mt-0.5">
+                <span className="text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-medium">{modeLabel}</span>
+                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded-md">{typeLabel}</span>
+                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded-md">Bo{tournament.bestOf * 2 - 1}</span>
               </div>
             </div>
             <TournamentSettingsDialog
@@ -278,7 +278,7 @@ const Index = () => {
               onUpdateDetails={updateDetails}
             />
             {tournament.openingVideoUrl && (
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setOpeningVideoPlayerOpen(true)} title="Eröffnungsvideo abspielen">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setOpeningVideoPlayerOpen(true)} title="Eröffnungsvideo abspielen">
                 <Video className="h-4 w-4" />
               </Button>
             )}
@@ -317,7 +317,7 @@ const Index = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedTournamentId(null)}
-                  className="text-muted-foreground"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   <RotateCcw className="mr-1 h-4 w-4" />
                   Zurück
@@ -329,38 +329,38 @@ const Index = () => {
       </header>
 
       {/* Info bar */}
-      <div className="container py-2">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-          <span>{tournament.players.length} Spieler</span>
-          {isDoubles && <span>{tournament.doublesPairs.length} Paare</span>}
+      <div className="container py-2.5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span className="font-medium text-foreground/70">{tournament.players.length} Spieler</span>
+          {isDoubles && <span className="font-medium text-foreground/70">{tournament.doublesPairs.length} Paare</span>}
           {isGroupKnockout && tournament.started && (
             <>
-              <span>·</span>
+              <span className="text-border">·</span>
               <span className="text-primary font-semibold">{tournament.phase === 'knockout' ? 'K.O.-Runde' : 'Gruppenphase'}</span>
             </>
           )}
           {tournament.started && (
             <>
-              <span>·</span>
+              <span className="text-border">·</span>
               <span>{tournament.matches.filter(m => m.status === 'completed').length}/{tournament.matches.length} Spiele</span>
             </>
           )}
           {tournament.tournamentDate && (
             <>
-              <span>·</span>
+              <span className="text-border">·</span>
               <span>📅 {new Date(tournament.tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
             </>
           )}
           {(tournament.venueCity || tournament.venueStreet) && (
             <>
-              <span>·</span>
+              <span className="text-border">·</span>
               <span>📍 {[tournament.venueStreet, tournament.venueHouseNumber, tournament.venuePostalCode, tournament.venueCity].filter(Boolean).join(' ')}</span>
             </>
           )}
           {tournament.motto && (
             <>
-              <span>·</span>
-              <span className="italic">„{tournament.motto}"</span>
+              <span className="text-border">·</span>
+              <span className="italic text-foreground/50">„{tournament.motto}"</span>
             </>
           )}
         </div>
