@@ -122,46 +122,48 @@ const Index = () => {
   if (!selectedTournamentId) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="gradient-sport border-b border-border sticky top-0 z-50">
-          <div className="container py-3 flex items-center gap-2">
+        <header className="glass border-b border-border/50 sticky top-0 z-50">
+          <div className="container py-4 flex items-center gap-3">
             <span className="text-2xl">🏓</span>
-            <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-tight flex-1">
-              <span className="text-gradient">TT</span> Turniermanager
-              <span className="hidden sm:inline"> SV Straßgräbchen 1948 e.V</span>
-              <span className="block text-xs font-semibold text-muted-foreground sm:inline sm:text-sm"> Sektion Tischtennis</span>
-            </h1>
-            <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-sm sm:text-lg font-bold tracking-tight leading-tight font-display">
+                <span className="text-gradient">TT</span> Turniermanager
+                <span className="hidden sm:inline text-foreground/80"> SV Straßgräbchen</span>
+              </h1>
+              <span className="text-[11px] text-muted-foreground hidden sm:block">Sektion Tischtennis</span>
+            </div>
+            <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground hover:text-foreground">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </header>
-        <div className="container py-6">
-          <div className="flex gap-2 mb-4">
+        <div className="container py-8">
+          <div className="flex gap-1 mb-6 bg-secondary/50 p-1 rounded-xl w-fit">
             <Button
-              variant={homeTab === 'tournaments' ? 'default' : 'outline'}
+              variant={homeTab === 'tournaments' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setHomeTab('tournaments')}
-              className="gap-1.5"
+              className={`gap-1.5 rounded-lg text-xs font-medium ${homeTab !== 'tournaments' ? 'text-muted-foreground hover:text-foreground' : ''}`}
             >
-              <Swords className="h-4 w-4" />
+              <Swords className="h-3.5 w-3.5" />
               Turniere
             </Button>
             <Button
-              variant={homeTab === 'clubs' ? 'default' : 'outline'}
+              variant={homeTab === 'clubs' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setHomeTab('clubs')}
-              className="gap-1.5"
+              className={`gap-1.5 rounded-lg text-xs font-medium ${homeTab !== 'clubs' ? 'text-muted-foreground hover:text-foreground' : ''}`}
             >
-              <Building2 className="h-4 w-4" />
-              Vereinsverwaltung
+              <Building2 className="h-3.5 w-3.5" />
+              Vereine
             </Button>
             <Button
-              variant={homeTab === 'settings' ? 'default' : 'outline'}
+              variant={homeTab === 'settings' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setHomeTab('settings')}
-              className="gap-1.5"
+              className={`gap-1.5 rounded-lg text-xs font-medium ${homeTab !== 'settings' ? 'text-muted-foreground hover:text-foreground' : ''}`}
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="h-3.5 w-3.5" />
               Einstellungen
             </Button>
           </div>
