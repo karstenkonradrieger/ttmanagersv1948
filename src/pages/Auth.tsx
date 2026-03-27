@@ -4,6 +4,7 @@ import { lovable } from '@/integrations/lovable/index';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -49,71 +50,72 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <span className="text-4xl">🏓</span>
-          <h1 className="text-xl font-extrabold mt-2">
+      <Card className="w-full max-w-sm border-border/50 card-shadow">
+        <CardHeader className="text-center pb-2">
+          <div className="mx-auto mb-2 text-4xl">🏓</div>
+          <CardTitle className="text-xl font-bold font-display">
             <span className="text-gradient">TT</span> Turniermanager
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          </CardTitle>
+          <CardDescription>
             {isLogin ? 'Anmelden' : 'Registrieren'}
-          </p>
-        </div>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-xs font-medium">E-Mail</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                placeholder="email@beispiel.de"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-xs font-medium">Passwort</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                minLength={6}
+                placeholder="Mindestens 6 Zeichen"
+              />
+            </div>
+            <Button type="submit" className="w-full font-medium" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLogin ? 'Anmelden' : 'Registrieren'}
+            </Button>
+          </form>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">E-Mail</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              placeholder="email@beispiel.de"
-            />
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border/50" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">oder</span>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Passwort</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              minLength={6}
-              placeholder="Mindestens 6 Zeichen"
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isLogin ? 'Anmelden' : 'Registrieren'}
+
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+            Mit Google anmelden
           </Button>
-        </form>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">oder</span>
-          </div>
-        </div>
-
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
-          Mit Google anmelden
-        </Button>
-
-        <p className="text-center text-sm text-muted-foreground">
-          {isLogin ? 'Noch kein Konto?' : 'Bereits registriert?'}{' '}
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-primary underline-offset-4 hover:underline font-medium"
-          >
-            {isLogin ? 'Registrieren' : 'Anmelden'}
-          </button>
-        </p>
-      </div>
+          <p className="text-center text-xs text-muted-foreground pt-2">
+            {isLogin ? 'Noch kein Konto?' : 'Bereits registriert?'}{' '}
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-primary underline-offset-4 hover:underline font-medium"
+            >
+              {isLogin ? 'Registrieren' : 'Anmelden'}
+            </button>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

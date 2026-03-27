@@ -64,9 +64,9 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
   }
 
   return (
-    <div className="space-y-4 animate-slide-up">
+    <div className="space-y-6 animate-slide-up">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Turniere</h2>
+        <h2 className="text-xl font-bold font-display">Turniere</h2>
         <CreateTournamentWizard
           onCreated={handleCreated}
           userId={user?.id}
@@ -75,10 +75,10 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
       </div>
 
       {tournaments.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>Noch keine Turniere vorhanden</p>
-          <p className="text-sm">Erstelle dein erstes Turnier!</p>
+        <div className="text-center py-16 text-muted-foreground">
+          <Trophy className="h-12 w-12 mx-auto mb-4 opacity-30" />
+          <p className="font-medium">Noch keine Turniere vorhanden</p>
+          <p className="text-sm mt-1">Erstelle dein erstes Turnier!</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -86,38 +86,38 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
             <div
               key={t.id}
               onClick={() => onSelect(t.id)}
-              className={`bg-card rounded-lg p-4 card-shadow cursor-pointer transition-all hover:scale-[1.01] ${
-                selectedId === t.id ? 'ring-2 ring-primary' : ''
+              className={`bg-card rounded-xl p-4 card-shadow cursor-pointer transition-all duration-200 hover:card-shadow-hover hover:translate-y-[-1px] border border-transparent ${
+                selectedId === t.id ? 'ring-2 ring-primary border-primary/20' : 'border-border/30 hover:border-border/50'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Trophy className="h-4 w-4 text-primary flex-shrink-0" />
-                    <h3 className="font-semibold truncate">{t.name}</h3>
+                    <h3 className="font-semibold truncate font-display">{t.name}</h3>
                     {t.started && (
-                      <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] bg-primary/15 text-primary px-2 py-0.5 rounded-full font-medium">
                         Gestartet
                       </span>
                     )}
-                    <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
                       {(t as any).mode === 'round_robin' ? 'Alle gg. Alle' : (t as any).mode === 'group_knockout' ? 'Gruppen+KO' : (t as any).mode === 'double_knockout' ? 'Doppel-KO' : (t as any).mode === 'swiss' ? 'Schweizer' : (t as any).mode === 'kaiser' ? 'Kaiser' : (t as any).mode === 'handicap' ? 'Vorgabe' : 'KO'}
                     </span>
-                    <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
                       {(t as any).type === 'doubles' ? 'Doppel' : (t as any).type === 'team' ? 'Mannschaft' : 'Einzel'}
                     </span>
-                    <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
                       Bo{((t as any).best_of || 3) * 2 - 1}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
                     <Calendar className="h-3 w-3" />
                     <span>
                       {formatDistanceToNow(new Date(t.created_at), { addSuffix: true, locale: de })}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -147,7 +147,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  <ChevronRight className="h-5 w-5 text-muted-foreground/50" />
                 </div>
               </div>
             </div>

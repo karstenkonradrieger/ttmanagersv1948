@@ -122,46 +122,48 @@ const Index = () => {
   if (!selectedTournamentId) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="gradient-sport border-b border-border sticky top-0 z-50">
-          <div className="container py-3 flex items-center gap-2">
+        <header className="glass border-b border-border/50 sticky top-0 z-50">
+          <div className="container py-4 flex items-center gap-3">
             <span className="text-2xl">🏓</span>
-            <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-tight flex-1">
-              <span className="text-gradient">TT</span> Turniermanager
-              <span className="hidden sm:inline"> SV Straßgräbchen 1948 e.V</span>
-              <span className="block text-xs font-semibold text-muted-foreground sm:inline sm:text-sm"> Sektion Tischtennis</span>
-            </h1>
-            <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-sm sm:text-lg font-bold tracking-tight leading-tight font-display">
+                <span className="text-gradient">TT</span> Turniermanager
+                <span className="hidden sm:inline text-foreground/80"> SV Straßgräbchen</span>
+              </h1>
+              <span className="text-[11px] text-muted-foreground hidden sm:block">Sektion Tischtennis</span>
+            </div>
+            <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground hover:text-foreground">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </header>
-        <div className="container py-6">
-          <div className="flex gap-2 mb-4">
+        <div className="container py-8">
+          <div className="flex gap-1 mb-6 bg-secondary/50 p-1 rounded-xl w-fit">
             <Button
-              variant={homeTab === 'tournaments' ? 'default' : 'outline'}
+              variant={homeTab === 'tournaments' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setHomeTab('tournaments')}
-              className="gap-1.5"
+              className={`gap-1.5 rounded-lg text-xs font-medium ${homeTab !== 'tournaments' ? 'text-muted-foreground hover:text-foreground' : ''}`}
             >
-              <Swords className="h-4 w-4" />
+              <Swords className="h-3.5 w-3.5" />
               Turniere
             </Button>
             <Button
-              variant={homeTab === 'clubs' ? 'default' : 'outline'}
+              variant={homeTab === 'clubs' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setHomeTab('clubs')}
-              className="gap-1.5"
+              className={`gap-1.5 rounded-lg text-xs font-medium ${homeTab !== 'clubs' ? 'text-muted-foreground hover:text-foreground' : ''}`}
             >
-              <Building2 className="h-4 w-4" />
-              Vereinsverwaltung
+              <Building2 className="h-3.5 w-3.5" />
+              Vereine
             </Button>
             <Button
-              variant={homeTab === 'settings' ? 'default' : 'outline'}
+              variant={homeTab === 'settings' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setHomeTab('settings')}
-              className="gap-1.5"
+              className={`gap-1.5 rounded-lg text-xs font-medium ${homeTab !== 'settings' ? 'text-muted-foreground hover:text-foreground' : ''}`}
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="h-3.5 w-3.5" />
               Einstellungen
             </Button>
           </div>
@@ -205,14 +207,14 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="gradient-sport border-b border-border sticky top-0 z-50">
+      <header className="glass border-b border-border/50 sticky top-0 z-50">
         <div className="container py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSelectedTournamentId(null)}
-              className="h-8 w-8 flex-shrink-0"
+              className="h-8 w-8 flex-shrink-0 text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -229,20 +231,20 @@ const Index = () => {
                   onChange={e => setNameValue(e.target.value)}
                   onBlur={() => { updateName(nameValue); setEditingName(false); }}
                   onKeyDown={e => { if (e.key === 'Enter') { updateName(nameValue); setEditingName(false); } if (e.key === 'Escape') setEditingName(false); }}
-                  className="h-7 text-sm sm:text-lg font-extrabold w-48 sm:w-64"
+                  className="h-7 text-sm sm:text-lg font-bold w-48 sm:w-64 font-display"
                 />
               ) : (
                 <div className="flex items-center gap-1 group cursor-pointer" onClick={() => { setNameValue(tournament.name); setEditingName(true); }}>
-                  <h1 className="text-sm sm:text-lg font-extrabold tracking-tight leading-tight truncate">
+                  <h1 className="text-sm sm:text-lg font-bold tracking-tight leading-tight truncate font-display">
                     {tournament.name || 'Turnier'}
                   </h1>
                   <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                 </div>
               )}
-              <div className="flex gap-1.5">
-                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{modeLabel}</span>
-                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{typeLabel}</span>
-                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">Bo{tournament.bestOf * 2 - 1}</span>
+              <div className="flex gap-1.5 mt-0.5">
+                <span className="text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-medium">{modeLabel}</span>
+                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded-md">{typeLabel}</span>
+                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded-md">Bo{tournament.bestOf * 2 - 1}</span>
               </div>
             </div>
             <TournamentSettingsDialog
@@ -276,7 +278,7 @@ const Index = () => {
               onUpdateDetails={updateDetails}
             />
             {tournament.openingVideoUrl && (
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setOpeningVideoPlayerOpen(true)} title="Eröffnungsvideo abspielen">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setOpeningVideoPlayerOpen(true)} title="Eröffnungsvideo abspielen">
                 <Video className="h-4 w-4" />
               </Button>
             )}
@@ -315,7 +317,7 @@ const Index = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedTournamentId(null)}
-                  className="text-muted-foreground"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   <RotateCcw className="mr-1 h-4 w-4" />
                   Zurück
@@ -327,38 +329,38 @@ const Index = () => {
       </header>
 
       {/* Info bar */}
-      <div className="container py-2">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-          <span>{tournament.players.length} Spieler</span>
-          {isDoubles && <span>{tournament.doublesPairs.length} Paare</span>}
+      <div className="container py-2.5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span className="font-medium text-foreground/70">{tournament.players.length} Spieler</span>
+          {isDoubles && <span className="font-medium text-foreground/70">{tournament.doublesPairs.length} Paare</span>}
           {isGroupKnockout && tournament.started && (
             <>
-              <span>·</span>
+              <span className="text-border">·</span>
               <span className="text-primary font-semibold">{tournament.phase === 'knockout' ? 'K.O.-Runde' : 'Gruppenphase'}</span>
             </>
           )}
           {tournament.started && (
             <>
-              <span>·</span>
+              <span className="text-border">·</span>
               <span>{tournament.matches.filter(m => m.status === 'completed').length}/{tournament.matches.length} Spiele</span>
             </>
           )}
           {tournament.tournamentDate && (
             <>
-              <span>·</span>
+              <span className="text-border">·</span>
               <span>📅 {new Date(tournament.tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
             </>
           )}
           {(tournament.venueCity || tournament.venueStreet) && (
             <>
-              <span>·</span>
+              <span className="text-border">·</span>
               <span>📍 {[tournament.venueStreet, tournament.venueHouseNumber, tournament.venuePostalCode, tournament.venueCity].filter(Boolean).join(' ')}</span>
             </>
           )}
           {tournament.motto && (
             <>
-              <span>·</span>
-              <span className="italic">„{tournament.motto}"</span>
+              <span className="text-border">·</span>
+              <span className="italic text-foreground/50">„{tournament.motto}"</span>
             </>
           )}
         </div>
@@ -367,45 +369,45 @@ const Index = () => {
       {/* Main content */}
       <div className="container pb-24">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className={`w-full bg-secondary h-12 p-1 rounded-xl grid`} style={{ gridTemplateColumns: `repeat(${tabCount}, minmax(0, 1fr))` }}>
-            <TabsTrigger value="players" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <Users className="h-4 w-4" />
+          <TabsList className={`w-full bg-secondary/50 h-11 p-1 rounded-xl grid`} style={{ gridTemplateColumns: `repeat(${tabCount}, minmax(0, 1fr))` }}>
+            <TabsTrigger value="players" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <Users className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Spieler</span>
             </TabsTrigger>
             {isDoubles && (
-              <TabsTrigger value="doubles" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-                <Users2 className="h-4 w-4" />
+              <TabsTrigger value="doubles" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+                <Users2 className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Doppel</span>
               </TabsTrigger>
             )}
             {isTeam && (
-              <TabsTrigger value="teams" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-                <Shield className="h-4 w-4" />
+              <TabsTrigger value="teams" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+                <Shield className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Teams</span>
               </TabsTrigger>
             )}
-            <TabsTrigger value="clubs" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <Building2 className="h-4 w-4" />
+            <TabsTrigger value="clubs" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <Building2 className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Vereine</span>
             </TabsTrigger>
-            <TabsTrigger value="bracket" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <Swords className="h-4 w-4" />
+            <TabsTrigger value="bracket" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <Swords className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">{isRoundRobin || isSwiss || isHandicap ? 'Tabelle' : isKaiser ? 'Rangliste' : isGroupKnockout ? 'Gruppen' : 'Bracket'}</span>
             </TabsTrigger>
-            <TabsTrigger value="scoring" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <PenLine className="h-4 w-4" />
+            <TabsTrigger value="scoring" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <PenLine className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Ergebnis</span>
             </TabsTrigger>
-            <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <ClipboardList className="h-4 w-4" />
+            <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <ClipboardList className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Übersicht</span>
             </TabsTrigger>
-            <TabsTrigger value="media" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <Film className="h-4 w-4" />
+            <TabsTrigger value="media" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <Film className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Medien</span>
             </TabsTrigger>
-            <TabsTrigger value="live" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <Monitor className="h-4 w-4" />
+            <TabsTrigger value="live" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <Monitor className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Live</span>
             </TabsTrigger>
           </TabsList>
