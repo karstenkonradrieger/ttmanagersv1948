@@ -369,45 +369,45 @@ const Index = () => {
       {/* Main content */}
       <div className="container pb-24">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className={`w-full bg-secondary h-12 p-1 rounded-xl grid`} style={{ gridTemplateColumns: `repeat(${tabCount}, minmax(0, 1fr))` }}>
-            <TabsTrigger value="players" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <Users className="h-4 w-4" />
+          <TabsList className={`w-full bg-secondary/50 h-11 p-1 rounded-xl grid`} style={{ gridTemplateColumns: `repeat(${tabCount}, minmax(0, 1fr))` }}>
+            <TabsTrigger value="players" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <Users className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Spieler</span>
             </TabsTrigger>
             {isDoubles && (
-              <TabsTrigger value="doubles" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-                <Users2 className="h-4 w-4" />
+              <TabsTrigger value="doubles" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+                <Users2 className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Doppel</span>
               </TabsTrigger>
             )}
             {isTeam && (
-              <TabsTrigger value="teams" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-                <Shield className="h-4 w-4" />
+              <TabsTrigger value="teams" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+                <Shield className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Teams</span>
               </TabsTrigger>
             )}
-            <TabsTrigger value="clubs" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <Building2 className="h-4 w-4" />
+            <TabsTrigger value="clubs" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <Building2 className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Vereine</span>
             </TabsTrigger>
-            <TabsTrigger value="bracket" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <Swords className="h-4 w-4" />
+            <TabsTrigger value="bracket" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <Swords className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">{isRoundRobin || isSwiss || isHandicap ? 'Tabelle' : isKaiser ? 'Rangliste' : isGroupKnockout ? 'Gruppen' : 'Bracket'}</span>
             </TabsTrigger>
-            <TabsTrigger value="scoring" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <PenLine className="h-4 w-4" />
+            <TabsTrigger value="scoring" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <PenLine className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Ergebnis</span>
             </TabsTrigger>
-            <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <ClipboardList className="h-4 w-4" />
+            <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <ClipboardList className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Übersicht</span>
             </TabsTrigger>
-            <TabsTrigger value="media" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <Film className="h-4 w-4" />
+            <TabsTrigger value="media" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <Film className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Medien</span>
             </TabsTrigger>
-            <TabsTrigger value="live" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold text-xs gap-1">
-              <Monitor className="h-4 w-4" />
+            <TabsTrigger value="live" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <Monitor className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Live</span>
             </TabsTrigger>
           </TabsList>
