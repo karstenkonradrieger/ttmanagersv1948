@@ -189,7 +189,7 @@ const Index = () => {
           ) : (
             <GlobalSettings />
           )}
-        </div>
+        </PageTransition>
       </div>
     );
   }
