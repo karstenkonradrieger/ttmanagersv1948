@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { CreateTournamentWizard } from '@/components/CreateTournamentWizard';
+import { FadeIn, StaggerContainer, StaggerItem } from '@/components/ui/motion';
 
 interface Props {
   selectedId: string | null;
