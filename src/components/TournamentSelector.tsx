@@ -152,9 +152,10 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                 </div>
               </div>
             </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       )}
-    </div>
+    </FadeIn>
   );
 }
