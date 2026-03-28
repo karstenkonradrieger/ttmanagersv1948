@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { CreateTournamentWizard } from '@/components/CreateTournamentWizard';
+import { FadeIn, StaggerContainer, StaggerItem } from '@/components/ui/motion';
 
 interface Props {
   selectedId: string | null;
@@ -64,7 +65,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
   }
 
   return (
-    <div className="space-y-6 animate-slide-up">
+    <FadeIn className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold font-display">Turniere</h2>
         <CreateTournamentWizard
@@ -81,10 +82,10 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
           <p className="text-sm mt-1">Erstelle dein erstes Turnier!</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <StaggerContainer className="space-y-2">
           {tournaments.map(t => (
+            <StaggerItem key={t.id}>
             <div
-              key={t.id}
               onClick={() => onSelect(t.id)}
               className={`bg-card rounded-xl p-4 card-shadow cursor-pointer transition-all duration-200 hover:card-shadow-hover hover:translate-y-[-1px] border border-transparent ${
                 selectedId === t.id ? 'ring-2 ring-primary border-primary/20' : 'border-border/30 hover:border-border/50'
@@ -151,9 +152,10 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                 </div>
               </div>
             </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       )}
-    </div>
+    </FadeIn>
   );
 }

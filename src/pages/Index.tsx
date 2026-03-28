@@ -33,6 +33,7 @@ import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, C
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
+import { PageTransition, FadeIn } from '@/components/ui/motion';
 
 const Index = () => {
   const { signOut } = useAuth();
@@ -137,7 +138,8 @@ const Index = () => {
             </Button>
           </div>
         </header>
-        <div className="container py-8">
+        <PageTransition className="container py-8">
+          <FadeIn delay={0.1}>
           <div className="flex gap-1 mb-6 bg-secondary/50 p-1 rounded-xl w-fit">
             <Button
               variant={homeTab === 'tournaments' ? 'default' : 'ghost'}
@@ -167,6 +169,7 @@ const Index = () => {
               Einstellungen
             </Button>
           </div>
+          </FadeIn>
           {homeTab === 'tournaments' ? (
             <TournamentSelector
               selectedId={selectedTournamentId}
@@ -186,7 +189,7 @@ const Index = () => {
           ) : (
             <GlobalSettings />
           )}
-        </div>
+        </PageTransition>
       </div>
     );
   }
@@ -205,7 +208,7 @@ const Index = () => {
   const tabCount = isTeam ? 8 : isDoubles ? 8 : 7;
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageTransition className="min-h-screen bg-background">
       {/* Header */}
       <header className="glass border-b border-border/50 sticky top-0 z-50">
         <div className="container py-3 flex items-center justify-between">
@@ -786,7 +789,7 @@ const Index = () => {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageTransition>
   );
 };
 
