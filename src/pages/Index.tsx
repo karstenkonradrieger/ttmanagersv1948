@@ -789,7 +789,7 @@ const Index = () => {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageTransition>
   );
 };
 
