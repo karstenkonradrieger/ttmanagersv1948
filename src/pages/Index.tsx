@@ -140,6 +140,7 @@ const Index = () => {
         </header>
         <PageTransition className="container py-8">
           <FadeIn delay={0.1}>
+          <div className="flex gap-1 mb-6 bg-secondary/50 p-1 rounded-xl w-fit">
             <Button
               variant={homeTab === 'tournaments' ? 'default' : 'ghost'}
               size="sm"
@@ -168,6 +169,7 @@ const Index = () => {
               Einstellungen
             </Button>
           </div>
+          </FadeIn>
           {homeTab === 'tournaments' ? (
             <TournamentSelector
               selectedId={selectedTournamentId}
