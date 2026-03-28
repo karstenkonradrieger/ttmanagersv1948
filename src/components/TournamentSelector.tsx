@@ -65,7 +65,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
   }
 
   return (
-    <div className="space-y-6 animate-slide-up">
+    <FadeIn className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold font-display">Turniere</h2>
         <CreateTournamentWizard
