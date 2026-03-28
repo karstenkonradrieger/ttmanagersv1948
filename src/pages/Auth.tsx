@@ -118,6 +118,7 @@ const Auth = () => {
           </p>
         </CardContent>
       </Card>
+      </ScaleIn>
     </div>
   );
 };
