@@ -114,4 +114,15 @@
     backdrop-filter: blur(12px);
     background: hsl(222 47% 11% / 0.85);
   }
+  .interactive-card {
+    @apply transition-all duration-200 cursor-pointer;
+  }
+  .interactive-card:hover {
+    @apply translate-y-[-2px];
+    box-shadow: var(--shadow-card-hover);
+  }
+  .interactive-card:active {
+    @apply translate-y-0;
+    transition-duration: 100ms;
+  }
 }
