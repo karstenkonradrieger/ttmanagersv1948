@@ -208,7 +208,7 @@ const Index = () => {
   const tabCount = isTeam ? 8 : isDoubles ? 8 : 7;
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageTransition className="min-h-screen bg-background">
       {/* Header */}
       <header className="glass border-b border-border/50 sticky top-0 z-50">
         <div className="container py-3 flex items-center justify-between">
