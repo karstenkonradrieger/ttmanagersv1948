@@ -82,9 +82,9 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
           <p className="text-sm mt-1">Erstelle dein erstes Turnier!</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <StaggerContainer className="space-y-2">
           {tournaments.map(t => (
-            <div
+            <StaggerItem key={t.id}>
               key={t.id}
               onClick={() => onSelect(t.id)}
               className={`bg-card rounded-xl p-4 card-shadow cursor-pointer transition-all duration-200 hover:card-shadow-hover hover:translate-y-[-1px] border border-transparent ${
