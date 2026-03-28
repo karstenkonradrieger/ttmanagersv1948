@@ -138,8 +138,8 @@ const Index = () => {
             </Button>
           </div>
         </header>
-        <div className="container py-8">
-          <div className="flex gap-1 mb-6 bg-secondary/50 p-1 rounded-xl w-fit">
+        <PageTransition className="container py-8">
+          <FadeIn delay={0.1}>
             <Button
               variant={homeTab === 'tournaments' ? 'default' : 'ghost'}
               size="sm"
