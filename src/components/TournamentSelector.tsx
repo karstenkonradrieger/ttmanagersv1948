@@ -87,7 +87,7 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
             <StaggerItem key={t.id}>
             <div
               onClick={() => onSelect(t.id)}
-              className={`bg-card rounded-xl p-4 card-shadow cursor-pointer transition-all duration-200 hover:card-shadow-hover hover:translate-y-[-1px] border border-transparent ${
+              className={`bg-card rounded-xl p-4 card-shadow interactive-card border border-transparent ${
                 selectedId === t.id ? 'ring-2 ring-primary border-primary/20' : 'border-border/30 hover:border-border/50'
               }`}
             >
