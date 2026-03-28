@@ -33,6 +33,7 @@ import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, C
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
+import { PageTransition, FadeIn } from '@/components/ui/motion';
 
 const Index = () => {
   const { signOut } = useAuth();
