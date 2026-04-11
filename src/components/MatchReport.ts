@@ -68,7 +68,7 @@ export async function generateMatchReport({
     if (logoData) {
       const img = new Image();
       img.src = logoData;
-      const maxH = 8;
+      const maxH = 24;
       const ratio = img.naturalWidth / img.naturalHeight || 1;
       const logoW = maxH * ratio;
       doc.addImage(logoData, 'JPEG', w - 10 - logoW, y, logoW, maxH);
