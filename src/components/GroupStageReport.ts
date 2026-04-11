@@ -59,21 +59,9 @@ export async function generateGroupStageReport({
   const w = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   let y = 10;
+  const logoStartY = y;
 
-  // Logo
-  if (logoUrl) {
-    const logoData = await loadImage(logoUrl);
-    if (logoData) {
-      const img = new Image();
-      img.src = logoData;
-      const maxH = 30;
-      const ratio = img.naturalWidth / img.naturalHeight || 1;
-      const logoW = maxH * ratio;
-      doc.addImage(logoData, 'JPEG', w - 10 - logoW, y, logoW, maxH);
-    }
-  }
-
-  // Header
+  // Header (drawn first so logo overlays on top)
   doc.setFontSize(12);
   doc.setFont(undefined!, 'bold');
   doc.text('Gruppenphase – Ergebnisse', 10, y + 4);
@@ -103,6 +91,19 @@ export async function generateGroupStageReport({
   doc.setLineWidth(0.3);
   doc.line(10, y, w - 10, y);
   y += 6;
+
+  // Logo (drawn last to appear in foreground, overlaying separator)
+  if (logoUrl) {
+    const logoData = await loadImage(logoUrl);
+    if (logoData) {
+      const img = new Image();
+      img.src = logoData;
+      const maxH = 30;
+      const ratio = img.naturalWidth / img.naturalHeight || 1;
+      const logoW = maxH * ratio;
+      doc.addImage(logoData, 'JPEG', w - 10 - logoW, logoStartY, logoW, maxH);
+    }
+  }
 
   const maxSets = bestOf * 2 - 1;
 
