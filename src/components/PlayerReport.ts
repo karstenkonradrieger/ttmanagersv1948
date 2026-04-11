@@ -90,7 +90,7 @@ export async function generatePlayerReport({
     if (logoData) {
       const img = new Image();
       img.src = logoData;
-      const maxH = 12;
+      const maxH = 36;
       const ratio = img.naturalWidth / img.naturalHeight || 1;
       const logoW = maxH * ratio;
       doc.addImage(logoData, 'JPEG', w - 10 - logoW, y, logoW, maxH);

@@ -83,7 +83,7 @@ export async function generatePhotoReport({
     if (logoData) {
       const img = new Image();
       img.src = logoData;
-      const maxH = 20;
+      const maxH = 60;
       const ratio = img.naturalWidth / img.naturalHeight || 1;
       const logoW = maxH * ratio;
       doc.addImage(logoData, 'JPEG', pageW - 14 - logoW, 14, logoW, maxH);
