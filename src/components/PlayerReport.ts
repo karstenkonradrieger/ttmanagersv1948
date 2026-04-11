@@ -83,21 +83,9 @@ export async function generatePlayerReport({
   const w = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   let y = 10;
+  const logoStartY = y;
 
-  // Logo
-  if (logoUrl) {
-    const logoData = await loadImage(logoUrl);
-    if (logoData) {
-      const img = new Image();
-      img.src = logoData;
-      const maxH = 36;
-      const ratio = img.naturalWidth / img.naturalHeight || 1;
-      const logoW = maxH * ratio;
-      doc.addImage(logoData, 'JPEG', w - 10 - logoW, y, logoW, maxH);
-    }
-  }
-
-  // Header
+  // Header (drawn first so logo overlays on top)
   doc.setFontSize(14);
   doc.setFont(undefined!, 'bold');
   doc.text('Spielerbericht', 10, y + 5);
@@ -124,6 +112,19 @@ export async function generatePlayerReport({
   doc.setLineWidth(0.3);
   doc.line(10, y, w - 10, y);
   y += 6;
+
+  // Logo (drawn last to appear in foreground, overlaying separator)
+  if (logoUrl) {
+    const logoData = await loadImage(logoUrl);
+    if (logoData) {
+      const img = new Image();
+      img.src = logoData;
+      const maxH = 36;
+      const ratio = img.naturalWidth / img.naturalHeight || 1;
+      const logoW = maxH * ratio;
+      doc.addImage(logoData, 'JPEG', w - 10 - logoW, logoStartY, logoW, maxH);
+    }
+  }
 
   // Player info
   doc.setTextColor(0);

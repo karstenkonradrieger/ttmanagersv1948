@@ -61,21 +61,9 @@ export async function generateMatchReport({
   const w = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   let y = 8;
+  const logoStartY = y;
 
-  // Logo (small)
-  if (logoUrl) {
-    const logoData = await loadImage(logoUrl);
-    if (logoData) {
-      const img = new Image();
-      img.src = logoData;
-      const maxH = 24;
-      const ratio = img.naturalWidth / img.naturalHeight || 1;
-      const logoW = maxH * ratio;
-      doc.addImage(logoData, 'JPEG', w - 10 - logoW, y, logoW, maxH);
-    }
-  }
-
-  // Title + tournament info
+  // Title + tournament info (drawn first so logo overlays on top)
   doc.setFontSize(11);
   doc.setFont(undefined!, 'bold');
   doc.text('Spielbericht', 10, y + 3);
@@ -106,6 +94,19 @@ export async function generateMatchReport({
   doc.setLineWidth(0.3);
   doc.line(10, y, w - 10, y);
   y += 3;
+
+  // Logo (drawn last to appear in foreground, overlaying separator)
+  if (logoUrl) {
+    const logoData = await loadImage(logoUrl);
+    if (logoData) {
+      const img = new Image();
+      img.src = logoData;
+      const maxH = 24;
+      const ratio = img.naturalWidth / img.naturalHeight || 1;
+      const logoW = maxH * ratio;
+      doc.addImage(logoData, 'JPEG', w - 10 - logoW, logoStartY, logoW, maxH);
+    }
+  }
 
   // Players + score
   doc.setTextColor(0);
