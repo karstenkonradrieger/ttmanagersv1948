@@ -104,7 +104,7 @@ export async function generateMatchReport({
       const maxH = 24;
       const ratio = img.naturalWidth / img.naturalHeight || 1;
       const logoW = maxH * ratio;
-      doc.addImage(logoData, 'JPEG', w - 10 - logoW, logoStartY, logoW, maxH);
+      doc.addImage(logoData, 'PNG', w - 10 - logoW, logoStartY, logoW, maxH);
     }
   }
 
