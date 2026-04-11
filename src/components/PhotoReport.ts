@@ -77,7 +77,18 @@ export async function generatePhotoReport({
   // ---- Title page ----
   let y = 30;
 
-  // Logo
+  // Header text first, logo drawn on top afterwards
+  doc.setFontSize(22);
+  doc.setFont(undefined!, 'bold');
+  doc.text('Foto-Report', 14, y);
+  y += 10;
+
+  doc.setFontSize(14);
+  doc.setFont(undefined!, 'normal');
+  doc.text(tournamentName, 14, y);
+  y += 7;
+
+  // Logo (drawn after header to appear in foreground)
   if (logoUrl) {
     const logoData = await loadImage(logoUrl);
     if (logoData) {
@@ -89,16 +100,6 @@ export async function generatePhotoReport({
       doc.addImage(logoData, 'JPEG', pageW - 14 - logoW, 14, logoW, maxH);
     }
   }
-
-  doc.setFontSize(22);
-  doc.setFont(undefined!, 'bold');
-  doc.text('Foto-Report', 14, y);
-  y += 10;
-
-  doc.setFontSize(14);
-  doc.setFont(undefined!, 'normal');
-  doc.text(tournamentName, 14, y);
-  y += 7;
 
   if (motto) {
     doc.setFontSize(10);
