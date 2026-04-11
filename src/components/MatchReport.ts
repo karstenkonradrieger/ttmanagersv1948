@@ -104,7 +104,11 @@ export async function generateMatchReport({
       const maxH = 24;
       const ratio = img.naturalWidth / img.naturalHeight || 1;
       const logoW = maxH * ratio;
-      doc.addImage(logoData, 'JPEG', w - 10 - logoW, logoStartY, logoW, maxH);
+      const logoX = w - 10 - logoW;
+      // White background behind logo to cover separator line
+      doc.setFillColor(255, 255, 255);
+      doc.rect(logoX - 1, logoStartY - 1, logoW + 2, maxH + 2, 'F');
+      doc.addImage(logoData, 'JPEG', logoX, logoStartY, logoW, maxH);
     }
   }
 
