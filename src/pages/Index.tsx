@@ -37,7 +37,7 @@ import { PageTransition, FadeIn } from '@/components/ui/motion';
 
 const Index = () => {
   const { signOut } = useAuth();
-  const { clubs, addClub, removeClub } = useClubs();
+  const { clubs, addClub, removeClub, updateClub } = useClubs();
   const { players: clubPlayers, addPlayer: addClubPlayer, updatePlayer: updateClubPlayer, removePlayer: removeClubPlayer, getPlayersForClub } = useClubPlayers();
   const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
   const {
@@ -525,6 +525,7 @@ const Index = () => {
                 players={tournament.players}
                 onAdd={addClub}
                 onRemove={removeClub}
+                onUpdate={updateClub}
                 onImportClubsWithPlayers={handleImportClubsWithPlayers}
               />
             </TabsContent>

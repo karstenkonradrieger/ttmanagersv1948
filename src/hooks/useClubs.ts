@@ -6,6 +6,15 @@ import { toast } from 'sonner';
 export interface Club {
   id: string;
   name: string;
+  street: string;
+  house_number: string;
+  postal_code: string;
+  city: string;
+  chairman: string;
+  logo_url: string | null;
+  phone: string;
+  email: string;
+  website: string;
 }
 
 export function useClubs() {
@@ -17,7 +26,7 @@ export function useClubs() {
     try {
       const { data, error } = await supabase
         .from('clubs')
-        .select('id, name')
+        .select('id, name, street, house_number, postal_code, city, chairman, logo_url, phone, email, website')
         .order('name');
       if (error) throw error;
       setClubs(data || []);
@@ -45,7 +54,7 @@ export function useClubs() {
       const { data, error } = await supabase
         .from('clubs')
         .insert({ name: trimmed, created_by: user.id })
-        .select('id, name')
+        .select('id, name, street, house_number, postal_code, city, chairman, logo_url, phone, email, website')
         .single();
       if (error) throw error;
       setClubs(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
@@ -73,5 +82,16 @@ export function useClubs() {
     }
   }, []);
 
-  return { clubs, loading, addClub, removeClub, reload: loadClubs };
+  const updateClub = useCallback(async (id: string, updates: Partial<Omit<Club, 'id'>>) => {
+    try {
+      const { error } = await supabase.from('clubs').update(updates).eq('id', id);
+      if (error) throw error;
+      setClubs(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+    } catch (error) {
+      console.error('Error updating club:', error);
+      toast.error('Fehler beim Aktualisieren des Vereins');
+    }
+  }, []);
+
+  return { clubs, loading, addClub, removeClub, updateClub, reload: loadClubs };
 }

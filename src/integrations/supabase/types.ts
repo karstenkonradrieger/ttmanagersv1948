@@ -111,22 +111,49 @@ export type Database = {
       }
       clubs: {
         Row: {
+          chairman: string
+          city: string
           created_at: string
           created_by: string | null
+          email: string
+          house_number: string
           id: string
+          logo_url: string | null
           name: string
+          phone: string
+          postal_code: string
+          street: string
+          website: string
         }
         Insert: {
+          chairman?: string
+          city?: string
           created_at?: string
           created_by?: string | null
+          email?: string
+          house_number?: string
           id?: string
+          logo_url?: string | null
           name: string
+          phone?: string
+          postal_code?: string
+          street?: string
+          website?: string
         }
         Update: {
+          chairman?: string
+          city?: string
           created_at?: string
           created_by?: string | null
+          email?: string
+          house_number?: string
           id?: string
+          logo_url?: string | null
           name?: string
+          phone?: string
+          postal_code?: string
+          street?: string
+          website?: string
         }
         Relationships: []
       }
