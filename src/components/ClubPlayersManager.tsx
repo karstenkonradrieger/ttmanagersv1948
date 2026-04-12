@@ -14,11 +14,6 @@ import { printGeneralPhotoConsentPdf } from '@/components/PhotoConsentForm';
 import { ConsentDocumentDialog } from '@/components/ConsentViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { VoiceRecorder } from '@/components/VoiceRecorder';
-import { printGeneralPhotoConsentPdf } from '@/components/PhotoConsentForm';
-import { ConsentDocumentDialog } from '@/components/ConsentViewDialog';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 interface Props {
   clubs: Club[];
