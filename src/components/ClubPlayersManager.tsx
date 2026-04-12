@@ -509,7 +509,11 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                   <CollapsibleTrigger asChild>
                     <button className="flex items-center gap-2 flex-1 text-left hover:opacity-80 transition-opacity">
                       {isOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                      <Building2 className="h-4 w-4 text-primary" />
+                      {club.logo_url ? (
+                        <img src={club.logo_url} alt="" className="h-5 w-5 object-contain flex-shrink-0 rounded" />
+                      ) : (
+                        <Building2 className="h-4 w-4 text-primary" />
+                      )}
                       <span className="text-sm font-medium">{club.name}</span>
                       <span className="text-xs text-muted-foreground ml-1">({players.length} Spieler)</span>
                     </button>
