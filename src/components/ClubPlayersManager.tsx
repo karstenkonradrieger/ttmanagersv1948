@@ -519,6 +519,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                     </button>
                   </CollapsibleTrigger>
                   <div className="flex items-center gap-1">
+                    <ClubLogoUpload club={club} onUpdate={onUpdateClub} />
                     <Button
                       variant="ghost"
                       size="icon"
@@ -563,6 +564,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
 
                 <CollapsibleContent>
                   <div className="px-3 pb-3 pt-1 border-t border-border/50 mx-2">
+                    <ClubDetailsSection club={club} onUpdate={onUpdateClub} />
                     {/* Add player form */}
                     {addingPlayerFor === club.id && (
                       <div className="space-y-2 mb-3 p-2 bg-background/60 rounded-md">
