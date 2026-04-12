@@ -82,5 +82,16 @@ export function useClubs() {
     }
   }, []);
 
-  return { clubs, loading, addClub, removeClub, reload: loadClubs };
+  const updateClub = useCallback(async (id: string, updates: Partial<Omit<Club, 'id'>>) => {
+    try {
+      const { error } = await supabase.from('clubs').update(updates).eq('id', id);
+      if (error) throw error;
+      setClubs(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+    } catch (error) {
+      console.error('Error updating club:', error);
+      toast.error('Fehler beim Aktualisieren des Vereins');
+    }
+  }, []);
+
+  return { clubs, loading, addClub, removeClub, updateClub, reload: loadClubs };
 }
