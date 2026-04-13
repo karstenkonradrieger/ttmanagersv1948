@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Tournament, Player, Match, SetScore, DoublesPair, TournamentMode, Team, TeamPlayer, EncounterGame, TeamMode } from '@/types/tournament';
+import { Tournament, Player, Match, SetScore, DoublesPair, TournamentMode, Team, TeamPlayer, EncounterGame, TeamMode, Sponsor } from '@/types/tournament';
 import { Json } from '@/integrations/supabase/types';
 
 export interface DbTournament {
@@ -30,10 +30,6 @@ export interface DbTournament {
   google_maps_link: string | null;
   certificate_text: string;
   organizer_name: string;
-  sponsor_name: string;
-  sponsor_signature_url: string | null;
-  sponsor_logo_url: string | null;
-  sponsor_consent: boolean;
   certificate_bg_url: string | null;
   certificate_font_family: string;
   certificate_font_size: number;
@@ -109,12 +105,14 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     { data: doublesPairs, error: dpError },
     { data: teams, error: teError },
     { data: teamPlayers, error: tpError },
+    { data: sponsors, error: spError },
   ] = await Promise.all([
     supabase.from('players').select('*').eq('tournament_id', id),
     supabase.from('matches').select('*').eq('tournament_id', id).order('round', { ascending: true }).order('position', { ascending: true }),
     supabase.from('doubles_pairs').select('*').eq('tournament_id', id),
     supabase.from('teams').select('*').eq('tournament_id', id),
     supabase.from('team_players').select('*'),
+    supabase.from('tournament_sponsors').select('*').eq('tournament_id', id).order('sort_order', { ascending: true }),
   ]);
 
   if (pError) throw pError;
@@ -122,6 +120,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
   if (dpError) throw dpError;
   if (teError) throw teError;
   if (tpError) throw tpError;
+  if (spError) throw spError;
 
   // Filter team_players to only those belonging to this tournament's teams
   const teamIds = new Set((teams || []).map((t: any) => t.id));
@@ -154,10 +153,12 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     googleMapsLink: (tournament as any).google_maps_link || null,
     certificateText: (tournament as any).certificate_text || 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.',
     organizerName: (tournament as any).organizer_name || '',
-    sponsorName: (tournament as any).sponsor_name || '',
-    sponsorSignatureUrl: (tournament as any).sponsor_signature_url || null,
-    sponsorLogoUrl: (tournament as any).sponsor_logo_url || null,
-    sponsorConsent: (tournament as any).sponsor_consent ?? false,
+    sponsors: (sponsors || []).map((s: any) => ({
+      id: s.id,
+      name: s.name,
+      logoUrl: s.logo_url || null,
+      sortOrder: s.sort_order,
+    })),
     certificateBgUrl: (tournament as any).certificate_bg_url || null,
     certificateFontFamily: (tournament as any).certificate_font_family || 'Helvetica',
     certificateFontSize: (tournament as any).certificate_font_size ?? 20,
@@ -237,17 +238,13 @@ export async function createTournament(
     logo_url?: string | null;
     certificate_text?: string;
     organizer_name?: string;
-    sponsor_name?: string;
-    sponsor_signature_url?: string | null;
-      sponsor_logo_url?: string | null;
-      sponsor_consent?: boolean;
-      certificate_bg_url?: string | null;
-      certificate_font_family?: string;
-      certificate_font_size?: number;
-      certificate_text_color?: string;
-      certificate_line_sizes?: number[];
-      certificate_extra_sizes?: Record<string, number>;
-    },
+    certificate_bg_url?: string | null;
+    certificate_font_family?: string;
+    certificate_font_size?: number;
+    certificate_text_color?: string;
+    certificate_line_sizes?: number[];
+    certificate_extra_sizes?: Record<string, number>;
+  },
 ): Promise<string> {
   const { data, error } = await supabase
     .from('tournaments')
@@ -270,10 +267,6 @@ export async function createTournament(
       ...(extras?.logo_url ? { logo_url: extras.logo_url } : {}),
       ...(extras?.certificate_text ? { certificate_text: extras.certificate_text } : {}),
       ...(extras?.organizer_name !== undefined ? { organizer_name: extras.organizer_name } : {}),
-      ...(extras?.sponsor_name !== undefined ? { sponsor_name: extras.sponsor_name } : {}),
-      ...(extras?.sponsor_signature_url !== undefined ? { sponsor_signature_url: extras.sponsor_signature_url } : {}),
-      ...(extras?.sponsor_logo_url !== undefined ? { sponsor_logo_url: extras.sponsor_logo_url } : {}),
-      ...(extras?.sponsor_consent !== undefined ? { sponsor_consent: extras.sponsor_consent } : {}),
       ...(extras?.certificate_bg_url !== undefined ? { certificate_bg_url: extras.certificate_bg_url } : {}),
       ...(extras?.certificate_font_family !== undefined ? { certificate_font_family: extras.certificate_font_family } : {}),
       ...(extras?.certificate_font_size !== undefined ? { certificate_font_size: extras.certificate_font_size } : {}),
@@ -314,10 +307,6 @@ export async function updateTournament(id: string, updates: Partial<{
   google_maps_link: string | null;
   certificate_text: string;
   organizer_name: string;
-  sponsor_name: string;
-  sponsor_signature_url: string | null;
-  sponsor_logo_url: string | null;
-  sponsor_consent: boolean;
   certificate_bg_url: string | null;
   certificate_font_family: string;
   certificate_font_size: number;
