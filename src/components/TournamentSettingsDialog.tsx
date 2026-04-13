@@ -59,7 +59,7 @@ export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
   certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize, certificateTextColor, certificateExtraSizes = {},
-  organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
+  organizerName, sponsors,
   openingVideoUrl, tournamentId,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
@@ -76,24 +76,19 @@ export function TournamentSettingsDialog({
   const [localBreakMinutes, setLocalBreakMinutes] = useState(breakMinutes);
   const [localCertText, setLocalCertText] = useState(certificateText);
   const [localOrganizerName, setLocalOrganizerName] = useState(organizerName);
-  const [localSponsorName, setLocalSponsorName] = useState(sponsorName);
-  const [localSponsorSigUrl, setLocalSponsorSigUrl] = useState(sponsorSignatureUrl);
-  const [localSponsorLogoUrl, setLocalSponsorLogoUrl] = useState(sponsorLogoUrl);
-  const [localSponsorConsent, setLocalSponsorConsent] = useState(sponsorConsent);
+  const [localSponsors, setLocalSponsors] = useState<Sponsor[]>(sponsors);
   const [localCertBgUrl, setLocalCertBgUrl] = useState(certificateBgUrl);
   const [localFontFamily, setLocalFontFamily] = useState(certificateFontFamily);
   const [localFontSize, setLocalFontSize] = useState(certificateFontSize);
   const [localTextColor, setLocalTextColor] = useState(certificateTextColor);
   const [localFontBold, setLocalFontBold] = useState(!!certificateExtraSizes.fontBold);
-  const [uploadingSig, setUploadingSig] = useState(false);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingSponsorLogoIdx, setUploadingSponsorLogoIdx] = useState<number | null>(null);
   const [uploadingCertBg, setUploadingCertBg] = useState(false);
   const [uploadingOpeningVideo, setUploadingOpeningVideo] = useState(false);
   const [localOpeningVideoUrl, setLocalOpeningVideoUrl] = useState(openingVideoUrl);
   const [openingVideoPlayerOpen, setOpeningVideoPlayerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const sigInputRef = useRef<HTMLInputElement>(null);
-  const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
+  const sponsorLogoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const certBgInputRef = useRef<HTMLInputElement>(null);
   const openingVideoInputRef = useRef<HTMLInputElement>(null);
 
