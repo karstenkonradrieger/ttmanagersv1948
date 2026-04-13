@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Match, Player, SetScore } from '@/types/tournament';
+import { Match, Player, SetScore, Sponsor } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save, Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
@@ -30,10 +30,7 @@ interface Props {
   motto?: string;
   mode?: string;
   organizerName?: string;
-  sponsorName?: string;
-  sponsorSignatureUrl?: string | null;
-  sponsorLogoUrl?: string | null;
-  sponsorConsent?: boolean;
+  sponsors?: Sponsor[];
   certificateBgUrl?: string | null;
   certificateText?: string;
   certificateFontFamily?: string;
@@ -50,7 +47,6 @@ interface Props {
     motto: string;
     venueString: string;
     organizerName: string;
-    sponsorName: string;
   }) => void;
 }
 
@@ -131,7 +127,7 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
   return Math.max(wins.p1, wins.p2) >= 3;
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, getParticipantName, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent, certificateBgUrl, certificateText = 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.', certificateFontFamily = 'Helvetica', certificateFontSize = 20, certificateTextColor = '#1e1e1e', certificateLineSizes = [], certificateExtraSizes = {}, certificateHiddenFields = [], onSaveCertificateSettings }: Props) {
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, getParticipantName, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsors = [], certificateBgUrl, certificateText = 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.', certificateFontFamily = 'Helvetica', certificateFontSize = 20, certificateTextColor = '#1e1e1e', certificateLineSizes = [], certificateExtraSizes = {}, certificateHiddenFields = [], onSaveCertificateSettings }: Props) {
   const [showMatchPhotos, setShowMatchPhotos] = useState(false);
   const [showCertPreview, setShowCertPreview] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
@@ -140,10 +136,13 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
   const [localMotto, setLocalMotto] = useState(motto || '');
   const [localVenue, setLocalVenue] = useState(venueString || '');
   const [localOrganizer, setLocalOrganizer] = useState(organizerName || '');
-  const [localSponsor, setLocalSponsor] = useState(sponsorName || '');
   const [localExtraSizes, setLocalExtraSizes] = useState<Record<string, number>>(certificateExtraSizes);
   const [localHiddenFields, setLocalHiddenFields] = useState<string[]>(certificateHiddenFields);
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
+
+  // Derive first sponsor for certificate display (backward compat)
+  const sponsorName = sponsors[0]?.name || '';
+  const sponsorLogoUrl = sponsors[0]?.logoUrl || null;
 
   // Sync local state when props change (e.g. after DB load)
   useEffect(() => {
@@ -152,11 +151,10 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     setLocalMotto(motto || '');
     setLocalVenue(venueString || '');
     setLocalOrganizer(organizerName || '');
-    setLocalSponsor(sponsorName || '');
     setLocalExtraSizes(certificateExtraSizes);
     setLocalHiddenFields(certificateHiddenFields);
     setHasPendingChanges(false);
-  }, [certificateText, certificateLineSizes, motto, venueString, organizerName, sponsorName, certificateExtraSizes, certificateHiddenFields]);
+  }, [certificateText, certificateLineSizes, motto, venueString, organizerName, sponsors, certificateExtraSizes, certificateHiddenFields]);
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
   if (matches.length === 0) {
@@ -553,14 +551,14 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     let sigData: string | null = null;
     let sigWidth = 0;
     let sigHeight = 0;
-    if (sponsorConsent && sponsorSignatureUrl && sponsorName) {
+    if (false) {
       try {
         const sigImg = new Image();
         sigImg.crossOrigin = 'anonymous';
         await new Promise<void>((resolve, reject) => {
           sigImg.onload = () => resolve();
           sigImg.onerror = () => reject();
-          sigImg.src = sponsorSignatureUrl;
+          sigImg.src = null;
         });
         const sigCanvas = document.createElement('canvas');
         sigCanvas.width = sigImg.naturalWidth;
@@ -748,14 +746,14 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
 
       // Footer / Signature area
       const hasSponsorSection = (!certificateHiddenFields.includes('sponsor')) &&
-        ((sponsorConsent && sigData && sponsorName) || (sponsorName && sponsorLogoData));
+        ((false) || (sponsorName && sponsorLogoData));
 
       doc.setDrawColor(...mutedRgb);
       doc.setLineWidth(0.5);
 
       // Sponsor section (left)
       if (hasSponsorSection) {
-        if (sponsorConsent && sigData && sponsorName) {
+        if (false) {
           doc.addImage(sigData, 'PNG', w / 4 - sigWidth / 2, sigY - sigHeight - 2, sigWidth, sigHeight);
         }
         doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
@@ -1226,7 +1224,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       { key: 'motto', label: 'Motto', value: localMotto, setter: setLocalMotto },
                       { key: 'venue', label: 'Austragungsort', value: localVenue, setter: setLocalVenue },
                       { key: 'organizer', label: 'Veranstalter', value: localOrganizer, setter: setLocalOrganizer },
-                      { key: 'sponsor', label: 'Sponsor', value: localSponsor, setter: setLocalSponsor },
+                      { key: 'sponsor', label: 'Sponsor', value: sponsorName, setter: (() => {}) },
                     ].map(field => (
                       <div key={field.key} className="space-y-1">
                         <div className="flex items-center gap-2">
@@ -1276,10 +1274,10 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     tournamentDate={tournamentDate}
                     venueString={localVenue}
                     organizerName={localOrganizer}
-                    sponsorName={localSponsor}
-                    sponsorSignatureUrl={sponsorSignatureUrl}
+                    sponsorName={sponsorName}
+                    null={null}
                     sponsorLogoUrl={sponsorLogoUrl}
-                    sponsorConsent={sponsorConsent}
+                    false={false}
                     certificateBgUrl={certificateBgUrl}
                     certificateText={localCertText}
                     player={current.player}
@@ -1308,7 +1306,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       motto: localMotto,
                       venueString: localVenue,
                       organizerName: localOrganizer,
-                      sponsorName: localSponsor,
+                      organizerName: localOrganizer,
                     });
                     setHasPendingChanges(false);
                   }}

@@ -5,10 +5,11 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Settings2, Upload, X, Loader2, PenTool, ImagePlus, Video, Play } from 'lucide-react';
-import { TournamentMode, TournamentType, TeamMode } from '@/types/tournament';
+import { Settings2, Upload, X, Loader2, ImagePlus, Video, Play, Plus } from 'lucide-react';
+import { TournamentMode, TournamentType, TeamMode, Sponsor } from '@/types/tournament';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import * as tournamentService from '@/services/tournamentService';
 
 interface Props {
   mode: TournamentMode;
@@ -29,10 +30,7 @@ interface Props {
   certificateTextColor: string;
   certificateExtraSizes?: Record<string, number>;
   organizerName: string;
-  sponsorName: string;
-  sponsorSignatureUrl: string | null;
-  sponsorLogoUrl: string | null;
-  sponsorConsent: boolean;
+  sponsors: Sponsor[];
   openingVideoUrl: string | null;
   tournamentId: string;
   onUpdateMode: (mode: TournamentMode) => Promise<void>;
@@ -48,10 +46,6 @@ interface Props {
     break_minutes: number;
     certificate_text: string;
     organizer_name: string;
-    sponsor_name: string;
-    sponsor_signature_url: string | null;
-    sponsor_logo_url: string | null;
-    sponsor_consent: boolean;
     certificate_bg_url?: string | null;
     certificate_font_family?: string;
     certificate_font_size?: number;
@@ -65,7 +59,7 @@ export function TournamentSettingsDialog({
   mode, type, bestOf, started = false,
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
   certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize, certificateTextColor, certificateExtraSizes = {},
-  organizerName, sponsorName, sponsorSignatureUrl, sponsorLogoUrl, sponsorConsent,
+  organizerName, sponsors,
   openingVideoUrl, tournamentId,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
 }: Props) {
@@ -82,24 +76,19 @@ export function TournamentSettingsDialog({
   const [localBreakMinutes, setLocalBreakMinutes] = useState(breakMinutes);
   const [localCertText, setLocalCertText] = useState(certificateText);
   const [localOrganizerName, setLocalOrganizerName] = useState(organizerName);
-  const [localSponsorName, setLocalSponsorName] = useState(sponsorName);
-  const [localSponsorSigUrl, setLocalSponsorSigUrl] = useState(sponsorSignatureUrl);
-  const [localSponsorLogoUrl, setLocalSponsorLogoUrl] = useState(sponsorLogoUrl);
-  const [localSponsorConsent, setLocalSponsorConsent] = useState(sponsorConsent);
+  const [localSponsors, setLocalSponsors] = useState<Sponsor[]>(sponsors);
   const [localCertBgUrl, setLocalCertBgUrl] = useState(certificateBgUrl);
   const [localFontFamily, setLocalFontFamily] = useState(certificateFontFamily);
   const [localFontSize, setLocalFontSize] = useState(certificateFontSize);
   const [localTextColor, setLocalTextColor] = useState(certificateTextColor);
   const [localFontBold, setLocalFontBold] = useState(!!certificateExtraSizes.fontBold);
-  const [uploadingSig, setUploadingSig] = useState(false);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingSponsorLogoIdx, setUploadingSponsorLogoIdx] = useState<number | null>(null);
   const [uploadingCertBg, setUploadingCertBg] = useState(false);
   const [uploadingOpeningVideo, setUploadingOpeningVideo] = useState(false);
   const [localOpeningVideoUrl, setLocalOpeningVideoUrl] = useState(openingVideoUrl);
   const [openingVideoPlayerOpen, setOpeningVideoPlayerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const sigInputRef = useRef<HTMLInputElement>(null);
-  const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
+  const sponsorLogoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const certBgInputRef = useRef<HTMLInputElement>(null);
   const openingVideoInputRef = useRef<HTMLInputElement>(null);
 
@@ -117,10 +106,7 @@ export function TournamentSettingsDialog({
       setLocalBreakMinutes(breakMinutes);
       setLocalCertText(certificateText);
       setLocalOrganizerName(organizerName);
-      setLocalSponsorName(sponsorName);
-      setLocalSponsorSigUrl(sponsorSignatureUrl);
-      setLocalSponsorLogoUrl(sponsorLogoUrl);
-      setLocalSponsorConsent(sponsorConsent);
+      setLocalSponsors(sponsors.map(s => ({ ...s })));
       setLocalCertBgUrl(certificateBgUrl);
       setLocalFontFamily(certificateFontFamily);
       setLocalFontSize(certificateFontSize);
@@ -131,62 +117,44 @@ export function TournamentSettingsDialog({
     setOpen(isOpen);
   };
 
-  const handleSigUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSponsorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const file = e.target.files?.[0];
     if (!file || !file.type.startsWith('image/')) return;
-    setUploadingSig(true);
-    try {
-      const ext = file.name.split('.').pop();
-      const fileName = `sig-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('signatures').upload(fileName, file, { upsert: true });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from('signatures').getPublicUrl(fileName);
-      setLocalSponsorSigUrl(urlData.publicUrl);
-      toast.success('Unterschrift hochgeladen');
-    } catch {
-      toast.error('Fehler beim Hochladen');
-    } finally {
-      setUploadingSig(false);
-      if (sigInputRef.current) sigInputRef.current.value = '';
-    }
-  };
-
-  const removeSig = async () => {
-    if (localSponsorSigUrl) {
-      const parts = localSponsorSigUrl.split('/');
-      const fileName = parts[parts.length - 1];
-      await supabase.storage.from('signatures').remove([fileName]);
-    }
-    setLocalSponsorSigUrl(null);
-  };
-
-  const handleSponsorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingLogo(true);
+    setUploadingSponsorLogoIdx(idx);
     try {
       const ext = file.name.split('.').pop();
       const fileName = `sponsor-logo-${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
       if (error) throw error;
       const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
-      setLocalSponsorLogoUrl(urlData.publicUrl);
+      setLocalSponsors(prev => prev.map((s, i) => i === idx ? { ...s, logoUrl: urlData.publicUrl } : s));
       toast.success('Sponsor-Logo hochgeladen');
     } catch {
       toast.error('Fehler beim Hochladen');
     } finally {
-      setUploadingLogo(false);
-      if (sponsorLogoInputRef.current) sponsorLogoInputRef.current.value = '';
+      setUploadingSponsorLogoIdx(null);
+      const ref = sponsorLogoInputRefs.current[idx];
+      if (ref) ref.value = '';
     }
   };
 
-  const removeSponsorLogo = async () => {
-    if (localSponsorLogoUrl) {
-      const parts = localSponsorLogoUrl.split('/');
+  const removeSponsorLogo = async (idx: number) => {
+    const url = localSponsors[idx]?.logoUrl;
+    if (url) {
+      const parts = url.split('/');
       const fileName = parts[parts.length - 1];
       await supabase.storage.from('logos').remove([fileName]);
     }
-    setLocalSponsorLogoUrl(null);
+    setLocalSponsors(prev => prev.map((s, i) => i === idx ? { ...s, logoUrl: null } : s));
+  };
+
+  const addSponsorSlot = () => {
+    if (localSponsors.length >= 5) return;
+    setLocalSponsors(prev => [...prev, { id: '', name: '', logoUrl: null, sortOrder: prev.length + 1 }]);
+  };
+
+  const removeSponsorSlot = (idx: number) => {
+    setLocalSponsors(prev => prev.filter((_, i) => i !== idx).map((s, i) => ({ ...s, sortOrder: i + 1 })));
   };
 
   const handleCertBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,19 +226,7 @@ export function TournamentSettingsDialog({
     setLocalOpeningVideoUrl(null);
   };
 
-  const hasChanges =
-    localMode !== mode || localType !== type || localBestOf !== bestOf ||
-    (localDate || null) !== (tournamentDate || null) ||
-    localStreet !== venueStreet || localHouseNumber !== venueHouseNumber ||
-    localPostalCode !== venuePostalCode || localCity !== venueCity ||
-    localMotto !== motto || localBreakMinutes !== breakMinutes ||
-    localCertText !== certificateText || localOrganizerName !== organizerName ||
-    localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-    localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
-    localCertBgUrl !== certificateBgUrl ||
-    localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
-    localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold ||
-    localOpeningVideoUrl !== openingVideoUrl;
+  const hasChanges = true; // Always allow saving since sponsor changes are tracked separately
 
   const handleSave = async () => {
     setSaving(true);
@@ -279,41 +235,41 @@ export function TournamentSettingsDialog({
       if (localType !== type) await onUpdateType(localType);
       if (localBestOf !== bestOf) await onUpdateBestOf(localBestOf);
 
-      const detailsChanged =
-        (localDate || null) !== (tournamentDate || null) ||
-        localStreet !== venueStreet || localHouseNumber !== venueHouseNumber ||
-        localPostalCode !== venuePostalCode || localCity !== venueCity ||
-        localMotto !== motto || localBreakMinutes !== breakMinutes ||
-        localCertText !== certificateText || localOrganizerName !== organizerName ||
-        localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-        localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
-        localCertBgUrl !== certificateBgUrl ||
-        localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
-        localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold ||
-        localOpeningVideoUrl !== openingVideoUrl;
+      await onUpdateDetails({
+        tournament_date: localDate || null,
+        venue_street: localStreet,
+        venue_house_number: localHouseNumber,
+        venue_postal_code: localPostalCode,
+        venue_city: localCity,
+        motto: localMotto,
+        break_minutes: localBreakMinutes,
+        certificate_text: localCertText,
+        organizer_name: localOrganizerName,
+        certificate_bg_url: localCertBgUrl,
+        certificate_font_family: localFontFamily,
+        certificate_font_size: localFontSize,
+        certificate_text_color: localTextColor,
+        certificate_extra_sizes: { ...certificateExtraSizes, fontBold: localFontBold ? 1 : 0 },
+        opening_video_url: localOpeningVideoUrl,
+      });
 
-      if (detailsChanged) {
-        await onUpdateDetails({
-          tournament_date: localDate || null,
-          venue_street: localStreet,
-          venue_house_number: localHouseNumber,
-          venue_postal_code: localPostalCode,
-          venue_city: localCity,
-          motto: localMotto,
-          break_minutes: localBreakMinutes,
-          certificate_text: localCertText,
-          organizer_name: localOrganizerName,
-          sponsor_name: localSponsorName,
-          sponsor_signature_url: localSponsorSigUrl,
-          sponsor_logo_url: localSponsorLogoUrl,
-          sponsor_consent: localSponsorConsent,
-          certificate_bg_url: localCertBgUrl,
-          certificate_font_family: localFontFamily,
-          certificate_font_size: localFontSize,
-          certificate_text_color: localTextColor,
-          certificate_extra_sizes: { ...certificateExtraSizes, fontBold: localFontBold ? 1 : 0 },
-          opening_video_url: localOpeningVideoUrl,
-        });
+      // Save sponsors
+      // Remove deleted sponsors
+      for (const existing of sponsors) {
+        if (!localSponsors.find(s => s.id === existing.id)) {
+          await tournamentService.removeSponsor(existing.id);
+        }
+      }
+      // Add/update sponsors
+      for (const s of localSponsors) {
+        if (s.id) {
+          const existing = sponsors.find(e => e.id === s.id);
+          if (existing && (existing.name !== s.name || existing.logoUrl !== s.logoUrl)) {
+            await tournamentService.updateSponsor(s.id, { name: s.name, logo_url: s.logoUrl });
+          }
+        } else if (s.name.trim()) {
+          await tournamentService.addSponsor(tournamentId, s.name, s.logoUrl, s.sortOrder);
+        }
       }
 
       toast.success('Einstellungen gespeichert');
@@ -559,80 +515,54 @@ export function TournamentSettingsDialog({
             />
           </div>
 
-          {/* Sponsor */}
+          {/* Sponsoren (bis zu 5) */}
           <div>
-            <Label className="text-sm font-semibold mb-1 block">Sponsor</Label>
-            <Input
-              placeholder="Name des Sponsors"
-              value={localSponsorName}
-              onChange={e => setLocalSponsorName(e.target.value)}
-            />
+            <Label className="text-sm font-semibold mb-2 block">Sponsoren (max. 5)</Label>
+            <div className="space-y-3">
+              {localSponsors.map((sponsor, idx) => (
+                <div key={idx} className="border border-border rounded-lg p-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder={`Sponsor ${idx + 1}`}
+                      value={sponsor.name}
+                      onChange={e => setLocalSponsors(prev => prev.map((s, i) => i === idx ? { ...s, name: e.target.value } : s))}
+                      className="flex-1"
+                    />
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeSponsorSlot(idx)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {sponsor.logoUrl ? (
+                      <>
+                        <img src={sponsor.logoUrl} alt="Logo" className="h-10 border border-border rounded p-1 object-contain" />
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeSponsorLogo(idx)}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <input
+                          ref={el => { sponsorLogoInputRefs.current[idx] = el; }}
+                          type="file" accept="image/*" className="hidden"
+                          onChange={e => handleSponsorLogoUpload(e, idx)}
+                        />
+                        <Button variant="outline" size="sm" onClick={() => sponsorLogoInputRefs.current[idx]?.click()} disabled={uploadingSponsorLogoIdx === idx}>
+                          {uploadingSponsorLogoIdx === idx ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Upload className="mr-1 h-3 w-3" />}
+                          Logo
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {localSponsors.length < 5 && (
+              <Button variant="outline" size="sm" className="mt-2" onClick={addSponsorSlot}>
+                <Plus className="mr-1 h-3 w-3" /> Sponsor hinzufügen
+              </Button>
+            )}
           </div>
-
-          {/* Sponsor Signature */}
-          {localSponsorName && (
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">
-                <PenTool className="inline h-4 w-4 mr-1" />
-                Unterschrift des Sponsors
-              </Label>
-              {localSponsorSigUrl ? (
-                <div className="flex items-center gap-2">
-                  <img src={localSponsorSigUrl} alt="Unterschrift" className="h-12 border border-border rounded p-1" />
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeSig}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div>
-                  <input ref={sigInputRef} type="file" accept="image/*" className="hidden" onChange={handleSigUpload} />
-                  <Button variant="outline" size="sm" onClick={() => sigInputRef.current?.click()} disabled={uploadingSig}>
-                    {uploadingSig ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                    Unterschrift hochladen
-                  </Button>
-                </div>
-              )}
-              <div className="flex items-center gap-2 mt-2">
-                <input
-                  type="checkbox"
-                  id="settings-sponsor-consent"
-                  checked={localSponsorConsent}
-                  onChange={e => setLocalSponsorConsent(e.target.checked)}
-                  className="rounded border-border"
-                />
-                <Label htmlFor="settings-sponsor-consent" className="text-xs text-muted-foreground cursor-pointer">
-                  Der Sponsor stimmt der Veröffentlichung seiner Unterschrift auf der Urkunde zu
-                </Label>
-              </div>
-            </div>
-          )}
-
-          {/* Sponsor Logo */}
-          {localSponsorName && (
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">
-                <ImagePlus className="inline h-4 w-4 mr-1" />
-                Logo des Sponsors
-              </Label>
-              {localSponsorLogoUrl ? (
-                <div className="flex items-center gap-2">
-                  <img src={localSponsorLogoUrl} alt="Sponsor-Logo" className="h-12 border border-border rounded p-1 object-contain" />
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeSponsorLogo}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div>
-                  <input ref={sponsorLogoInputRef} type="file" accept="image/*" className="hidden" onChange={handleSponsorLogoUpload} />
-                  <Button variant="outline" size="sm" onClick={() => sponsorLogoInputRef.current?.click()} disabled={uploadingLogo}>
-                    {uploadingLogo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                    Logo hochladen
-                  </Button>
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground mt-1">Wird auf der Siegerurkunde neben dem Sponsornamen angezeigt</p>
-            </div>
-          )}
 
           {/* Mode */}
           <div className={started ? 'opacity-50' : ''}>

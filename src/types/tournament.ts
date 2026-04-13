@@ -154,6 +154,13 @@ export const TEAM_GAME_SEQUENCES: Record<TeamMode, { games: GameSequenceEntry[];
   },
 };
 
+export interface Sponsor {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  sortOrder: number;
+}
+
 export interface Tournament {
   id: string;
   name: string;
@@ -186,10 +193,7 @@ export interface Tournament {
   googleMapsLink: string | null;
   certificateText: string;
   organizerName: string;
-  sponsorName: string;
-  sponsorSignatureUrl: string | null;
-  sponsorLogoUrl: string | null;
-  sponsorConsent: boolean;
+  sponsors: Sponsor[];
   certificateBgUrl: string | null;
   certificateFontFamily: string;
   certificateFontSize: number;
