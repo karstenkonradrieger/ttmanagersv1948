@@ -1306,7 +1306,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       motto: localMotto,
                       venueString: localVenue,
                       organizerName: localOrganizer,
-                      sponsorName: sponsorName,
+                      organizerName: localOrganizer,
                     });
                     setHasPendingChanges(false);
                   }}
