@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Match, Player, SetScore } from '@/types/tournament';
+import { Match, Player, SetScore, Sponsor } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save, Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
@@ -30,10 +30,7 @@ interface Props {
   motto?: string;
   mode?: string;
   organizerName?: string;
-  sponsorName?: string;
-  sponsorSignatureUrl?: string | null;
-  sponsorLogoUrl?: string | null;
-  sponsorConsent?: boolean;
+  sponsors?: Sponsor[];
   certificateBgUrl?: string | null;
   certificateText?: string;
   certificateFontFamily?: string;
@@ -50,7 +47,6 @@ interface Props {
     motto: string;
     venueString: string;
     organizerName: string;
-    sponsorName: string;
   }) => void;
 }
 
