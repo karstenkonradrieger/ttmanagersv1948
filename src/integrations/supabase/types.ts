@@ -586,6 +586,41 @@ export type Database = {
           },
         ]
       }
+      tournament_sponsors: {
+        Row: {
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          sort_order: number
+          tournament_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          sort_order?: number
+          tournament_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          sort_order?: number
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_sponsors_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_videos: {
         Row: {
           created_at: string
@@ -642,10 +677,6 @@ export type Database = {
           organizer_name: string
           phase: string | null
           rounds: number
-          sponsor_consent: boolean
-          sponsor_logo_url: string | null
-          sponsor_name: string
-          sponsor_signature_url: string | null
           sport: string
           started: boolean
           table_count: number
@@ -685,10 +716,6 @@ export type Database = {
           organizer_name?: string
           phase?: string | null
           rounds?: number
-          sponsor_consent?: boolean
-          sponsor_logo_url?: string | null
-          sponsor_name?: string
-          sponsor_signature_url?: string | null
           sport?: string
           started?: boolean
           table_count?: number
@@ -728,10 +755,6 @@ export type Database = {
           organizer_name?: string
           phase?: string | null
           rounds?: number
-          sponsor_consent?: boolean
-          sponsor_logo_url?: string | null
-          sponsor_name?: string
-          sponsor_signature_url?: string | null
           sport?: string
           started?: boolean
           table_count?: number
