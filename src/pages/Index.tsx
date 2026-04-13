@@ -264,10 +264,7 @@ const Index = () => {
               breakMinutes={tournament.breakMinutes}
               certificateText={tournament.certificateText}
               organizerName={tournament.organizerName}
-              sponsorName={tournament.sponsorName}
-              sponsorSignatureUrl={tournament.sponsorSignatureUrl}
-              sponsorLogoUrl={tournament.sponsorLogoUrl}
-              sponsorConsent={tournament.sponsorConsent}
+              sponsors={tournament.sponsors}
               certificateBgUrl={tournament.certificateBgUrl}
               certificateFontFamily={tournament.certificateFontFamily}
               certificateFontSize={tournament.certificateFontSize}
@@ -720,10 +717,7 @@ const Index = () => {
                  motto={tournament.motto}
                  mode={tournament.mode}
                  organizerName={tournament.organizerName}
-                 sponsorName={tournament.sponsorName}
-                 sponsorSignatureUrl={tournament.sponsorSignatureUrl}
-                 sponsorLogoUrl={tournament.sponsorLogoUrl}
-                 sponsorConsent={tournament.sponsorConsent}
+                 sponsors={tournament.sponsors}
                  certificateBgUrl={tournament.certificateBgUrl}
                  certificateText={tournament.certificateText}
                  certificateFontFamily={tournament.certificateFontFamily}
