@@ -106,10 +106,7 @@ export function TournamentSettingsDialog({
       setLocalBreakMinutes(breakMinutes);
       setLocalCertText(certificateText);
       setLocalOrganizerName(organizerName);
-      setLocalSponsorName(sponsorName);
-      setLocalSponsorSigUrl(sponsorSignatureUrl);
-      setLocalSponsorLogoUrl(sponsorLogoUrl);
-      setLocalSponsorConsent(sponsorConsent);
+      setLocalSponsors(sponsors.map(s => ({ ...s })));
       setLocalCertBgUrl(certificateBgUrl);
       setLocalFontFamily(certificateFontFamily);
       setLocalFontSize(certificateFontSize);
@@ -120,62 +117,44 @@ export function TournamentSettingsDialog({
     setOpen(isOpen);
   };
 
-  const handleSigUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSponsorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const file = e.target.files?.[0];
     if (!file || !file.type.startsWith('image/')) return;
-    setUploadingSig(true);
-    try {
-      const ext = file.name.split('.').pop();
-      const fileName = `sig-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('signatures').upload(fileName, file, { upsert: true });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from('signatures').getPublicUrl(fileName);
-      setLocalSponsorSigUrl(urlData.publicUrl);
-      toast.success('Unterschrift hochgeladen');
-    } catch {
-      toast.error('Fehler beim Hochladen');
-    } finally {
-      setUploadingSig(false);
-      if (sigInputRef.current) sigInputRef.current.value = '';
-    }
-  };
-
-  const removeSig = async () => {
-    if (localSponsorSigUrl) {
-      const parts = localSponsorSigUrl.split('/');
-      const fileName = parts[parts.length - 1];
-      await supabase.storage.from('signatures').remove([fileName]);
-    }
-    setLocalSponsorSigUrl(null);
-  };
-
-  const handleSponsorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingLogo(true);
+    setUploadingSponsorLogoIdx(idx);
     try {
       const ext = file.name.split('.').pop();
       const fileName = `sponsor-logo-${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
       if (error) throw error;
       const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
-      setLocalSponsorLogoUrl(urlData.publicUrl);
+      setLocalSponsors(prev => prev.map((s, i) => i === idx ? { ...s, logoUrl: urlData.publicUrl } : s));
       toast.success('Sponsor-Logo hochgeladen');
     } catch {
       toast.error('Fehler beim Hochladen');
     } finally {
-      setUploadingLogo(false);
-      if (sponsorLogoInputRef.current) sponsorLogoInputRef.current.value = '';
+      setUploadingSponsorLogoIdx(null);
+      const ref = sponsorLogoInputRefs.current[idx];
+      if (ref) ref.value = '';
     }
   };
 
-  const removeSponsorLogo = async () => {
-    if (localSponsorLogoUrl) {
-      const parts = localSponsorLogoUrl.split('/');
+  const removeSponsorLogo = async (idx: number) => {
+    const url = localSponsors[idx]?.logoUrl;
+    if (url) {
+      const parts = url.split('/');
       const fileName = parts[parts.length - 1];
       await supabase.storage.from('logos').remove([fileName]);
     }
-    setLocalSponsorLogoUrl(null);
+    setLocalSponsors(prev => prev.map((s, i) => i === idx ? { ...s, logoUrl: null } : s));
+  };
+
+  const addSponsorSlot = () => {
+    if (localSponsors.length >= 5) return;
+    setLocalSponsors(prev => [...prev, { id: '', name: '', logoUrl: null, sortOrder: prev.length + 1 }]);
+  };
+
+  const removeSponsorSlot = (idx: number) => {
+    setLocalSponsors(prev => prev.filter((_, i) => i !== idx).map((s, i) => ({ ...s, sortOrder: i + 1 })));
   };
 
   const handleCertBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
