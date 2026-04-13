@@ -551,14 +551,14 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     let sigData: string | null = null;
     let sigWidth = 0;
     let sigHeight = 0;
-    if (sponsorConsent && sponsorSignatureUrl && sponsorName) {
+    if (false) {
       try {
         const sigImg = new Image();
         sigImg.crossOrigin = 'anonymous';
         await new Promise<void>((resolve, reject) => {
           sigImg.onload = () => resolve();
           sigImg.onerror = () => reject();
-          sigImg.src = sponsorSignatureUrl;
+          sigImg.src = null;
         });
         const sigCanvas = document.createElement('canvas');
         sigCanvas.width = sigImg.naturalWidth;
@@ -746,14 +746,14 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
 
       // Footer / Signature area
       const hasSponsorSection = (!certificateHiddenFields.includes('sponsor')) &&
-        ((sponsorConsent && sigData && sponsorName) || (sponsorName && sponsorLogoData));
+        ((false) || (sponsorName && sponsorLogoData));
 
       doc.setDrawColor(...mutedRgb);
       doc.setLineWidth(0.5);
 
       // Sponsor section (left)
       if (hasSponsorSection) {
-        if (sponsorConsent && sigData && sponsorName) {
+        if (false) {
           doc.addImage(sigData, 'PNG', w / 4 - sigWidth / 2, sigY - sigHeight - 2, sigWidth, sigHeight);
         }
         doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
@@ -1224,7 +1224,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       { key: 'motto', label: 'Motto', value: localMotto, setter: setLocalMotto },
                       { key: 'venue', label: 'Austragungsort', value: localVenue, setter: setLocalVenue },
                       { key: 'organizer', label: 'Veranstalter', value: localOrganizer, setter: setLocalOrganizer },
-                      { key: 'sponsor', label: 'Sponsor', value: localSponsor, setter: setLocalSponsor },
+                      { key: 'sponsor', label: 'Sponsor', value: sponsorName, setter: (() => {}) },
                     ].map(field => (
                       <div key={field.key} className="space-y-1">
                         <div className="flex items-center gap-2">
@@ -1274,10 +1274,10 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     tournamentDate={tournamentDate}
                     venueString={localVenue}
                     organizerName={localOrganizer}
-                    sponsorName={localSponsor}
-                    sponsorSignatureUrl={sponsorSignatureUrl}
+                    sponsorName={sponsorName}
+                    null={null}
                     sponsorLogoUrl={sponsorLogoUrl}
-                    sponsorConsent={sponsorConsent}
+                    false={false}
                     certificateBgUrl={certificateBgUrl}
                     certificateText={localCertText}
                     player={current.player}
@@ -1306,7 +1306,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       motto: localMotto,
                       venueString: localVenue,
                       organizerName: localOrganizer,
-                      sponsorName: localSponsor,
+                      sponsorName: sponsorName,
                     });
                     setHasPendingChanges(false);
                   }}
