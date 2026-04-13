@@ -515,80 +515,54 @@ export function TournamentSettingsDialog({
             />
           </div>
 
-          {/* Sponsor */}
+          {/* Sponsoren (bis zu 5) */}
           <div>
-            <Label className="text-sm font-semibold mb-1 block">Sponsor</Label>
-            <Input
-              placeholder="Name des Sponsors"
-              value={localSponsorName}
-              onChange={e => setLocalSponsorName(e.target.value)}
-            />
+            <Label className="text-sm font-semibold mb-2 block">Sponsoren (max. 5)</Label>
+            <div className="space-y-3">
+              {localSponsors.map((sponsor, idx) => (
+                <div key={idx} className="border border-border rounded-lg p-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder={`Sponsor ${idx + 1}`}
+                      value={sponsor.name}
+                      onChange={e => setLocalSponsors(prev => prev.map((s, i) => i === idx ? { ...s, name: e.target.value } : s))}
+                      className="flex-1"
+                    />
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeSponsorSlot(idx)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {sponsor.logoUrl ? (
+                      <>
+                        <img src={sponsor.logoUrl} alt="Logo" className="h-10 border border-border rounded p-1 object-contain" />
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeSponsorLogo(idx)}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <input
+                          ref={el => { sponsorLogoInputRefs.current[idx] = el; }}
+                          type="file" accept="image/*" className="hidden"
+                          onChange={e => handleSponsorLogoUpload(e, idx)}
+                        />
+                        <Button variant="outline" size="sm" onClick={() => sponsorLogoInputRefs.current[idx]?.click()} disabled={uploadingSponsorLogoIdx === idx}>
+                          {uploadingSponsorLogoIdx === idx ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Upload className="mr-1 h-3 w-3" />}
+                          Logo
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {localSponsors.length < 5 && (
+              <Button variant="outline" size="sm" className="mt-2" onClick={addSponsorSlot}>
+                <Plus className="mr-1 h-3 w-3" /> Sponsor hinzufügen
+              </Button>
+            )}
           </div>
-
-          {/* Sponsor Signature */}
-          {localSponsorName && (
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">
-                <PenTool className="inline h-4 w-4 mr-1" />
-                Unterschrift des Sponsors
-              </Label>
-              {localSponsorSigUrl ? (
-                <div className="flex items-center gap-2">
-                  <img src={localSponsorSigUrl} alt="Unterschrift" className="h-12 border border-border rounded p-1" />
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeSig}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div>
-                  <input ref={sigInputRef} type="file" accept="image/*" className="hidden" onChange={handleSigUpload} />
-                  <Button variant="outline" size="sm" onClick={() => sigInputRef.current?.click()} disabled={uploadingSig}>
-                    {uploadingSig ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                    Unterschrift hochladen
-                  </Button>
-                </div>
-              )}
-              <div className="flex items-center gap-2 mt-2">
-                <input
-                  type="checkbox"
-                  id="settings-sponsor-consent"
-                  checked={localSponsorConsent}
-                  onChange={e => setLocalSponsorConsent(e.target.checked)}
-                  className="rounded border-border"
-                />
-                <Label htmlFor="settings-sponsor-consent" className="text-xs text-muted-foreground cursor-pointer">
-                  Der Sponsor stimmt der Veröffentlichung seiner Unterschrift auf der Urkunde zu
-                </Label>
-              </div>
-            </div>
-          )}
-
-          {/* Sponsor Logo */}
-          {localSponsorName && (
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">
-                <ImagePlus className="inline h-4 w-4 mr-1" />
-                Logo des Sponsors
-              </Label>
-              {localSponsorLogoUrl ? (
-                <div className="flex items-center gap-2">
-                  <img src={localSponsorLogoUrl} alt="Sponsor-Logo" className="h-12 border border-border rounded p-1 object-contain" />
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeSponsorLogo}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div>
-                  <input ref={sponsorLogoInputRef} type="file" accept="image/*" className="hidden" onChange={handleSponsorLogoUpload} />
-                  <Button variant="outline" size="sm" onClick={() => sponsorLogoInputRef.current?.click()} disabled={uploadingLogo}>
-                    {uploadingLogo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                    Logo hochladen
-                  </Button>
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground mt-1">Wird auf der Siegerurkunde neben dem Sponsornamen angezeigt</p>
-            </div>
-          )}
 
           {/* Mode */}
           <div className={started ? 'opacity-50' : ''}>
