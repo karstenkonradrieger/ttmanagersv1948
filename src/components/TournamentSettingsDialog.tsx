@@ -226,19 +226,7 @@ export function TournamentSettingsDialog({
     setLocalOpeningVideoUrl(null);
   };
 
-  const hasChanges =
-    localMode !== mode || localType !== type || localBestOf !== bestOf ||
-    (localDate || null) !== (tournamentDate || null) ||
-    localStreet !== venueStreet || localHouseNumber !== venueHouseNumber ||
-    localPostalCode !== venuePostalCode || localCity !== venueCity ||
-    localMotto !== motto || localBreakMinutes !== breakMinutes ||
-    localCertText !== certificateText || localOrganizerName !== organizerName ||
-    localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-    localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
-    localCertBgUrl !== certificateBgUrl ||
-    localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
-    localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold ||
-    localOpeningVideoUrl !== openingVideoUrl;
+  const hasChanges = true; // Always allow saving since sponsor changes are tracked separately
 
   const handleSave = async () => {
     setSaving(true);
@@ -247,41 +235,41 @@ export function TournamentSettingsDialog({
       if (localType !== type) await onUpdateType(localType);
       if (localBestOf !== bestOf) await onUpdateBestOf(localBestOf);
 
-      const detailsChanged =
-        (localDate || null) !== (tournamentDate || null) ||
-        localStreet !== venueStreet || localHouseNumber !== venueHouseNumber ||
-        localPostalCode !== venuePostalCode || localCity !== venueCity ||
-        localMotto !== motto || localBreakMinutes !== breakMinutes ||
-        localCertText !== certificateText || localOrganizerName !== organizerName ||
-        localSponsorName !== sponsorName || localSponsorSigUrl !== sponsorSignatureUrl ||
-        localSponsorLogoUrl !== sponsorLogoUrl || localSponsorConsent !== sponsorConsent ||
-        localCertBgUrl !== certificateBgUrl ||
-        localFontFamily !== certificateFontFamily || localFontSize !== certificateFontSize ||
-        localTextColor !== certificateTextColor || localFontBold !== !!certificateExtraSizes.fontBold ||
-        localOpeningVideoUrl !== openingVideoUrl;
+      await onUpdateDetails({
+        tournament_date: localDate || null,
+        venue_street: localStreet,
+        venue_house_number: localHouseNumber,
+        venue_postal_code: localPostalCode,
+        venue_city: localCity,
+        motto: localMotto,
+        break_minutes: localBreakMinutes,
+        certificate_text: localCertText,
+        organizer_name: localOrganizerName,
+        certificate_bg_url: localCertBgUrl,
+        certificate_font_family: localFontFamily,
+        certificate_font_size: localFontSize,
+        certificate_text_color: localTextColor,
+        certificate_extra_sizes: { ...certificateExtraSizes, fontBold: localFontBold ? 1 : 0 },
+        opening_video_url: localOpeningVideoUrl,
+      });
 
-      if (detailsChanged) {
-        await onUpdateDetails({
-          tournament_date: localDate || null,
-          venue_street: localStreet,
-          venue_house_number: localHouseNumber,
-          venue_postal_code: localPostalCode,
-          venue_city: localCity,
-          motto: localMotto,
-          break_minutes: localBreakMinutes,
-          certificate_text: localCertText,
-          organizer_name: localOrganizerName,
-          sponsor_name: localSponsorName,
-          sponsor_signature_url: localSponsorSigUrl,
-          sponsor_logo_url: localSponsorLogoUrl,
-          sponsor_consent: localSponsorConsent,
-          certificate_bg_url: localCertBgUrl,
-          certificate_font_family: localFontFamily,
-          certificate_font_size: localFontSize,
-          certificate_text_color: localTextColor,
-          certificate_extra_sizes: { ...certificateExtraSizes, fontBold: localFontBold ? 1 : 0 },
-          opening_video_url: localOpeningVideoUrl,
-        });
+      // Save sponsors
+      // Remove deleted sponsors
+      for (const existing of sponsors) {
+        if (!localSponsors.find(s => s.id === existing.id)) {
+          await tournamentService.removeSponsor(existing.id);
+        }
+      }
+      // Add/update sponsors
+      for (const s of localSponsors) {
+        if (s.id) {
+          const existing = sponsors.find(e => e.id === s.id);
+          if (existing && (existing.name !== s.name || existing.logoUrl !== s.logoUrl)) {
+            await tournamentService.updateSponsor(s.id, { name: s.name, logo_url: s.logoUrl });
+          }
+        } else if (s.name.trim()) {
+          await tournamentService.addSponsor(tournamentId, s.name, s.logoUrl, s.sortOrder);
+        }
       }
 
       toast.success('Einstellungen gespeichert');
