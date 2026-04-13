@@ -736,9 +736,8 @@ const Index = () => {
                      motto: settings.motto,
                      venue_street: parts[0] || '',
                      venue_city: parts.slice(1).join(', ') || '',
-                     organizer_name: settings.organizerName,
-                     sponsor_name: settings.sponsorName,
-                   } as any);
+                      organizer_name: settings.organizerName,
+                    } as any);
                  }}
                 />
             </TabsContent>
