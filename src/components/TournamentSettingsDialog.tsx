@@ -30,10 +30,7 @@ interface Props {
   certificateTextColor: string;
   certificateExtraSizes?: Record<string, number>;
   organizerName: string;
-  sponsorName: string;
-  sponsorSignatureUrl: string | null;
-  sponsorLogoUrl: string | null;
-  sponsorConsent: boolean;
+  sponsors: Sponsor[];
   openingVideoUrl: string | null;
   tournamentId: string;
   onUpdateMode: (mode: TournamentMode) => Promise<void>;
@@ -49,10 +46,6 @@ interface Props {
     break_minutes: number;
     certificate_text: string;
     organizer_name: string;
-    sponsor_name: string;
-    sponsor_signature_url: string | null;
-    sponsor_logo_url: string | null;
-    sponsor_consent: boolean;
     certificate_bg_url?: string | null;
     certificate_font_family?: string;
     certificate_font_size?: number;
