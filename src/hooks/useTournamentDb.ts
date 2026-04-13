@@ -36,10 +36,7 @@ const emptyTournament: Tournament = {
   googleMapsLink: null,
   certificateText: 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.',
   organizerName: '',
-  sponsorName: '',
-  sponsorSignatureUrl: null,
-  sponsorLogoUrl: null,
-  sponsorConsent: false,
+  sponsors: [],
   certificateBgUrl: null,
   certificateFontFamily: 'Helvetica',
   certificateFontSize: 20,
@@ -1144,10 +1141,6 @@ export function useTournamentDb(tournamentId: string | null) {
     break_minutes: number;
     certificate_text: string;
     organizer_name: string;
-    sponsor_name: string;
-    sponsor_signature_url: string | null;
-    sponsor_logo_url: string | null;
-    sponsor_consent: boolean;
     certificate_bg_url: string | null;
     certificate_font_family: string;
     certificate_font_size: number;
@@ -1169,10 +1162,6 @@ export function useTournamentDb(tournamentId: string | null) {
         ...(details.break_minutes !== undefined ? { breakMinutes: details.break_minutes } : {}),
         ...(details.certificate_text !== undefined ? { certificateText: details.certificate_text } : {}),
         ...(details.organizer_name !== undefined ? { organizerName: details.organizer_name } : {}),
-        ...(details.sponsor_name !== undefined ? { sponsorName: details.sponsor_name } : {}),
-        ...(details.sponsor_signature_url !== undefined ? { sponsorSignatureUrl: details.sponsor_signature_url } : {}),
-        ...(details.sponsor_logo_url !== undefined ? { sponsorLogoUrl: details.sponsor_logo_url } : {}),
-        ...(details.sponsor_consent !== undefined ? { sponsorConsent: details.sponsor_consent } : {}),
         ...(details.certificate_bg_url !== undefined ? { certificateBgUrl: details.certificate_bg_url } : {}),
         ...(details.certificate_font_family !== undefined ? { certificateFontFamily: details.certificate_font_family } : {}),
         ...(details.certificate_font_size !== undefined ? { certificateFontSize: details.certificate_font_size } : {}),

@@ -321,6 +321,42 @@ export async function updateTournament(id: string, updates: Partial<{
   if (error) throw error;
 }
 
+// Sponsor operations
+export async function fetchSponsors(tournamentId: string): Promise<Sponsor[]> {
+  const { data, error } = await supabase
+    .from('tournament_sponsors')
+    .select('*')
+    .eq('tournament_id', tournamentId)
+    .order('sort_order', { ascending: true });
+  if (error) throw error;
+  return (data || []).map((s: any) => ({
+    id: s.id,
+    name: s.name,
+    logoUrl: s.logo_url || null,
+    sortOrder: s.sort_order,
+  }));
+}
+
+export async function addSponsor(tournamentId: string, name: string, logoUrl: string | null, sortOrder: number): Promise<Sponsor> {
+  const { data, error } = await supabase
+    .from('tournament_sponsors')
+    .insert({ tournament_id: tournamentId, name, logo_url: logoUrl, sort_order: sortOrder })
+    .select()
+    .single();
+  if (error) throw error;
+  return { id: data.id, name: data.name, logoUrl: data.logo_url, sortOrder: data.sort_order };
+}
+
+export async function updateSponsor(id: string, updates: { name?: string; logo_url?: string | null }): Promise<void> {
+  const { error } = await supabase.from('tournament_sponsors').update(updates).eq('id', id);
+  if (error) throw error;
+}
+
+export async function removeSponsor(id: string): Promise<void> {
+  const { error } = await supabase.from('tournament_sponsors').delete().eq('id', id);
+  if (error) throw error;
+}
+
 export async function deleteTournament(id: string): Promise<void> {
   const { error } = await supabase
     .from('tournaments')
