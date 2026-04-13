@@ -136,10 +136,13 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
   const [localMotto, setLocalMotto] = useState(motto || '');
   const [localVenue, setLocalVenue] = useState(venueString || '');
   const [localOrganizer, setLocalOrganizer] = useState(organizerName || '');
-  const [localSponsor, setLocalSponsor] = useState(sponsorName || '');
   const [localExtraSizes, setLocalExtraSizes] = useState<Record<string, number>>(certificateExtraSizes);
   const [localHiddenFields, setLocalHiddenFields] = useState<string[]>(certificateHiddenFields);
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
+
+  // Derive first sponsor for certificate display (backward compat)
+  const sponsorName = sponsors[0]?.name || '';
+  const sponsorLogoUrl = sponsors[0]?.logoUrl || null;
 
   // Sync local state when props change (e.g. after DB load)
   useEffect(() => {
@@ -148,11 +151,10 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     setLocalMotto(motto || '');
     setLocalVenue(venueString || '');
     setLocalOrganizer(organizerName || '');
-    setLocalSponsor(sponsorName || '');
     setLocalExtraSizes(certificateExtraSizes);
     setLocalHiddenFields(certificateHiddenFields);
     setHasPendingChanges(false);
-  }, [certificateText, certificateLineSizes, motto, venueString, organizerName, sponsorName, certificateExtraSizes, certificateHiddenFields]);
+  }, [certificateText, certificateLineSizes, motto, venueString, organizerName, sponsors, certificateExtraSizes, certificateHiddenFields]);
   const playerStats = useMemo(() => computePlayerStats(players, matches), [players, matches]);
 
   if (matches.length === 0) {
