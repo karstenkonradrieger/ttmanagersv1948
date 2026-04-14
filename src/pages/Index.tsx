@@ -453,7 +453,7 @@ const Index = () => {
                     onImportPlayers={(players) => {
                       const withConsent: string[] = [];
                       for (const p of players) {
-                        addPlayer(p.name, p.club, p.ttr, p.gender, p.birthDate, p.postalCode, p.city, p.street, p.houseNumber, p.phone, p.voiceNameUrl || undefined);
+                        addPlayer(p.name, p.club, p.ttr, p.gender, p.birthDate, p.postalCode, p.city, p.street, p.houseNumber, p.phone, p.voiceNameUrl || undefined, p.photoConsent);
                         if (p.photoConsent) withConsent.push(p.name);
                       }
                       if (withConsent.length > 0) {

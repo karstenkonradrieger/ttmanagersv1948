@@ -12,6 +12,7 @@ export interface Player {
   phone: string;
   groupNumber?: number | null;
   voiceNameUrl?: string | null;
+  photoConsent?: boolean;
 }
 
 export interface SetScore {
