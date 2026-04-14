@@ -1274,10 +1274,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     tournamentDate={tournamentDate}
                     venueString={localVenue}
                     organizerName={localOrganizer}
-                    sponsorName={sponsorName}
-                    null={null}
-                    sponsorLogoUrl={sponsorLogoUrl}
-                    false={false}
+                    sponsors={sponsors}
                     certificateBgUrl={certificateBgUrl}
                     certificateText={localCertText}
                     player={current.player}
@@ -1305,7 +1302,6 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       certificateHiddenFields: localHiddenFields,
                       motto: localMotto,
                       venueString: localVenue,
-                      organizerName: localOrganizer,
                       organizerName: localOrganizer,
                     });
                     setHasPendingChanges(false);
