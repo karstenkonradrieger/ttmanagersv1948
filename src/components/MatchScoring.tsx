@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { DoublesPair, Match, Player, SetScore, getHandicap } from '@/types/tournament';
+import { DoublesPair, Match, Player, SetScore, Sponsor, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,6 +28,7 @@ interface Props {
   tournamentDate?: string | null;
   venueString?: string;
   motto?: string;
+  sponsors?: Sponsor[];
   isHandicap?: boolean;
   players?: Player[];
   doublesPairs?: DoublesPair[];
@@ -149,7 +150,7 @@ const announceMatch = async (
   });
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, isHandicap = false, players = [], doublesPairs = [], mode, breakMinutes = 0 }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, sponsors = [], isHandicap = false, players = [], doublesPairs = [], mode, breakMinutes = 0 }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
   const { getPhraseAudioUrl } = useAnnouncementPhrases();
 
@@ -716,7 +717,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
               match, player1: p1, player2: p2,
               tournamentName, tournamentId,
               roundName: getRoundName(match.round, rounds),
-              logoUrl, bestOf, tournamentDate, venueString, motto,
+              logoUrl, bestOf, tournamentDate, venueString, motto, sponsors,
             })}
           >
             <FileText className="mr-1 h-3 w-3" />

@@ -987,7 +987,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                               match: m, player1: p1, player2: p2,
                               tournamentName, tournamentId,
                               roundName: getRoundName(r, rounds, mode),
-                              logoUrl, bestOf,
+                              logoUrl, bestOf, sponsors,
                             })}
                           >
                             <FileText className="mr-1 h-3 w-3" />
