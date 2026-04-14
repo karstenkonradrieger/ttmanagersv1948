@@ -744,32 +744,32 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
 
       // Footer / Signature area
-      const hasSponsorSection = (!certificateHiddenFields.includes('sponsor')) &&
-        ((false) || (sponsorName && sponsorLogoData));
+      const hasSponsorSection = (!certificateHiddenFields.includes('sponsor')) && sponsorLogos.length > 0;
 
       doc.setDrawColor(...mutedRgb);
       doc.setLineWidth(0.5);
 
       // Sponsor section (left)
       if (hasSponsorSection) {
-        if (false) {
-          doc.addImage(sigData, 'PNG', w / 4 - sigWidth / 2, sigY - sigHeight - 2, sigWidth, sigHeight);
-        }
         doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
         const sponsorSize = certificateExtraSizes.sponsor ?? 8;
         doc.setFontSize(sponsorSize);
         doc.setTextColor(tr, tg, tb);
-        if (sponsorLogoData && sponsorName) {
-          const totalW = sponsorLogoW + 2 + doc.getTextWidth(sponsorName);
-          const startX = w / 4 - totalW / 2;
-          doc.addImage(sponsorLogoData, 'PNG', startX, sigY + 2, sponsorLogoW, sponsorLogoH);
-          doc.text(sponsorName, startX + sponsorLogoW + 2, sigY + 7);
-        } else if (sponsorName) {
-          doc.text(sponsorName, w / 4, sigY + 7, { align: 'center' });
+        let sponsorTextY = sigY + 4;
+        for (const sl of sponsorLogos) {
+          if (sl.data) {
+            const totalW = sl.w + 2 + doc.getTextWidth(sl.name);
+            const startX = w / 4 - totalW / 2;
+            doc.addImage(sl.data, 'PNG', startX, sponsorTextY, sl.w, sl.h);
+            doc.text(sl.name, startX + sl.w + 2, sponsorTextY + sl.h * 0.7);
+          } else {
+            doc.text(sl.name, w / 4, sponsorTextY + 4, { align: 'center' });
+          }
+          sponsorTextY += Math.max(sl.h, 6) + 2;
         }
         doc.setFontSize(Math.max(6, sponsorSize * 0.8));
         doc.setTextColor(...mutedRgb);
-        doc.text('Sponsor', w / 4, sigY + (sponsorLogoData ? sponsorLogoH + 5 : 13), { align: 'center' });
+        doc.text(sponsorLogos.length === 1 ? 'Sponsor' : 'Sponsoren', w / 4, sponsorTextY + 2, { align: 'center' });
       }
 
       // Organizer / Turnierleitung (right or center)
