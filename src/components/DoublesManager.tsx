@@ -12,6 +12,7 @@ interface Props {
   onAutoGenerate: (method: 'ttr' | 'random') => void;
   started: boolean;
   getPlayer: (id: string | null) => Player | null;
+  tournamentId?: string;
 }
 
 export function DoublesManager({ players, doublesPairs, onAddPair, onRemovePair, onAutoGenerate, started, getPlayer }: Props) {
