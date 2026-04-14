@@ -43,8 +43,13 @@ export function DoublesManager({ players, doublesPairs, onAddPair, onRemovePair,
           <Users className="h-5 w-5 text-primary" />
           Doppelpaare ({doublesPairs.length})
         </h3>
-        {!started && players.length >= 2 && (
-          <div className="flex gap-2">
+        <div className="flex gap-2">
+          {tournamentId && doublesPairs.length > 0 && (
+            <Button variant="outline" size="sm" onClick={() => window.open(`/doubles/${tournamentId}`, '_blank')} className="gap-1 text-xs">
+              <ExternalLink className="h-3 w-3" />
+              Ansicht
+            </Button>
+          )}
             <Button variant="outline" size="sm" onClick={() => onAutoGenerate('ttr')} className="gap-1 text-xs">
               <TrendingUp className="h-3 w-3" />
               Nach TTR
