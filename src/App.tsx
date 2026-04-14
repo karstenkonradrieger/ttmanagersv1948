@@ -60,6 +60,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/live/:id" element={<LiveView />} />
             <Route path="/standings/:id" element={<StandingsView />} />
+            <Route path="/doubles/:id" element={<DoublesView />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
