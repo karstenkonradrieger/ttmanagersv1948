@@ -371,7 +371,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
       {completedMatches.length > 0 && (
         <Section title="✅ Abgeschlossene Spiele">
           {completedMatches.map(m => (
-            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} motto={motto} mode={mode} />
+            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} motto={motto} mode={mode} sponsors={sponsors} />
           ))}
         </Section>
       )}
@@ -671,7 +671,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   );
 }
 
-function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf, rounds, logoUrl, tournamentDate, venueString, motto, mode }: {
+function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf, rounds, logoUrl, tournamentDate, venueString, motto, mode, sponsors = [] }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   tournamentId: string;
@@ -683,6 +683,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
   venueString?: string;
   motto?: string;
   mode?: string;
+  sponsors?: Sponsor[];
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
