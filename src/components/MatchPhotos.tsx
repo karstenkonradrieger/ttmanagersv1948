@@ -352,6 +352,7 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
         ref={photoInputRef}
         type="file"
         accept="image/*"
+        capture="environment"
         onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], 'photo')}
         className="hidden"
       />
@@ -359,6 +360,7 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
         ref={videoInputRef}
         type="file"
         accept="video/*"
+        capture="environment"
         onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], 'video')}
         className="hidden"
       />
