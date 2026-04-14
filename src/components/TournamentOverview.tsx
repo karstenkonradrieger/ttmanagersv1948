@@ -573,30 +573,30 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
     }
 
-    // Pre-load sponsor logo if available
-    let sponsorLogoData: string | null = null;
-    let sponsorLogoW = 0;
-    let sponsorLogoH = 0;
-    if (sponsorLogoUrl && sponsorName) {
-      try {
-        const slImg = new Image();
-        slImg.crossOrigin = 'anonymous';
-        await new Promise<void>((resolve, reject) => {
-          slImg.onload = () => resolve();
-          slImg.onerror = () => reject();
-          slImg.src = sponsorLogoUrl;
-        });
-        const slCanvas = document.createElement('canvas');
-        slCanvas.width = slImg.naturalWidth;
-        slCanvas.height = slImg.naturalHeight;
-        slCanvas.getContext('2d')!.drawImage(slImg, 0, 0);
-        sponsorLogoData = slCanvas.toDataURL('image/png');
-        const slMaxH = 16;
-        const slRatio = slImg.naturalWidth / slImg.naturalHeight;
-        sponsorLogoH = slMaxH;
-        sponsorLogoW = slMaxH * slRatio;
-      } catch {
-        // ignore
+    // Pre-load sponsor logos
+    const sponsorLogos: Array<{ name: string; data: string; w: number; h: number }> = [];
+    for (const sponsor of visibleSponsors) {
+      if (sponsor.logoUrl) {
+        try {
+          const slImg = new Image();
+          slImg.crossOrigin = 'anonymous';
+          await new Promise<void>((resolve, reject) => {
+            slImg.onload = () => resolve();
+            slImg.onerror = () => reject();
+            slImg.src = sponsor.logoUrl!;
+          });
+          const slCanvas = document.createElement('canvas');
+          slCanvas.width = slImg.naturalWidth;
+          slCanvas.height = slImg.naturalHeight;
+          slCanvas.getContext('2d')!.drawImage(slImg, 0, 0);
+          const slMaxH = 16;
+          const slRatio = slImg.naturalWidth / slImg.naturalHeight;
+          sponsorLogos.push({ name: sponsor.name, data: slCanvas.toDataURL('image/png'), w: slMaxH * slRatio, h: slMaxH });
+        } catch {
+          sponsorLogos.push({ name: sponsor.name, data: '', w: 0, h: 0 });
+        }
+      } else {
+        sponsorLogos.push({ name: sponsor.name, data: '', w: 0, h: 0 });
       }
     }
 
