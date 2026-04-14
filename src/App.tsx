@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import LiveView from "./pages/LiveView";
 import StandingsView from "./pages/StandingsView";
+import DoublesView from "./pages/DoublesView";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
