@@ -410,18 +410,31 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                     voiceNameUrl={player.voiceNameUrl || null}
                     onSaved={(url) => onUpdate(player.id, { voiceNameUrl: url })}
                   />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      printPhotoConsentForm({ player, tournamentName, tournamentDate: tournamentDate ?? null, venueString, logoUrl });
-                      toast.success(`Fotoerlaubnis für ${player.name} erstellt`);
-                    }}
-                    className="text-destructive hover:text-destructive"
-                    title="⚠ Fotoerlaubnis fehlt – klicken zum Drucken"
-                  >
-                    <Camera className="h-4 w-4" />
-                  </Button>
+                  {player.photoConsent ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex items-center justify-center h-9 w-9">
+                            <FileCheck className="h-4 w-4 text-green-500" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="text-xs">Fotoerlaubnis erteilt</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        printPhotoConsentForm({ player, tournamentName, tournamentDate: tournamentDate ?? null, venueString, logoUrl });
+                        toast.success(`Fotoerlaubnis für ${player.name} erstellt`);
+                      }}
+                      className="text-destructive hover:text-destructive"
+                      title="⚠ Fotoerlaubnis fehlt – klicken zum Drucken"
+                    >
+                      <Camera className="h-4 w-4" />
+                    </Button>
+                  )}
                   {started && matches.length > 0 && getPlayer && (
                     <Button
                       variant="ghost"
