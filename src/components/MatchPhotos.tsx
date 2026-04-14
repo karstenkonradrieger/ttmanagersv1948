@@ -16,6 +16,42 @@ interface MatchMedia {
 }
 
 const VIDEO_EXTENSIONS = ['.mp4', '.mov', '.webm', '.avi', '.mkv', '.m4v', '.3gp'];
+const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.heic', '.heif'];
+
+const MIME_EXTENSION_MAP: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+  'image/bmp': 'bmp',
+  'image/heic': 'heic',
+  'image/heif': 'heif',
+  'video/mp4': 'mp4',
+  'video/quicktime': 'mov',
+  'video/webm': 'webm',
+  'video/x-msvideo': 'avi',
+  'video/x-matroska': 'mkv',
+  'video/x-m4v': 'm4v',
+  'video/3gpp': '3gp',
+};
+
+const EXTENSION_MIME_TYPE_MAP: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  gif: 'image/gif',
+  bmp: 'image/bmp',
+  heic: 'image/heic',
+  heif: 'image/heif',
+  mp4: 'video/mp4',
+  mov: 'video/quicktime',
+  webm: 'video/webm',
+  avi: 'video/x-msvideo',
+  mkv: 'video/x-matroska',
+  m4v: 'video/x-m4v',
+  '3gp': 'video/3gpp',
+};
 
 function isVideoUrl(url: string): boolean {
   try {
@@ -24,6 +60,41 @@ function isVideoUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+function getFileExtension(file: File): string | null {
+  const match = file.name.toLowerCase().match(/\.([a-z0-9]+)$/);
+  return match?.[1] ?? null;
+}
+
+function inferFileKind(file: File): 'photo' | 'video' | null {
+  const mimeType = file.type.toLowerCase();
+
+  if (mimeType.startsWith('image/')) return 'photo';
+  if (mimeType.startsWith('video/')) return 'video';
+
+  const extension = getFileExtension(file);
+  if (!extension) return null;
+
+  const dottedExtension = `.${extension}`;
+  if (IMAGE_EXTENSIONS.includes(dottedExtension)) return 'photo';
+  if (VIDEO_EXTENSIONS.includes(dottedExtension)) return 'video';
+
+  return null;
+}
+
+function getUploadContentType(file: File, type: 'photo' | 'video'): string {
+  const mimeType = file.type.toLowerCase();
+  if (mimeType && mimeType !== 'application/octet-stream') {
+    return file.type;
+  }
+
+  const extension = getFileExtension(file);
+  if (extension && EXTENSION_MIME_TYPE_MAP[extension]) {
+    return EXTENSION_MIME_TYPE_MAP[extension];
+  }
+
+  return type === 'video' ? 'video/mp4' : 'image/jpeg';
 }
 
 interface Props {
@@ -83,16 +154,12 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
       return;
     }
 
-    if (type === 'photo' && !file.type.startsWith('image/')) {
-      toast.error('Nur Bilder sind erlaubt');
-      return;
-    }
-    if (type === 'video' && !file.type.startsWith('video/')) {
-      toast.error('Nur Videos sind erlaubt');
+    const inferredType = inferFileKind(file);
+    if (inferredType && inferredType !== type) {
+      toast.error(type === 'photo' ? 'Nur Bilder sind erlaubt' : 'Nur Videos sind erlaubt');
       return;
     }
 
-    // 100MB limit for videos, 20MB for photos
     const maxSize = type === 'video' ? 100 * 1024 * 1024 : 20 * 1024 * 1024;
     if (file.size > maxSize) {
       toast.error(`Datei zu groß (max. ${type === 'video' ? '100' : '20'} MB)`);
@@ -101,12 +168,15 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
 
     setUploading(type);
     try {
-      const ext = file.name.split('.').pop() || (type === 'video' ? 'mp4' : 'jpg');
+      const ext = getFileExtension(file)
+        ?? MIME_EXTENSION_MAP[file.type.toLowerCase()]
+        ?? (type === 'video' ? 'mp4' : 'jpg');
       const fileName = `${tournamentId}/${matchId || 'ceremony'}/${Date.now()}.${ext}`;
+      const contentType = getUploadContentType(file, type);
 
       const { error: uploadError } = await supabase.storage
         .from('match-photos')
-        .upload(fileName, file);
+        .upload(fileName, file, { contentType });
 
       if (uploadError) throw uploadError;
 
