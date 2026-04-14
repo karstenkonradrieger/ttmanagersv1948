@@ -1,0 +1,1 @@
+ALTER TABLE public.players ADD COLUMN photo_consent boolean NOT NULL DEFAULT false;

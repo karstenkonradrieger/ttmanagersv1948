@@ -199,6 +199,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
       phone: p.phone,
       groupNumber: p.group_number,
       voiceNameUrl: (p as any).voice_name_url || null,
+      photoConsent: (p as any).photo_consent ?? false,
     })),
     matches: (matches || []).map((m: any) => ({
       id: m.id,
@@ -383,6 +384,7 @@ export async function addPlayerToDb(tournamentId: string, player: Omit<Player, '
       house_number: player.houseNumber,
       phone: player.phone,
       voice_name_url: player.voiceNameUrl || null,
+      photo_consent: player.photoConsent ?? false,
     })
     .select()
     .single();
@@ -401,6 +403,7 @@ export async function addPlayerToDb(tournamentId: string, player: Omit<Player, '
     houseNumber: data.house_number,
     phone: data.phone,
     voiceNameUrl: data.voice_name_url || null,
+    photoConsent: (data as any).photo_consent ?? false,
   };
 }
 
@@ -426,6 +429,7 @@ export async function updatePlayerInDb(playerId: string, updates: Partial<Omit<P
   if (updates.houseNumber !== undefined) dbUpdates.house_number = updates.houseNumber;
   if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
   if (updates.voiceNameUrl !== undefined) dbUpdates.voice_name_url = updates.voiceNameUrl;
+  if (updates.photoConsent !== undefined) dbUpdates.photo_consent = updates.photoConsent;
 
   const { error } = await supabase
     .from('players')
