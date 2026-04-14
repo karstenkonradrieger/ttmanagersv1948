@@ -19,6 +19,7 @@ function PhraseRecorderRow({ phrase, onUpload, onRemove }: {
   const [uploading, setUploading] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const importRef = useRef<HTMLInputElement>(null);
 
   const startRecording = async () => {
     try {
@@ -70,6 +71,35 @@ function PhraseRecorderRow({ phrase, onUpload, onRemove }: {
     setUploading(false);
   };
 
+  const handleExportSingle = async () => {
+    if (!phrase.audioUrl) return;
+    try {
+      const resp = await fetch(phrase.audioUrl);
+      if (!resp.ok) throw new Error('Download fehlgeschlagen');
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${phrase.phraseKey}.webm`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error('Fehler beim Herunterladen');
+    }
+  };
+
+  const handleImportSingle = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const result = await onUpload(phrase.id, phrase.phraseKey, file);
+    if (result) {
+      toast.success(`"${phrase.label}" importiert`);
+    }
+    setUploading(false);
+    if (importRef.current) importRef.current.value = '';
+  };
+
   const hasExisting = !!phrase.audioUrl;
   const hasNew = !!previewUrl;
 
@@ -92,6 +122,23 @@ function PhraseRecorderRow({ phrase, onUpload, onRemove }: {
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={playPreview}>
             <Play className="h-3 w-3" />
           </Button>
+        )}
+
+        {/* Export single */}
+        {hasExisting && !hasNew && (
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleExportSingle} title="Einzeln exportieren">
+            <Download className="h-3 w-3" />
+          </Button>
+        )}
+
+        {/* Import single */}
+        {!hasNew && (
+          <>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => importRef.current?.click()} disabled={uploading} title="Datei importieren">
+              {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+            </Button>
+            <input ref={importRef} type="file" accept="audio/*" className="hidden" onChange={handleImportSingle} />
+          </>
         )}
 
         {/* Record */}
