@@ -606,7 +606,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             <Button onClick={() => setStep(2)} disabled={!canProceedStep1} className="w-full">
               Weiter <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-          </div>
+           </div>
+        )}
 
         {step === 2 && (
           <div className="space-y-4 pt-2">
