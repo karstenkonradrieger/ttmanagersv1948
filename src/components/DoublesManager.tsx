@@ -15,7 +15,7 @@ interface Props {
   tournamentId?: string;
 }
 
-export function DoublesManager({ players, doublesPairs, onAddPair, onRemovePair, onAutoGenerate, started, getPlayer }: Props) {
+export function DoublesManager({ players, doublesPairs, onAddPair, onRemovePair, onAutoGenerate, started, getPlayer, tournamentId }: Props) {
   const [player1Id, setPlayer1Id] = useState('');
   const [player2Id, setPlayer2Id] = useState('');
 
