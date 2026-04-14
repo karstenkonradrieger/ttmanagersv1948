@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { RoundRobinStandings } from '@/components/RoundRobinStandings';
+import { SponsorLogos } from '@/components/SponsorLogos';
 import { Loader2 } from 'lucide-react';
 
 const StandingsView = () => {
@@ -35,6 +36,7 @@ const StandingsView = () => {
           getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
           isDoubles={isDoubles}
         />
+        <SponsorLogos sponsors={tournament.sponsors} />
       </div>
     </div>
   );

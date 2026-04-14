@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { LiveDashboard } from '@/components/LiveDashboard';
+import { SponsorLogos } from '@/components/SponsorLogos';
 import { Loader2 } from 'lucide-react';
 
 const LiveView = () => {
@@ -43,8 +44,9 @@ const LiveView = () => {
           players={tournament.players}
           groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? -1) + 1), 0)}
           tournamentDate={tournament.tournamentDate}
-          started={tournament.started}
+         started={tournament.started}
         />
+        <SponsorLogos sponsors={tournament.sponsors} />
       </div>
     </div>
   );
