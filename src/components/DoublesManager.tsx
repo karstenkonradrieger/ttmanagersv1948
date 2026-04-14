@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Player, DoublesPair } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Shuffle, TrendingUp, Plus, Users } from 'lucide-react';
+import { Trash2, Shuffle, TrendingUp, Plus, Users, ExternalLink } from 'lucide-react';
 
 interface Props {
   players: Player[];
@@ -12,9 +12,10 @@ interface Props {
   onAutoGenerate: (method: 'ttr' | 'random') => void;
   started: boolean;
   getPlayer: (id: string | null) => Player | null;
+  tournamentId?: string;
 }
 
-export function DoublesManager({ players, doublesPairs, onAddPair, onRemovePair, onAutoGenerate, started, getPlayer }: Props) {
+export function DoublesManager({ players, doublesPairs, onAddPair, onRemovePair, onAutoGenerate, started, getPlayer, tournamentId }: Props) {
   const [player1Id, setPlayer1Id] = useState('');
   const [player2Id, setPlayer2Id] = useState('');
 
@@ -42,18 +43,26 @@ export function DoublesManager({ players, doublesPairs, onAddPair, onRemovePair,
           <Users className="h-5 w-5 text-primary" />
           Doppelpaare ({doublesPairs.length})
         </h3>
-        {!started && players.length >= 2 && (
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => onAutoGenerate('ttr')} className="gap-1 text-xs">
-              <TrendingUp className="h-3 w-3" />
-              Nach TTR
+        <div className="flex gap-2">
+          {tournamentId && doublesPairs.length > 0 && (
+            <Button variant="outline" size="sm" onClick={() => window.open(`/doubles/${tournamentId}`, '_blank')} className="gap-1 text-xs">
+              <ExternalLink className="h-3 w-3" />
+              Ansicht
             </Button>
-            <Button variant="outline" size="sm" onClick={() => onAutoGenerate('random')} className="gap-1 text-xs">
-              <Shuffle className="h-3 w-3" />
-              Zufällig
-            </Button>
-          </div>
-        )}
+          )}
+          {!started && players.length >= 2 && (
+            <>
+              <Button variant="outline" size="sm" onClick={() => onAutoGenerate('ttr')} className="gap-1 text-xs">
+                <TrendingUp className="h-3 w-3" />
+                Nach TTR
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onAutoGenerate('random')} className="gap-1 text-xs">
+                <Shuffle className="h-3 w-3" />
+                Zufällig
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Manual pair creation */}
