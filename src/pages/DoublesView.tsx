@@ -62,6 +62,8 @@ const DoublesView = () => {
             })}
           </div>
         )}
+
+        <SponsorLogos sponsors={tournament.sponsors} />
       </main>
     </div>
   );
