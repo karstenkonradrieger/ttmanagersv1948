@@ -1,4 +1,4 @@
-import { Player } from '@/types/tournament';
+import { Player, Sponsor } from '@/types/tournament';
 
 const FONT_FAMILY_MAP: Record<string, string> = {
   Helvetica: 'Helvetica, Arial, sans-serif',
@@ -19,10 +19,7 @@ interface Props {
   tournamentDate?: string | null;
   venueString?: string;
   organizerName?: string;
-  sponsorName?: string;
-  sponsorSignatureUrl?: string | null;
-  sponsorLogoUrl?: string | null;
-  sponsorConsent?: boolean;
+  sponsors?: Sponsor[];
   certificateBgUrl?: string | null;
   certificateText: string;
   player: Player;
@@ -47,10 +44,7 @@ export function CertificatePreview({
   tournamentDate,
   venueString,
   organizerName,
-  sponsorName,
-  sponsorSignatureUrl,
-  sponsorLogoUrl,
-  sponsorConsent,
+  sponsors = [],
   certificateBgUrl,
   certificateText,
   player,
@@ -67,8 +61,6 @@ export function CertificatePreview({
     ? new Date(tournamentDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
     : new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
 
-  const hasSponsorSection = (sponsorConsent && sponsorSignatureUrl && sponsorName) || (sponsorName && sponsorLogoUrl);
-
   const resolvedText = resolvePlaceholders(certificateText, {
     turniername: tournamentName,
     spieler: player.name,
@@ -77,10 +69,9 @@ export function CertificatePreview({
   });
 
   const textLines = resolvedText.split('\n').filter(l => l.trim());
-
-  // Muted color derived from textColor with reduced opacity
-  const mutedColor = textColor + '99';
   const subtleColor = textColor + '70';
+
+  const visibleSponsors = hiddenFields.includes('sponsor') ? [] : sponsors.filter(s => s.name);
 
   return (
     <div
@@ -130,31 +121,26 @@ export function CertificatePreview({
         </div>
 
         <div className="w-full flex items-end justify-center gap-8 mt-4">
-          {!hiddenFields.includes('sponsor') && hasSponsorSection && (
+          {visibleSponsors.length > 0 && (
             <div className="flex flex-col items-center gap-1">
-              {sponsorConsent && sponsorSignatureUrl && (
-                <img
-                  src={sponsorSignatureUrl}
-                  alt="Unterschrift"
-                  className="max-h-8 object-contain"
-                  crossOrigin="anonymous"
-                />
-              )}
-              <div className="w-20 border-t" style={{ borderColor: subtleColor }} />
-              <div className="flex items-center gap-1">
-                {sponsorLogoUrl && (
-                  <img
-                    src={sponsorLogoUrl}
-                    alt="Sponsor"
-                    className="max-h-4 object-contain"
-                    crossOrigin="anonymous"
-                  />
-                )}
-                {sponsorName && (
-                  <span style={{ color: textColor, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>{sponsorName}</span>
-                )}
+              <div className="flex items-center gap-2 flex-wrap justify-center">
+                {visibleSponsors.map((sponsor) => (
+                  <div key={sponsor.id} className="flex items-center gap-1">
+                    {sponsor.logoUrl && (
+                      <img
+                        src={sponsor.logoUrl}
+                        alt={sponsor.name}
+                        className="max-h-4 object-contain"
+                        crossOrigin="anonymous"
+                      />
+                    )}
+                    <span style={{ color: textColor, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>{sponsor.name}</span>
+                  </div>
+                ))}
               </div>
-              <span style={{ color: textColor, opacity: 0.7, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>Sponsor</span>
+              <span style={{ color: textColor, opacity: 0.7, fontSize: `${Math.max(5, (extraSizes.sponsor ?? 8) * 0.55)}px` }}>
+                {visibleSponsors.length === 1 ? 'Sponsor' : 'Sponsoren'}
+              </span>
             </div>
           )}
 

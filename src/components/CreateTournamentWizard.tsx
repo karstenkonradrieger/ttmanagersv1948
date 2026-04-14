@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Plus, Loader2, ArrowLeft, ArrowRight, Upload, X, MapPin, ImagePlus, PenTool } from 'lucide-react';
+import { Plus, Loader2, ArrowLeft, ArrowRight, Upload, X, MapPin, ImagePlus } from 'lucide-react';
 import { TournamentMode, TournamentType, TeamMode } from '@/types/tournament';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -29,10 +29,6 @@ interface WizardData {
   certificateTextColor: string;
   certificateFontBold: boolean;
   organizerName: string;
-  sponsorName: string;
-  sponsorSignatureUrl: string | null;
-  sponsorLogoUrl: string | null;
-  sponsorConsent: boolean;
   type: TournamentType;
   teamMode: TeamMode;
   mode: TournamentMode;
@@ -78,10 +74,6 @@ interface Props {
       logo_url?: string | null;
       certificate_text?: string;
       organizer_name?: string;
-      sponsor_name?: string;
-      sponsor_signature_url?: string | null;
-      sponsor_logo_url?: string | null;
-      sponsor_consent?: boolean;
       certificate_bg_url?: string | null;
       certificate_font_family?: string;
       certificate_font_size?: number;
@@ -97,14 +89,10 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
   const [creating, setCreating] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [uploadingSignature, setUploadingSignature] = useState(false);
-  const [uploadingSponsorLogo, setUploadingSponsorLogo] = useState(false);
   const [uploadingCertBg, setUploadingCertBg] = useState(false);
   const [customSport, setCustomSport] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
-  const signatureInputRef = useRef<HTMLInputElement>(null);
-  const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
   const certBgInputRef = useRef<HTMLInputElement>(null);
 
   const [data, setData] = useState<WizardData>({
@@ -126,10 +114,6 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     certificateTextColor: '#1e1e1e',
     certificateFontBold: false,
     organizerName: '',
-    sponsorName: '',
-    sponsorSignatureUrl: null,
-    sponsorLogoUrl: null,
-    sponsorConsent: false,
     type: 'singles',
     teamMode: 'bundessystem',
     mode: 'knockout',
@@ -160,10 +144,6 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
         certificateTextColor: '#1e1e1e',
         certificateFontBold: false,
         organizerName: '',
-        sponsorName: '',
-        sponsorSignatureUrl: null,
-        sponsorLogoUrl: null,
-        sponsorConsent: false,
         type: 'singles',
         teamMode: 'bundessystem',
         mode: 'knockout',
@@ -244,71 +224,6 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     update({ logoUrl: null });
   };
 
-  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast.error('Bitte nur Bilddateien hochladen');
-      return;
-    }
-    setUploadingSignature(true);
-    try {
-      const ext = file.name.split('.').pop();
-      const fileName = `sig-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('signatures').upload(fileName, file, { upsert: true });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from('signatures').getPublicUrl(fileName);
-      update({ sponsorSignatureUrl: urlData.publicUrl });
-      toast.success('Unterschrift hochgeladen');
-    } catch {
-      toast.error('Fehler beim Hochladen');
-    } finally {
-      setUploadingSignature(false);
-      if (signatureInputRef.current) signatureInputRef.current.value = '';
-    }
-  };
-
-  const removeSignature = async () => {
-    if (data.sponsorSignatureUrl) {
-      const parts = data.sponsorSignatureUrl.split('/');
-      const fileName = parts[parts.length - 1];
-      await supabase.storage.from('signatures').remove([fileName]);
-    }
-    update({ sponsorSignatureUrl: null });
-  };
-
-  const handleSponsorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast.error('Bitte nur Bilddateien hochladen');
-      return;
-    }
-    setUploadingSponsorLogo(true);
-    try {
-      const ext = file.name.split('.').pop();
-      const fileName = `sponsor-logo-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('logos').upload(fileName, file, { upsert: true });
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
-      update({ sponsorLogoUrl: urlData.publicUrl });
-      toast.success('Sponsor-Logo hochgeladen');
-    } catch {
-      toast.error('Fehler beim Hochladen');
-    } finally {
-      setUploadingSponsorLogo(false);
-      if (sponsorLogoInputRef.current) sponsorLogoInputRef.current.value = '';
-    }
-  };
-
-  const removeSponsorLogo = async () => {
-    if (data.sponsorLogoUrl) {
-      const parts = data.sponsorLogoUrl.split('/');
-      const fileName = parts[parts.length - 1];
-      await supabase.storage.from('logos').remove([fileName]);
-    }
-    update({ sponsorLogoUrl: null });
-  };
 
   const handleCertBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -369,10 +284,6 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           logo_url: data.logoUrl || null,
           certificate_text: data.certificateText,
           organizer_name: data.organizerName,
-          sponsor_name: data.sponsorName,
-          sponsor_signature_url: data.sponsorSignatureUrl,
-          sponsor_logo_url: data.sponsorLogoUrl,
-          sponsor_consent: data.sponsorConsent,
           certificate_bg_url: data.certificateBgUrl,
           certificate_font_family: data.certificateFontFamily,
           certificate_font_size: data.certificateFontSize,
@@ -690,86 +601,14 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               />
             </div>
 
-            {/* Sponsor */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Sponsor</Label>
-              <Input
-                placeholder="Name des Sponsors"
-                value={data.sponsorName}
-                onChange={e => update({ sponsorName: e.target.value })}
-              />
-            </div>
-
-            {/* Sponsor Signature */}
-            {data.sponsorName && (
-              <div>
-                <Label className="text-sm font-semibold mb-1 block">
-                  <PenTool className="inline h-4 w-4 mr-1" />
-                  Unterschrift des Sponsors
-                </Label>
-                {data.sponsorSignatureUrl ? (
-                  <div className="flex items-center gap-2">
-                    <img src={data.sponsorSignatureUrl} alt="Unterschrift" className="h-12 border border-border rounded p-1" />
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeSignature}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div>
-                    <input ref={signatureInputRef} type="file" accept="image/*" className="hidden" onChange={handleSignatureUpload} />
-                    <Button variant="outline" size="sm" onClick={() => signatureInputRef.current?.click()} disabled={uploadingSignature}>
-                      {uploadingSignature ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                      Unterschrift hochladen
-                    </Button>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 mt-2">
-                  <input
-                    type="checkbox"
-                    id="wiz-sponsor-consent"
-                    checked={data.sponsorConsent}
-                    onChange={e => update({ sponsorConsent: e.target.checked })}
-                    className="rounded border-border"
-                  />
-                  <Label htmlFor="wiz-sponsor-consent" className="text-xs text-muted-foreground cursor-pointer">
-                    Der Sponsor stimmt der Veröffentlichung seiner Unterschrift auf der Urkunde zu
-                  </Label>
-                </div>
-              </div>
-            )}
+            <p className="text-xs text-muted-foreground">Sponsoren können nach dem Erstellen in den Turniereinstellungen hinzugefügt werden.</p>
 
             <Button onClick={() => setStep(2)} disabled={!canProceedStep1} className="w-full">
               Weiter <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-          </div>
-            )}
+           </div>
+        )}
 
-            {/* Sponsor Logo */}
-            {data.sponsorName && (
-              <div>
-                <Label className="text-sm font-semibold mb-1 block">
-                  <ImagePlus className="inline h-4 w-4 mr-1" />
-                  Logo des Sponsors
-                </Label>
-                {data.sponsorLogoUrl ? (
-                  <div className="flex items-center gap-2">
-                    <img src={data.sponsorLogoUrl} alt="Sponsor-Logo" className="h-12 border border-border rounded p-1 object-contain" />
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeSponsorLogo}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div>
-                    <input ref={sponsorLogoInputRef} type="file" accept="image/*" className="hidden" onChange={handleSponsorLogoUpload} />
-                    <Button variant="outline" size="sm" onClick={() => sponsorLogoInputRef.current?.click()} disabled={uploadingSponsorLogo}>
-                      {uploadingSponsorLogo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                      Logo hochladen
-                    </Button>
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">Wird auf der Siegerurkunde neben dem Sponsornamen angezeigt</p>
-              </div>
-            )}
         {step === 2 && (
           <div className="space-y-4 pt-2">
             {/* Tournament Type */}

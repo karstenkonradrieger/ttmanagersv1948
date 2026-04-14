@@ -140,9 +140,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
   const [localHiddenFields, setLocalHiddenFields] = useState<string[]>(certificateHiddenFields);
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
-  // Derive first sponsor for certificate display (backward compat)
-  const sponsorName = sponsors[0]?.name || '';
-  const sponsorLogoUrl = sponsors[0]?.logoUrl || null;
+  // Visible sponsors for certificate
+  const visibleSponsors = sponsors.filter(s => s.name);
 
   // Sync local state when props change (e.g. after DB load)
   useEffect(() => {
@@ -574,30 +573,30 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
     }
 
-    // Pre-load sponsor logo if available
-    let sponsorLogoData: string | null = null;
-    let sponsorLogoW = 0;
-    let sponsorLogoH = 0;
-    if (sponsorLogoUrl && sponsorName) {
-      try {
-        const slImg = new Image();
-        slImg.crossOrigin = 'anonymous';
-        await new Promise<void>((resolve, reject) => {
-          slImg.onload = () => resolve();
-          slImg.onerror = () => reject();
-          slImg.src = sponsorLogoUrl;
-        });
-        const slCanvas = document.createElement('canvas');
-        slCanvas.width = slImg.naturalWidth;
-        slCanvas.height = slImg.naturalHeight;
-        slCanvas.getContext('2d')!.drawImage(slImg, 0, 0);
-        sponsorLogoData = slCanvas.toDataURL('image/png');
-        const slMaxH = 16;
-        const slRatio = slImg.naturalWidth / slImg.naturalHeight;
-        sponsorLogoH = slMaxH;
-        sponsorLogoW = slMaxH * slRatio;
-      } catch {
-        // ignore
+    // Pre-load sponsor logos
+    const sponsorLogos: Array<{ name: string; data: string; w: number; h: number }> = [];
+    for (const sponsor of visibleSponsors) {
+      if (sponsor.logoUrl) {
+        try {
+          const slImg = new Image();
+          slImg.crossOrigin = 'anonymous';
+          await new Promise<void>((resolve, reject) => {
+            slImg.onload = () => resolve();
+            slImg.onerror = () => reject();
+            slImg.src = sponsor.logoUrl!;
+          });
+          const slCanvas = document.createElement('canvas');
+          slCanvas.width = slImg.naturalWidth;
+          slCanvas.height = slImg.naturalHeight;
+          slCanvas.getContext('2d')!.drawImage(slImg, 0, 0);
+          const slMaxH = 16;
+          const slRatio = slImg.naturalWidth / slImg.naturalHeight;
+          sponsorLogos.push({ name: sponsor.name, data: slCanvas.toDataURL('image/png'), w: slMaxH * slRatio, h: slMaxH });
+        } catch {
+          sponsorLogos.push({ name: sponsor.name, data: '', w: 0, h: 0 });
+        }
+      } else {
+        sponsorLogos.push({ name: sponsor.name, data: '', w: 0, h: 0 });
       }
     }
 
@@ -745,32 +744,32 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       }
 
       // Footer / Signature area
-      const hasSponsorSection = (!certificateHiddenFields.includes('sponsor')) &&
-        ((false) || (sponsorName && sponsorLogoData));
+      const hasSponsorSection = (!certificateHiddenFields.includes('sponsor')) && sponsorLogos.length > 0;
 
       doc.setDrawColor(...mutedRgb);
       doc.setLineWidth(0.5);
 
       // Sponsor section (left)
       if (hasSponsorSection) {
-        if (false) {
-          doc.addImage(sigData, 'PNG', w / 4 - sigWidth / 2, sigY - sigHeight - 2, sigWidth, sigHeight);
-        }
         doc.line(w / 4 - 40, sigY, w / 4 + 40, sigY);
         const sponsorSize = certificateExtraSizes.sponsor ?? 8;
         doc.setFontSize(sponsorSize);
         doc.setTextColor(tr, tg, tb);
-        if (sponsorLogoData && sponsorName) {
-          const totalW = sponsorLogoW + 2 + doc.getTextWidth(sponsorName);
-          const startX = w / 4 - totalW / 2;
-          doc.addImage(sponsorLogoData, 'PNG', startX, sigY + 2, sponsorLogoW, sponsorLogoH);
-          doc.text(sponsorName, startX + sponsorLogoW + 2, sigY + 7);
-        } else if (sponsorName) {
-          doc.text(sponsorName, w / 4, sigY + 7, { align: 'center' });
+        let sponsorTextY = sigY + 4;
+        for (const sl of sponsorLogos) {
+          if (sl.data) {
+            const totalW = sl.w + 2 + doc.getTextWidth(sl.name);
+            const startX = w / 4 - totalW / 2;
+            doc.addImage(sl.data, 'PNG', startX, sponsorTextY, sl.w, sl.h);
+            doc.text(sl.name, startX + sl.w + 2, sponsorTextY + sl.h * 0.7);
+          } else {
+            doc.text(sl.name, w / 4, sponsorTextY + 4, { align: 'center' });
+          }
+          sponsorTextY += Math.max(sl.h, 6) + 2;
         }
         doc.setFontSize(Math.max(6, sponsorSize * 0.8));
         doc.setTextColor(...mutedRgb);
-        doc.text('Sponsor', w / 4, sigY + (sponsorLogoData ? sponsorLogoH + 5 : 13), { align: 'center' });
+        doc.text(sponsorLogos.length === 1 ? 'Sponsor' : 'Sponsoren', w / 4, sponsorTextY + 2, { align: 'center' });
       }
 
       // Organizer / Turnierleitung (right or center)
@@ -1224,7 +1223,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       { key: 'motto', label: 'Motto', value: localMotto, setter: setLocalMotto },
                       { key: 'venue', label: 'Austragungsort', value: localVenue, setter: setLocalVenue },
                       { key: 'organizer', label: 'Veranstalter', value: localOrganizer, setter: setLocalOrganizer },
-                      { key: 'sponsor', label: 'Sponsor', value: sponsorName, setter: (() => {}) },
+                      { key: 'sponsor', label: 'Sponsoren', value: sponsors.map(s => s.name).join(', '), setter: (() => {}) },
                     ].map(field => (
                       <div key={field.key} className="space-y-1">
                         <div className="flex items-center gap-2">
@@ -1274,10 +1273,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     tournamentDate={tournamentDate}
                     venueString={localVenue}
                     organizerName={localOrganizer}
-                    sponsorName={sponsorName}
-                    null={null}
-                    sponsorLogoUrl={sponsorLogoUrl}
-                    false={false}
+                    sponsors={sponsors}
                     certificateBgUrl={certificateBgUrl}
                     certificateText={localCertText}
                     player={current.player}
@@ -1305,7 +1301,6 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       certificateHiddenFields: localHiddenFields,
                       motto: localMotto,
                       venueString: localVenue,
-                      organizerName: localOrganizer,
                       organizerName: localOrganizer,
                     });
                     setHasPendingChanges(false);
