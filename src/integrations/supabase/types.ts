@@ -438,6 +438,7 @@ export type Database = {
           id: string
           name: string
           phone: string
+          photo_consent: boolean
           postal_code: string
           street: string
           tournament_id: string
@@ -455,6 +456,7 @@ export type Database = {
           id?: string
           name: string
           phone?: string
+          photo_consent?: boolean
           postal_code?: string
           street?: string
           tournament_id: string
@@ -472,6 +474,7 @@ export type Database = {
           id?: string
           name?: string
           phone?: string
+          photo_consent?: boolean
           postal_code?: string
           street?: string
           tournament_id?: string
