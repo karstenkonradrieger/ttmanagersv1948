@@ -50,16 +50,19 @@ export function DoublesManager({ players, doublesPairs, onAddPair, onRemovePair,
               Ansicht
             </Button>
           )}
-            <Button variant="outline" size="sm" onClick={() => onAutoGenerate('ttr')} className="gap-1 text-xs">
-              <TrendingUp className="h-3 w-3" />
-              Nach TTR
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => onAutoGenerate('random')} className="gap-1 text-xs">
-              <Shuffle className="h-3 w-3" />
-              Zufällig
-            </Button>
-          </div>
-        )}
+          {!started && players.length >= 2 && (
+            <>
+              <Button variant="outline" size="sm" onClick={() => onAutoGenerate('ttr')} className="gap-1 text-xs">
+                <TrendingUp className="h-3 w-3" />
+                Nach TTR
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onAutoGenerate('random')} className="gap-1 text-xs">
+                <Shuffle className="h-3 w-3" />
+                Zufällig
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Manual pair creation */}
