@@ -89,14 +89,10 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
   const [creating, setCreating] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [uploadingSignature, setUploadingSignature] = useState(false);
-  const [uploadingSponsorLogo, setUploadingSponsorLogo] = useState(false);
   const [uploadingCertBg, setUploadingCertBg] = useState(false);
   const [customSport, setCustomSport] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
-  const signatureInputRef = useRef<HTMLInputElement>(null);
-  const sponsorLogoInputRef = useRef<HTMLInputElement>(null);
   const certBgInputRef = useRef<HTMLInputElement>(null);
 
   const [data, setData] = useState<WizardData>({
@@ -118,10 +114,6 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     certificateTextColor: '#1e1e1e',
     certificateFontBold: false,
     organizerName: '',
-    sponsorName: '',
-    sponsorSignatureUrl: null,
-    sponsorLogoUrl: null,
-    sponsorConsent: false,
     type: 'singles',
     teamMode: 'bundessystem',
     mode: 'knockout',
@@ -152,10 +144,6 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
         certificateTextColor: '#1e1e1e',
         certificateFontBold: false,
         organizerName: '',
-        sponsorName: '',
-        sponsorSignatureUrl: null,
-        sponsorLogoUrl: null,
-        sponsorConsent: false,
         type: 'singles',
         teamMode: 'bundessystem',
         mode: 'knockout',
