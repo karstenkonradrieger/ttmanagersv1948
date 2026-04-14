@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { Loader2, Users } from 'lucide-react';
+import { SponsorLogos } from '@/components/SponsorLogos';
 
 const DoublesView = () => {
   const { id } = useParams<{ id: string }>();
@@ -61,6 +62,8 @@ const DoublesView = () => {
             })}
           </div>
         )}
+
+        <SponsorLogos sponsors={tournament.sponsors} />
       </main>
     </div>
   );
