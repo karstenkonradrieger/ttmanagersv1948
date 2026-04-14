@@ -61,9 +61,10 @@ export function printRefereeSheet({ match, player1Name, player2Name, tournamentN
   const tableY = yPlayers + 16;
   const rowH = 10;
   const tableX = 10;
-  const nameColW = 65;
   const resultColW = 16;
-  const setColW = (w - 20 - nameColW - resultColW) / maxSets;
+  const baseSetColW = (w - 20 - 65 - resultColW) / maxSets;
+  const setColW = baseSetColW * 0.8;
+  const nameColW = w - 20 - resultColW - maxSets * setColW;
 
   // Header row
   doc.setFontSize(8);
