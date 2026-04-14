@@ -197,9 +197,10 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
 
       toast.success(type === 'video' ? 'Video hochgeladen' : 'Foto hochgeladen');
       fetchMedia();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading:', error);
-      toast.error('Fehler beim Hochladen');
+      const msg = error?.message || error?.error_description || String(error);
+      toast.error(`Fehler beim Hochladen: ${msg}`);
     } finally {
       setUploading(null);
       if (photoInputRef.current) photoInputRef.current.value = '';
