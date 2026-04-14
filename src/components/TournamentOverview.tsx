@@ -1224,7 +1224,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       { key: 'motto', label: 'Motto', value: localMotto, setter: setLocalMotto },
                       { key: 'venue', label: 'Austragungsort', value: localVenue, setter: setLocalVenue },
                       { key: 'organizer', label: 'Veranstalter', value: localOrganizer, setter: setLocalOrganizer },
-                      { key: 'sponsor', label: 'Sponsor', value: sponsorName, setter: (() => {}) },
+                      { key: 'sponsor', label: 'Sponsoren', value: sponsors.map(s => s.name).join(', '), setter: (() => {}) },
                     ].map(field => (
                       <div key={field.key} className="space-y-1">
                         <div className="flex items-center gap-2">
