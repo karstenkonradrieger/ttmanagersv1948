@@ -685,7 +685,8 @@ const Index = () => {
                   logoUrl={tournament.logoUrl}
                   tournamentDate={tournament.tournamentDate}
                   venueString={venueString}
-                  motto={tournament.motto}
+                   motto={tournament.motto}
+                   sponsors={tournament.sponsors}
                    isHandicap={isHandicap}
                    players={tournament.players}
                    doublesPairs={tournament.doublesPairs}
