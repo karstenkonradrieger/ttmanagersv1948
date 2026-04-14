@@ -27,8 +27,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    console.warn("Auth bypassed for local environment!");
-    // return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth" replace />;
   }
   return <>{children}</>;
 }
