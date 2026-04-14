@@ -140,9 +140,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
   const [localHiddenFields, setLocalHiddenFields] = useState<string[]>(certificateHiddenFields);
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
-  // Derive first sponsor for certificate display (backward compat)
-  const sponsorName = sponsors[0]?.name || '';
-  const sponsorLogoUrl = sponsors[0]?.logoUrl || null;
+  // Visible sponsors for certificate
+  const visibleSponsors = sponsors.filter(s => s.name);
 
   // Sync local state when props change (e.g. after DB load)
   useEffect(() => {
