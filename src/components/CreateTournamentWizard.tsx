@@ -601,87 +601,13 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               />
             </div>
 
-            {/* Sponsor */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Sponsor</Label>
-              <Input
-                placeholder="Name des Sponsors"
-                value={data.sponsorName}
-                onChange={e => update({ sponsorName: e.target.value })}
-              />
-            </div>
-
-            {/* Sponsor Signature */}
-            {data.sponsorName && (
-              <div>
-                <Label className="text-sm font-semibold mb-1 block">
-                  <PenTool className="inline h-4 w-4 mr-1" />
-                  Unterschrift des Sponsors
-                </Label>
-                {data.sponsorSignatureUrl ? (
-                  <div className="flex items-center gap-2">
-                    <img src={data.sponsorSignatureUrl} alt="Unterschrift" className="h-12 border border-border rounded p-1" />
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeSignature}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div>
-                    <input ref={signatureInputRef} type="file" accept="image/*" className="hidden" onChange={handleSignatureUpload} />
-                    <Button variant="outline" size="sm" onClick={() => signatureInputRef.current?.click()} disabled={uploadingSignature}>
-                      {uploadingSignature ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                      Unterschrift hochladen
-                    </Button>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 mt-2">
-                  <input
-                    type="checkbox"
-                    id="wiz-sponsor-consent"
-                    checked={data.sponsorConsent}
-                    onChange={e => update({ sponsorConsent: e.target.checked })}
-                    className="rounded border-border"
-                  />
-                  <Label htmlFor="wiz-sponsor-consent" className="text-xs text-muted-foreground cursor-pointer">
-                    Der Sponsor stimmt der Veröffentlichung seiner Unterschrift auf der Urkunde zu
-                  </Label>
-                </div>
-              </div>
-            )}
+            <p className="text-xs text-muted-foreground">Sponsoren können nach dem Erstellen in den Turniereinstellungen hinzugefügt werden.</p>
 
             <Button onClick={() => setStep(2)} disabled={!canProceedStep1} className="w-full">
               Weiter <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
             )}
-
-            {/* Sponsor Logo */}
-            {data.sponsorName && (
-              <div>
-                <Label className="text-sm font-semibold mb-1 block">
-                  <ImagePlus className="inline h-4 w-4 mr-1" />
-                  Logo des Sponsors
-                </Label>
-                {data.sponsorLogoUrl ? (
-                  <div className="flex items-center gap-2">
-                    <img src={data.sponsorLogoUrl} alt="Sponsor-Logo" className="h-12 border border-border rounded p-1 object-contain" />
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeSponsorLogo}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div>
-                    <input ref={sponsorLogoInputRef} type="file" accept="image/*" className="hidden" onChange={handleSponsorLogoUpload} />
-                    <Button variant="outline" size="sm" onClick={() => sponsorLogoInputRef.current?.click()} disabled={uploadingSponsorLogo}>
-                      {uploadingSponsorLogo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                      Logo hochladen
-                    </Button>
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">Wird auf der Siegerurkunde neben dem Sponsornamen angezeigt</p>
-              </div>
-            )}
-        {step === 2 && (
           <div className="space-y-4 pt-2">
             {/* Tournament Type */}
             <div>
