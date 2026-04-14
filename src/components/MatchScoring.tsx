@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { DoublesPair, Match, Player, SetScore, getHandicap } from '@/types/tournament';
+import { DoublesPair, Match, Player, SetScore, Sponsor, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,6 +28,7 @@ interface Props {
   tournamentDate?: string | null;
   venueString?: string;
   motto?: string;
+  sponsors?: Sponsor[];
   isHandicap?: boolean;
   players?: Player[];
   doublesPairs?: DoublesPair[];

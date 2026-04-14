@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
-import { Match, Player, SetScore } from '@/types/tournament';
+import { Match, Player, SetScore, Sponsor } from '@/types/tournament';
 
 function getSetWins(sets: SetScore[]): { p1: number; p2: number } {
   let p1 = 0, p2 = 0;
@@ -42,6 +42,7 @@ interface MatchReportOptions {
   tournamentDate?: string | null;
   venueString?: string;
   motto?: string;
+  sponsors?: Sponsor[];
 }
 
 export async function generateMatchReport({
@@ -56,6 +57,7 @@ export async function generateMatchReport({
   tournamentDate,
   venueString,
   motto,
+  sponsors = [],
 }: MatchReportOptions) {
   const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
   const w = doc.internal.pageSize.getWidth();
@@ -252,6 +254,34 @@ export async function generateMatchReport({
         doc.addImage(imgData, 'JPEG', x, y, photoW, photoH);
         y += photoH + gap;
       });
+    }
+  }
+
+  // Sponsor logos
+  const sponsorsWithLogo = sponsors.filter(s => s.logoUrl);
+  if (sponsorsWithLogo.length > 0) {
+    const sponsorImages: Array<{ data: string; name: string }> = [];
+    for (const s of sponsorsWithLogo) {
+      const imgData = await loadImage(s.logoUrl!);
+      if (imgData) sponsorImages.push({ data: imgData, name: s.name });
+    }
+    if (sponsorImages.length > 0) {
+      const footerY = pageH - 18;
+      doc.setDrawColor(220);
+      doc.setLineWidth(0.2);
+      doc.line(10, footerY - 2, w - 10, footerY - 2);
+      doc.setFontSize(5);
+      doc.setTextColor(160);
+      doc.text('Sponsoren', w / 2, footerY + 1, { align: 'center' });
+
+      const logoH = 8;
+      const gap = 6;
+      const totalW = sponsorImages.length * 28 + (sponsorImages.length - 1) * gap;
+      let lx = (w - totalW) / 2;
+      for (const si of sponsorImages) {
+        doc.addImage(si.data, 'JPEG', lx, footerY + 2, 28, logoH);
+        lx += 28 + gap;
+      }
     }
   }
 
