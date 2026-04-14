@@ -607,7 +607,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               Weiter <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
-            )}
+
+        {step === 2 && (
           <div className="space-y-4 pt-2">
             {/* Tournament Type */}
             <div>
