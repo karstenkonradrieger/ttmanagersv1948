@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Player, DoublesPair } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Shuffle, TrendingUp, Plus, Users } from 'lucide-react';
+import { Trash2, Shuffle, TrendingUp, Plus, Users, ExternalLink } from 'lucide-react';
 
 interface Props {
   players: Player[];
