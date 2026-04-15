@@ -893,59 +893,21 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                 const isBye = !m.player2Id && m.player1Id;
 
                 return (
-                  <div
+                  <OverviewMatchRow
                     key={m.id}
-                    className={`bg-card rounded-lg p-3 card-shadow border-l-4 ${
-                      m.status === 'completed'
-                        ? 'border-l-primary'
-                        : m.status === 'active'
-                        ? 'border-l-yellow-500'
-                        : 'border-l-muted'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className={`font-semibold ${m.winnerId === m.player1Id ? 'text-primary' : ''}`}>
-                            {p1?.name || 'TBD'}
-                          </span>
-                          <span className="text-muted-foreground">vs</span>
-                          <span className={`font-semibold ${m.winnerId === m.player2Id ? 'text-primary' : ''}`}>
-                            {isBye ? 'Freilos' : (p2?.name || 'TBD')}
-                          </span>
-                        </div>
-
-                        {m.sets.length > 0 && !isBye && (
-                          <div className="mt-1 flex items-center gap-2">
-                            <span className="text-xs font-bold text-primary">{wins.p1}:{wins.p2}</span>
-                            <span className="text-xs text-muted-foreground">
-                              ({formatSets(m.sets)})
-                            </span>
-                            {wasUpgradedBestOf(m, bestOf) && (
-                              <span className="text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded font-semibold">
-                                Bo5
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        {isBye && (
-                          <p className="text-xs text-muted-foreground mt-1">Freilos</p>
-                        )}
-                      </div>
-
-                      <div className="text-right flex-shrink-0 ml-3">
-                        {winner && !isBye && (
-                          <span className="text-xs font-bold text-primary">🏆 {winner.name}</span>
-                        )}
-                        {m.status === 'active' && (
-                          <span className="text-xs font-semibold text-yellow-500">▶ Live</span>
-                        )}
-                        {m.status === 'pending' && !isBye && (
-                          <span className="text-xs text-muted-foreground">Ausstehend</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                    match={m}
+                    getPlayer={getPlayer}
+                    bestOf={bestOf}
+                    mode={mode}
+                    rounds={rounds}
+                    isEditing={editingMatchId === m.id}
+                    onStartEdit={() => setEditingMatchId(m.id)}
+                    onCancelEdit={() => setEditingMatchId(null)}
+                    onUpdateScore={onUpdateScore ? (sets, ebo) => {
+                      onUpdateScore(m.id, sets, ebo);
+                      setEditingMatchId(null);
+                    } : undefined}
+                  />
                 );
               })}
             </div>
