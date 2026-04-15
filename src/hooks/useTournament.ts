@@ -238,9 +238,10 @@ export function useTournament() {
         if (!activeTables.has(i)) freeTables.push(i);
       }
       
+      // Sort pending matches by earliest availability (no break tracking in local mode)
       const pendingReadyMatches = prev.matches.filter(
         m => m.status === 'pending' && m.player1Id && m.player2Id
-      );
+      ).sort((a, b) => (a.round - b.round) || (a.position - b.position));
       
       const updatedMatches = [...prev.matches];
       let tableIdx = 0;

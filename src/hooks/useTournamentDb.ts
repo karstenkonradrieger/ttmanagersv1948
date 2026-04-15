@@ -927,21 +927,18 @@ export function useTournamentDb(tournamentId: string | null) {
       }
     });
 
-    // Collect players with active delay (tournament not started long enough for them)
+    // Determine tournament start time for delay calculations
+    let tournamentStartTime: number | null = null;
     const delayedPlayers = new Set<string>();
     if (tournament.started) {
-      // Find the earliest active/completed match to determine tournament start time
       const allStartedMatches = tournament.matches.filter(m => m.status === 'active' || m.status === 'completed');
-      let tournamentStartTime: number | null = null;
       for (const m of allStartedMatches) {
         if (m.completedAt) {
           const t = new Date(m.completedAt).getTime();
           if (!tournamentStartTime || t < tournamentStartTime) tournamentStartTime = t;
         }
       }
-      // If no completed match yet, use first active match assignment as approximate start
       if (!tournamentStartTime) {
-        // Fallback: treat "now" as start, so delay is measured from now
         tournamentStartTime = now;
       }
 
@@ -955,9 +952,41 @@ export function useTournamentDb(tournamentId: string | null) {
 
     const unavailablePlayers = new Set([...activePlayers, ...recentPlayers, ...delayedPlayers]);
 
-    const pendingReadyMatches = tournament.matches.filter(
-      m => m.status === 'pending' && m.player1Id && m.player2Id
-    );
+    // Calculate remaining wait time per player (break or delay)
+    const playerWaitUntil = new Map<string, number>();
+    tournament.matches.filter(m => m.status === 'completed' && m.completedAt).forEach(m => {
+      const completedTime = new Date(m.completedAt!).getTime();
+      const readyAt = completedTime + PAUSE_MS;
+      if (readyAt > now) {
+        for (const pid of [m.player1Id, m.player2Id]) {
+          if (pid) {
+            const prev = playerWaitUntil.get(pid) ?? 0;
+            if (readyAt > prev) playerWaitUntil.set(pid, readyAt);
+          }
+        }
+      }
+    });
+    // Include delay-based wait times
+    if (tournament.started && tournamentStartTime) {
+      for (const player of tournament.players) {
+        const delayMs = (player.delayMinutes ?? 0) * 60 * 1000;
+        if (delayMs > 0) {
+          const readyAt = tournamentStartTime + delayMs;
+          if (readyAt > now) {
+            const prev = playerWaitUntil.get(player.id) ?? 0;
+            if (readyAt > prev) playerWaitUntil.set(player.id, readyAt);
+          }
+        }
+      }
+    }
+
+    const pendingReadyMatches = tournament.matches
+      .filter(m => m.status === 'pending' && m.player1Id && m.player2Id)
+      .sort((a, b) => {
+        const waitA = Math.max(playerWaitUntil.get(a.player1Id!) ?? 0, playerWaitUntil.get(a.player2Id!) ?? 0);
+        const waitB = Math.max(playerWaitUntil.get(b.player1Id!) ?? 0, playerWaitUntil.get(b.player2Id!) ?? 0);
+        return waitA - waitB;
+      });
 
     const updates: Array<{ id: string; table: number }> = [];
     // Track players being assigned in this batch to avoid double-booking
