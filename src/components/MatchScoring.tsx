@@ -385,7 +385,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
       {completedMatches.length > 0 && (
         <Section title="✅ Abgeschlossene Spiele">
           {completedMatches.map(m => (
-            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} motto={motto} mode={mode} sponsors={sponsors} />
+            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} motto={motto} mode={mode} sponsors={sponsors} onUpdateScore={onUpdateScore} getParticipantName={getParticipantName} isHandicap={isHandicap} players={players} />
           ))}
         </Section>
       )}
@@ -747,7 +747,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
   );
 }
 
-function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf, rounds, logoUrl, tournamentDate, venueString, motto, mode, sponsors = [] }: {
+function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf, rounds, logoUrl, tournamentDate, venueString, motto, mode, sponsors = [], onUpdateScore, getParticipantName, isHandicap, players = [] }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   tournamentId: string;
@@ -760,12 +760,17 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
   motto?: string;
   mode?: string;
   sponsors?: Sponsor[];
+  onUpdateScore: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
+  getParticipantName: (id: string | null) => string;
+  isHandicap?: boolean;
+  players?: Player[];
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
   const p1Wins = match.sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
   const p2Wins = match.sets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
   const winner = getPlayer(match.winnerId);
+  const [editing, setEditing] = useState(false);
 
   const getRoundName = (round: number, totalRounds: number): string => {
     if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
@@ -777,6 +782,41 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
     return `Runde ${round + 1}`;
   };
 
+  if (editing) {
+    const handicapInfo = isHandicap ? (() => {
+      if (!p1 || !p2) return null;
+      return getHandicap(p1.ttr, p2.ttr);
+    })() : null;
+
+    return (
+      <div className="relative">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-2 right-2 z-10 h-7 text-xs text-muted-foreground"
+          onClick={() => setEditing(false)}
+        >
+          <X className="mr-1 h-3 w-3" />
+          Abbrechen
+        </Button>
+        <ScoreEntry
+          match={{ ...match, status: 'active' }}
+          getPlayer={getPlayer}
+          onUpdateScore={(id, sets, ebo) => {
+            onUpdateScore(id, sets, ebo);
+            setEditing(false);
+          }}
+          bestOf={bestOf}
+          getParticipantName={getParticipantName}
+          tournamentName={tournamentName}
+          rounds={rounds}
+          tournamentId={tournamentId}
+          handicapInfo={handicapInfo}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-card/50 rounded-lg p-3 card-shadow space-y-2">
       <div className="flex items-center justify-between">
@@ -786,6 +826,15 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
           <span className={match.winnerId === match.player2Id ? 'font-bold text-primary' : ''}>{p2?.name}</span>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-muted-foreground"
+            onClick={() => setEditing(true)}
+          >
+            <Settings className="mr-1 h-3 w-3" />
+            Korrigieren
+          </Button>
           <Button
             variant="ghost"
             size="sm"
