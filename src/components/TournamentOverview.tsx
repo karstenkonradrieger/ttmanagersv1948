@@ -1,8 +1,9 @@
 import { useMemo, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Match, Player, SetScore, Sponsor } from '@/types/tournament';
+import { Match, Player, SetScore, Sponsor, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save, Download } from 'lucide-react';
+import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save, Download, Settings, X, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
