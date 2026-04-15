@@ -622,22 +622,62 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     doc.save(`${tournamentName.replace(/\s+/g, '_')}_Ergebnisse.pdf`);
   };
 
-  const koMatches = mode === 'group_knockout'
-    ? matches.filter(m => m.groupNumber === undefined || m.groupNumber === null)
-    : matches;
-  const finalMatch = koMatches.find(m => m.round === rounds - 1);
-  const champion = finalMatch?.winnerId ? getPlayer(finalMatch.winnerId) : null;
-  const secondPlace = finalMatch ? getPlayer(finalMatch.winnerId === finalMatch.player1Id ? finalMatch.player2Id : finalMatch.player1Id) : null;
+  // Determine champion based on tournament mode
+  let champion: Player | null = null;
+  let secondPlace: Player | null = null;
+  let thirdPlacePlayers: Player[] = [];
 
-  // Place 3: losers of the semi-finals
-  const semiRound = rounds - 2;
-  const semiMatches = semiRound >= 0 ? koMatches.filter(m => m.round === semiRound && m.status === 'completed') : [];
-  const thirdPlacePlayers = semiMatches
-    .map(m => {
-      const loserId = m.winnerId === m.player1Id ? m.player2Id : m.player1Id;
-      return loserId ? getPlayer(loserId) : null;
-    })
-    .filter((p): p is Player => p !== null);
+  const isRoundRobinLike = mode === 'round_robin' || mode === 'swiss';
+  const allFinished = matches.length > 0 && matches.every(m => m.status === 'completed' || (m.status as string) === 'bye');
+
+  if (isRoundRobinLike) {
+    // For round robin / swiss: champion is determined by standings
+    if (allFinished) {
+      const getName = getParticipantName || ((id: string | null) => getPlayer(id)?.name || '');
+      const standingsMap = new Map<string, { won: number; setsWon: number; setsLost: number; pointsWon: number; pointsLost: number }>();
+      for (const m of matches) {
+        if (!m.player1Id || !m.player2Id || m.status !== 'completed') continue;
+        for (const pid of [m.player1Id, m.player2Id]) {
+          if (!standingsMap.has(pid)) standingsMap.set(pid, { won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
+        }
+        const s1 = standingsMap.get(m.player1Id)!;
+        const s2 = standingsMap.get(m.player2Id)!;
+        if (m.winnerId === m.player1Id) { s1.won++; } else if (m.winnerId === m.player2Id) { s2.won++; }
+        for (const s of m.sets) {
+          s1.pointsWon += s.player1; s1.pointsLost += s.player2;
+          s2.pointsWon += s.player2; s2.pointsLost += s.player1;
+          if (s.player1 >= 11 && s.player1 - s.player2 >= 2) { s1.setsWon++; s2.setsLost++; }
+          else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) { s2.setsWon++; s1.setsLost++; }
+        }
+      }
+      const sorted = [...standingsMap.entries()].sort(([, a], [, b]) =>
+        b.won - a.won ||
+        (b.setsWon - b.setsLost) - (a.setsWon - a.setsLost) ||
+        (b.pointsWon - b.pointsLost) - (a.pointsWon - a.pointsLost)
+      );
+      if (sorted.length >= 1) champion = getPlayer(sorted[0][0]);
+      if (sorted.length >= 2) secondPlace = getPlayer(sorted[1][0]);
+      if (sorted.length >= 3) thirdPlacePlayers = [getPlayer(sorted[2][0])].filter((p): p is Player => p !== null);
+    }
+  } else {
+    // For knockout modes: champion is winner of the final match
+    const koMatches = mode === 'group_knockout'
+      ? matches.filter(m => m.groupNumber === undefined || m.groupNumber === null)
+      : matches;
+    const finalMatch = koMatches.find(m => m.round === rounds - 1);
+    champion = finalMatch?.winnerId ? getPlayer(finalMatch.winnerId) : null;
+    secondPlace = finalMatch ? getPlayer(finalMatch.winnerId === finalMatch.player1Id ? finalMatch.player2Id : finalMatch.player1Id) : null;
+
+    // Place 3: losers of the semi-finals
+    const semiRound = rounds - 2;
+    const semiMatches = semiRound >= 0 ? koMatches.filter(m => m.round === semiRound && m.status === 'completed') : [];
+    thirdPlacePlayers = semiMatches
+      .map(m => {
+        const loserId = m.winnerId === m.player1Id ? m.player2Id : m.player1Id;
+        return loserId ? getPlayer(loserId) : null;
+      })
+      .filter((p): p is Player => p !== null);
+  }
 
   const exportCertificates = async () => {
     const placements: { rank: number; label: string; player: Player }[] = [];
