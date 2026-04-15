@@ -759,6 +759,7 @@ export function useTournamentDb(tournamentId: string | null) {
           cascadeReset(oldWinnerId, match.round, match.position);
           if (dbUpdates.length > 0) {
             await tournamentService.updateMultipleMatches(dbUpdates);
+            toast.info(`Sieger geändert: ${dbUpdates.length} Folgespiel(e) zurückgesetzt.`);
           }
         }
 
