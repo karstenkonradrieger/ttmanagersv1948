@@ -693,6 +693,7 @@ const Index = () => {
                    doublesPairs={tournament.doublesPairs}
                    mode={tournament.mode}
                    breakMinutes={tournament.breakMinutes}
+                   onUpdatePlayer={updatePlayer}
                  />
               )}
             </TabsContent>

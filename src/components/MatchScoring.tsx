@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Check, Play, X, Zap, Settings, Printer, FileText } from 'lucide-react';
+import { Check, Play, X, Zap, Settings, Printer, FileText, Clock } from 'lucide-react';
 import { printRefereeSheet, printAllRefereeSheets } from '@/components/RefereeSheet';
 import { MatchPhotos } from '@/components/MatchPhotos';
 import { generateMatchReport } from '@/components/MatchReport';
@@ -34,6 +34,7 @@ interface Props {
   doublesPairs?: DoublesPair[];
   mode?: string;
   breakMinutes?: number;
+  onUpdatePlayer?: (id: string, updates: Partial<Omit<Player, 'id'>>) => void;
 }
 
 let announcementQueue: Promise<void> = Promise.resolve();
@@ -150,7 +151,7 @@ const announceMatch = async (
   });
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, sponsors = [], isHandicap = false, players = [], doublesPairs = [], mode, breakMinutes = 0 }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, sponsors = [], isHandicap = false, players = [], doublesPairs = [], mode, breakMinutes = 0, onUpdatePlayer }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
   const { getPhraseAudioUrl } = useAnnouncementPhrases();
 
@@ -363,7 +364,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
             .filter(m => m.status === 'pending')
             .map(m => {
               const handicapInfo = isHandicap ? computeHandicap(m, getPlayer) : null;
-              return <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={handleSetActive} freeTables={freeTables} handicapInfo={handicapInfo} allMatches={matches} breakMinutes={breakMinutes} />;
+              return <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={handleSetActive} freeTables={freeTables} handicapInfo={handicapInfo} allMatches={matches} breakMinutes={breakMinutes} onUpdatePlayer={onUpdatePlayer} />;
             })}
         </Section>
       )}
@@ -419,7 +420,7 @@ function getPlayerBreakRemaining(playerId: string | null, allMatches: Match[], b
   return maxRemaining;
 }
 
-function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo, allMatches, breakMinutes }: {
+function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo, allMatches, breakMinutes, onUpdatePlayer }: {
   match: Match;
   getPlayer: (id: string | null) => Player | null;
   onSetActive: (id: string, table?: number) => void;
@@ -427,6 +428,7 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
   handicapInfo?: { player1Handicap: number; player2Handicap: number } | null;
   allMatches: Match[];
   breakMinutes: number;
+  onUpdatePlayer?: (id: string, updates: Partial<Omit<Player, 'id'>>) => void;
 }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
@@ -451,6 +453,10 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const p1Delay = p1?.delayMinutes ?? 0;
+  const p2Delay = p2?.delayMinutes ?? 0;
+  const hasDelay = p1Delay > 0 || p2Delay > 0;
+
   return (
     <div className={`bg-card rounded-lg p-4 card-shadow ${maxBreak > 0 ? 'border border-destructive/40' : ''}`}>
       <div className="flex items-center justify-between mb-3">
@@ -458,6 +464,11 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
           <span className="font-semibold">{p1?.name}</span>
           {p1Break > 0 && (
             <span className="ml-1 text-xs bg-destructive/15 text-destructive px-1.5 py-0.5 rounded-full font-mono">⏸ {formatBreak(p1Break)}</span>
+          )}
+          {p1Delay > 0 && (
+            <span className="ml-1 text-xs bg-orange-500/15 text-orange-400 px-1.5 py-0.5 rounded-full">
+              <Clock className="inline h-3 w-3 mr-0.5" />{p1Delay} Min.
+            </span>
           )}
           {handicapInfo && handicapInfo.player1Handicap > 0 && (
             <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded">+{handicapInfo.player1Handicap}</span>
@@ -467,11 +478,51 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
           {p2Break > 0 && (
             <span className="ml-1 text-xs bg-destructive/15 text-destructive px-1.5 py-0.5 rounded-full font-mono">⏸ {formatBreak(p2Break)}</span>
           )}
+          {p2Delay > 0 && (
+            <span className="ml-1 text-xs bg-orange-500/15 text-orange-400 px-1.5 py-0.5 rounded-full">
+              <Clock className="inline h-3 w-3 mr-0.5" />{p2Delay} Min.
+            </span>
+          )}
           {handicapInfo && handicapInfo.player2Handicap > 0 && (
             <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded">+{handicapInfo.player2Handicap}</span>
           )}
         </div>
       </div>
+      {/* Inline delay editor */}
+      {onUpdatePlayer && (
+        <div className="flex flex-wrap gap-3 mb-3 text-xs">
+          <div className="flex items-center gap-1">
+            <Clock className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground">{p1?.name?.split(' ')[0]}:</span>
+            <Input
+              type="number"
+              min={0}
+              value={p1Delay}
+              onChange={e => {
+                if (match.player1Id) onUpdatePlayer(match.player1Id, { delayMinutes: parseInt(e.target.value) || 0 });
+              }}
+              className="w-16 h-7 text-xs bg-secondary"
+              title="Zeitverzögerung in Minuten"
+            />
+            <span className="text-muted-foreground">Min.</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground">{p2?.name?.split(' ')[0]}:</span>
+            <Input
+              type="number"
+              min={0}
+              value={p2Delay}
+              onChange={e => {
+                if (match.player2Id) onUpdatePlayer(match.player2Id, { delayMinutes: parseInt(e.target.value) || 0 });
+              }}
+              className="w-16 h-7 text-xs bg-secondary"
+              title="Zeitverzögerung in Minuten"
+            />
+            <span className="text-muted-foreground">Min.</span>
+          </div>
+        </div>
+      )}
       <div className="flex gap-2">
         <select
           value={selectedTable}
