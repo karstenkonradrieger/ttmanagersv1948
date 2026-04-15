@@ -13,6 +13,7 @@ export interface Player {
   groupNumber?: number | null;
   voiceNameUrl?: string | null;
   photoConsent?: boolean;
+  delayMinutes?: number;
 }
 
 export interface SetScore {
