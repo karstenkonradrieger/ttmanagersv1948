@@ -4,7 +4,7 @@ import { MatchPhotos } from '@/components/MatchPhotos';
 import { Match } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Camera, PartyPopper, Film, Loader2, Download, Trash2, Music, Upload, X } from 'lucide-react';
+import { Camera, PartyPopper, Film, Loader2, Download, Trash2, Music, Upload, X, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -397,8 +397,19 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
                   onClick={() => window.open(videoUrl, '_blank')}
                   className="gap-1"
                 >
-                  <Download className="h-3.5 w-3.5" />
-                  Herunterladen
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  In neuem Tab öffnen
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="gap-1"
+                >
+                  <a href={videoUrl} download>
+                    <Download className="h-3.5 w-3.5" />
+                    Herunterladen
+                  </a>
                 </Button>
                 <Button
                   variant="outline"
