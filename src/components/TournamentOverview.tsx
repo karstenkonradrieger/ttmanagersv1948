@@ -1005,14 +1005,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
           <div key={r}>
             <h4 className="font-bold text-sm mb-2 text-primary">{roundName}</h4>
             <div className="space-y-2">
-              {roundMatches.map((m, idx) => {
-                const p1 = getPlayer(m.player1Id);
-                const p2 = getPlayer(m.player2Id);
-                const wins = getSetWins(m.sets);
-                const winner = getPlayer(m.winnerId);
-                const isBye = !m.player2Id && m.player1Id;
-
-                return (
+              {roundMatches.map((m) => (
                   <OverviewMatchRow
                     key={m.id}
                     match={m}
