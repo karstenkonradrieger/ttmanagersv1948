@@ -4,7 +4,7 @@ import { MatchPhotos } from '@/components/MatchPhotos';
 import { Match } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Camera, PartyPopper, Film, Loader2, Download, Trash2, Music, Upload, X } from 'lucide-react';
+import { Camera, PartyPopper, Film, Loader2, Download, Trash2, Music, Upload, X, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import {
