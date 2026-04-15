@@ -38,9 +38,18 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
 
   // Show completed matches whose table hasn't been reassigned yet
   const activeTableNumbers = new Set(activeMatches.filter(m => m.table).map(m => m.table));
-  const recentlyCompletedOnTable = matches.filter(
-    m => m.status === 'completed' && m.table && !activeTableNumbers.has(m.table) && m.sets.length > 0
-  );
+  const recentlyCompletedOnTable = useMemo(() => {
+    const latestPerTable = new Map<number, Match>();
+    for (const m of matches) {
+      if (m.status === 'completed' && m.table && !activeTableNumbers.has(m.table) && m.sets.length > 0) {
+        const existing = latestPerTable.get(m.table);
+        if (!existing || (m.completedAt && (!existing.completedAt || m.completedAt > existing.completedAt))) {
+          latestPerTable.set(m.table, m);
+        }
+      }
+    }
+    return Array.from(latestPerTable.values());
+  }, [matches, activeTableNumbers]);
 
   const nextPending = matches
     .filter(m => m.status === 'pending' && m.player1Id && m.player2Id)
