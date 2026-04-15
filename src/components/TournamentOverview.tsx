@@ -49,6 +49,7 @@ interface Props {
     venueString: string;
     organizerName: string;
   }) => void;
+  onUpdateScore?: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
 }
 
 function getRoundName(round: number, totalRounds: number, mode?: string): string {
