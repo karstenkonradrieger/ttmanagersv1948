@@ -493,7 +493,10 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     // Summary
     const totalMatches = matches.length;
     const completed = matches.filter(m => m.status === 'completed').length;
-    const finalMatch = matches.find(m => m.round === rounds - 1);
+    const pdfKoMatches = mode === 'group_knockout'
+      ? matches.filter(m => m.groupNumber === undefined || m.groupNumber === null)
+      : matches;
+    const finalMatch = pdfKoMatches.find(m => m.round === rounds - 1);
     const champion = finalMatch?.winnerId ? getPlayer(finalMatch.winnerId) : null;
 
     doc.setFontSize(11);
