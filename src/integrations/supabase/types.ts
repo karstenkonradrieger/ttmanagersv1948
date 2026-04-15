@@ -432,6 +432,7 @@ export type Database = {
           city: string
           club: string
           created_at: string
+          delay_minutes: number
           gender: string
           group_number: number | null
           house_number: string
@@ -450,6 +451,7 @@ export type Database = {
           city?: string
           club?: string
           created_at?: string
+          delay_minutes?: number
           gender?: string
           group_number?: number | null
           house_number?: string
@@ -468,6 +470,7 @@ export type Database = {
           city?: string
           club?: string
           created_at?: string
+          delay_minutes?: number
           gender?: string
           group_number?: number | null
           house_number?: string

@@ -1,0 +1,1 @@
+ALTER TABLE public.players ADD COLUMN delay_minutes integer NOT NULL DEFAULT 0;
