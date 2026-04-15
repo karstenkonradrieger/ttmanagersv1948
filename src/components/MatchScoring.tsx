@@ -455,9 +455,9 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
   const [selectedTable, setSelectedTable] = useState<number | ''>(freeTables[0] || '');
   const [, setTick] = useState(0);
 
-  const p1Break = getPlayerBreakRemaining(match.player1Id, allMatches, breakMinutes);
-  const p2Break = getPlayerBreakRemaining(match.player2Id, allMatches, breakMinutes);
-  const maxBreak = Math.max(p1Break, p2Break);
+  const p1Wait = getPlayerWaitRemaining(match.player1Id, allMatches, breakMinutes, p1);
+  const p2Wait = getPlayerWaitRemaining(match.player2Id, allMatches, breakMinutes, p2);
+  const maxWait = Math.max(p1Wait, p2Wait);
 
   // Re-render every second while break is active
   useEffect(() => {
