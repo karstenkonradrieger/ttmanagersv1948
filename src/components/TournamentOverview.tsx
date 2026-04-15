@@ -619,13 +619,16 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     doc.save(`${tournamentName.replace(/\s+/g, '_')}_Ergebnisse.pdf`);
   };
 
-  const finalMatch = matches.find(m => m.round === rounds - 1);
+  const koMatches = mode === 'group_knockout'
+    ? matches.filter(m => m.groupNumber === undefined || m.groupNumber === null)
+    : matches;
+  const finalMatch = koMatches.find(m => m.round === rounds - 1);
   const champion = finalMatch?.winnerId ? getPlayer(finalMatch.winnerId) : null;
   const secondPlace = finalMatch ? getPlayer(finalMatch.winnerId === finalMatch.player1Id ? finalMatch.player2Id : finalMatch.player1Id) : null;
 
   // Place 3: losers of the semi-finals
   const semiRound = rounds - 2;
-  const semiMatches = semiRound >= 0 ? matches.filter(m => m.round === semiRound && m.status === 'completed') : [];
+  const semiMatches = semiRound >= 0 ? koMatches.filter(m => m.round === semiRound && m.status === 'completed') : [];
   const thirdPlacePlayers = semiMatches
     .map(m => {
       const loserId = m.winnerId === m.player1Id ? m.player2Id : m.player1Id;
