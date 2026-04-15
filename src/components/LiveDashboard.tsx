@@ -35,6 +35,13 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
   }, [players, tournamentDate]);
 
   const activeMatches = matches.filter(m => m.status === 'active');
+
+  // Show completed matches whose table hasn't been reassigned yet
+  const activeTableNumbers = new Set(activeMatches.filter(m => m.table).map(m => m.table));
+  const recentlyCompletedOnTable = matches.filter(
+    m => m.status === 'completed' && m.table && !activeTableNumbers.has(m.table) && m.sets.length > 0
+  );
+
   const nextPending = matches
     .filter(m => m.status === 'pending' && m.player1Id && m.player2Id)
     .slice(0, 4);
