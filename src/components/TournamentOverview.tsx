@@ -1021,8 +1021,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                       setEditingMatchId(null);
                     } : undefined}
                   />
-                );
-              })}
+              ))}
             </div>
           </div>
         );
