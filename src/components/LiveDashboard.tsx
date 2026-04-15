@@ -55,7 +55,8 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
     .filter(m => m.status === 'pending' && m.player1Id && m.player2Id)
     .slice(0, 4);
 
-  const champion = rounds > 0
+  const allFinished = matches.length > 0 && matches.every(m => m.status === 'completed' || (m.status as string) === 'bye');
+  const champion = allFinished && rounds > 0
     ? mode === 'double_knockout'
       ? matches.find(m => m.groupNumber === -2 && m.winnerId)
       : matches.find(m => m.round === rounds - 1 && m.winnerId && (m.groupNumber === null || m.groupNumber === undefined))
