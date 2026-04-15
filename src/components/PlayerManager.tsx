@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { UserPlus, Trash2, Trophy, Pencil, Check, X, Camera, FileText, FileCheck } from 'lucide-react';
+import { UserPlus, Trash2, Trophy, Pencil, Check, X, Camera, FileText, FileCheck, Clock } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { generatePlayerReport } from '@/components/PlayerReport';
@@ -97,10 +97,11 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
       phone: editData.phone || '',
     };
     if (!started) {
-      updates.club = editData.club || '';
+    updates.club = editData.club || '';
       updates.gender = editData.gender || '';
       updates.ttr = editData.ttr || 0;
     }
+    updates.delayMinutes = editData.delayMinutes ?? 0;
     onUpdate(editingId, updates);
     setEditingId(null);
     setEditData({});
@@ -358,13 +359,28 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                     placeholder="Ort"
                   />
                 </div>
-                <Input
-                  type="tel"
-                  value={editData.phone || ''}
-                  onChange={e => setEditData(prev => ({ ...prev, phone: e.target.value }))}
-                  className="h-10 text-sm bg-background border-border"
-                  placeholder="Telefon"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    type="tel"
+                    value={editData.phone || ''}
+                    onChange={e => setEditData(prev => ({ ...prev, phone: e.target.value }))}
+                    className="h-10 text-sm bg-background border-border flex-1"
+                    placeholder="Telefon"
+                  />
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      min="0"
+                      value={editData.delayMinutes ?? 0}
+                      onChange={e => setEditData(prev => ({ ...prev, delayMinutes: parseInt(e.target.value) || 0 }))}
+                      className="h-10 text-sm bg-background border-border w-20"
+                      placeholder="Min."
+                      title="Zeitverzögerung in Minuten (z.B. Spätanreise)"
+                    />
+                    <span className="text-xs text-muted-foreground">Min. Verzögerung</span>
+                  </div>
+                </div>
                 <div className="flex justify-end gap-1">
                   <Button variant="ghost" size="icon" onClick={cancelEdit} className="h-8 w-8">
                     <X className="h-4 w-4" />
@@ -400,6 +416,11 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                         {player.street && player.city ? ', ' : ''}
                         {player.postalCode && `${player.postalCode} `}{player.city}
                         {player.phone && ` · ☎ ${player.phone}`}
+                      </p>
+                    )}
+                    {(player.delayMinutes ?? 0) > 0 && (
+                      <p className="text-xs text-orange-400 flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> {player.delayMinutes} Min. Verzögerung
                       </p>
                     )}
                   </div>
