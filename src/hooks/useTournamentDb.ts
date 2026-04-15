@@ -927,7 +927,33 @@ export function useTournamentDb(tournamentId: string | null) {
       }
     });
 
-    const unavailablePlayers = new Set([...activePlayers, ...recentPlayers]);
+    // Collect players with active delay (tournament not started long enough for them)
+    const delayedPlayers = new Set<string>();
+    if (tournament.started) {
+      // Find the earliest active/completed match to determine tournament start time
+      const allStartedMatches = tournament.matches.filter(m => m.status === 'active' || m.status === 'completed');
+      let tournamentStartTime: number | null = null;
+      for (const m of allStartedMatches) {
+        if (m.completedAt) {
+          const t = new Date(m.completedAt).getTime();
+          if (!tournamentStartTime || t < tournamentStartTime) tournamentStartTime = t;
+        }
+      }
+      // If no completed match yet, use first active match assignment as approximate start
+      if (!tournamentStartTime) {
+        // Fallback: treat "now" as start, so delay is measured from now
+        tournamentStartTime = now;
+      }
+
+      for (const player of tournament.players) {
+        const delayMs = (player.delayMinutes ?? 0) * 60 * 1000;
+        if (delayMs > 0 && (now - tournamentStartTime) < delayMs) {
+          delayedPlayers.add(player.id);
+        }
+      }
+    }
+
+    const unavailablePlayers = new Set([...activePlayers, ...recentPlayers, ...delayedPlayers]);
 
     const pendingReadyMatches = tournament.matches.filter(
       m => m.status === 'pending' && m.player1Id && m.player2Id
@@ -954,7 +980,11 @@ export function useTournamentDb(tournamentId: string | null) {
 
     if (updates.length === 0) {
       if (pendingReadyMatches.length > 0 && freeTables.length > 0) {
-        toast.info(`Spieler benötigen noch eine Pause (mind. ${tournament.breakMinutes} Min.) oder spielen gerade.`);
+        const hasDelayed = delayedPlayers.size > 0;
+        const msg = hasDelayed
+          ? `Spieler benötigen noch eine Pause oder haben eine Zeitverzögerung (Spätanreise).`
+          : `Spieler benötigen noch eine Pause (mind. ${tournament.breakMinutes} Min.) oder spielen gerade.`;
+        toast.info(msg);
       }
       return [];
     }
