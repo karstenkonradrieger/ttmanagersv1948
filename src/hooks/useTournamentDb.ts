@@ -836,9 +836,9 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournament.matches, tournament.mode, tournament.phase]);
 
-  const setMatchActive = useCallback(async (matchId: string, table?: number) => {
+  const setMatchActive = useCallback(async (matchId: string, table?: number): Promise<boolean> => {
     const match = tournament.matches.find(m => m.id === matchId);
-    if (!match) return;
+    if (!match) return false;
 
     // Check if any player is currently in an active match
     const activePlayers = new Set<string>();
@@ -850,7 +850,7 @@ export function useTournamentDb(tournamentId: string | null) {
     if ((match.player1Id && activePlayers.has(match.player1Id)) ||
       (match.player2Id && activePlayers.has(match.player2Id))) {
       toast.error('Ein Spieler spielt gerade noch ein anderes Spiel.');
-      return;
+      return false;
     }
 
     // Check 5-minute pause
@@ -865,7 +865,7 @@ export function useTournamentDb(tournamentId: string | null) {
     if (recentMatch) {
       const remaining = Math.ceil((PAUSE_MS - (now - new Date(recentMatch.completedAt!).getTime())) / 60000);
       toast.error(`Spieler braucht noch ${remaining} Min. Pause.`);
-      return;
+      return false;
     }
 
     try {
@@ -880,9 +880,11 @@ export function useTournamentDb(tournamentId: string | null) {
           m.id === matchId ? { ...m, status: 'active' as const, table } : m
         ),
       }));
+      return true;
     } catch (error) {
       console.error('Error setting match active:', error);
       toast.error('Fehler beim Aktivieren des Spiels');
+      return false;
     }
   }, [tournament.matches]);
 
