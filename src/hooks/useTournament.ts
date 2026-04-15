@@ -170,13 +170,14 @@ export function useTournament() {
     });
   }, []);
 
-  const setMatchActive = useCallback((matchId: string, table?: number) => {
+  const setMatchActive = useCallback(async (matchId: string, table?: number): Promise<boolean> => {
     setTournament(prev => ({
       ...prev,
       matches: prev.matches.map(m =>
         m.id === matchId ? { ...m, status: 'active' as const, table } : m
       ),
     }));
+    return true;
   }, []);
 
   const resetTournament = useCallback(() => {
