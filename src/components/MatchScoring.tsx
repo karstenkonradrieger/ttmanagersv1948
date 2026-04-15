@@ -404,19 +404,39 @@ function Section({ title, children, action }: { title: string; children: React.R
   );
 }
 
-function getPlayerBreakRemaining(playerId: string | null, allMatches: Match[], breakMinutes: number): number {
-  if (!playerId || breakMinutes <= 0) return 0;
-  const pauseMs = breakMinutes * 60 * 1000;
+function getPlayerWaitRemaining(playerId: string | null, allMatches: Match[], breakMinutes: number, player: Player | null): number {
+  if (!playerId) return 0;
   const now = Date.now();
   let maxRemaining = 0;
-  for (const m of allMatches) {
-    if (m.status === 'completed' && m.completedAt &&
-      (m.player1Id === playerId || m.player2Id === playerId)) {
-      const elapsed = now - new Date(m.completedAt).getTime();
-      const remaining = pauseMs - elapsed;
-      if (remaining > maxRemaining) maxRemaining = remaining;
+
+  // Break-based wait
+  if (breakMinutes > 0) {
+    const pauseMs = breakMinutes * 60 * 1000;
+    for (const m of allMatches) {
+      if (m.status === 'completed' && m.completedAt &&
+        (m.player1Id === playerId || m.player2Id === playerId)) {
+        const remaining = pauseMs - (now - new Date(m.completedAt).getTime());
+        if (remaining > maxRemaining) maxRemaining = remaining;
+      }
     }
   }
+
+  // Delay-based wait (relative to tournament start = earliest completed match time)
+  const delayMs = (player?.delayMinutes ?? 0) * 60 * 1000;
+  if (delayMs > 0) {
+    let tournamentStart: number | null = null;
+    for (const m of allMatches) {
+      if ((m.status === 'active' || m.status === 'completed') && m.completedAt) {
+        const t = new Date(m.completedAt).getTime();
+        if (!tournamentStart || t < tournamentStart) tournamentStart = t;
+      }
+    }
+    if (tournamentStart) {
+      const delayRemaining = (tournamentStart + delayMs) - now;
+      if (delayRemaining > maxRemaining) maxRemaining = delayRemaining;
+    }
+  }
+
   return maxRemaining;
 }
 
@@ -435,18 +455,18 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
   const [selectedTable, setSelectedTable] = useState<number | ''>(freeTables[0] || '');
   const [, setTick] = useState(0);
 
-  const p1Break = getPlayerBreakRemaining(match.player1Id, allMatches, breakMinutes);
-  const p2Break = getPlayerBreakRemaining(match.player2Id, allMatches, breakMinutes);
-  const maxBreak = Math.max(p1Break, p2Break);
+  const p1Wait = getPlayerWaitRemaining(match.player1Id, allMatches, breakMinutes, p1);
+  const p2Wait = getPlayerWaitRemaining(match.player2Id, allMatches, breakMinutes, p2);
+  const maxWait = Math.max(p1Wait, p2Wait);
 
-  // Re-render every second while break is active
+  // Re-render every second while wait is active
   useEffect(() => {
-    if (maxBreak <= 0) return;
+    if (maxWait <= 0) return;
     const interval = setInterval(() => setTick(t => t + 1), 1000);
     return () => clearInterval(interval);
-  }, [maxBreak > 0]);
+  }, [maxWait > 0]);
 
-  const formatBreak = (ms: number) => {
+  const formatTime = (ms: number) => {
     if (ms <= 0) return '';
     const mins = Math.floor(ms / 60000);
     const secs = Math.floor((ms % 60000) / 1000);
@@ -455,38 +475,30 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
 
   const p1Delay = p1?.delayMinutes ?? 0;
   const p2Delay = p2?.delayMinutes ?? 0;
-  const hasDelay = p1Delay > 0 || p2Delay > 0;
 
   return (
-    <div className={`bg-card rounded-lg p-4 card-shadow ${maxBreak > 0 ? 'border border-destructive/40' : ''}`}>
+    <div className={`bg-card rounded-lg p-4 card-shadow ${maxWait > 0 ? 'border border-destructive/40' : ''}`}>
       <div className="flex items-center justify-between mb-3">
         <div className="text-sm">
           <span className="font-semibold">{p1?.name}</span>
-          {p1Break > 0 && (
-            <span className="ml-1 text-xs bg-destructive/15 text-destructive px-1.5 py-0.5 rounded-full font-mono">⏸ {formatBreak(p1Break)}</span>
-          )}
-          {p1Delay > 0 && (
-            <span className="ml-1 text-xs bg-orange-500/15 text-orange-400 px-1.5 py-0.5 rounded-full">
-              <Clock className="inline h-3 w-3 mr-0.5" />{p1Delay} Min.
-            </span>
+          {p1Wait > 0 && (
+            <span className="ml-1 text-xs bg-destructive/15 text-destructive px-1.5 py-0.5 rounded-full font-mono">⏸ {formatTime(p1Wait)}</span>
           )}
           {handicapInfo && handicapInfo.player1Handicap > 0 && (
             <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded">+{handicapInfo.player1Handicap}</span>
           )}
           <span className="text-muted-foreground mx-2">vs</span>
           <span className="font-semibold">{p2?.name}</span>
-          {p2Break > 0 && (
-            <span className="ml-1 text-xs bg-destructive/15 text-destructive px-1.5 py-0.5 rounded-full font-mono">⏸ {formatBreak(p2Break)}</span>
-          )}
-          {p2Delay > 0 && (
-            <span className="ml-1 text-xs bg-orange-500/15 text-orange-400 px-1.5 py-0.5 rounded-full">
-              <Clock className="inline h-3 w-3 mr-0.5" />{p2Delay} Min.
-            </span>
+          {p2Wait > 0 && (
+            <span className="ml-1 text-xs bg-destructive/15 text-destructive px-1.5 py-0.5 rounded-full font-mono">⏸ {formatTime(p2Wait)}</span>
           )}
           {handicapInfo && handicapInfo.player2Handicap > 0 && (
             <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded">+{handicapInfo.player2Handicap}</span>
           )}
         </div>
+        {maxWait > 0 && (
+          <span className="text-xs font-mono text-destructive">bereit in {formatTime(maxWait)}</span>
+        )}
       </div>
       {/* Inline delay editor */}
       {onUpdatePlayer && (
@@ -540,7 +552,7 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
           disabled={freeTables.length === 0}
         >
           <Play className="mr-2 h-4 w-4" />
-          {freeTables.length === 0 ? 'Kein Tisch frei' : maxBreak > 0 ? `Pause (${formatBreak(maxBreak)})` : 'Spiel starten'}
+          {freeTables.length === 0 ? 'Kein Tisch frei' : maxWait > 0 ? `Warten (${formatTime(maxWait)})` : 'Spiel starten'}
         </Button>
       </div>
     </div>
