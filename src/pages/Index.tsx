@@ -742,6 +742,7 @@ const Index = () => {
                       organizer_name: settings.organizerName,
                     } as any);
                  }}
+                 onUpdateScore={updateMatchScore}
                 />
             </TabsContent>
 

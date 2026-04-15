@@ -1,8 +1,9 @@
 import { useMemo, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Match, Player, SetScore, Sponsor } from '@/types/tournament';
+import { Match, Player, SetScore, Sponsor, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save, Download } from 'lucide-react';
+import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save, Download, Settings, X, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
@@ -48,6 +49,7 @@ interface Props {
     venueString: string;
     organizerName: string;
   }) => void;
+  onUpdateScore?: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
 }
 
 function getRoundName(round: number, totalRounds: number, mode?: string): string {
@@ -127,8 +129,129 @@ function wasUpgradedBestOf(match: Match, tournamentBestOf: number): boolean {
   return Math.max(wins.p1, wins.p2) >= 3;
 }
 
-export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, getParticipantName, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsors = [], certificateBgUrl, certificateText = 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.', certificateFontFamily = 'Helvetica', certificateFontSize = 20, certificateTextColor = '#1e1e1e', certificateLineSizes = [], certificateExtraSizes = {}, certificateHiddenFields = [], onSaveCertificateSettings }: Props) {
+function OverviewMatchRow({ match: m, getPlayer, bestOf, mode, rounds, isEditing, onStartEdit, onCancelEdit, onUpdateScore }: {
+  match: Match;
+  getPlayer: (id: string | null) => Player | null;
+  bestOf: number;
+  mode?: string;
+  rounds: number;
+  isEditing: boolean;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
+  onUpdateScore?: (sets: SetScore[], effectiveBestOf?: number) => void;
+}) {
+  const p1 = getPlayer(m.player1Id);
+  const p2 = getPlayer(m.player2Id);
+  const wins = getSetWins(m.sets);
+  const winner = getPlayer(m.winnerId);
+  const isBye = !m.player2Id && m.player1Id;
+
+  const [editSets, setEditSets] = useState<SetScore[]>(m.sets.length > 0 ? m.sets : [{ player1: 0, player2: 0 }]);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isEditing) {
+      setEditSets(m.sets.length > 0 ? [...m.sets] : [{ player1: 0, player2: 0 }]);
+      setValidationError(null);
+    }
+  }, [isEditing]);
+
+  const maxSets = bestOf * 2 - 1;
+  const editP1Wins = editSets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
+  const editP2Wins = editSets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
+  const editMatchOver = editP1Wins >= bestOf || editP2Wins >= bestOf;
+
+  const saveEdit = () => {
+    for (let i = 0; i < editSets.length; i++) {
+      const s = editSets[i];
+      if (s.player1 >= 11 || s.player2 >= 11) {
+        if (Math.abs(s.player1 - s.player2) === 1) {
+          setValidationError(`Satz ${i + 1} ungültig (${s.player1}:${s.player2}). Mindestens 2 Punkte Vorsprung nötig.`);
+          return;
+        }
+      }
+    }
+    setValidationError(null);
+    onUpdateScore?.(editSets);
+  };
+
+  if (isEditing && onUpdateScore) {
+    return (
+      <div className="bg-card rounded-lg p-3 card-shadow border-2 border-primary/30">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-sm font-semibold">{p1?.name} vs {p2?.name}</div>
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onCancelEdit}>
+            <X className="mr-1 h-3 w-3" />Abbrechen
+          </Button>
+        </div>
+        <div className="space-y-1.5">
+          {editSets.map((set, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground w-6">S{i + 1}</span>
+              <Input type="number" value={set.player1 || ''} onChange={e => { const u = [...editSets]; u[i] = { ...u[i], player1: parseInt(e.target.value) || 0 }; setEditSets(u); }} className="h-9 text-center text-sm font-bold bg-secondary flex-1" min={0} />
+              <span className="text-muted-foreground text-xs">:</span>
+              <Input type="number" value={set.player2 || ''} onChange={e => { const u = [...editSets]; u[i] = { ...u[i], player2: parseInt(e.target.value) || 0 }; setEditSets(u); }} className="h-9 text-center text-sm font-bold bg-secondary flex-1" min={0} />
+              {editSets.length > 1 && (
+                <Button variant="ghost" size="icon" onClick={() => setEditSets(editSets.filter((_, j) => j !== i))} className="h-8 w-8 text-muted-foreground"><X className="h-3 w-3" /></Button>
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2 mt-2">
+          {!editMatchOver && editSets.length < maxSets && (
+            <Button variant="secondary" size="sm" onClick={() => setEditSets([...editSets, { player1: 0, player2: 0 }])} className="flex-1 h-8 text-xs">+ Satz</Button>
+          )}
+          <Button size="sm" onClick={saveEdit} className="flex-1 h-8 text-xs">
+            <Check className="mr-1 h-3 w-3" />Speichern
+          </Button>
+        </div>
+        {validationError && (
+          <p className="mt-2 text-xs text-destructive">{validationError}</p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`bg-card rounded-lg p-3 card-shadow border-l-4 ${
+      m.status === 'completed' ? 'border-l-primary' : m.status === 'active' ? 'border-l-amber-500' : 'border-l-muted'
+    }`}>
+      <div className="flex items-center justify-between">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 text-sm">
+            <span className={`font-semibold ${m.winnerId === m.player1Id ? 'text-primary' : ''}`}>{p1?.name || 'TBD'}</span>
+            <span className="text-muted-foreground">vs</span>
+            <span className={`font-semibold ${m.winnerId === m.player2Id ? 'text-primary' : ''}`}>{isBye ? 'Freilos' : (p2?.name || 'TBD')}</span>
+          </div>
+          {m.sets.length > 0 && !isBye && (
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-xs font-bold text-primary">{wins.p1}:{wins.p2}</span>
+              <span className="text-xs text-muted-foreground">({formatSets(m.sets)})</span>
+              {wasUpgradedBestOf(m, bestOf) && (
+                <span className="text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded font-semibold">Bo5</span>
+              )}
+            </div>
+          )}
+          {isBye && <p className="text-xs text-muted-foreground mt-1">Freilos</p>}
+        </div>
+        <div className="text-right flex-shrink-0 ml-3 flex items-center gap-2">
+          {m.status === 'completed' && !isBye && onUpdateScore && (
+            <Button variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground" onClick={onStartEdit}>
+              <Settings className="mr-1 h-3 w-3" />Korrigieren
+            </Button>
+          )}
+          {winner && !isBye && <span className="text-xs font-bold text-primary">🏆 {winner.name}</span>}
+          {m.status === 'active' && <span className="text-xs font-semibold text-amber-500">▶ Live</span>}
+          {m.status === 'pending' && !isBye && <span className="text-xs text-muted-foreground">Ausstehend</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, getParticipantName, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsors = [], certificateBgUrl, certificateText = 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.', certificateFontFamily = 'Helvetica', certificateFontSize = 20, certificateTextColor = '#1e1e1e', certificateLineSizes = [], certificateExtraSizes = {}, certificateHiddenFields = [], onSaveCertificateSettings, onUpdateScore }: Props) {
   const [showMatchPhotos, setShowMatchPhotos] = useState(false);
+  const [editingMatchId, setEditingMatchId] = useState<string | null>(null);
   const [showCertPreview, setShowCertPreview] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [localCertText, setLocalCertText] = useState(certificateText);
@@ -882,69 +1005,23 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
           <div key={r}>
             <h4 className="font-bold text-sm mb-2 text-primary">{roundName}</h4>
             <div className="space-y-2">
-              {roundMatches.map((m, idx) => {
-                const p1 = getPlayer(m.player1Id);
-                const p2 = getPlayer(m.player2Id);
-                const wins = getSetWins(m.sets);
-                const winner = getPlayer(m.winnerId);
-                const isBye = !m.player2Id && m.player1Id;
-
-                return (
-                  <div
+              {roundMatches.map((m) => (
+                  <OverviewMatchRow
                     key={m.id}
-                    className={`bg-card rounded-lg p-3 card-shadow border-l-4 ${
-                      m.status === 'completed'
-                        ? 'border-l-primary'
-                        : m.status === 'active'
-                        ? 'border-l-yellow-500'
-                        : 'border-l-muted'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className={`font-semibold ${m.winnerId === m.player1Id ? 'text-primary' : ''}`}>
-                            {p1?.name || 'TBD'}
-                          </span>
-                          <span className="text-muted-foreground">vs</span>
-                          <span className={`font-semibold ${m.winnerId === m.player2Id ? 'text-primary' : ''}`}>
-                            {isBye ? 'Freilos' : (p2?.name || 'TBD')}
-                          </span>
-                        </div>
-
-                        {m.sets.length > 0 && !isBye && (
-                          <div className="mt-1 flex items-center gap-2">
-                            <span className="text-xs font-bold text-primary">{wins.p1}:{wins.p2}</span>
-                            <span className="text-xs text-muted-foreground">
-                              ({formatSets(m.sets)})
-                            </span>
-                            {wasUpgradedBestOf(m, bestOf) && (
-                              <span className="text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded font-semibold">
-                                Bo5
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        {isBye && (
-                          <p className="text-xs text-muted-foreground mt-1">Freilos</p>
-                        )}
-                      </div>
-
-                      <div className="text-right flex-shrink-0 ml-3">
-                        {winner && !isBye && (
-                          <span className="text-xs font-bold text-primary">🏆 {winner.name}</span>
-                        )}
-                        {m.status === 'active' && (
-                          <span className="text-xs font-semibold text-yellow-500">▶ Live</span>
-                        )}
-                        {m.status === 'pending' && !isBye && (
-                          <span className="text-xs text-muted-foreground">Ausstehend</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                    match={m}
+                    getPlayer={getPlayer}
+                    bestOf={bestOf}
+                    mode={mode}
+                    rounds={rounds}
+                    isEditing={editingMatchId === m.id}
+                    onStartEdit={() => setEditingMatchId(m.id)}
+                    onCancelEdit={() => setEditingMatchId(null)}
+                    onUpdateScore={onUpdateScore ? (sets, ebo) => {
+                      onUpdateScore(m.id, sets, ebo);
+                      setEditingMatchId(null);
+                    } : undefined}
+                  />
+              ))}
             </div>
           </div>
         );
