@@ -385,7 +385,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
       {completedMatches.length > 0 && (
         <Section title="✅ Abgeschlossene Spiele">
           {completedMatches.map(m => (
-            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} motto={motto} mode={mode} sponsors={sponsors} />
+            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} motto={motto} mode={mode} sponsors={sponsors} onUpdateScore={onUpdateScore} getParticipantName={getParticipantName} isHandicap={isHandicap} players={players} />
           ))}
         </Section>
       )}
