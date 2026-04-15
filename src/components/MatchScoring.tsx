@@ -16,7 +16,7 @@ interface Props {
   getPlayer: (id: string | null) => Player | null;
   getParticipantName: (id: string | null) => string;
   onUpdateScore: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
-  onSetActive: (matchId: string, table?: number) => void;
+  onSetActive: (matchId: string, table?: number) => Promise<boolean> | void;
   tableCount: number;
   onTableCountChange: (count: number) => void;
   onAutoAssign: () => Promise<Array<{ id: string; table: number }>>;
@@ -198,8 +198,10 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
     return single ? [single] : [];
   };
 
-  const handleSetActive = (matchId: string, table?: number) => {
-    onSetActive(matchId, table);
+  const handleSetActive = async (matchId: string, table?: number) => {
+    const result = await onSetActive(matchId, table);
+    if (!result) return;
+
     const match = matches.find(m => m.id === matchId);
     if (match) {
       const next = getNextPendingAfter(matchId);
