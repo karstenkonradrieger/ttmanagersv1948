@@ -46,33 +46,6 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
     : null;
   const championPlayer = champion ? getPlayer(champion.winnerId) : null;
 
-  // Round-robin top 3 calculation
-  const rrTopThree = useMemo(() => {
-    if (mode !== 'round_robin' && mode !== 'swiss') return null;
-    const completed = matches.filter(m => m.status === 'completed');
-    if (completed.length === 0) return null;
-
-    const stats = new Map<string, { won: number; setDiff: number; ptDiff: number }>();
-    for (const m of completed) {
-      if (!m.player1Id || !m.player2Id) continue;
-      if (!stats.has(m.player1Id)) stats.set(m.player1Id, { won: 0, setDiff: 0, ptDiff: 0 });
-      if (!stats.has(m.player2Id)) stats.set(m.player2Id, { won: 0, setDiff: 0, ptDiff: 0 });
-      const s1 = stats.get(m.player1Id)!;
-      const s2 = stats.get(m.player2Id)!;
-      if (m.winnerId === m.player1Id) { s1.won++; } else if (m.winnerId === m.player2Id) { s2.won++; }
-      for (const s of m.sets) {
-        s1.ptDiff += s.player1 - s.player2;
-        s2.ptDiff += s.player2 - s.player1;
-        if (s.player1 >= 11 && s.player1 - s.player2 >= 2) { s1.setDiff++; s2.setDiff--; }
-        else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) { s2.setDiff++; s1.setDiff--; }
-      }
-    }
-    const sorted = [...stats.entries()]
-      .map(([id, s]) => ({ id, ...s }))
-      .sort((a, b) => b.won - a.won || b.setDiff - a.setDiff || b.ptDiff - a.ptDiff);
-    return sorted.slice(0, 3);
-  }, [matches, mode]);
-
   return (
     <div className="space-y-6 animate-slide-up">
       {birthdayPlayers.length > 0 && !started && (
@@ -97,34 +70,6 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
           <p className="text-2xl font-extrabold text-tt-gold">{getName(champion?.winnerId)}</p>
           {championPlayer.club && (
             <p className="text-sm text-muted-foreground">{championPlayer.club}</p>
-          )}
-        </div>
-      )}
-
-      {rrTopThree && rrTopThree.length > 0 && !championPlayer && (
-        <div className="bg-gradient-to-r from-primary/10 to-accent/10 border-2 border-primary/40 rounded-xl p-5 space-y-4">
-          {/* 1st place */}
-          <div className="text-center">
-            <Crown className="h-10 w-10 mx-auto mb-1 text-primary" />
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Aktueller Spitzenreiter</p>
-            <p className="text-2xl font-extrabold text-primary mt-1">{getName(rrTopThree[0].id)}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {rrTopThree[0].won} {rrTopThree[0].won === 1 ? 'Sieg' : 'Siege'} · Sätze {rrTopThree[0].setDiff > 0 ? '+' : ''}{rrTopThree[0].setDiff} · Punkte {rrTopThree[0].ptDiff > 0 ? '+' : ''}{rrTopThree[0].ptDiff}
-            </p>
-          </div>
-          {/* 2nd & 3rd */}
-          {rrTopThree.length > 1 && (
-            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border/50">
-              {rrTopThree.slice(1).map((entry, i) => (
-                <div key={entry.id} className="text-center">
-                  <p className="text-xs text-muted-foreground font-semibold">{i === 0 ? '🥈 2.' : '🥉 3.'}</p>
-                  <p className="font-bold text-sm">{getName(entry.id)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {entry.won} {entry.won === 1 ? 'Sieg' : 'Siege'} · Sätze {entry.setDiff > 0 ? '+' : ''}{entry.setDiff}
-                  </p>
-                </div>
-              ))}
-            </div>
           )}
         </div>
       )}
