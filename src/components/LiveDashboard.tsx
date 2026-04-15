@@ -81,7 +81,7 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
         </div>
       )}
 
-      {activeMatches.length > 0 && (
+      {(activeMatches.length > 0 || recentlyCompletedOnTable.length > 0) && (
         <div>
           <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
             <Monitor className="h-5 w-5 text-primary" />
@@ -89,8 +89,6 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
           </h3>
           <div className="grid gap-3">
             {activeMatches.map(match => {
-              const p1 = getPlayer(match.player1Id);
-              const p2 = getPlayer(match.player2Id);
               const p1Wins = match.sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
               const p2Wins = match.sets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
 
@@ -108,6 +106,33 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
                     <div className="text-center flex-1">
                       <p className="font-bold">{getName(match.player2Id)}</p>
                       <p className="text-3xl font-extrabold text-primary">{p2Wins}</p>
+                    </div>
+                  </div>
+                  <div className="text-center text-xs text-muted-foreground mt-2">
+                    {match.sets.map((s, i) => `${s.player1}:${s.player2}`).join(' | ')}
+                  </div>
+                </div>
+              );
+            })}
+            {recentlyCompletedOnTable.map(match => {
+              const p1Wins = match.sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
+              const p2Wins = match.sets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
+              const winner = getPlayer(match.winnerId);
+
+              return (
+                <div key={match.id} className="bg-card rounded-xl p-4 border-2 border-muted opacity-80">
+                  {match.table && (
+                    <p className="text-xs text-muted-foreground font-bold mb-2">Tisch {match.table} — Ergebnis</p>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div className="text-center flex-1">
+                      <p className={`font-bold ${match.winnerId === match.player1Id ? 'text-primary' : ''}`}>{getName(match.player1Id)}</p>
+                      <p className={`text-3xl font-extrabold ${match.winnerId === match.player1Id ? 'text-primary' : 'text-muted-foreground'}`}>{p1Wins}</p>
+                    </div>
+                    <span className="text-muted-foreground text-2xl">:</span>
+                    <div className="text-center flex-1">
+                      <p className={`font-bold ${match.winnerId === match.player2Id ? 'text-primary' : ''}`}>{getName(match.player2Id)}</p>
+                      <p className={`text-3xl font-extrabold ${match.winnerId === match.player2Id ? 'text-primary' : 'text-muted-foreground'}`}>{p2Wins}</p>
                     </div>
                   </div>
                   <div className="text-center text-xs text-muted-foreground mt-2">
