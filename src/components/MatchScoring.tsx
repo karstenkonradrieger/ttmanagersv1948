@@ -16,7 +16,7 @@ interface Props {
   getPlayer: (id: string | null) => Player | null;
   getParticipantName: (id: string | null) => string;
   onUpdateScore: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
-  onSetActive: (matchId: string, table?: number) => void;
+  onSetActive: (matchId: string, table?: number) => Promise<boolean> | void;
   tableCount: number;
   onTableCountChange: (count: number) => void;
   onAutoAssign: () => Promise<Array<{ id: string; table: number }>>;
