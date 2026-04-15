@@ -404,19 +404,39 @@ function Section({ title, children, action }: { title: string; children: React.R
   );
 }
 
-function getPlayerBreakRemaining(playerId: string | null, allMatches: Match[], breakMinutes: number): number {
-  if (!playerId || breakMinutes <= 0) return 0;
-  const pauseMs = breakMinutes * 60 * 1000;
+function getPlayerWaitRemaining(playerId: string | null, allMatches: Match[], breakMinutes: number, player: Player | null): number {
+  if (!playerId) return 0;
   const now = Date.now();
   let maxRemaining = 0;
-  for (const m of allMatches) {
-    if (m.status === 'completed' && m.completedAt &&
-      (m.player1Id === playerId || m.player2Id === playerId)) {
-      const elapsed = now - new Date(m.completedAt).getTime();
-      const remaining = pauseMs - elapsed;
-      if (remaining > maxRemaining) maxRemaining = remaining;
+
+  // Break-based wait
+  if (breakMinutes > 0) {
+    const pauseMs = breakMinutes * 60 * 1000;
+    for (const m of allMatches) {
+      if (m.status === 'completed' && m.completedAt &&
+        (m.player1Id === playerId || m.player2Id === playerId)) {
+        const remaining = pauseMs - (now - new Date(m.completedAt).getTime());
+        if (remaining > maxRemaining) maxRemaining = remaining;
+      }
     }
   }
+
+  // Delay-based wait (relative to tournament start = earliest completed match time)
+  const delayMs = (player?.delayMinutes ?? 0) * 60 * 1000;
+  if (delayMs > 0) {
+    let tournamentStart: number | null = null;
+    for (const m of allMatches) {
+      if ((m.status === 'active' || m.status === 'completed') && m.completedAt) {
+        const t = new Date(m.completedAt).getTime();
+        if (!tournamentStart || t < tournamentStart) tournamentStart = t;
+      }
+    }
+    if (tournamentStart) {
+      const delayRemaining = (tournamentStart + delayMs) - now;
+      if (delayRemaining > maxRemaining) maxRemaining = delayRemaining;
+    }
+  }
+
   return maxRemaining;
 }
 
