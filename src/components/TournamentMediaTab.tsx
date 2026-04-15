@@ -397,8 +397,19 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
                   onClick={() => window.open(videoUrl, '_blank')}
                   className="gap-1"
                 >
-                  <Download className="h-3.5 w-3.5" />
-                  Herunterladen
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  In neuem Tab öffnen
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="gap-1"
+                >
+                  <a href={videoUrl} download>
+                    <Download className="h-3.5 w-3.5" />
+                    Herunterladen
+                  </a>
                 </Button>
                 <Button
                   variant="outline"
