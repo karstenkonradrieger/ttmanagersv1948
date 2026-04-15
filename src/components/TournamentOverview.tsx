@@ -493,11 +493,33 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     // Summary
     const totalMatches = matches.length;
     const completed = matches.filter(m => m.status === 'completed').length;
-    const pdfKoMatches = mode === 'group_knockout'
-      ? matches.filter(m => m.groupNumber === undefined || m.groupNumber === null)
-      : matches;
-    const finalMatch = pdfKoMatches.find(m => m.round === rounds - 1);
-    const champion = finalMatch?.winnerId ? getPlayer(finalMatch.winnerId) : null;
+    let champion: Player | null = null;
+    const isRR = mode === 'round_robin' || mode === 'swiss';
+    if (isRR) {
+      const standingsMap = new Map<string, { won: number; sd: number; pd: number }>();
+      for (const m of matches) {
+        if (!m.player1Id || !m.player2Id || m.status !== 'completed') continue;
+        for (const pid of [m.player1Id, m.player2Id]) {
+          if (!standingsMap.has(pid)) standingsMap.set(pid, { won: 0, sd: 0, pd: 0 });
+        }
+        const s1 = standingsMap.get(m.player1Id)!;
+        const s2 = standingsMap.get(m.player2Id)!;
+        if (m.winnerId === m.player1Id) s1.won++; else if (m.winnerId === m.player2Id) s2.won++;
+        for (const s of m.sets) {
+          s1.pd += s.player1 - s.player2; s2.pd += s.player2 - s.player1;
+          if (s.player1 >= 11 && s.player1 - s.player2 >= 2) { s1.sd++; s2.sd--; }
+          else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) { s2.sd++; s1.sd--; }
+        }
+      }
+      const sorted = [...standingsMap.entries()].sort(([, a], [, b]) => b.won - a.won || b.sd - a.sd || b.pd - a.pd);
+      if (sorted.length > 0) champion = getPlayer(sorted[0][0]);
+    } else {
+      const pdfKoMatches = mode === 'group_knockout'
+        ? matches.filter(m => m.groupNumber === undefined || m.groupNumber === null)
+        : matches;
+      const finalMatch = pdfKoMatches.find(m => m.round === rounds - 1);
+      champion = finalMatch?.winnerId ? getPlayer(finalMatch.winnerId) : null;
+    }
 
     doc.setFontSize(11);
     doc.setFont(undefined!, 'bold');
