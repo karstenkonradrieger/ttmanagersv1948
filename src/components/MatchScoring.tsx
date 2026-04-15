@@ -362,6 +362,17 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
         <Section title="⏳ Anstehende Spiele">
           {pendingMatches
             .filter(m => m.status === 'pending')
+            .sort((a, b) => {
+              const waitA = Math.max(
+                getPlayerWaitRemaining(a.player1Id, matches, breakMinutes, getPlayer(a.player1Id)),
+                getPlayerWaitRemaining(a.player2Id, matches, breakMinutes, getPlayer(a.player2Id))
+              );
+              const waitB = Math.max(
+                getPlayerWaitRemaining(b.player1Id, matches, breakMinutes, getPlayer(b.player1Id)),
+                getPlayerWaitRemaining(b.player2Id, matches, breakMinutes, getPlayer(b.player2Id))
+              );
+              return waitA - waitB;
+            })
             .map(m => {
               const handicapInfo = isHandicap ? computeHandicap(m, getPlayer) : null;
               return <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={handleSetActive} freeTables={freeTables} handicapInfo={handicapInfo} allMatches={matches} breakMinutes={breakMinutes} onUpdatePlayer={onUpdatePlayer} />;
