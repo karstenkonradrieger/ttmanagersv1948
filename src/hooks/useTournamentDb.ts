@@ -696,6 +696,8 @@ export function useTournamentDb(tournamentId: string | null) {
     }
 
     const completedAt = status === 'completed' ? new Date().toISOString() : null;
+    const oldWinnerId = match.winnerId;
+    const winnerChanged = match.status === 'completed' && winnerId && oldWinnerId && winnerId !== oldWinnerId;
 
     try {
       await tournamentService.updateMatch(matchId, {
@@ -712,6 +714,56 @@ export function useTournamentDb(tournamentId: string | null) {
 
       // Propagate winner if completed (only for knockout mode)
       if (winnerId && (tournament.mode === 'knockout' || (tournament.mode === 'group_knockout' && tournament.phase === 'knockout'))) {
+
+        // If the winner changed on an already-completed match, cascade reset subsequent matches
+        if (winnerChanged) {
+          const dbUpdates: Array<{ id: string; data: Record<string, unknown> }> = [];
+          // Collect all match IDs that the old winner was propagated into and reset them
+          const cascadeReset = (playerId: string, fromRound: number, fromPos: number) => {
+            const nextRound = fromRound + 1;
+            const nextPos = Math.floor(fromPos / 2);
+            const nextMatch = updatedMatches.find(nm =>
+              nm.round === nextRound && nm.position === nextPos &&
+              (nm.groupNumber === undefined || nm.groupNumber === null)
+            );
+            if (!nextMatch) return;
+
+            const isP1 = fromPos % 2 === 0;
+            const slotPlayer = isP1 ? nextMatch.player1Id : nextMatch.player2Id;
+            if (slotPlayer !== playerId) return;
+
+            // If this subsequent match was already completed with the old winner participating, reset it
+            if (nextMatch.status === 'completed' && nextMatch.winnerId) {
+              const nextWinner = nextMatch.winnerId;
+              // Reset this match
+              nextMatch.sets = [];
+              nextMatch.winnerId = null;
+              nextMatch.status = 'pending';
+              nextMatch.completedAt = null;
+              if (isP1) nextMatch.player1Id = null;
+              else nextMatch.player2Id = null;
+              dbUpdates.push({ id: nextMatch.id, data: {
+                sets: [], winner_id: null, status: 'pending', completed_at: null,
+                ...(isP1 ? { player1_id: null } : { player2_id: null }),
+              }});
+              // Continue cascading with the winner of this reset match
+              cascadeReset(nextWinner, nextRound, nextPos);
+            } else {
+              // Just clear the player slot
+              if (isP1) nextMatch.player1Id = null;
+              else nextMatch.player2Id = null;
+              dbUpdates.push({ id: nextMatch.id, data: isP1 ? { player1_id: null } : { player2_id: null } });
+            }
+          };
+
+          cascadeReset(oldWinnerId, match.round, match.position);
+          if (dbUpdates.length > 0) {
+            await tournamentService.updateMultipleMatches(dbUpdates);
+            toast.info(`Sieger geändert: ${dbUpdates.length} Folgespiel(e) zurückgesetzt.`);
+          }
+        }
+
+        // Now propagate the new winner
         const koMatches = tournament.mode === 'group_knockout'
           ? updatedMatches.filter(m => m.groupNumber === undefined || m.groupNumber === null)
           : updatedMatches;
