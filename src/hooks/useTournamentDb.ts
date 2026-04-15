@@ -927,21 +927,18 @@ export function useTournamentDb(tournamentId: string | null) {
       }
     });
 
-    // Collect players with active delay (tournament not started long enough for them)
+    // Determine tournament start time for delay calculations
+    let tournamentStartTime: number | null = null;
     const delayedPlayers = new Set<string>();
     if (tournament.started) {
-      // Find the earliest active/completed match to determine tournament start time
       const allStartedMatches = tournament.matches.filter(m => m.status === 'active' || m.status === 'completed');
-      let tournamentStartTime: number | null = null;
       for (const m of allStartedMatches) {
         if (m.completedAt) {
           const t = new Date(m.completedAt).getTime();
           if (!tournamentStartTime || t < tournamentStartTime) tournamentStartTime = t;
         }
       }
-      // If no completed match yet, use first active match assignment as approximate start
       if (!tournamentStartTime) {
-        // Fallback: treat "now" as start, so delay is measured from now
         tournamentStartTime = now;
       }
 
