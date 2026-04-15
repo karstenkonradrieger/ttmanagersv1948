@@ -198,8 +198,10 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
     return single ? [single] : [];
   };
 
-  const handleSetActive = (matchId: string, table?: number) => {
-    onSetActive(matchId, table);
+  const handleSetActive = async (matchId: string, table?: number) => {
+    const result = await onSetActive(matchId, table);
+    if (!result) return;
+
     const match = matches.find(m => m.id === matchId);
     if (match) {
       const next = getNextPendingAfter(matchId);
