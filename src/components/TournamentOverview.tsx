@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MatchPhotos } from '@/components/MatchPhotos';
+import { computeGroupStandings } from '@/components/GroupStageView';
 import { generateMatchReport } from '@/components/MatchReport';
 import { generatePhotoReport } from '@/components/PhotoReport';
 import { generatePlayerReport } from '@/components/PlayerReport';
@@ -1783,12 +1784,47 @@ function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMat
                   .filter(m => m.groupNumber === g)
                   .sort((a, b) => a.round - b.round || a.position - b.position);
                 if (inGroup.length === 0) return null;
+                const standings = computeGroupStandings(inGroup, (id) => getPlayer(id)?.name || '—');
                 return (
                   <div key={`group-${g}`} className="rounded-lg border border-border/50 bg-background/40 overflow-hidden">
                     <div className="px-3 py-2 bg-muted/40 border-b border-border/50 flex items-center justify-between">
                       <h4 className="font-bold text-sm text-foreground">{groupLabel(g)}</h4>
                       <span className="text-[11px] text-muted-foreground">{inGroup.length} Spiele</span>
                     </div>
+                    {standings.length > 0 && (
+                      <div className="px-2 pt-2">
+                        <div className="overflow-x-auto rounded-md border border-border/50">
+                          <table className="w-full text-xs">
+                            <thead className="bg-muted/40">
+                              <tr className="text-muted-foreground">
+                                <th className="px-2 py-1 text-left font-semibold w-6">#</th>
+                                <th className="px-2 py-1 text-left font-semibold">Spieler</th>
+                                <th className="px-2 py-1 text-center font-semibold w-8" title="Spiele">Sp</th>
+                                <th className="px-2 py-1 text-center font-semibold w-12" title="Siege:Niederlagen">S:N</th>
+                                <th className="px-2 py-1 text-center font-semibold w-12" title="Satzdifferenz">Sätze</th>
+                                <th className="px-2 py-1 text-center font-semibold w-14" title="Punktdifferenz">Punkte</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {standings.map((s, idx) => {
+                                const setDiff = s.setsWon - s.setsLost;
+                                const ptsDiff = s.pointsWon - s.pointsLost;
+                                return (
+                                  <tr key={s.playerId} className="border-t border-border/40">
+                                    <td className="px-2 py-1 text-muted-foreground">{idx + 1}</td>
+                                    <td className="px-2 py-1 font-semibold truncate max-w-[160px]">{s.name}</td>
+                                    <td className="px-2 py-1 text-center">{s.played}</td>
+                                    <td className="px-2 py-1 text-center font-semibold text-primary">{s.won}:{s.lost}</td>
+                                    <td className="px-2 py-1 text-center">{s.setsWon}:{s.setsLost} <span className="text-muted-foreground">({setDiff >= 0 ? '+' : ''}{setDiff})</span></td>
+                                    <td className="px-2 py-1 text-center text-muted-foreground">{ptsDiff >= 0 ? '+' : ''}{ptsDiff}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
                     <div className="p-2 space-y-2">{inGroup.map(renderRow)}</div>
                   </div>
                 );

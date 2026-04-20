@@ -15,7 +15,7 @@ interface GroupStanding {
   pointsLost: number;
 }
 
-function computeGroupStandings(
+export function computeGroupStandings(
   groupMatches: Match[],
   getName: (id: string | null) => string,
 ): GroupStanding[] {
@@ -199,6 +199,4 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
   );
 }
 
-// Export for reuse in knockout transition
-export { computeGroupStandings };
 export type { GroupStanding };
