@@ -1674,13 +1674,19 @@ function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMat
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="p-3 space-y-4">
-              {groupRoundsPresent.map(r => {
-                const inRound = groupMatches.filter(m => m.round === r).sort((a, b) => a.position - b.position);
+            <div className="p-3 space-y-5">
+              {groupsPresent.map(g => {
+                const inGroup = groupMatches
+                  .filter(m => m.groupNumber === g)
+                  .sort((a, b) => a.round - b.round || a.position - b.position);
+                if (inGroup.length === 0) return null;
                 return (
-                  <div key={`g-${r}`}>
-                    <h4 className="font-bold text-sm mb-2 text-muted-foreground">Spieltag {r + 1}</h4>
-                    <div className="space-y-2">{inRound.map(renderRow)}</div>
+                  <div key={`group-${g}`} className="rounded-lg border border-border/50 bg-background/40 overflow-hidden">
+                    <div className="px-3 py-2 bg-muted/40 border-b border-border/50 flex items-center justify-between">
+                      <h4 className="font-bold text-sm text-foreground">{groupLabel(g)}</h4>
+                      <span className="text-[11px] text-muted-foreground">{inGroup.length} Spiele</span>
+                    </div>
+                    <div className="p-2 space-y-2">{inGroup.map(renderRow)}</div>
                   </div>
                 );
               })}
