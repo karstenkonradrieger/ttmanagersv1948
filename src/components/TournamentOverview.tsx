@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MatchPhotos } from '@/components/MatchPhotos';
+import { computeGroupStandings } from '@/components/GroupStageView';
 import { generateMatchReport } from '@/components/MatchReport';
 import { generatePhotoReport } from '@/components/PhotoReport';
 import { generatePlayerReport } from '@/components/PlayerReport';
