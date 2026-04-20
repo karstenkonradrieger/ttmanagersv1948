@@ -41,18 +41,18 @@ export function TournamentBracket({ matches, rounds, getPlayer }: Props) {
   return (
     <div className="overflow-x-auto pb-4">
       <div className="flex gap-6 min-w-max items-start">
-        {Array.from({ length: rounds }).map((_, r) => {
+        {presentRounds.map((r, idx) => {
           const roundMatches = matches
             .filter(m => m.round === r)
             .sort((a, b) => a.position - b.position);
 
-          const isFinal = r === rounds - 1;
+          const isFinal = r === maxRound;
 
           return (
             <div key={r} className="flex flex-col min-w-[220px]">
               <div className={`text-center mb-3 pb-2 border-b ${isFinal ? 'border-primary/40' : 'border-border/40'}`}>
                 <h3 className={`text-xs font-bold uppercase tracking-widest ${isFinal ? 'text-primary' : 'text-muted-foreground'}`}>
-                  {roundNames(r, rounds)}
+                  {roundNames(r)}
                 </h3>
                 <span className="text-[10px] text-muted-foreground/60">
                   {roundMatches.length} {roundMatches.length === 1 ? 'Spiel' : 'Spiele'}
@@ -60,7 +60,7 @@ export function TournamentBracket({ matches, rounds, getPlayer }: Props) {
               </div>
               <div
                 className="flex flex-col justify-around flex-1"
-                style={{ gap: `${Math.max(Math.pow(2, r) * 8, 12)}px` }}
+                style={{ gap: `${Math.max(Math.pow(2, idx) * 8, 12)}px` }}
               >
                 {roundMatches.map(match => (
                   <BracketMatch key={match.id} match={match} getPlayer={getPlayer} isFinal={isFinal} />
