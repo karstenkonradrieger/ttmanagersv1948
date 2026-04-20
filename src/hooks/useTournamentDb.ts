@@ -555,10 +555,8 @@ export function useTournamentDb(tournamentId: string | null) {
       const slots = Math.pow(2, Math.ceil(Math.log2(n)));
       rounds = Math.log2(slots);
 
-      const seeded: (string | null)[] = Array(slots).fill(null);
-      for (let i = 0; i < n; i++) {
-        seeded[i] = participants[i];
-      }
+      // Standard bracket seeding: byes are paired with top seeds, no empty matches
+      const seeded: (string | null)[] = seedBracketSlots(participants, slots);
 
       matchesData = [];
 
@@ -566,7 +564,9 @@ export function useTournamentDb(tournamentId: string | null) {
       for (let i = 0; i < slots / 2; i++) {
         const p1 = seeded[i * 2];
         const p2 = seeded[i * 2 + 1];
-        const isBye = p2 === null;
+        const bothNull = p1 === null && p2 === null;
+        const isBye = !bothNull && (p1 === null || p2 === null);
+        const soleParticipant = p1 ?? p2;
         matchesData.push({
           round: 0,
           position: i,
@@ -575,7 +575,7 @@ export function useTournamentDb(tournamentId: string | null) {
           homeTeamId: isTeam ? p1 : null,
           awayTeamId: isTeam ? p2 : null,
           sets: [],
-          winnerId: isBye && !isTeam ? p1 : null,
+          winnerId: isBye && !isTeam ? soleParticipant : null,
           status: isBye ? 'completed' : 'pending',
         });
       }
@@ -1370,10 +1370,8 @@ export function useTournamentDb(tournamentId: string | null) {
     const slots = Math.pow(2, Math.ceil(Math.log2(n)));
     const koRounds = Math.log2(slots);
 
-    const seededSlots: (string | null)[] = Array(slots).fill(null);
-    for (let i = 0; i < n; i++) {
-      seededSlots[i] = seeded[i];
-    }
+    // Place seeds into bracket so byes go to top seeds (no empty matches)
+    const seededSlots: (string | null)[] = seedBracketSlots(seeded, slots);
 
     const koMatchesData: Omit<Match, 'id'>[] = [];
 
@@ -1381,14 +1379,16 @@ export function useTournamentDb(tournamentId: string | null) {
     for (let i = 0; i < slots / 2; i++) {
       const p1 = seededSlots[i * 2];
       const p2 = seededSlots[i * 2 + 1];
-      const isBye = p2 === null;
+      const bothNull = p1 === null && p2 === null;
+      const isBye = !bothNull && (p1 === null || p2 === null);
+      const soleParticipant = p1 ?? p2;
       koMatchesData.push({
         round: 0,
         position: i,
         player1Id: p1,
         player2Id: p2,
         sets: [],
-        winnerId: isBye ? p1 : null,
+        winnerId: isBye ? soleParticipant : null,
         status: isBye ? 'completed' : 'pending',
         groupNumber: null,
       });
@@ -1825,6 +1825,37 @@ export function useTournamentDb(tournamentId: string | null) {
     updateKaiserDuration,
     generateNextKaiserRound,
   };
+}
+
+// Standard tournament bracket seeding order for `size` slots (size must be power of 2).
+// Returns an array of seed numbers (1-based) in slot order. Top seeds are placed so that
+// they only meet in later rounds, and byes (null seeds beyond participant count) end up
+// paired against the highest seeds.
+function standardSeedOrder(size: number): number[] {
+  let order = [1];
+  while (order.length < size) {
+    const next: number[] = [];
+    const sum = order.length * 2 + 1;
+    for (const s of order) {
+      next.push(s);
+      next.push(sum - s);
+    }
+    order = next;
+  }
+  return order;
+}
+
+// Place participants into bracket slots so that byes are assigned to top seeds.
+// `participants` is in seed order (best first). Returns array of length `slots`
+// where null entries represent byes.
+function seedBracketSlots(participants: (string | null)[], slots: number): (string | null)[] {
+  const order = standardSeedOrder(slots); // seed number per slot index
+  const result: (string | null)[] = Array(slots).fill(null);
+  for (let i = 0; i < slots; i++) {
+    const seedNum = order[i]; // 1-based
+    result[i] = seedNum <= participants.length ? participants[seedNum - 1] : null;
+  }
+  return result;
 }
 
 function propagateWinners(matches: Match[]): Match[] {
