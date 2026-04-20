@@ -1588,3 +1588,149 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     </div>
   );
 }
+
+function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMatchId, setEditingMatchId, onUpdateScore }: {
+  matches: Match[];
+  rounds: number;
+  mode?: string;
+  getPlayer: (id: string | null) => Player | null;
+  bestOf: number;
+  editingMatchId: string | null;
+  setEditingMatchId: (id: string | null) => void;
+  onUpdateScore?: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
+}) {
+  const groupMatches = matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
+  const koMatches = matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
+
+  // KO-Round-Labels basierend auf den vorhandenen KO-Match-Runden (nicht auf `rounds` total)
+  const koRoundsPresent = Array.from(new Set(koMatches.map(m => m.round))).sort((a, b) => a - b);
+  const koMaxRound = koRoundsPresent.length > 0 ? koRoundsPresent[koRoundsPresent.length - 1] : 0;
+  const koMinRound = koRoundsPresent.length > 0 ? koRoundsPresent[0] : 0;
+
+  const koRoundLabel = (r: number): string => {
+    const matchesInRound = koMatches.filter(m => m.round === r).length;
+    const fromEnd = koMaxRound - r;
+    if (fromEnd === 0) return 'Finale';
+    if (fromEnd === 1) return 'Halbfinale';
+    if (fromEnd === 2 && matchesInRound <= 4) return 'Viertelfinale';
+    if (fromEnd === 3 && matchesInRound <= 8) return 'Achtelfinale';
+    return `K.O. Runde ${r - koMinRound + 1}`;
+  };
+
+  // Gruppen-Runden in der Reihenfolge ihrer round-Werte
+  const groupRoundsPresent = Array.from(new Set(groupMatches.map(m => m.round))).sort((a, b) => a - b);
+
+  const [groupOpen, setGroupOpen] = useState(false);
+  const [koOpen, setKoOpen] = useState(true);
+
+  const renderRow = (m: Match) => (
+    <OverviewMatchRow
+      key={m.id}
+      match={m}
+      getPlayer={getPlayer}
+      bestOf={bestOf}
+      mode={mode}
+      rounds={rounds}
+      isEditing={editingMatchId === m.id}
+      onStartEdit={() => setEditingMatchId(m.id)}
+      onCancelEdit={() => setEditingMatchId(null)}
+      onUpdateScore={onUpdateScore ? (sets, ebo) => {
+        onUpdateScore(m.id, sets, ebo);
+        setEditingMatchId(null);
+      } : undefined}
+    />
+  );
+
+  // Falls nur eine Phase vorhanden ist, zeige sie ohne Trennung
+  if (groupMatches.length === 0 || koMatches.length === 0) {
+    const all = matches.slice().sort((a, b) => a.round - b.round || a.position - b.position);
+    return <div className="space-y-2">{all.map(renderRow)}</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* === Sektion 1: Gruppenphase (collapsible) === */}
+      <Collapsible open={groupOpen} onOpenChange={setGroupOpen} asChild>
+        <section className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              className="w-full flex items-center justify-between gap-3 px-4 py-2.5 border-b border-border/50 bg-muted/30 hover:bg-muted/50 transition-colors text-left"
+              aria-label={groupOpen ? 'Gruppenphase einklappen' : 'Gruppenphase ausklappen'}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary/15 text-primary text-xs font-bold flex-shrink-0">1</span>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold leading-tight">Gruppenphase</h3>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {groupMatches.length} Spiele
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${groupOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="p-3 space-y-4">
+              {groupRoundsPresent.map(r => {
+                const inRound = groupMatches.filter(m => m.round === r).sort((a, b) => a.position - b.position);
+                return (
+                  <div key={`g-${r}`}>
+                    <h4 className="font-bold text-sm mb-2 text-muted-foreground">Spieltag {r + 1}</h4>
+                    <div className="space-y-2">{inRound.map(renderRow)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </CollapsibleContent>
+        </section>
+      </Collapsible>
+
+      {/* === Visueller Trenner === */}
+      <div className="flex items-center gap-3" aria-hidden="true">
+        <div className="flex-1 h-px bg-border/60" />
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+          ↓ K.O.-Runde ↓
+        </span>
+        <div className="flex-1 h-px bg-border/60" />
+      </div>
+
+      {/* === Sektion 2: K.O.-Runde (collapsible, default offen) === */}
+      <Collapsible open={koOpen} onOpenChange={setKoOpen} asChild>
+        <section className="rounded-xl border-2 border-primary/30 bg-primary/[0.02] overflow-hidden">
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              className="w-full flex items-center justify-between gap-3 px-4 py-2.5 border-b border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors text-left"
+              aria-label={koOpen ? 'K.O.-Phase einklappen' : 'K.O.-Phase ausklappen'}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary text-primary-foreground text-xs font-bold flex-shrink-0">2</span>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold leading-tight text-primary">K.O.-Runde</h3>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {koMatches.length} Spiele
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${koOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="p-3 space-y-4">
+              {koRoundsPresent.map(r => {
+                const inRound = koMatches.filter(m => m.round === r).sort((a, b) => a.position - b.position);
+                return (
+                  <div key={`k-${r}`}>
+                    <h4 className="font-bold text-sm mb-2 text-primary">{koRoundLabel(r)}</h4>
+                    <div className="space-y-2">{inRound.map(renderRow)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </CollapsibleContent>
+        </section>
+      </Collapsible>
+    </div>
+  );
+}
