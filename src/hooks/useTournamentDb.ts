@@ -4,6 +4,7 @@ import { Json } from '@/integrations/supabase/types';
 import * as tournamentService from '@/services/tournamentService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { computeQualifiedPlayers } from '@/services/byeValidation';
 
 const emptyTournament: Tournament = {
   id: '',
