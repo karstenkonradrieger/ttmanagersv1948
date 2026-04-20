@@ -578,39 +578,82 @@ const Index = () => {
                       />
                     </>
                   ) : (
-                    <div className="space-y-6">
-                      <GroupStageView
-                        matches={tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null)}
-                        players={tournament.players}
-                        getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
-                        groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? 0)), 0) + 1}
-                      />
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-bold">🏆 K.O.-Runde</h3>
-                        {hasMisallocatedByes(tournament.matches, tournament.players) && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1.5 border-destructive/50 text-destructive hover:bg-destructive/10"
-                            onClick={() => {
-                              if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
-                                redistributeKnockoutByes();
-                              }
-                            }}
-                          >
-                            <RefreshCw className="h-3.5 w-3.5" />
-                            Freilose neu verteilen
-                          </Button>
-                        )}
+                    <div className="space-y-8">
+                      {/* === Sektion 1: Gruppenphase === */}
+                      <section className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+                        <header className="flex items-center justify-between gap-3 px-5 py-3 border-b border-border/50 bg-muted/30">
+                          <div className="flex items-center gap-3">
+                            <span className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/15 text-primary text-sm font-bold">1</span>
+                            <div>
+                              <h3 className="text-base font-bold leading-tight">Gruppenphase</h3>
+                              <p className="text-xs text-muted-foreground">Abgeschlossen — Ergebnisse & Tabellen</p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-muted text-muted-foreground">
+                            Phase 1
+                          </span>
+                        </header>
+                        <div className="p-4">
+                          <GroupStageView
+                            matches={tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null)}
+                            players={tournament.players}
+                            getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
+                            groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? 0)), 0) + 1}
+                          />
+                        </div>
+                      </section>
+
+                      {/* === Visueller Trenner === */}
+                      <div className="flex items-center gap-3" aria-hidden="true">
+                        <div className="flex-1 h-px bg-border/60" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+                          ↓ Qualifizierte ziehen ins K.O. ein ↓
+                        </span>
+                        <div className="flex-1 h-px bg-border/60" />
                       </div>
-                      <TournamentBracket
-                        matches={tournament.matches.filter(m => (m.groupNumber === undefined || m.groupNumber === null) && (m.bracketType ?? 'main') === 'main')}
-                        rounds={tournament.rounds}
-                        getPlayer={isDoubles
-                          ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
-                          : getPlayer
-                        }
-                      />
+
+                      {/* === Sektion 2: K.O.-Phase === */}
+                      <section className="rounded-xl border-2 border-primary/30 bg-primary/[0.02] overflow-hidden">
+                        <header className="flex items-center justify-between gap-3 px-5 py-3 border-b border-primary/20 bg-primary/5">
+                          <div className="flex items-center gap-3">
+                            <span className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary text-primary-foreground text-sm font-bold">2</span>
+                            <div>
+                              <h3 className="text-base font-bold leading-tight text-primary">K.O.-Runde</h3>
+                              <p className="text-xs text-muted-foreground">Finalrunden um den Turniersieg</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {hasMisallocatedByes(tournament.matches, tournament.players) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5 border-destructive/50 text-destructive hover:bg-destructive/10"
+                                onClick={() => {
+                                  if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
+                                    redistributeKnockoutByes();
+                                  }
+                                }}
+                              >
+                                <RefreshCw className="h-3.5 w-3.5" />
+                                Freilose neu verteilen
+                              </Button>
+                            )}
+                            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-primary/15 text-primary">
+                              Phase 2
+                            </span>
+                          </div>
+                        </header>
+                        <div className="p-4">
+                          <TournamentBracket
+                            matches={tournament.matches.filter(m => (m.groupNumber === undefined || m.groupNumber === null) && (m.bracketType ?? 'main') === 'main')}
+                            rounds={tournament.rounds}
+                            getPlayer={isDoubles
+                              ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
+                              : getPlayer
+                            }
+                          />
+                        </div>
+                      </section>
                     </div>
                   )}
                 </>
