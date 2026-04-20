@@ -410,6 +410,12 @@ const Index = () => {
               <Film className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Medien</span>
             </TabsTrigger>
+            {hasConsolation && (
+              <TabsTrigger value="consolation" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+                <Swords className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Trostrunde</span>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="live" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
               <Monitor className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Live</span>
