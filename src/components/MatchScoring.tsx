@@ -428,6 +428,72 @@ function Section({ title, children, action }: { title: string; children: React.R
   );
 }
 
+function PhaseGroupedMatches({ matches, mode, renderMatch }: {
+  matches: Match[];
+  mode?: string;
+  renderMatch: (m: Match) => React.ReactNode;
+}) {
+  const isGroupKnockout = mode === 'group_knockout';
+  const groupMatches = matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
+  const koMatches = matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
+
+  // No split needed: not group+KO, or only one phase present
+  if (!isGroupKnockout || groupMatches.length === 0 || koMatches.length === 0) {
+    return <>{matches.map(renderMatch)}</>;
+  }
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <PhaseHeader
+          number={1}
+          label="Gruppenphase"
+          count={groupMatches.length}
+          tone="muted"
+        />
+        <div className="space-y-3 mt-2">{groupMatches.map(renderMatch)}</div>
+      </div>
+      <div>
+        <PhaseHeader
+          number={2}
+          label="K.O.-Runde"
+          count={koMatches.length}
+          tone="primary"
+        />
+        <div className="space-y-3 mt-2">{koMatches.map(renderMatch)}</div>
+      </div>
+    </div>
+  );
+}
+
+function PhaseHeader({ number, label, count, tone }: {
+  number: number;
+  label: string;
+  count: number;
+  tone: 'muted' | 'primary';
+}) {
+  const isPrimary = tone === 'primary';
+  return (
+    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md border ${
+      isPrimary ? 'border-primary/30 bg-primary/5' : 'border-border/60 bg-muted/30'
+    }`}>
+      <span className={`flex items-center justify-center h-5 w-5 rounded text-[10px] font-bold ${
+        isPrimary ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
+      }`}>
+        {number}
+      </span>
+      <h4 className={`text-xs font-bold uppercase tracking-wider ${
+        isPrimary ? 'text-primary' : 'text-muted-foreground'
+      }`}>
+        {label}
+      </h4>
+      <span className="text-[10px] text-muted-foreground ml-auto">
+        {count} {count === 1 ? 'Spiel' : 'Spiele'}
+      </span>
+    </div>
+  );
+}
+
 function getPlayerWaitRemaining(playerId: string | null, allMatches: Match[], breakMinutes: number, player: Player | null): number {
   if (!playerId) return 0;
   const now = Date.now();
