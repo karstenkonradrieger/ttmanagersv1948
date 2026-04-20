@@ -5,6 +5,7 @@ import * as tournamentService from '@/services/tournamentService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { computeQualifiedPlayers } from '@/services/byeValidation';
+import { computeConsolationSeeds, buildConsolationMatches, isMainRound0Complete, hasConsolationBracket } from '@/services/consolationBracket';
 
 const emptyTournament: Tournament = {
   id: '',
