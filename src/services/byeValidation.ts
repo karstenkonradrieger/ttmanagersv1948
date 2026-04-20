@@ -10,13 +10,23 @@ interface QualifiedPlayer {
 }
 
 /**
- * Computes group standings and returns the qualified players (top 2 per group),
- * ranked across groups by performance within their rank tier.
+ * Computes group standings and returns the qualified players, ranked across
+ * groups by performance within their rank tier.
+ *
+ * @param qualifyPerGroup How many top players per group to include in the
+ *   result. Defaults to 2 (winners + runners-up). Pass 3 to additionally get
+ *   group thirds (e.g. for a Trostrunde / consolation bracket).
  */
 export function computeQualifiedPlayers(
   groupMatches: Match[],
-  players: Player[]
-): { winners: QualifiedPlayer[]; runnersUp: QualifiedPlayer[] } {
+  players: Player[],
+  qualifyPerGroup: number = 2
+): {
+  winners: QualifiedPlayer[];
+  runnersUp: QualifiedPlayer[];
+  thirds: QualifiedPlayer[];
+  byRank: QualifiedPlayer[][];
+} {
   const groupCount = Math.max(...players.map(p => (p.groupNumber ?? 0)), 0) + 1;
   const qualified: QualifiedPlayer[] = [];
 
@@ -55,7 +65,7 @@ export function computeQualifiedPlayers(
       return (b.pointsWon - b.pointsLost) - (a.pointsWon - a.pointsLost);
     });
 
-    for (let i = 0; i < Math.min(2, standings.length); i++) {
+    for (let i = 0; i < Math.min(qualifyPerGroup, standings.length); i++) {
       const s = standings[i];
       qualified.push({
         playerId: s.playerId, groupNumber: g, rank: i + 1,
@@ -70,9 +80,16 @@ export function computeQualifiedPlayers(
     return b.pointsDiff - a.pointsDiff;
   };
 
+  const byRank: QualifiedPlayer[][] = [];
+  for (let r = 1; r <= qualifyPerGroup; r++) {
+    byRank.push(qualified.filter(q => q.rank === r).sort(perfSort));
+  }
+
   return {
-    winners: qualified.filter(q => q.rank === 1).sort(perfSort),
-    runnersUp: qualified.filter(q => q.rank === 2).sort(perfSort),
+    winners: byRank[0] ?? [],
+    runnersUp: byRank[1] ?? [],
+    thirds: byRank[2] ?? [],
+    byRank,
   };
 }
 
