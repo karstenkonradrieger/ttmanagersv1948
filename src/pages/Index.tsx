@@ -86,6 +86,8 @@ const Index = () => {
   const [homeTab, setHomeTab] = useState<'tournaments' | 'clubs' | 'settings'>('tournaments');
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState('');
+  const [groupSectionOpen, setGroupSectionOpen] = useState(false);
+  const [koSectionOpen, setKoSectionOpen] = useState(true);
 
   const isDoubles = tournament.type === 'doubles';
   const isTeam = tournament.type === 'team';
