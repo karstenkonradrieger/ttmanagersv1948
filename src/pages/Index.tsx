@@ -581,30 +581,45 @@ const Index = () => {
                       />
                     </>
                   ) : (
-                    <div className="space-y-8">
-                      {/* === Sektion 1: Gruppenphase === */}
-                      <section className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
-                        <header className="flex items-center justify-between gap-3 px-5 py-3 border-b border-border/50 bg-muted/30">
-                          <div className="flex items-center gap-3">
-                            <span className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/15 text-primary text-sm font-bold">1</span>
-                            <div>
-                              <h3 className="text-base font-bold leading-tight">Gruppenphase</h3>
-                              <p className="text-xs text-muted-foreground">Abgeschlossen — Ergebnisse & Tabellen</p>
+                    <div className="space-y-6">
+                      {/* === Sektion 1: Gruppenphase (collapsible) === */}
+                      <Collapsible open={groupSectionOpen} onOpenChange={setGroupSectionOpen} asChild>
+                        <section className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+                          <CollapsibleTrigger asChild>
+                            <button
+                              type="button"
+                              className="w-full flex items-center justify-between gap-3 px-5 py-3 border-b border-border/50 bg-muted/30 hover:bg-muted/50 transition-colors text-left"
+                              aria-label={groupSectionOpen ? 'Gruppenphase einklappen' : 'Gruppenphase ausklappen'}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <span className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/15 text-primary text-sm font-bold flex-shrink-0">1</span>
+                                <div className="min-w-0">
+                                  <h3 className="text-base font-bold leading-tight">Gruppenphase</h3>
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    {groupSectionOpen ? 'Abgeschlossen — Ergebnisse & Tabellen' : 'Klick zum Anzeigen der Gruppen-Tabellen'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-muted text-muted-foreground hidden sm:inline">
+                                  Phase 1
+                                </span>
+                                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${groupSectionOpen ? 'rotate-180' : ''}`} />
+                              </div>
+                            </button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="p-4">
+                              <GroupStageView
+                                matches={tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null)}
+                                players={tournament.players}
+                                getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
+                                groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? 0)), 0) + 1}
+                              />
                             </div>
-                          </div>
-                          <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-muted text-muted-foreground">
-                            Phase 1
-                          </span>
-                        </header>
-                        <div className="p-4">
-                          <GroupStageView
-                            matches={tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null)}
-                            players={tournament.players}
-                            getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
-                            groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? 0)), 0) + 1}
-                          />
-                        </div>
-                      </section>
+                          </CollapsibleContent>
+                        </section>
+                      </Collapsible>
 
                       {/* === Visueller Trenner === */}
                       <div className="flex items-center gap-3" aria-hidden="true">
@@ -615,48 +630,61 @@ const Index = () => {
                         <div className="flex-1 h-px bg-border/60" />
                       </div>
 
-                      {/* === Sektion 2: K.O.-Phase === */}
-                      <section className="rounded-xl border-2 border-primary/30 bg-primary/[0.02] overflow-hidden">
-                        <header className="flex items-center justify-between gap-3 px-5 py-3 border-b border-primary/20 bg-primary/5">
-                          <div className="flex items-center gap-3">
-                            <span className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary text-primary-foreground text-sm font-bold">2</span>
-                            <div>
-                              <h3 className="text-base font-bold leading-tight text-primary">K.O.-Runde</h3>
-                              <p className="text-xs text-muted-foreground">Finalrunden um den Turniersieg</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {hasMisallocatedByes(tournament.matches, tournament.players) && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5 border-destructive/50 text-destructive hover:bg-destructive/10"
-                                onClick={() => {
-                                  if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
-                                    redistributeKnockoutByes();
-                                  }
-                                }}
+                      {/* === Sektion 2: K.O.-Phase (collapsible) === */}
+                      <Collapsible open={koSectionOpen} onOpenChange={setKoSectionOpen} asChild>
+                        <section className="rounded-xl border-2 border-primary/30 bg-primary/[0.02] overflow-hidden">
+                          <header className="flex items-stretch border-b border-primary/20 bg-primary/5">
+                            <CollapsibleTrigger asChild>
+                              <button
+                                type="button"
+                                className="flex-1 flex items-center gap-3 px-5 py-3 hover:bg-primary/10 transition-colors text-left min-w-0"
+                                aria-label={koSectionOpen ? 'K.O.-Phase einklappen' : 'K.O.-Phase ausklappen'}
                               >
-                                <RefreshCw className="h-3.5 w-3.5" />
-                                Freilose neu verteilen
-                              </Button>
-                            )}
-                            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-primary/15 text-primary">
-                              Phase 2
-                            </span>
-                          </div>
-                        </header>
-                        <div className="p-4">
-                          <TournamentBracket
-                            matches={tournament.matches.filter(m => (m.groupNumber === undefined || m.groupNumber === null) && (m.bracketType ?? 'main') === 'main')}
-                            rounds={tournament.rounds}
-                            getPlayer={isDoubles
-                              ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
-                              : getPlayer
-                            }
-                          />
-                        </div>
-                      </section>
+                                <span className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary text-primary-foreground text-sm font-bold flex-shrink-0">2</span>
+                                <div className="min-w-0">
+                                  <h3 className="text-base font-bold leading-tight text-primary">K.O.-Runde</h3>
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    {koSectionOpen ? 'Finalrunden um den Turniersieg' : 'Klick zum Anzeigen des K.O.-Brackets'}
+                                  </p>
+                                </div>
+                                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ml-auto ${koSectionOpen ? 'rotate-180' : ''}`} />
+                              </button>
+                            </CollapsibleTrigger>
+                            <div className="flex items-center gap-2 px-3 border-l border-primary/20">
+                              {hasMisallocatedByes(tournament.matches, tournament.players) && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5 border-destructive/50 text-destructive hover:bg-destructive/10"
+                                  onClick={() => {
+                                    if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
+                                      redistributeKnockoutByes();
+                                    }
+                                  }}
+                                >
+                                  <RefreshCw className="h-3.5 w-3.5" />
+                                  <span className="hidden sm:inline">Freilose neu verteilen</span>
+                                </Button>
+                              )}
+                              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-primary/15 text-primary hidden sm:inline">
+                                Phase 2
+                              </span>
+                            </div>
+                          </header>
+                          <CollapsibleContent>
+                            <div className="p-4">
+                              <TournamentBracket
+                                matches={tournament.matches.filter(m => (m.groupNumber === undefined || m.groupNumber === null) && (m.bracketType ?? 'main') === 'main')}
+                                rounds={tournament.rounds}
+                                getPlayer={isDoubles
+                                  ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
+                                  : getPlayer
+                                }
+                              />
+                            </div>
+                          </CollapsibleContent>
+                        </section>
+                      </Collapsible>
                     </div>
                   )}
                 </>
