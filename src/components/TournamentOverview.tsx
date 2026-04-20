@@ -1124,58 +1124,161 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
               {showMatchPhotos ? 'Fotos ausblenden' : 'Fotos einblenden'}
             </Button>
           </div>
-          <div className="space-y-3">
-            {matchesByRound.map((roundMatches, r) => {
-              const completedInRound = roundMatches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id);
-              if (completedInRound.length === 0) return null;
+          {(() => {
+            const renderPhotoCard = (m: Match, roundLabel: string) => {
+              const p1 = getPlayer(m.player1Id);
+              const p2 = getPlayer(m.player2Id);
               return (
-                <div key={`photos-${r}`}>
-                  <h5 className="text-xs font-semibold text-muted-foreground mb-2">{getRoundName(r, rounds, mode)}</h5>
-                  {completedInRound.map(m => {
-                    const p1 = getPlayer(m.player1Id);
-                    const p2 = getPlayer(m.player2Id);
-                    return (
-                      <div key={`photo-${m.id}`} className="bg-card rounded-lg p-3 card-shadow mb-2">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-xs font-semibold">{p1?.name} vs {p2?.name}</p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 text-xs text-muted-foreground"
-                            onClick={() => generateMatchReport({
-                              match: m, player1: p1, player2: p2,
-                              tournamentName, tournamentId,
-                              roundName: getRoundName(r, rounds, mode),
-                              logoUrl, bestOf, sponsors,
-                            })}
-                          >
-                            <FileText className="mr-1 h-3 w-3" />
-                            Spielbericht
-                          </Button>
-                        </div>
-                        {showMatchPhotos && (
-                          <MatchPhotos
-                            tournamentId={tournamentId}
-                            matchId={m.id}
-                            photoType="match"
-                            readOnly
-                          />
-                        )}
-                      </div>
-                    );
-                  })}
+                <div key={`photo-${m.id}`} className="bg-card rounded-lg p-3 card-shadow mb-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold">{p1?.name} vs {p2?.name}</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs text-muted-foreground"
+                      onClick={() => generateMatchReport({
+                        match: m, player1: p1, player2: p2,
+                        tournamentName, tournamentId,
+                        roundName: roundLabel,
+                        logoUrl, bestOf, sponsors,
+                      })}
+                    >
+                      <FileText className="mr-1 h-3 w-3" />
+                      Spielbericht
+                    </Button>
+                  </div>
+                  {showMatchPhotos && (
+                    <MatchPhotos
+                      tournamentId={tournamentId}
+                      matchId={m.id}
+                      photoType="match"
+                      readOnly
+                    />
+                  )}
                 </div>
               );
-            })}
-            <div className="bg-card rounded-lg p-3 card-shadow">
-              <p className="text-xs font-semibold mb-2">🏆 Siegerehrung</p>
-              <MatchPhotos
-                tournamentId={tournamentId}
-                photoType="ceremony"
-                readOnly
-              />
-            </div>
-          </div>
+            };
+
+            const ceremony = (
+              <div className="bg-card rounded-lg p-3 card-shadow">
+                <p className="text-xs font-semibold mb-2">🏆 Siegerehrung</p>
+                <MatchPhotos
+                  tournamentId={tournamentId}
+                  photoType="ceremony"
+                  readOnly
+                />
+              </div>
+            );
+
+            if (mode === 'group_knockout') {
+              const completed = matches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id);
+              const groupCompleted = completed.filter(m => typeof m.groupNumber === 'number' && m.groupNumber >= 0);
+              const koCompleted = completed.filter(m => m.groupNumber == null || (typeof m.groupNumber === 'number' && m.groupNumber < 0));
+
+              const groupsPresent = Array.from(new Set(groupCompleted.map(m => m.groupNumber as number))).sort((a, b) => a - b);
+              const groupLabel = (g: number) => `Gruppe ${String.fromCharCode(65 + g)}`;
+
+              const koRoundsPresent = Array.from(new Set(koCompleted.map(m => m.round))).sort((a, b) => a - b);
+              const koMaxRound = koRoundsPresent.length > 0 ? koRoundsPresent[koRoundsPresent.length - 1] : 0;
+              const koMinRound = koRoundsPresent.length > 0 ? koRoundsPresent[0] : 0;
+              const koRoundLabel = (r: number): string => {
+                const matchesInRound = koCompleted.filter(m => m.round === r).length;
+                const fromEnd = koMaxRound - r;
+                if (fromEnd === 0) return 'Finale';
+                if (fromEnd === 1) return 'Halbfinale';
+                if (fromEnd === 2 && matchesInRound <= 4) return 'Viertelfinale';
+                if (fromEnd === 3 && matchesInRound <= 8) return 'Achtelfinale';
+                return `K.O. Runde ${r - koMinRound + 1}`;
+              };
+
+              return (
+                <div className="space-y-4">
+                  {/* === Gruppenphase === */}
+                  {groupCompleted.length > 0 && (
+                    <section className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+                      <div className="px-4 py-2.5 border-b border-border/50 bg-muted/30 flex items-center gap-3">
+                        <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary/15 text-primary text-xs font-bold flex-shrink-0">1</span>
+                        <div>
+                          <h5 className="text-sm font-bold leading-tight">Gruppenphase</h5>
+                          <p className="text-[11px] text-muted-foreground">{groupCompleted.length} abgeschlossene Spiele</p>
+                        </div>
+                      </div>
+                      <div className="p-3 space-y-4">
+                        {groupsPresent.map(g => {
+                          const inGroup = groupCompleted
+                            .filter(m => m.groupNumber === g)
+                            .sort((a, b) => a.round - b.round || a.position - b.position);
+                          if (inGroup.length === 0) return null;
+                          return (
+                            <div key={`rs-g-${g}`} className="rounded-lg border border-border/50 bg-background/40 overflow-hidden">
+                              <div className="px-3 py-2 bg-muted/40 border-b border-border/50">
+                                <h6 className="font-bold text-xs">{groupLabel(g)}</h6>
+                              </div>
+                              <div className="p-2">
+                                {inGroup.map(m => renderPhotoCard(m, groupLabel(g)))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* Visueller Trenner */}
+                  {groupCompleted.length > 0 && koCompleted.length > 0 && (
+                    <div className="flex items-center gap-3" aria-hidden="true">
+                      <div className="flex-1 h-px bg-border/60" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">↓ K.O.-Runde ↓</span>
+                      <div className="flex-1 h-px bg-border/60" />
+                    </div>
+                  )}
+
+                  {/* === K.O.-Runde === */}
+                  {koCompleted.length > 0 && (
+                    <section className="rounded-xl border-2 border-primary/30 bg-primary/[0.02] overflow-hidden">
+                      <div className="px-4 py-2.5 border-b border-primary/20 bg-primary/5 flex items-center gap-3">
+                        <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary text-primary-foreground text-xs font-bold flex-shrink-0">2</span>
+                        <div>
+                          <h5 className="text-sm font-bold leading-tight text-primary">K.O.-Runde</h5>
+                          <p className="text-[11px] text-muted-foreground">{koCompleted.length} abgeschlossene Spiele</p>
+                        </div>
+                      </div>
+                      <div className="p-3 space-y-4">
+                        {koRoundsPresent.map(r => {
+                          const inRound = koCompleted.filter(m => m.round === r).sort((a, b) => a.position - b.position);
+                          return (
+                            <div key={`rs-k-${r}`}>
+                              <h6 className="font-bold text-xs mb-2 text-primary">{koRoundLabel(r)}</h6>
+                              {inRound.map(m => renderPhotoCard(m, koRoundLabel(r)))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  )}
+
+                  {ceremony}
+                </div>
+              );
+            }
+
+            return (
+              <div className="space-y-3">
+                {matchesByRound.map((roundMatches, r) => {
+                  const completedInRound = roundMatches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id);
+                  if (completedInRound.length === 0) return null;
+                  const roundLabel = getRoundName(r, rounds, mode);
+                  return (
+                    <div key={`photos-${r}`}>
+                      <h5 className="text-xs font-semibold text-muted-foreground mb-2">{roundLabel}</h5>
+                      {completedInRound.map(m => renderPhotoCard(m, roundLabel))}
+                    </div>
+                  );
+                })}
+                {ceremony}
+              </div>
+            );
+          })()}
         </div>
       )}
 
