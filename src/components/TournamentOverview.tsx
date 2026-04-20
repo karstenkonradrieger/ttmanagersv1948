@@ -1599,8 +1599,10 @@ function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMat
   setEditingMatchId: (id: string | null) => void;
   onUpdateScore?: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
 }) {
-  const groupMatches = matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
-  const koMatches = matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
+  // Strikte Trennung: Gruppen-Matches haben groupNumber als nicht-negative Zahl;
+  // KO-Matches haben groupNumber null/undefined (oder negativ, wie bei double_knockout-Finals)
+  const groupMatches = matches.filter(m => typeof m.groupNumber === 'number' && m.groupNumber >= 0);
+  const koMatches = matches.filter(m => m.groupNumber == null || (typeof m.groupNumber === 'number' && m.groupNumber < 0));
 
   // KO-Round-Labels basierend auf den vorhandenen KO-Match-Runden (nicht auf `rounds` total)
   const koRoundsPresent = Array.from(new Set(koMatches.map(m => m.round))).sort((a, b) => a - b);
@@ -1617,8 +1619,9 @@ function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMat
     return `K.O. Runde ${r - koMinRound + 1}`;
   };
 
-  // Gruppen-Runden in der Reihenfolge ihrer round-Werte
-  const groupRoundsPresent = Array.from(new Set(groupMatches.map(m => m.round))).sort((a, b) => a - b);
+  // Gruppen vorhanden (nach groupNumber): 0=A, 1=B, 2=C, ...
+  const groupsPresent = Array.from(new Set(groupMatches.map(m => m.groupNumber as number))).sort((a, b) => a - b);
+  const groupLabel = (g: number) => `Gruppe ${String.fromCharCode(65 + g)}`;
 
   const [groupOpen, setGroupOpen] = useState(false);
   const [koOpen, setKoOpen] = useState(true);
@@ -1671,13 +1674,19 @@ function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMat
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="p-3 space-y-4">
-              {groupRoundsPresent.map(r => {
-                const inRound = groupMatches.filter(m => m.round === r).sort((a, b) => a.position - b.position);
+            <div className="p-3 space-y-5">
+              {groupsPresent.map(g => {
+                const inGroup = groupMatches
+                  .filter(m => m.groupNumber === g)
+                  .sort((a, b) => a.round - b.round || a.position - b.position);
+                if (inGroup.length === 0) return null;
                 return (
-                  <div key={`g-${r}`}>
-                    <h4 className="font-bold text-sm mb-2 text-muted-foreground">Spieltag {r + 1}</h4>
-                    <div className="space-y-2">{inRound.map(renderRow)}</div>
+                  <div key={`group-${g}`} className="rounded-lg border border-border/50 bg-background/40 overflow-hidden">
+                    <div className="px-3 py-2 bg-muted/40 border-b border-border/50 flex items-center justify-between">
+                      <h4 className="font-bold text-sm text-foreground">{groupLabel(g)}</h4>
+                      <span className="text-[11px] text-muted-foreground">{inGroup.length} Spiele</span>
+                    </div>
+                    <div className="p-2 space-y-2">{inGroup.map(renderRow)}</div>
                   </div>
                 );
               })}
