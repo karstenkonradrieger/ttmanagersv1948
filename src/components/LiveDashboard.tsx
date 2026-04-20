@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Match, Player, TournamentMode, SetScore } from '@/types/tournament';
 import { TournamentBracket } from './TournamentBracket';
 import { GroupStageView } from './GroupStageView';
 import { DoubleEliminationBracket } from './DoubleEliminationBracket';
-import { Monitor, Trophy, Crown, Cake } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Monitor, Trophy, Crown, Cake, ChevronDown } from 'lucide-react';
 
 interface Props {
   matches: Match[];
@@ -190,16 +191,121 @@ export function LiveDashboard({ matches, rounds, getPlayer, getParticipantName, 
         </div>
       )}
 
-      {mode !== 'round_robin' && mode !== 'swiss' && mode !== 'double_knockout' && (mode !== 'group_knockout' || phase === 'knockout') && rounds > 0 && (
+      {/* Gruppen+KO in der K.O.-Phase: klar getrennte Sektionen für Gruppenphase (collapsible) + K.O.-Runde */}
+      {mode === 'group_knockout' && phase === 'knockout' && rounds > 0 && groupCount > 0 && (
+        <GroupKnockoutSections
+          matches={matches}
+          players={players}
+          groupCount={groupCount}
+          getName={getName}
+          getPlayer={getPlayer}
+          rounds={rounds}
+        />
+      )}
+
+      {/* Sonstige KO-Modi (reines KO, Kaiser, Handicap …) — unverändert */}
+      {mode !== 'round_robin' && mode !== 'swiss' && mode !== 'double_knockout' && mode !== 'group_knockout' && rounds > 0 && (
         <div>
           <h3 className="text-lg font-bold mb-3">🏆 Turnierbaum</h3>
           <TournamentBracket
-            matches={mode === 'group_knockout' ? matches.filter(m => m.groupNumber == null) : matches}
+            matches={matches}
             rounds={rounds}
             getPlayer={getPlayer}
           />
         </div>
       )}
+    </div>
+  );
+}
+
+function GroupKnockoutSections({ matches, players, groupCount, getName, getPlayer, rounds }: {
+  matches: Match[];
+  players: Player[];
+  groupCount: number;
+  getName: (id: string | null) => string;
+  getPlayer: (id: string | null) => Player | null;
+  rounds: number;
+}) {
+  const [groupOpen, setGroupOpen] = useState(false);
+  const [koOpen, setKoOpen] = useState(true);
+
+  return (
+    <div className="space-y-5">
+      {/* === Sektion 1: Gruppenphase (einklappbar, default zu) === */}
+      <Collapsible open={groupOpen} onOpenChange={setGroupOpen} asChild>
+        <section className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              className="w-full flex items-center justify-between gap-3 px-4 py-2.5 border-b border-border/50 bg-muted/30 hover:bg-muted/50 transition-colors text-left"
+              aria-label={groupOpen ? 'Gruppenphase einklappen' : 'Gruppenphase ausklappen'}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary/15 text-primary text-xs font-bold flex-shrink-0">1</span>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold leading-tight">Gruppenphase</h3>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {groupOpen ? 'Endstände der Gruppen' : 'Klick zum Anzeigen'}
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${groupOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="p-3">
+              <GroupStageView
+                matches={matches.filter(m => m.groupNumber != null)}
+                players={players}
+                getParticipantName={getName}
+                groupCount={groupCount}
+              />
+            </div>
+          </CollapsibleContent>
+        </section>
+      </Collapsible>
+
+      {/* === Visueller Trenner === */}
+      <div className="flex items-center gap-3" aria-hidden="true">
+        <div className="flex-1 h-px bg-border/60" />
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+          ↓ K.O.-Runde ↓
+        </span>
+        <div className="flex-1 h-px bg-border/60" />
+      </div>
+
+      {/* === Sektion 2: K.O.-Runde (einklappbar, default offen) === */}
+      <Collapsible open={koOpen} onOpenChange={setKoOpen} asChild>
+        <section className="rounded-xl border-2 border-primary/30 bg-primary/[0.02] overflow-hidden">
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              className="w-full flex items-center justify-between gap-3 px-4 py-2.5 border-b border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors text-left"
+              aria-label={koOpen ? 'K.O.-Phase einklappen' : 'K.O.-Phase ausklappen'}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary text-primary-foreground text-xs font-bold flex-shrink-0">2</span>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold leading-tight text-primary">🏆 Turnierbaum</h3>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {koOpen ? 'Finalrunden um den Turniersieg' : 'Klick zum Anzeigen'}
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${koOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="p-3">
+              <TournamentBracket
+                matches={matches.filter(m => m.groupNumber == null)}
+                rounds={rounds}
+                getPlayer={getPlayer}
+              />
+            </div>
+          </CollapsibleContent>
+        </section>
+      </Collapsible>
     </div>
   );
 }
