@@ -765,10 +765,12 @@ export function useTournamentDb(tournamentId: string | null) {
           }
         }
 
-        // Now propagate the new winner
-        const koMatches = tournament.mode === 'group_knockout'
+        // Now propagate the new winner — within the same bracket (main or consolation)
+        const matchBracket = match.bracketType ?? 'main';
+        const koMatches = (tournament.mode === 'group_knockout'
           ? updatedMatches.filter(m => m.groupNumber === undefined || m.groupNumber === null)
-          : updatedMatches;
+          : updatedMatches
+        ).filter(m => (m.bracketType ?? 'main') === matchBracket);
         const propagated = propagateWinners(koMatches);
         // Merge propagated back
         updatedMatches = updatedMatches.map(m => {
@@ -779,7 +781,12 @@ export function useTournamentDb(tournamentId: string | null) {
         // Find next match and update in DB
         const nextRound = match.round + 1;
         const nextPos = Math.floor(match.position / 2);
-        const nextMatch = updatedMatches.find(nm => nm.round === nextRound && nm.position === nextPos && (nm.groupNumber === undefined || nm.groupNumber === null));
+        const nextMatch = updatedMatches.find(nm =>
+          nm.round === nextRound &&
+          nm.position === nextPos &&
+          (nm.groupNumber === undefined || nm.groupNumber === null) &&
+          (nm.bracketType ?? 'main') === matchBracket
+        );
 
         if (nextMatch) {
           const updateData = match.position % 2 === 0
