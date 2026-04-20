@@ -332,6 +332,7 @@ export type Database = {
       matches: {
         Row: {
           away_team_id: string | null
+          bracket_type: string
           completed_at: string | null
           created_at: string
           group_number: number | null
@@ -349,6 +350,7 @@ export type Database = {
         }
         Insert: {
           away_team_id?: string | null
+          bracket_type?: string
           completed_at?: string | null
           created_at?: string
           group_number?: number | null
@@ -366,6 +368,7 @@ export type Database = {
         }
         Update: {
           away_team_id?: string | null
+          bracket_type?: string
           completed_at?: string | null
           created_at?: string
           group_number?: number | null

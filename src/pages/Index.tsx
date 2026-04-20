@@ -208,7 +208,8 @@ const Index = () => {
   const modeLabel = isRoundRobin ? 'Jeder gg. Jeden' : isGroupKnockout ? 'Gruppen+KO' : isDoubleKnockout ? 'Doppel-KO' : isSwiss ? 'Schweizer' : isKaiser ? 'Kaiser' : isHandicap ? 'Vorgabe' : 'KO';
   const typeLabel = isTeam ? 'Mannschaft' : isDoubles ? 'Doppel' : 'Einzel';
 
-  const tabCount = isTeam ? 8 : isDoubles ? 8 : 7;
+  const hasConsolation = tournament.matches.some(m => m.bracketType === 'consolation');
+  const tabCount = (isTeam ? 8 : isDoubles ? 8 : 7) + (hasConsolation ? 1 : 0);
 
   return (
     <PageTransition className="min-h-screen bg-background">
@@ -409,6 +410,12 @@ const Index = () => {
               <Film className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Medien</span>
             </TabsTrigger>
+            {hasConsolation && (
+              <TabsTrigger value="consolation" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+                <Swords className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Trostrunde</span>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="live" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
               <Monitor className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Live</span>
@@ -597,7 +604,7 @@ const Index = () => {
                         )}
                       </div>
                       <TournamentBracket
-                        matches={tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null)}
+                        matches={tournament.matches.filter(m => (m.groupNumber === undefined || m.groupNumber === null) && (m.bracketType ?? 'main') === 'main')}
                         rounds={tournament.rounds}
                         getPlayer={isDoubles
                           ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
@@ -640,7 +647,7 @@ const Index = () => {
                 </div>
               ) : (
                 <TournamentBracket
-                  matches={tournament.matches}
+                  matches={tournament.matches.filter(m => (m.bracketType ?? 'main') === 'main')}
                   rounds={tournament.rounds}
                   getPlayer={isDoubles
                     ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
@@ -649,6 +656,43 @@ const Index = () => {
                 />
               )}
             </TabsContent>
+
+            {hasConsolation && (
+              <TabsContent value="consolation">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold">🥉 Trostrunde</h3>
+                    <span className="text-xs text-muted-foreground">
+                      Erstrunden-Verlierer + Gruppendritte
+                    </span>
+                  </div>
+                  {(() => {
+                    const consMatches = tournament.matches.filter(m => m.bracketType === 'consolation');
+                    const isRR = consMatches.every(m => m.round === 0);
+                    if (isRR) {
+                      return (
+                        <RoundRobinStandings
+                          matches={consMatches}
+                          getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
+                          isDoubles={isDoubles}
+                        />
+                      );
+                    }
+                    const consRounds = Math.max(...consMatches.map(m => m.round)) + 1;
+                    return (
+                      <TournamentBracket
+                        matches={consMatches}
+                        rounds={consRounds}
+                        getPlayer={isDoubles
+                          ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
+                          : getPlayer
+                        }
+                      />
+                    );
+                  })()}
+                </div>
+              </TabsContent>
+            )}
 
             <TabsContent value="scoring">
               {isKaiser ? (

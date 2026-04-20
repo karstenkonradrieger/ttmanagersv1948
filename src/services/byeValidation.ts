@@ -101,7 +101,10 @@ export function hasMisallocatedByes(
   matches: Match[],
   players: Player[]
 ): boolean {
-  const koMatches = matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
+  const koMatches = matches.filter(m =>
+    (m.groupNumber === undefined || m.groupNumber === null) &&
+    (m.bracketType ?? 'main') === 'main'
+  );
   const round0 = koMatches.filter(m => m.round === 0);
   if (round0.length === 0) return false;
 

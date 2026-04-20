@@ -5,6 +5,7 @@ import * as tournamentService from '@/services/tournamentService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { computeQualifiedPlayers } from '@/services/byeValidation';
+import { computeConsolationSeeds, buildConsolationMatches, isMainRound0Complete, hasConsolationBracket } from '@/services/consolationBracket';
 
 const emptyTournament: Tournament = {
   id: '',
@@ -764,10 +765,12 @@ export function useTournamentDb(tournamentId: string | null) {
           }
         }
 
-        // Now propagate the new winner
-        const koMatches = tournament.mode === 'group_knockout'
+        // Now propagate the new winner — within the same bracket (main or consolation)
+        const matchBracket = match.bracketType ?? 'main';
+        const koMatches = (tournament.mode === 'group_knockout'
           ? updatedMatches.filter(m => m.groupNumber === undefined || m.groupNumber === null)
-          : updatedMatches;
+          : updatedMatches
+        ).filter(m => (m.bracketType ?? 'main') === matchBracket);
         const propagated = propagateWinners(koMatches);
         // Merge propagated back
         updatedMatches = updatedMatches.map(m => {
@@ -778,13 +781,44 @@ export function useTournamentDb(tournamentId: string | null) {
         // Find next match and update in DB
         const nextRound = match.round + 1;
         const nextPos = Math.floor(match.position / 2);
-        const nextMatch = updatedMatches.find(nm => nm.round === nextRound && nm.position === nextPos && (nm.groupNumber === undefined || nm.groupNumber === null));
+        const nextMatch = updatedMatches.find(nm =>
+          nm.round === nextRound &&
+          nm.position === nextPos &&
+          (nm.groupNumber === undefined || nm.groupNumber === null) &&
+          (nm.bracketType ?? 'main') === matchBracket
+        );
 
         if (nextMatch) {
           const updateData = match.position % 2 === 0
             ? { player1_id: winnerId }
             : { player2_id: winnerId };
           await tournamentService.updateMatch(nextMatch.id, updateData);
+        }
+      }
+
+      // Auto-build consolation bracket once main-bracket round 0 is complete.
+      // Only for group_knockout / knockout single mode, never for double_knockout.
+      if (
+        winnerId &&
+        (tournament.mode === 'knockout' ||
+          (tournament.mode === 'group_knockout' && tournament.phase === 'knockout')) &&
+        match.round === 0 &&
+        (match.groupNumber === undefined || match.groupNumber === null) &&
+        (match.bracketType ?? 'main') === 'main' &&
+        !hasConsolationBracket(updatedMatches) &&
+        isMainRound0Complete(updatedMatches)
+      ) {
+        const seeds = computeConsolationSeeds(updatedMatches, tournament.players);
+        const consolationData = buildConsolationMatches(seeds);
+        if (consolationData.length > 0) {
+          try {
+            const created = await tournamentService.createMatches(tournamentId!, consolationData);
+            updatedMatches = [...updatedMatches, ...created];
+            toast.success(`Trostrunde gestartet (${seeds.length} Teilnehmer)`);
+          } catch (err) {
+            console.error('Error creating consolation bracket:', err);
+            toast.error('Fehler beim Anlegen der Trostrunde');
+          }
         }
       }
 
