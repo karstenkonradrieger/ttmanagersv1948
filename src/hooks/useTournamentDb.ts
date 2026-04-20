@@ -789,6 +789,32 @@ export function useTournamentDb(tournamentId: string | null) {
         }
       }
 
+      // Auto-build consolation bracket once main-bracket round 0 is complete.
+      // Only for group_knockout / knockout single mode, never for double_knockout.
+      if (
+        winnerId &&
+        (tournament.mode === 'knockout' ||
+          (tournament.mode === 'group_knockout' && tournament.phase === 'knockout')) &&
+        match.round === 0 &&
+        (match.groupNumber === undefined || match.groupNumber === null) &&
+        (match.bracketType ?? 'main') === 'main' &&
+        !hasConsolationBracket(updatedMatches) &&
+        isMainRound0Complete(updatedMatches)
+      ) {
+        const seeds = computeConsolationSeeds(updatedMatches, tournament.players);
+        const consolationData = buildConsolationMatches(seeds);
+        if (consolationData.length > 0) {
+          try {
+            const created = await tournamentService.createMatches(tournamentId!, consolationData);
+            updatedMatches = [...updatedMatches, ...created];
+            toast.success(`Trostrunde gestartet (${seeds.length} Teilnehmer)`);
+          } catch (err) {
+            console.error('Error creating consolation bracket:', err);
+            toast.error('Fehler beim Anlegen der Trostrunde');
+          }
+        }
+      }
+
       // Double elimination propagation
       if (winnerId && tournament.mode === 'double_knockout') {
         const completedMatch = updatedMatches.find(m => m.id === matchId)!;
