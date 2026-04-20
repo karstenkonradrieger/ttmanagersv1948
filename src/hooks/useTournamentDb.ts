@@ -1457,6 +1457,43 @@ export function useTournamentDb(tournamentId: string | null) {
       }));
 
       toast.success(`K.O.-Runde mit ${qualifiedCount} Spielern gestartet`);
+
+      // Validation: verify that byes were assigned to the strongest group winners.
+      // A bye exists when a slot pair has exactly one player (the other is null).
+      const byeRecipients: string[] = [];
+      for (let i = 0; i < slots / 2; i++) {
+        const p1 = seededSlots[i * 2];
+        const p2 = seededSlots[i * 2 + 1];
+        if ((p1 === null) !== (p2 === null)) {
+          byeRecipients.push((p1 ?? p2) as string);
+        }
+      }
+
+      if (byeRecipients.length > 0) {
+        // Expected bye recipients = top N winners by performance
+        const expectedByeIds = winners.slice(0, byeRecipients.length).map(w => w.playerId);
+        const actualSet = new Set(byeRecipients);
+        const mismatched = expectedByeIds.filter(id => !actualSet.has(id));
+
+        if (mismatched.length > 0) {
+          const nameOf = (id: string) => {
+            const p = tournament.players.find(pl => pl.id === id);
+            return p?.name ?? id.slice(0, 8);
+          };
+          const expectedNames = expectedByeIds.map(nameOf).join(', ');
+          const actualNames = byeRecipients.map(nameOf).join(', ');
+          console.warn('[KO-Validierung] Freilose nicht optimal verteilt.', {
+            expected: expectedByeIds,
+            actual: byeRecipients,
+          });
+          toast.warning(
+            `Freilos-Verteilung prüfen: Erwartet wären ${expectedNames}, vergeben an ${actualNames}.`,
+            { duration: 10000 }
+          );
+        } else {
+          toast.success(`Freilose korrekt an die ${byeRecipients.length} stärksten Gruppensieger vergeben.`);
+        }
+      }
     } catch (error) {
       console.error('Error advancing to knockout:', error);
       toast.error('Fehler beim Starten der K.O.-Runde');
