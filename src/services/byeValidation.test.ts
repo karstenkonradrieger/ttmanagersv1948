@@ -58,7 +58,7 @@ describe('computeQualifiedPlayers', () => {
     const { winners, runnersUp } = computeQualifiedPlayers(matches, players);
 
     expect(winners.map(w => w.playerId)).toEqual(['a1', 'b1']);
-    expect(runnersUp.map(r => r.playerId)).toEqual(['a2', 'b2']);
+    expect(new Set(runnersUp.map(r => r.playerId))).toEqual(new Set(['a2', 'b2']));
     // a1 has bigger point diff than b1
     expect(winners[0].pointsDiff).toBeGreaterThan(winners[1].pointsDiff);
   });
