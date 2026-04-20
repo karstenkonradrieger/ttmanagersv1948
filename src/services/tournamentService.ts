@@ -467,6 +467,7 @@ export async function createMatches(tournamentId: string, matches: Omit<Match, '
     group_number: m.groupNumber ?? null,
     home_team_id: m.homeTeamId || null,
     away_team_id: m.awayTeamId || null,
+    bracket_type: m.bracketType || 'main',
   }));
 
   const { data, error } = await supabase
@@ -490,6 +491,7 @@ export async function createMatches(tournamentId: string, matches: Omit<Match, '
     completedAt: m.completed_at || null,
     homeTeamId: m.home_team_id || null,
     awayTeamId: m.away_team_id || null,
+    bracketType: ((m as any).bracket_type as BracketType) || 'main',
   }));
 }
 
