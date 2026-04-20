@@ -555,10 +555,8 @@ export function useTournamentDb(tournamentId: string | null) {
       const slots = Math.pow(2, Math.ceil(Math.log2(n)));
       rounds = Math.log2(slots);
 
-      const seeded: (string | null)[] = Array(slots).fill(null);
-      for (let i = 0; i < n; i++) {
-        seeded[i] = participants[i];
-      }
+      // Standard bracket seeding: byes are paired with top seeds, no empty matches
+      const seeded: (string | null)[] = seedBracketSlots(participants, slots);
 
       matchesData = [];
 
@@ -566,7 +564,9 @@ export function useTournamentDb(tournamentId: string | null) {
       for (let i = 0; i < slots / 2; i++) {
         const p1 = seeded[i * 2];
         const p2 = seeded[i * 2 + 1];
-        const isBye = p2 === null;
+        const bothNull = p1 === null && p2 === null;
+        const isBye = !bothNull && (p1 === null || p2 === null);
+        const soleParticipant = p1 ?? p2;
         matchesData.push({
           round: 0,
           position: i,
@@ -575,7 +575,7 @@ export function useTournamentDb(tournamentId: string | null) {
           homeTeamId: isTeam ? p1 : null,
           awayTeamId: isTeam ? p2 : null,
           sets: [],
-          winnerId: isBye && !isTeam ? p1 : null,
+          winnerId: isBye && !isTeam ? soleParticipant : null,
           status: isBye ? 'completed' : 'pending',
         });
       }
