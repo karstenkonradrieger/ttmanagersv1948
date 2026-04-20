@@ -1599,8 +1599,10 @@ function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMat
   setEditingMatchId: (id: string | null) => void;
   onUpdateScore?: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
 }) {
-  const groupMatches = matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
-  const koMatches = matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
+  // Strikte Trennung: Gruppen-Matches haben groupNumber als nicht-negative Zahl;
+  // KO-Matches haben groupNumber null/undefined (oder negativ, wie bei double_knockout-Finals)
+  const groupMatches = matches.filter(m => typeof m.groupNumber === 'number' && m.groupNumber >= 0);
+  const koMatches = matches.filter(m => m.groupNumber == null || (typeof m.groupNumber === 'number' && m.groupNumber < 0));
 
   // KO-Round-Labels basierend auf den vorhandenen KO-Match-Runden (nicht auf `rounds` total)
   const koRoundsPresent = Array.from(new Set(koMatches.map(m => m.round))).sort((a, b) => a - b);
@@ -1617,8 +1619,9 @@ function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMat
     return `K.O. Runde ${r - koMinRound + 1}`;
   };
 
-  // Gruppen-Runden in der Reihenfolge ihrer round-Werte
-  const groupRoundsPresent = Array.from(new Set(groupMatches.map(m => m.round))).sort((a, b) => a - b);
+  // Gruppen vorhanden (nach groupNumber): 0=A, 1=B, 2=C, ...
+  const groupsPresent = Array.from(new Set(groupMatches.map(m => m.groupNumber as number))).sort((a, b) => a - b);
+  const groupLabel = (g: number) => `Gruppe ${String.fromCharCode(65 + g)}`;
 
   const [groupOpen, setGroupOpen] = useState(false);
   const [koOpen, setKoOpen] = useState(true);
