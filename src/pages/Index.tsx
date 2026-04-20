@@ -580,19 +580,21 @@ const Index = () => {
                       />
                       <div className="flex items-center justify-between">
                         <h3 className="text-lg font-bold">🏆 K.O.-Runde</h3>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1.5"
-                          onClick={() => {
-                            if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
-                              redistributeKnockoutByes();
-                            }
-                          }}
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" />
-                          Freilose neu verteilen
-                        </Button>
+                        {hasMisallocatedByes(tournament.matches, tournament.players) && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 border-yellow-500/50 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/10"
+                            onClick={() => {
+                              if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
+                                redistributeKnockoutByes();
+                              }
+                            }}
+                          >
+                            <RefreshCw className="h-3.5 w-3.5" />
+                            Freilose neu verteilen
+                          </Button>
+                        )}
                       </div>
                       <TournamentBracket
                         matches={tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null)}
