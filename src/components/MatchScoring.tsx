@@ -353,40 +353,51 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
             Alle SR-Zettel drucken
           </Button>
         }>
-          {activeMatches.map(m => {
-            const handicapInfo = isHandicap ? computeHandicap(m, getPlayer) : null;
-            return <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} getParticipantName={getParticipantName} tournamentName={tournamentName} rounds={rounds} tournamentId={tournamentId} handicapInfo={handicapInfo} />;
-          })}
+          <PhaseGroupedMatches
+            matches={activeMatches}
+            mode={mode}
+            renderMatch={(m) => {
+              const handicapInfo = isHandicap ? computeHandicap(m, getPlayer) : null;
+              return <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} getParticipantName={getParticipantName} tournamentName={tournamentName} rounds={rounds} tournamentId={tournamentId} handicapInfo={handicapInfo} />;
+            }}
+          />
         </Section>
       )}
 
       {pendingMatches.filter(m => m.status === 'pending').length > 0 && (
         <Section title="⏳ Anstehende Spiele">
-          {pendingMatches
-            .filter(m => m.status === 'pending')
-            .sort((a, b) => {
-              const waitA = Math.max(
-                getPlayerWaitRemaining(a.player1Id, matches, breakMinutes, getPlayer(a.player1Id)),
-                getPlayerWaitRemaining(a.player2Id, matches, breakMinutes, getPlayer(a.player2Id))
-              );
-              const waitB = Math.max(
-                getPlayerWaitRemaining(b.player1Id, matches, breakMinutes, getPlayer(b.player1Id)),
-                getPlayerWaitRemaining(b.player2Id, matches, breakMinutes, getPlayer(b.player2Id))
-              );
-              return waitA - waitB;
-            })
-            .map(m => {
+          <PhaseGroupedMatches
+            matches={pendingMatches
+              .filter(m => m.status === 'pending')
+              .sort((a, b) => {
+                const waitA = Math.max(
+                  getPlayerWaitRemaining(a.player1Id, matches, breakMinutes, getPlayer(a.player1Id)),
+                  getPlayerWaitRemaining(a.player2Id, matches, breakMinutes, getPlayer(a.player2Id))
+                );
+                const waitB = Math.max(
+                  getPlayerWaitRemaining(b.player1Id, matches, breakMinutes, getPlayer(b.player1Id)),
+                  getPlayerWaitRemaining(b.player2Id, matches, breakMinutes, getPlayer(b.player2Id))
+                );
+                return waitA - waitB;
+              })}
+            mode={mode}
+            renderMatch={(m) => {
               const handicapInfo = isHandicap ? computeHandicap(m, getPlayer) : null;
               return <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={handleSetActive} freeTables={freeTables} handicapInfo={handicapInfo} allMatches={matches} breakMinutes={breakMinutes} onUpdatePlayer={onUpdatePlayer} />;
-            })}
+            }}
+          />
         </Section>
       )}
 
       {completedMatches.length > 0 && (
         <Section title="✅ Abgeschlossene Spiele">
-          {completedMatches.map(m => (
-            <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} motto={motto} mode={mode} sponsors={sponsors} onUpdateScore={onUpdateScore} getParticipantName={getParticipantName} isHandicap={isHandicap} players={players} />
-          ))}
+          <PhaseGroupedMatches
+            matches={completedMatches}
+            mode={mode}
+            renderMatch={(m) => (
+              <CompletedMatch key={m.id} match={m} getPlayer={getPlayer} tournamentId={tournamentId} tournamentName={tournamentName} bestOf={bestOf} rounds={rounds} logoUrl={logoUrl} tournamentDate={tournamentDate} venueString={venueString} motto={motto} mode={mode} sponsors={sponsors} onUpdateScore={onUpdateScore} getParticipantName={getParticipantName} isHandicap={isHandicap} players={players} />
+            )}
+          />
         </Section>
       )}
 
