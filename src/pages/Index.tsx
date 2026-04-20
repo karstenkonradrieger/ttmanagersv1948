@@ -29,7 +29,7 @@ import { TeamEncounterScoring } from '@/components/TeamEncounterScoring';
 import { KaiserScoring } from '@/components/KaiserScoring';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings, Film, Video } from 'lucide-react';
+import { Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings, Film, Video, RefreshCw } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
@@ -64,6 +64,7 @@ const Index = () => {
     getParticipantName,
     updateDetails,
     advanceToKnockout,
+    redistributeKnockoutByes,
     resetTournament,
     generateNextSwissRound,
     addTeam,
@@ -576,7 +577,22 @@ const Index = () => {
                         getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
                         groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? 0)), 0) + 1}
                       />
-                      <h3 className="text-lg font-bold">🏆 K.O.-Runde</h3>
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-bold">🏆 K.O.-Runde</h3>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          onClick={() => {
+                            if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
+                              redistributeKnockoutByes();
+                            }
+                          }}
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                          Freilose neu verteilen
+                        </Button>
+                      </div>
                       <TournamentBracket
                         matches={tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null)}
                         rounds={tournament.rounds}

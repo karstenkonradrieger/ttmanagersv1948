@@ -572,6 +572,16 @@ export async function clearTournamentMatches(tournamentId: string): Promise<void
   if (error) throw error;
 }
 
+export async function deleteMatchesByIds(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const { error } = await supabase
+    .from('matches')
+    .delete()
+    .in('id', ids);
+
+  if (error) throw error;
+}
+
 export async function resetTournamentState(tournamentId: string): Promise<void> {
   await supabase.from('players').update({ group_number: null }).eq('tournament_id', tournamentId);
 

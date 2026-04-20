@@ -1500,6 +1500,152 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId, tournament.mode, tournament.phase, tournament.matches, tournament.players]);
 
+  // Redistribute byes in the current KO bracket: deletes pending KO matches and
+  // regenerates them with correct performance-based seeding. Only allowed when no
+  // KO match has been played yet.
+  const redistributeKnockoutByes = useCallback(async () => {
+    if (!tournamentId || tournament.mode !== 'group_knockout' || tournament.phase !== 'knockout') {
+      toast.error('Freilose können nur in der K.O.-Phase neu verteilt werden.');
+      return;
+    }
+
+    const koMatches = tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
+    const hasPlayed = koMatches.some(m =>
+      m.status === 'active' || (m.status === 'completed' && m.sets && m.sets.length > 0)
+    );
+    if (hasPlayed) {
+      toast.error('Freilose können nicht neu verteilt werden, da bereits K.O.-Spiele gespielt wurden.');
+      return;
+    }
+
+    // Recompute group standings (same logic as advanceToKnockout)
+    const groupMatches = tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
+    const groupCount = Math.max(...tournament.players.map(p => (p.groupNumber ?? 0))) + 1;
+
+    const qualifiedPlayers: Array<{
+      playerId: string; groupNumber: number; rank: number;
+      won: number; setsDiff: number; pointsDiff: number;
+    }> = [];
+
+    for (let g = 0; g < groupCount; g++) {
+      const gMatches = groupMatches.filter(m => m.groupNumber === g);
+      const map = new Map<string, { playerId: string; won: number; setsWon: number; setsLost: number; pointsWon: number; pointsLost: number }>();
+      for (const m of gMatches) {
+        if (!m.player1Id || !m.player2Id || m.status !== 'completed') continue;
+        if (!map.has(m.player1Id)) map.set(m.player1Id, { playerId: m.player1Id, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
+        if (!map.has(m.player2Id)) map.set(m.player2Id, { playerId: m.player2Id, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
+        const s1 = map.get(m.player1Id)!;
+        const s2 = map.get(m.player2Id)!;
+        if (m.winnerId === m.player1Id) s1.won++;
+        else if (m.winnerId === m.player2Id) s2.won++;
+        for (const s of m.sets) {
+          s1.pointsWon += s.player1; s1.pointsLost += s.player2;
+          s2.pointsWon += s.player2; s2.pointsLost += s.player1;
+          if (s.player1 >= 11 && s.player1 - s.player2 >= 2) { s1.setsWon++; s2.setsLost++; }
+          else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) { s2.setsWon++; s1.setsLost++; }
+        }
+      }
+      const standings = [...map.values()].sort((a, b) => {
+        if (b.won !== a.won) return b.won - a.won;
+        const h2h = gMatches.find(m => m.status === 'completed' &&
+          ((m.player1Id === a.playerId && m.player2Id === b.playerId) ||
+            (m.player1Id === b.playerId && m.player2Id === a.playerId)));
+        if (h2h) {
+          if (h2h.winnerId === a.playerId) return -1;
+          if (h2h.winnerId === b.playerId) return 1;
+        }
+        const aDiff = a.setsWon - a.setsLost;
+        const bDiff = b.setsWon - b.setsLost;
+        if (bDiff !== aDiff) return bDiff - aDiff;
+        return (b.pointsWon - b.pointsLost) - (a.pointsWon - a.pointsLost);
+      });
+      for (let i = 0; i < Math.min(2, standings.length); i++) {
+        const s = standings[i];
+        qualifiedPlayers.push({
+          playerId: s.playerId, groupNumber: g, rank: i + 1,
+          won: s.won, setsDiff: s.setsWon - s.setsLost, pointsDiff: s.pointsWon - s.pointsLost,
+        });
+      }
+    }
+
+    if (qualifiedPlayers.length < 2) {
+      toast.error('Zu wenig qualifizierte Spieler für eine K.O.-Runde.');
+      return;
+    }
+
+    const perfSort = (a: typeof qualifiedPlayers[number], b: typeof qualifiedPlayers[number]) => {
+      if (b.won !== a.won) return b.won - a.won;
+      if (b.setsDiff !== a.setsDiff) return b.setsDiff - a.setsDiff;
+      return b.pointsDiff - a.pointsDiff;
+    };
+    const winners = qualifiedPlayers.filter(q => q.rank === 1).sort(perfSort);
+    const runnersUp = qualifiedPlayers.filter(q => q.rank === 2).sort(perfSort);
+    const seeded: string[] = [...winners.map(w => w.playerId), ...runnersUp.map(r => r.playerId)];
+
+    const n = seeded.length;
+    const slots = Math.pow(2, Math.ceil(Math.log2(n)));
+    const koRounds = Math.log2(slots);
+    const seededSlots: (string | null)[] = seedBracketSlots(seeded, slots);
+
+    const koMatchesData: Omit<Match, 'id'>[] = [];
+    for (let i = 0; i < slots / 2; i++) {
+      const p1 = seededSlots[i * 2];
+      const p2 = seededSlots[i * 2 + 1];
+      const bothNull = p1 === null && p2 === null;
+      const isBye = !bothNull && (p1 === null || p2 === null);
+      const soleParticipant = p1 ?? p2;
+      koMatchesData.push({
+        round: 0, position: i, player1Id: p1, player2Id: p2, sets: [],
+        winnerId: isBye ? soleParticipant : null,
+        status: isBye ? 'completed' : 'pending',
+        groupNumber: null,
+      });
+    }
+    for (let r = 1; r < koRounds; r++) {
+      const matchesInRound = slots / Math.pow(2, r + 1);
+      for (let i = 0; i < matchesInRound; i++) {
+        koMatchesData.push({
+          round: r, position: i, player1Id: null, player2Id: null,
+          sets: [], winnerId: null, status: 'pending', groupNumber: null,
+        });
+      }
+    }
+
+    try {
+      await tournamentService.deleteMatchesByIds(koMatches.map(m => m.id));
+      const createdKoMatches = await tournamentService.createMatches(tournamentId, koMatchesData);
+      const propagated = propagateWinners(createdKoMatches);
+      const matchesToUpdate = propagated.filter((m, i) =>
+        m.player1Id !== createdKoMatches[i].player1Id ||
+        m.player2Id !== createdKoMatches[i].player2Id
+      );
+      if (matchesToUpdate.length > 0) {
+        await tournamentService.updateMultipleMatches(
+          matchesToUpdate.map(m => ({
+            id: m.id,
+            data: { player1_id: m.player1Id, player2_id: m.player2Id },
+          }))
+        );
+      }
+
+      await tournamentService.updateTournament(tournamentId, { rounds: koRounds });
+
+      setTournament(prev => ({
+        ...prev,
+        matches: [
+          ...prev.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null),
+          ...propagated,
+        ],
+        rounds: koRounds,
+      }));
+
+      toast.success('K.O.-Bracket neu erzeugt – Freilose korrekt verteilt.');
+    } catch (error) {
+      console.error('Error redistributing byes:', error);
+      toast.error('Fehler beim Neuverteilen der Freilose.');
+    }
+  }, [tournamentId, tournament.mode, tournament.phase, tournament.matches, tournament.players]);
+
   const resetTournament = useCallback(async () => {
     if (!tournamentId) return;
 
@@ -1861,6 +2007,7 @@ export function useTournamentDb(tournamentId: string | null) {
     autoGenerateDoublesPairs,
     getParticipantName,
     advanceToKnockout,
+    redistributeKnockoutByes,
     resetTournament,
     generateNextSwissRound,
     addTeam,
