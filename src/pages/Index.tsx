@@ -34,6 +34,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
 import { PageTransition, FadeIn } from '@/components/ui/motion';
+import { hasMisallocatedByes } from '@/services/byeValidation';
 
 const Index = () => {
   const { signOut } = useAuth();
