@@ -604,7 +604,7 @@ const Index = () => {
                         )}
                       </div>
                       <TournamentBracket
-                        matches={tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null)}
+                        matches={tournament.matches.filter(m => (m.groupNumber === undefined || m.groupNumber === null) && (m.bracketType ?? 'main') === 'main')}
                         rounds={tournament.rounds}
                         getPlayer={isDoubles
                           ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
