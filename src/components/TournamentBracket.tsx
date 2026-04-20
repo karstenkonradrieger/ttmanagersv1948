@@ -16,32 +16,43 @@ export function TournamentBracket({ matches, rounds, getPlayer }: Props) {
     );
   }
 
-  const roundNames = (r: number, total: number) => {
-    const diff = total - r;
-    if (diff === 1) return 'Finale';
-    if (diff === 2) return 'Halbfinale';
-    if (diff === 3) return 'Viertelfinale';
-    return `Runde ${r + 1}`;
+  // Determine actual KO rounds present in the supplied matches.
+  // For group+KO tournaments, `rounds` is the total tournament rounds (incl. group stage),
+  // so we cannot derive Final/Semifinal labels from it. Use the matches themselves.
+  const presentRounds = Array.from(new Set(matches.map(m => m.round))).sort((a, b) => a - b);
+  const minRound = presentRounds[0] ?? 0;
+  const maxRound = presentRounds[presentRounds.length - 1] ?? rounds - 1;
+  
+
+  const roundNames = (r: number) => {
+    const matchesInRound = matches.filter(m => m.round === r).length;
+    // Label by remaining rounds from the final
+    const fromEnd = maxRound - r;
+    if (fromEnd === 0) return 'Finale';
+    if (fromEnd === 1) return 'Halbfinale';
+    if (fromEnd === 2 && matchesInRound <= 4) return 'Viertelfinale';
+    if (fromEnd === 3 && matchesInRound <= 8) return 'Achtelfinale';
+    return `Runde ${r - minRound + 1}`;
   };
 
-  const finalist = matches.find(m => m.round === rounds - 1 && m.winnerId);
+  const finalist = matches.find(m => m.round === maxRound && m.winnerId);
   const champion = finalist ? getPlayer(finalist.winnerId) : null;
 
   return (
     <div className="overflow-x-auto pb-4">
       <div className="flex gap-6 min-w-max items-start">
-        {Array.from({ length: rounds }).map((_, r) => {
+        {presentRounds.map((r, idx) => {
           const roundMatches = matches
             .filter(m => m.round === r)
             .sort((a, b) => a.position - b.position);
 
-          const isFinal = r === rounds - 1;
+          const isFinal = r === maxRound;
 
           return (
             <div key={r} className="flex flex-col min-w-[220px]">
               <div className={`text-center mb-3 pb-2 border-b ${isFinal ? 'border-primary/40' : 'border-border/40'}`}>
                 <h3 className={`text-xs font-bold uppercase tracking-widest ${isFinal ? 'text-primary' : 'text-muted-foreground'}`}>
-                  {roundNames(r, rounds)}
+                  {roundNames(r)}
                 </h3>
                 <span className="text-[10px] text-muted-foreground/60">
                   {roundMatches.length} {roundMatches.length === 1 ? 'Spiel' : 'Spiele'}
@@ -49,7 +60,7 @@ export function TournamentBracket({ matches, rounds, getPlayer }: Props) {
               </div>
               <div
                 className="flex flex-col justify-around flex-1"
-                style={{ gap: `${Math.max(Math.pow(2, r) * 8, 12)}px` }}
+                style={{ gap: `${Math.max(Math.pow(2, idx) * 8, 12)}px` }}
               >
                 {roundMatches.map(match => (
                   <BracketMatch key={match.id} match={match} getPlayer={getPlayer} isFinal={isFinal} />
