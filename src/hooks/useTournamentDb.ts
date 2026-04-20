@@ -1370,10 +1370,8 @@ export function useTournamentDb(tournamentId: string | null) {
     const slots = Math.pow(2, Math.ceil(Math.log2(n)));
     const koRounds = Math.log2(slots);
 
-    const seededSlots: (string | null)[] = Array(slots).fill(null);
-    for (let i = 0; i < n; i++) {
-      seededSlots[i] = seeded[i];
-    }
+    // Place seeds into bracket so byes go to top seeds (no empty matches)
+    const seededSlots: (string | null)[] = seedBracketSlots(seeded, slots);
 
     const koMatchesData: Omit<Match, 'id'>[] = [];
 
@@ -1381,14 +1379,16 @@ export function useTournamentDb(tournamentId: string | null) {
     for (let i = 0; i < slots / 2; i++) {
       const p1 = seededSlots[i * 2];
       const p2 = seededSlots[i * 2 + 1];
-      const isBye = p2 === null;
+      const bothNull = p1 === null && p2 === null;
+      const isBye = !bothNull && (p1 === null || p2 === null);
+      const soleParticipant = p1 ?? p2;
       koMatchesData.push({
         round: 0,
         position: i,
         player1Id: p1,
         player2Id: p2,
         sets: [],
-        winnerId: isBye ? p1 : null,
+        winnerId: isBye ? soleParticipant : null,
         status: isBye ? 'completed' : 'pending',
         groupNumber: null,
       });
