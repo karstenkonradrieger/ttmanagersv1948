@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Tournament, Player, Match, SetScore, DoublesPair, TournamentMode, Team, TeamPlayer, EncounterGame, TeamMode, Sponsor } from '@/types/tournament';
+import { Tournament, Player, Match, SetScore, DoublesPair, TournamentMode, Team, TeamPlayer, EncounterGame, TeamMode, Sponsor, BracketType } from '@/types/tournament';
 import { Json } from '@/integrations/supabase/types';
 
 export interface DbTournament {
