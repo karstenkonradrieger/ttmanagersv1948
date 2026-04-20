@@ -34,6 +34,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
 import { PageTransition, FadeIn } from '@/components/ui/motion';
+import { hasMisallocatedByes } from '@/services/byeValidation';
 
 const Index = () => {
   const { signOut } = useAuth();
@@ -579,19 +580,21 @@ const Index = () => {
                       />
                       <div className="flex items-center justify-between">
                         <h3 className="text-lg font-bold">🏆 K.O.-Runde</h3>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1.5"
-                          onClick={() => {
-                            if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
-                              redistributeKnockoutByes();
-                            }
-                          }}
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" />
-                          Freilose neu verteilen
-                        </Button>
+                        {hasMisallocatedByes(tournament.matches, tournament.players) && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 border-destructive/50 text-destructive hover:bg-destructive/10"
+                            onClick={() => {
+                              if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
+                                redistributeKnockoutByes();
+                              }
+                            }}
+                          >
+                            <RefreshCw className="h-3.5 w-3.5" />
+                            Freilose neu verteilen
+                          </Button>
+                        )}
                       </div>
                       <TournamentBracket
                         matches={tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null)}
