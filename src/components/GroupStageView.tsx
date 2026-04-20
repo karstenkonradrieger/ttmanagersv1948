@@ -15,7 +15,7 @@ interface GroupStanding {
   pointsLost: number;
 }
 
-function computeGroupStandings(
+export function computeGroupStandings(
   groupMatches: Match[],
   getName: (id: string | null) => string,
 ): GroupStanding[] {
