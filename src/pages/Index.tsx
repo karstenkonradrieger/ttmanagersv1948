@@ -208,7 +208,8 @@ const Index = () => {
   const modeLabel = isRoundRobin ? 'Jeder gg. Jeden' : isGroupKnockout ? 'Gruppen+KO' : isDoubleKnockout ? 'Doppel-KO' : isSwiss ? 'Schweizer' : isKaiser ? 'Kaiser' : isHandicap ? 'Vorgabe' : 'KO';
   const typeLabel = isTeam ? 'Mannschaft' : isDoubles ? 'Doppel' : 'Einzel';
 
-  const tabCount = isTeam ? 8 : isDoubles ? 8 : 7;
+  const hasConsolation = tournament.matches.some(m => m.bracketType === 'consolation');
+  const tabCount = (isTeam ? 8 : isDoubles ? 8 : 7) + (hasConsolation ? 1 : 0);
 
   return (
     <PageTransition className="min-h-screen bg-background">
