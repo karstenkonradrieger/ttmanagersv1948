@@ -647,7 +647,7 @@ const Index = () => {
                 </div>
               ) : (
                 <TournamentBracket
-                  matches={tournament.matches}
+                  matches={tournament.matches.filter(m => (m.bracketType ?? 'main') === 'main')}
                   rounds={tournament.rounds}
                   getPlayer={isDoubles
                     ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
@@ -656,6 +656,43 @@ const Index = () => {
                 />
               )}
             </TabsContent>
+
+            {hasConsolation && (
+              <TabsContent value="consolation">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold">🥉 Trostrunde</h3>
+                    <span className="text-xs text-muted-foreground">
+                      Erstrunden-Verlierer + Gruppendritte
+                    </span>
+                  </div>
+                  {(() => {
+                    const consMatches = tournament.matches.filter(m => m.bracketType === 'consolation');
+                    const isRR = consMatches.every(m => m.round === 0);
+                    if (isRR) {
+                      return (
+                        <RoundRobinStandings
+                          matches={consMatches}
+                          getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
+                          isDoubles={isDoubles}
+                        />
+                      );
+                    }
+                    const consRounds = Math.max(...consMatches.map(m => m.round)) + 1;
+                    return (
+                      <TournamentBracket
+                        matches={consMatches}
+                        rounds={consRounds}
+                        getPlayer={isDoubles
+                          ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
+                          : getPlayer
+                        }
+                      />
+                    );
+                  })()}
+                </div>
+              </TabsContent>
+            )}
 
             <TabsContent value="scoring">
               {isKaiser ? (
