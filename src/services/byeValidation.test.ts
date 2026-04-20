@@ -156,4 +156,50 @@ describe('computeQualifiedPlayers', () => {
     // w1 has more wins → ranked first
     expect(winners.map(w => w.playerId)).toEqual(['w1', 'w0']);
   });
+
+  it('returns group thirds when qualifyPerGroup=3 (e.g. for a Trostrunde)', () => {
+    const players = [
+      mkPlayer('a1', 0), mkPlayer('a2', 0), mkPlayer('a3', 0), mkPlayer('a4', 0),
+      mkPlayer('b1', 1), mkPlayer('b2', 1), mkPlayer('b3', 1), mkPlayer('b4', 1),
+    ];
+    const matches: Match[] = [
+      // Group 0: a1 > a2 > a3 > a4 (clean ladder)
+      mkMatch(0, 'a1', 'a2', [{ player1: 11, player2: 5 }, { player1: 11, player2: 5 }], 'a1'),
+      mkMatch(0, 'a1', 'a3', [{ player1: 11, player2: 5 }, { player1: 11, player2: 5 }], 'a1'),
+      mkMatch(0, 'a1', 'a4', [{ player1: 11, player2: 5 }, { player1: 11, player2: 5 }], 'a1'),
+      mkMatch(0, 'a2', 'a3', [{ player1: 11, player2: 5 }, { player1: 11, player2: 5 }], 'a2'),
+      mkMatch(0, 'a2', 'a4', [{ player1: 11, player2: 5 }, { player1: 11, player2: 5 }], 'a2'),
+      mkMatch(0, 'a3', 'a4', [{ player1: 11, player2: 5 }, { player1: 11, player2: 5 }], 'a3'),
+      // Group 1: b1 > b2 > b3 > b4 with closer scores
+      mkMatch(1, 'b1', 'b2', [{ player1: 11, player2: 9 }, { player1: 11, player2: 9 }], 'b1'),
+      mkMatch(1, 'b1', 'b3', [{ player1: 11, player2: 9 }, { player1: 11, player2: 9 }], 'b1'),
+      mkMatch(1, 'b1', 'b4', [{ player1: 11, player2: 9 }, { player1: 11, player2: 9 }], 'b1'),
+      mkMatch(1, 'b2', 'b3', [{ player1: 11, player2: 9 }, { player1: 11, player2: 9 }], 'b2'),
+      mkMatch(1, 'b2', 'b4', [{ player1: 11, player2: 9 }, { player1: 11, player2: 9 }], 'b2'),
+      mkMatch(1, 'b3', 'b4', [{ player1: 11, player2: 9 }, { player1: 11, player2: 9 }], 'b3'),
+    ];
+
+    const { winners, runnersUp, thirds, byRank } = computeQualifiedPlayers(matches, players, 3);
+
+    expect(winners.map(w => w.playerId)).toEqual(['a1', 'b1']);
+    expect(new Set(runnersUp.map(r => r.playerId))).toEqual(new Set(['a2', 'b2']));
+    expect(new Set(thirds.map(t => t.playerId))).toEqual(new Set(['a3', 'b3']));
+    expect(byRank).toHaveLength(3);
+    // Both a3 and b3 are thirds; ordering between them depends on point diff.
+    expect(['a3', 'b3']).toContain(thirds[0].playerId);
+  });
+
+  it('defaults to top 2 per group when qualifyPerGroup is omitted', () => {
+    const players = [mkPlayer('a', 0), mkPlayer('b', 0), mkPlayer('c', 0)];
+    const matches: Match[] = [
+      mkMatch(0, 'a', 'b', [{ player1: 11, player2: 5 }, { player1: 11, player2: 5 }], 'a'),
+      mkMatch(0, 'a', 'c', [{ player1: 11, player2: 5 }, { player1: 11, player2: 5 }], 'a'),
+      mkMatch(0, 'b', 'c', [{ player1: 11, player2: 5 }, { player1: 11, player2: 5 }], 'b'),
+    ];
+
+    const { thirds, byRank } = computeQualifiedPlayers(matches, players);
+
+    expect(thirds).toEqual([]);
+    expect(byRank).toHaveLength(2);
+  });
 });
