@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Check, Play, X, Zap, Settings, Printer, FileText, Clock } from 'lucide-react';
+import { Check, Play, X, Zap, Settings, Printer, FileText, Clock, ChevronDown } from 'lucide-react';
 import { printRefereeSheet, printAllRefereeSheets } from '@/components/RefereeSheet';
 import { MatchPhotos } from '@/components/MatchPhotos';
 import { generateMatchReport } from '@/components/MatchReport';
@@ -437,63 +437,84 @@ function PhaseGroupedMatches({ matches, mode, renderMatch }: {
   const groupMatches = matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
   const koMatches = matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
 
+  // Default: Gruppenphase eingeklappt, K.O. ausgeklappt
+  const [groupOpen, setGroupOpen] = useState(false);
+  const [koOpen, setKoOpen] = useState(true);
+
   // No split needed: not group+KO, or only one phase present
   if (!isGroupKnockout || groupMatches.length === 0 || koMatches.length === 0) {
     return <>{matches.map(renderMatch)}</>;
   }
 
   return (
-    <div className="space-y-5">
-      <div>
-        <PhaseHeader
-          number={1}
-          label="Gruppenphase"
-          count={groupMatches.length}
-          tone="muted"
-        />
-        <div className="space-y-3 mt-2">{groupMatches.map(renderMatch)}</div>
-      </div>
-      <div>
-        <PhaseHeader
-          number={2}
-          label="K.O.-Runde"
-          count={koMatches.length}
-          tone="primary"
-        />
-        <div className="space-y-3 mt-2">{koMatches.map(renderMatch)}</div>
-      </div>
+    <div className="space-y-3">
+      <CollapsiblePhase
+        number={1}
+        label="Gruppenphase"
+        count={groupMatches.length}
+        tone="muted"
+        open={groupOpen}
+        onOpenChange={setGroupOpen}
+      >
+        {groupMatches.map(renderMatch)}
+      </CollapsiblePhase>
+      <CollapsiblePhase
+        number={2}
+        label="K.O.-Runde"
+        count={koMatches.length}
+        tone="primary"
+        open={koOpen}
+        onOpenChange={setKoOpen}
+      >
+        {koMatches.map(renderMatch)}
+      </CollapsiblePhase>
     </div>
   );
 }
 
-function PhaseHeader({ number, label, count, tone }: {
+function CollapsiblePhase({ number, label, count, tone, open, onOpenChange, children }: {
   number: number;
   label: string;
   count: number;
   tone: 'muted' | 'primary';
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  children: React.ReactNode;
 }) {
   const isPrimary = tone === 'primary';
   return (
-    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md border ${
-      isPrimary ? 'border-primary/30 bg-primary/5' : 'border-border/60 bg-muted/30'
-    }`}>
-      <span className={`flex items-center justify-center h-5 w-5 rounded text-[10px] font-bold ${
-        isPrimary ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
-      }`}>
-        {number}
-      </span>
-      <h4 className={`text-xs font-bold uppercase tracking-wider ${
-        isPrimary ? 'text-primary' : 'text-muted-foreground'
-      }`}>
-        {label}
-      </h4>
-      <span className="text-[10px] text-muted-foreground ml-auto">
-        {count} {count === 1 ? 'Spiel' : 'Spiele'}
-      </span>
+    <div>
+      <button
+        type="button"
+        onClick={() => onOpenChange(!open)}
+        aria-expanded={open}
+        className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md border transition-colors text-left ${
+          isPrimary
+            ? 'border-primary/30 bg-primary/5 hover:bg-primary/10'
+            : 'border-border/60 bg-muted/30 hover:bg-muted/50'
+        }`}
+      >
+        <span className={`flex items-center justify-center h-5 w-5 rounded text-[10px] font-bold flex-shrink-0 ${
+          isPrimary ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
+        }`}>
+          {number}
+        </span>
+        <h4 className={`text-xs font-bold uppercase tracking-wider ${
+          isPrimary ? 'text-primary' : 'text-muted-foreground'
+        }`}>
+          {label}
+        </h4>
+        <span className="text-[10px] text-muted-foreground ml-auto">
+          {count} {count === 1 ? 'Spiel' : 'Spiele'}
+        </span>
+        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="space-y-3 mt-2 pl-1">{children}</div>
+      )}
     </div>
   );
 }
-
 function getPlayerWaitRemaining(playerId: string | null, allMatches: Match[], breakMinutes: number, player: Player | null): number {
   if (!playerId) return 0;
   const now = Date.now();
