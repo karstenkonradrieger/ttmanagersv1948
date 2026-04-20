@@ -1827,6 +1827,37 @@ export function useTournamentDb(tournamentId: string | null) {
   };
 }
 
+// Standard tournament bracket seeding order for `size` slots (size must be power of 2).
+// Returns an array of seed numbers (1-based) in slot order. Top seeds are placed so that
+// they only meet in later rounds, and byes (null seeds beyond participant count) end up
+// paired against the highest seeds.
+function standardSeedOrder(size: number): number[] {
+  let order = [1];
+  while (order.length < size) {
+    const next: number[] = [];
+    const sum = order.length * 2 + 1;
+    for (const s of order) {
+      next.push(s);
+      next.push(sum - s);
+    }
+    order = next;
+  }
+  return order;
+}
+
+// Place participants into bracket slots so that byes are assigned to top seeds.
+// `participants` is in seed order (best first). Returns array of length `slots`
+// where null entries represent byes.
+function seedBracketSlots(participants: (string | null)[], slots: number): (string | null)[] {
+  const order = standardSeedOrder(slots); // seed number per slot index
+  const result: (string | null)[] = Array(slots).fill(null);
+  for (let i = 0; i < slots; i++) {
+    const seedNum = order[i]; // 1-based
+    result[i] = seedNum <= participants.length ? participants[seedNum - 1] : null;
+  }
+  return result;
+}
+
 function propagateWinners(matches: Match[]): Match[] {
   const updated = [...matches];
   for (const m of updated) {
