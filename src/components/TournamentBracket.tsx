@@ -1,5 +1,6 @@
 import { Match, Player } from '@/types/tournament';
 import { Trophy } from 'lucide-react';
+import { getRoundLabel } from './bracketLabels';
 
 interface Props {
   matches: Match[];
@@ -24,16 +25,7 @@ export function TournamentBracket({ matches, rounds, getPlayer }: Props) {
   const maxRound = presentRounds[presentRounds.length - 1] ?? rounds - 1;
   
 
-  const roundNames = (r: number) => {
-    const matchesInRound = matches.filter(m => m.round === r).length;
-    // Label by remaining rounds from the final
-    const fromEnd = maxRound - r;
-    if (fromEnd === 0) return 'Finale';
-    if (fromEnd === 1) return 'Halbfinale';
-    if (fromEnd === 2 && matchesInRound <= 4) return 'Viertelfinale';
-    if (fromEnd === 3 && matchesInRound <= 8) return 'Achtelfinale';
-    return `Runde ${r - minRound + 1}`;
-  };
+  const roundNames = (r: number) => getRoundLabel(r, matches);
 
   const finalist = matches.find(m => m.round === maxRound && m.winnerId);
   const champion = finalist ? getPlayer(finalist.winnerId) : null;
