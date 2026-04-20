@@ -21,6 +21,8 @@ export interface SetScore {
   player2: number;
 }
 
+export type BracketType = 'main' | 'consolation';
+
 export interface Match {
   id: string;
   round: number;
@@ -35,6 +37,7 @@ export interface Match {
   completedAt?: string | null;
   homeTeamId?: string | null;
   awayTeamId?: string | null;
+  bracketType?: BracketType;
 }
 
 export interface DoublesPair {
