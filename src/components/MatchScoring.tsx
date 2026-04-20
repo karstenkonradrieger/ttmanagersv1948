@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Check, Play, X, Zap, Settings, Printer, FileText, Clock } from 'lucide-react';
+import { Check, Play, X, Zap, Settings, Printer, FileText, Clock, ChevronDown } from 'lucide-react';
 import { printRefereeSheet, printAllRefereeSheets } from '@/components/RefereeSheet';
 import { MatchPhotos } from '@/components/MatchPhotos';
 import { generateMatchReport } from '@/components/MatchReport';
