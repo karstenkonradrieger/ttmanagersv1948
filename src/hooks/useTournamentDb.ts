@@ -1297,7 +1297,14 @@ export function useTournamentDb(tournamentId: string | null) {
     const groupCount = Math.max(...tournament.players.map(p => (p.groupNumber ?? 0))) + 1;
 
     // Compute standings per group
-    const qualifiedPlayers: Array<{ playerId: string; groupNumber: number; rank: number }> = [];
+    const qualifiedPlayers: Array<{
+      playerId: string;
+      groupNumber: number;
+      rank: number;
+      won: number;
+      setsDiff: number;
+      pointsDiff: number;
+    }> = [];
 
     for (let g = 0; g < groupCount; g++) {
       const gMatches = groupMatches.filter(m => m.groupNumber === g);
@@ -1340,31 +1347,38 @@ export function useTournamentDb(tournamentId: string | null) {
 
       // Top 2 qualify
       for (let i = 0; i < Math.min(2, standings.length); i++) {
-        qualifiedPlayers.push({ playerId: standings[i].playerId, groupNumber: g, rank: i + 1 });
+        const s = standings[i];
+        qualifiedPlayers.push({
+          playerId: s.playerId,
+          groupNumber: g,
+          rank: i + 1,
+          won: s.won,
+          setsDiff: s.setsWon - s.setsLost,
+          pointsDiff: s.pointsWon - s.pointsLost,
+        });
       }
     }
 
     const qualifiedCount = qualifiedPlayers.length;
     if (qualifiedCount < 2) return;
 
-    // Cross-seeding: Group winners vs runners-up of other groups
-    // Sort: all group winners first (by group), then runners-up (reversed for cross)
-    const winners = qualifiedPlayers.filter(q => q.rank === 1).sort((a, b) => a.groupNumber - b.groupNumber);
-    const runnersUp = qualifiedPlayers.filter(q => q.rank === 2).sort((a, b) => a.groupNumber - b.groupNumber);
+    // Cross-group ranking within each rank tier by performance, so the
+    // strongest winners receive the bye slots in bracket seeding.
+    const perfSort = (a: typeof qualifiedPlayers[number], b: typeof qualifiedPlayers[number]) => {
+      if (b.won !== a.won) return b.won - a.won;
+      if (b.setsDiff !== a.setsDiff) return b.setsDiff - a.setsDiff;
+      return b.pointsDiff - a.pointsDiff;
+    };
+    const winners = qualifiedPlayers.filter(q => q.rank === 1).sort(perfSort);
+    const runnersUp = qualifiedPlayers.filter(q => q.rank === 2).sort(perfSort);
 
-    // Interleave: Winner A vs Runner-up B, Winner B vs Runner-up A, etc.
-    const seeded: string[] = [];
-    const runnersUpReversed = [...runnersUp].reverse();
-    for (let i = 0; i < winners.length; i++) {
-      seeded.push(winners[i].playerId);
-      if (i < runnersUpReversed.length) {
-        seeded.push(runnersUpReversed[i].playerId);
-      }
-    }
-    // Add any remaining runners-up
-    for (let i = winners.length; i < runnersUpReversed.length; i++) {
-      seeded.push(runnersUpReversed[i].playerId);
-    }
+    // Seed order: best winner first (seed 1), then remaining winners, then
+    // runners-up by performance. seedBracketSlots() ensures top seeds get byes
+    // when qualifier count is not a power of two.
+    const seeded: string[] = [
+      ...winners.map(w => w.playerId),
+      ...runnersUp.map(r => r.playerId),
+    ];
 
     const n = seeded.length;
     const slots = Math.pow(2, Math.ceil(Math.log2(n)));
