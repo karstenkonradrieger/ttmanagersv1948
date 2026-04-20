@@ -216,6 +216,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
       completedAt: m.completed_at || null,
       homeTeamId: m.home_team_id || null,
       awayTeamId: m.away_team_id || null,
+      bracketType: ((m as any).bracket_type as BracketType) || 'main',
     })),
   };
 }
