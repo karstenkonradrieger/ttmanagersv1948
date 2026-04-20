@@ -199,6 +199,4 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
   );
 }
 
-// Export for reuse in knockout transition
-export { computeGroupStandings };
 export type { GroupStanding };
