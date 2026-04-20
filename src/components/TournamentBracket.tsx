@@ -22,7 +22,7 @@ export function TournamentBracket({ matches, rounds, getPlayer }: Props) {
   const presentRounds = Array.from(new Set(matches.map(m => m.round))).sort((a, b) => a - b);
   const minRound = presentRounds[0] ?? 0;
   const maxRound = presentRounds[presentRounds.length - 1] ?? rounds - 1;
-  const koRoundCount = presentRounds.length;
+  
 
   const roundNames = (r: number) => {
     const matchesInRound = matches.filter(m => m.round === r).length;
