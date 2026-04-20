@@ -2,7 +2,8 @@ import { useMemo, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Match, Player, SetScore, Sponsor, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save, Download, Settings, X, Check } from 'lucide-react';
+import { FileDown, Award, FileText, User, ImageIcon, ImageOff, Eye, Printer, Save, Download, Settings, X, Check, ChevronDown } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
@@ -1064,36 +1065,49 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
         </div>
       </div>
 
-      {/* Rounds */}
-      {matchesByRound.map((roundMatches, r) => {
-        if (roundMatches.length === 0) return null;
-        const roundName = getRoundName(r, rounds, mode);
+      {/* Rounds — bei group_knockout in Gruppen-/K.O.-Sektionen splitten */}
+      {mode === 'group_knockout' ? (
+        <PhaseSplitRounds
+          matches={matches}
+          rounds={rounds}
+          mode={mode}
+          getPlayer={getPlayer}
+          bestOf={bestOf}
+          editingMatchId={editingMatchId}
+          setEditingMatchId={setEditingMatchId}
+          onUpdateScore={onUpdateScore}
+        />
+      ) : (
+        matchesByRound.map((roundMatches, r) => {
+          if (roundMatches.length === 0) return null;
+          const roundName = getRoundName(r, rounds, mode);
 
-        return (
-          <div key={r}>
-            <h4 className="font-bold text-sm mb-2 text-primary">{roundName}</h4>
-            <div className="space-y-2">
-              {roundMatches.map((m) => (
-                  <OverviewMatchRow
-                    key={m.id}
-                    match={m}
-                    getPlayer={getPlayer}
-                    bestOf={bestOf}
-                    mode={mode}
-                    rounds={rounds}
-                    isEditing={editingMatchId === m.id}
-                    onStartEdit={() => setEditingMatchId(m.id)}
-                    onCancelEdit={() => setEditingMatchId(null)}
-                    onUpdateScore={onUpdateScore ? (sets, ebo) => {
-                      onUpdateScore(m.id, sets, ebo);
-                      setEditingMatchId(null);
-                    } : undefined}
-                  />
-              ))}
+          return (
+            <div key={r}>
+              <h4 className="font-bold text-sm mb-2 text-primary">{roundName}</h4>
+              <div className="space-y-2">
+                {roundMatches.map((m) => (
+                    <OverviewMatchRow
+                      key={m.id}
+                      match={m}
+                      getPlayer={getPlayer}
+                      bestOf={bestOf}
+                      mode={mode}
+                      rounds={rounds}
+                      isEditing={editingMatchId === m.id}
+                      onStartEdit={() => setEditingMatchId(m.id)}
+                      onCancelEdit={() => setEditingMatchId(null)}
+                      onUpdateScore={onUpdateScore ? (sets, ebo) => {
+                        onUpdateScore(m.id, sets, ebo);
+                        setEditingMatchId(null);
+                      } : undefined}
+                    />
+                ))}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })
+      )}
 
       {/* Photo Retrospective */}
       {matches.filter(m => m.status === 'completed').length > 0 && (
