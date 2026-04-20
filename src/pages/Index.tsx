@@ -584,7 +584,7 @@ const Index = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-1.5 border-yellow-500/50 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/10"
+                            className="gap-1.5 border-destructive/50 text-destructive hover:bg-destructive/10"
                             onClick={() => {
                               if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
                                 redistributeKnockoutByes();
