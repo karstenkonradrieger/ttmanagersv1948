@@ -543,7 +543,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
 
       for (const gNum of groupNumbers) {
         const gMatches = allGroupMatches.filter(m => m.groupNumber === gNum);
-        const groupLabel = `Gruppe ${gNum}`;
+        const groupLabel = `G${gNum}`;
 
         // Match table
         const tableData = gMatches.map((m, idx) => {
