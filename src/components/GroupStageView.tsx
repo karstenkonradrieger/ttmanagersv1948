@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Trophy, Medal, Info } from 'lucide-react';
+import { ArrowRight, Trophy, Medal, Info, ChevronDown } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { computeQualifiedPlayers } from '@/services/byeValidation';
 
 interface GroupStanding {
