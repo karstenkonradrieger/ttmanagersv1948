@@ -359,7 +359,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     // Separate group and KO matches
     const allGroupMatches = matches.filter(m => m.groupNumber != null).sort((a, b) => (a.groupNumber ?? 0) - (b.groupNumber ?? 0) || a.round - b.round || a.position - b.position);
     const allKoMatches = matches.filter(m => m.groupNumber == null).sort((a, b) => a.round - b.round || a.position - b.position);
-    const koRounds = allKoMatches.length > 0 ? Math.max(...allKoMatches.map(m => m.round)) + 1 : 0;
+    const koMaxRound = allKoMatches.length > 0 ? Math.max(...allKoMatches.map(m => m.round)) : -1;
 
     const hasGroupAndKo = allGroupMatches.length > 0 && allKoMatches.length > 0;
 
