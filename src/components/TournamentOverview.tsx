@@ -55,9 +55,11 @@ interface Props {
   onUpdateScore?: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
 }
 
-function getRoundName(round: number, totalRounds: number, mode?: string): string {
+function getRoundName(round: number, totalRounds: number, mode?: string, groupNumber?: number | null, koRounds?: number): string {
+  if (groupNumber != null) return `Gruppe ${groupNumber} – Runde ${round + 1}`;
   if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
-  const diff = totalRounds - round;
+  const rounds = koRounds != null && koRounds > 0 ? koRounds : totalRounds;
+  const diff = rounds - round;
   if (diff === 1) return 'Finale';
   if (diff === 2) return 'Halbfinale';
   if (diff === 3) return 'Viertelfinale';
