@@ -28,9 +28,26 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
   const finalist = matches.find(m => m.round === maxRound && m.winnerId);
   const champion = finalist ? getPlayer(finalist.winnerId) : null;
 
-  // Configurable tiebreaker order and H2H priority
-  const [tiebreakerOrder, setTiebreakerOrder] = useState<TiebreakerCriterion[]>(DEFAULT_TIEBREAKER_ORDER);
-  const [h2hPriority, setH2hPriority] = useState(false);
+  // Configurable tiebreaker order and H2H priority — persisted in localStorage
+  const LS_KEY = 'tt-tiebreaker-config';
+  const [tiebreakerOrder, setTiebreakerOrder] = useState<TiebreakerCriterion[]>(() => {
+    try {
+      const stored = localStorage.getItem(LS_KEY);
+      if (stored) { const parsed = JSON.parse(stored); return parsed.order ?? DEFAULT_TIEBREAKER_ORDER; }
+    } catch {}
+    return DEFAULT_TIEBREAKER_ORDER;
+  });
+  const [h2hPriority, setH2hPriority] = useState(() => {
+    try {
+      const stored = localStorage.getItem(LS_KEY);
+      if (stored) { const parsed = JSON.parse(stored); return parsed.h2hPriority ?? false; }
+    } catch {}
+    return false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(LS_KEY, JSON.stringify({ order: tiebreakerOrder, h2hPriority }));
+  }, [tiebreakerOrder, h2hPriority]);
 
   const moveCriterion = useCallback((idx: number, dir: -1 | 1) => {
     setTiebreakerOrder(prev => {
