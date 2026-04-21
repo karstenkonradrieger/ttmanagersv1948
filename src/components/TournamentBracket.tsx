@@ -1,14 +1,21 @@
+import { useMemo, useState } from 'react';
 import { Match, Player } from '@/types/tournament';
-import { Trophy } from 'lucide-react';
+import { Trophy, ChevronDown, Info } from 'lucide-react';
 import { getRoundLabel } from './bracketLabels';
+import { computeQualifiedPlayers } from '@/services/byeValidation';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface Props {
   matches: Match[];
   rounds: number;
   getPlayer: (id: string | null) => Player | null;
+  /** All tournament matches (incl. group stage) – needed for seeding details */
+  allMatches?: Match[];
+  /** All tournament players – needed for seeding details */
+  players?: Player[];
 }
 
-export function TournamentBracket({ matches, rounds, getPlayer }: Props) {
+export function TournamentBracket({ matches, rounds, getPlayer, allMatches, players }: Props) {
   if (matches.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-12">
