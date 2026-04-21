@@ -1316,19 +1316,30 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
               );
             }
 
+            const allKo2 = matches.filter(m => m.groupNumber == null);
+            const photoKoRounds = allKo2.length > 0 ? Math.max(...allKo2.map(m => m.round)) + 1 : 0;
+            const completedAll = matches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id)
+              .sort((a, b) => {
+                const gA = a.groupNumber ?? -1, gB = b.groupNumber ?? -1;
+                if (gA !== gB) return gA - gB;
+                return a.round - b.round || a.position - b.position;
+              });
+            type PhotoBucket2 = { label: string; matches: Match[] };
+            const photoBuckets: PhotoBucket2[] = [];
+            for (const m of completedAll) {
+              const label = getRoundName(m.round, rounds, mode, m.groupNumber, photoKoRounds);
+              const last = photoBuckets[photoBuckets.length - 1];
+              if (last && last.label === label) { last.matches.push(m); }
+              else { photoBuckets.push({ label, matches: [m] }); }
+            }
             return (
               <div className="space-y-3">
-                {matchesByRound.map((roundMatches, r) => {
-                  const completedInRound = roundMatches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id);
-                  if (completedInRound.length === 0) return null;
-                  const roundLabel = getRoundName(r, rounds, mode);
-                  return (
-                    <div key={`photos-${r}`}>
-                      <h5 className="text-xs font-semibold text-muted-foreground mb-2">{roundLabel}</h5>
-                      {completedInRound.map(m => renderPhotoCard(m, roundLabel))}
-                    </div>
-                  );
-                })}
+                {photoBuckets.map((bucket, bi) => (
+                  <div key={`photos-${bi}`}>
+                    <h5 className="text-xs font-semibold text-muted-foreground mb-2">{bucket.label}</h5>
+                    {bucket.matches.map(m => renderPhotoCard(m, bucket.label))}
+                  </div>
+                ))}
                 {ceremony}
               </div>
             );
