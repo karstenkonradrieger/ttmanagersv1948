@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { Match, Player } from '@/types/tournament';
-import { Trophy, ChevronDown, Info } from 'lucide-react';
+import { Trophy, ChevronDown, ChevronUp, Info, ArrowUp, ArrowDown } from 'lucide-react';
 import { getRoundLabel } from './bracketLabels';
-import { computeQualifiedPlayers } from '@/services/byeValidation';
+import { computeQualifiedPlayers, TiebreakerCriterion, DEFAULT_TIEBREAKER_ORDER } from '@/services/byeValidation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   matches: Match[];
