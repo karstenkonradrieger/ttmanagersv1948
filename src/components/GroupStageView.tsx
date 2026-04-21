@@ -379,9 +379,66 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
             )}
           </div>
 
-          <p className="text-xs text-muted-foreground mt-3">
-            Setzliste: Gruppensieger nach Leistung (Siege → Satzdifferenz → Punktdifferenz), dann Gruppenzweite nach gleichen Kriterien.
-          </p>
+          {/* Setzlogik-Details */}
+          <Collapsible>
+            <CollapsibleTrigger asChild>
+              <button className="w-full flex items-center justify-between mt-3 px-2 py-1.5 rounded-md text-xs font-semibold text-muted-foreground hover:bg-muted/40 transition-colors">
+                <span className="flex items-center gap-1.5">
+                  <Info className="h-3 w-3" />
+                  Setzlogik-Details
+                </span>
+                <ChevronDown className="h-3 w-3 transition-transform [[data-state=open]>&]:rotate-180" />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-1 space-y-3 px-1">
+                {/* Explain seeding within each tier */}
+                {[
+                  { label: 'Gruppensieger', list: qualifiedData.winners, seedOffset: 0 },
+                  { label: 'Gruppenzweite', list: qualifiedData.runnersUp, seedOffset: qualifiedData.winners.length },
+                ].filter(t => t.list.length > 1).map(tier => (
+                  <div key={tier.label}>
+                    <p className="text-[11px] font-bold text-foreground mb-1">{tier.label} – Reihenfolge</p>
+                    <div className="space-y-1">
+                      {tier.list.map((q, i) => {
+                        const seed = tier.seedOffset + i + 1;
+                        const next = tier.list[i + 1];
+                        let comparison = '';
+                        if (next) {
+                          if (q.won !== next.won) {
+                            comparison = `${q.won}S vs. ${next.won}S → mehr Siege`;
+                          } else if (q.setsDiff !== next.setsDiff) {
+                            comparison = `Siege gleich (${q.won}), Sätze ${q.setsDiff > 0 ? '+' : ''}${q.setsDiff} vs. ${next.setsDiff > 0 ? '+' : ''}${next.setsDiff}`;
+                          } else if (q.pointsDiff !== next.pointsDiff) {
+                            comparison = `Siege & Sätze gleich, Punkte ${q.pointsDiff > 0 ? '+' : ''}${q.pointsDiff} vs. ${next.pointsDiff > 0 ? '+' : ''}${next.pointsDiff}`;
+                          } else {
+                            comparison = 'Alle Kriterien identisch';
+                          }
+                        }
+                        return (
+                          <div key={q.playerId} className="flex items-start gap-2 text-[11px]">
+                            <span className="font-bold text-primary w-4 text-right shrink-0">#{seed}</span>
+                            <span className="font-semibold shrink-0">{getParticipantName(q.playerId)}</span>
+                            <span className="text-muted-foreground">
+                              (Gr.{String.fromCharCode(65 + q.groupNumber)}: {q.won}S, Sätze{q.setsDiff > 0 ? '+' : ''}{q.setsDiff}, Pkt{q.pointsDiff > 0 ? '+' : ''}{q.pointsDiff})
+                            </span>
+                            {comparison && (
+                              <span className="text-muted-foreground/70 italic ml-auto text-right">
+                                ↳ vs. #{seed + 1}: {comparison}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+                <p className="text-[10px] text-muted-foreground/60 mt-1">
+                  Kriterien: 1. Siege → 2. Satzdifferenz → 3. Punktdifferenz. Bei zwei Spielern gleicher Gruppe zusätzlich direkter Vergleich.
+                </p>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       )}
     </div>
