@@ -102,7 +102,7 @@ export async function generatePlayerReport({
     return;
   }
 
-
+  const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
   const w = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   let y = 10;
