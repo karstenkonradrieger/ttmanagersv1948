@@ -8,7 +8,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { UserPlus, Trash2, Trophy, Pencil, Check, X, Camera, FileText, FileCheck, Clock } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
-import { generatePlayerReport } from '@/components/PlayerReport';
+import { generatePlayerReport, PlayerReportPhaseFilter } from '@/components/PlayerReport';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { LogicAgentValidator } from '@/components/LogicAgentValidator';
 import { printPhotoConsentForm, printAllPhotoConsentForms } from '@/components/PhotoConsentForm';
 import { toast } from 'sonner';
