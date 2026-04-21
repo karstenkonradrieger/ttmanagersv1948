@@ -16,21 +16,11 @@ interface Props {
 }
 
 export function TournamentBracket({ matches, rounds, getPlayer, allMatches, players }: Props) {
-  if (matches.length === 0) {
-    return (
-      <div className="text-center text-muted-foreground py-12">
-        Starte das Turnier, um den Bracket zu sehen
-      </div>
-    );
-  }
-
-  // Determine actual KO rounds present in the supplied matches.
-  // For group+KO tournaments, `rounds` is the total tournament rounds (incl. group stage),
-  // so we cannot derive Final/Semifinal labels from it. Use the matches themselves.
-  const presentRounds = Array.from(new Set(matches.map(m => m.round))).sort((a, b) => a - b);
-  const minRound = presentRounds[0] ?? 0;
+  const presentRounds = useMemo(() =>
+    Array.from(new Set(matches.map(m => m.round))).sort((a, b) => a - b),
+    [matches]
+  );
   const maxRound = presentRounds[presentRounds.length - 1] ?? rounds - 1;
-  
 
   const roundNames = (r: number) => getRoundLabel(r, matches);
 
@@ -39,7 +29,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
 
   // Compute seeding details for first KO round when group data is available
   const seedingDetails = useMemo(() => {
-    if (!allMatches || !players) return null;
+    if (!allMatches || !players || matches.length === 0) return null;
     const groupMatches = allMatches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
     if (groupMatches.length === 0) return null;
     const { winners, runnersUp } = computeQualifiedPlayers(groupMatches, players);
