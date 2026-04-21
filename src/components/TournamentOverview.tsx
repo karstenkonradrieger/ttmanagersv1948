@@ -383,7 +383,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       type Bucket = { label: string; matches: Match[] };
       const buckets: Bucket[] = [];
       for (const m of sectionMatches) {
-        const label = getRoundName(m.round, rounds, mode, m.groupNumber, koRounds);
+        const label = getRoundName(m.round, rounds, mode, m.groupNumber, koMaxRound);
         const last = buckets[buckets.length - 1];
         if (last && last.label === label) {
           last.matches.push(m);
