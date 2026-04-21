@@ -164,12 +164,13 @@ interface Props {
 
 export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount }: Props) {
   const groupData = useMemo(() => {
-    const groups: { groupNumber: number; standings: GroupStanding[]; matches: Match[]; allCompleted: boolean }[] = [];
+    const groups: { groupNumber: number; standings: GroupStanding[]; matches: Match[]; allCompleted: boolean; tiebreakers: TiebreakerInfo[] }[] = [];
     for (let g = 0; g < groupCount; g++) {
       const gMatches = matches.filter(m => m.groupNumber === g);
       const standings = computeGroupStandings(gMatches, getParticipantName);
       const allCompleted = gMatches.length > 0 && gMatches.every(m => m.status === 'completed');
-      groups.push({ groupNumber: g, standings, matches: gMatches, allCompleted });
+      const tiebreakers = allCompleted ? detectTiebreakers(standings, gMatches) : [];
+      groups.push({ groupNumber: g, standings, matches: gMatches, allCompleted, tiebreakers });
     }
     return groups;
   }, [matches, getParticipantName, groupCount]);
