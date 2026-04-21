@@ -24,7 +24,8 @@ export function computeQualifiedPlayers(
   groupMatches: Match[],
   players: Player[],
   qualifyPerGroup: number = 2,
-  tiebreakerOrder: TiebreakerCriterion[] = DEFAULT_TIEBREAKER_ORDER
+  tiebreakerOrder: TiebreakerCriterion[] = DEFAULT_TIEBREAKER_ORDER,
+  h2hPriority: boolean = false
 ): {
   winners: QualifiedPlayer[];
   runnersUp: QualifiedPlayer[];
@@ -61,17 +62,29 @@ export function computeQualifiedPlayers(
     };
 
     const standings = [...map.values()].sort((a, b) => {
+      // H2H priority: check direct comparison first when enabled
+      if (h2hPriority) {
+        const h2h = gMatches.find(m => m.status === 'completed' &&
+          ((m.player1Id === a.playerId && m.player2Id === b.playerId) ||
+            (m.player1Id === b.playerId && m.player2Id === a.playerId)));
+        if (h2h) {
+          if (h2h.winnerId === a.playerId) return -1;
+          if (h2h.winnerId === b.playerId) return 1;
+        }
+      }
       for (const criterion of tiebreakerOrder) {
         const diff = getVal(b, criterion) - getVal(a, criterion);
         if (diff !== 0) return diff;
       }
-      // H2H as final fallback within group
-      const h2h = gMatches.find(m => m.status === 'completed' &&
-        ((m.player1Id === a.playerId && m.player2Id === b.playerId) ||
-          (m.player1Id === b.playerId && m.player2Id === a.playerId)));
-      if (h2h) {
-        if (h2h.winnerId === a.playerId) return -1;
-        if (h2h.winnerId === b.playerId) return 1;
+      // H2H as final fallback within group (when not priority)
+      if (!h2hPriority) {
+        const h2h = gMatches.find(m => m.status === 'completed' &&
+          ((m.player1Id === a.playerId && m.player2Id === b.playerId) ||
+            (m.player1Id === b.playerId && m.player2Id === a.playerId)));
+        if (h2h) {
+          if (h2h.winnerId === a.playerId) return -1;
+          if (h2h.winnerId === b.playerId) return 1;
+        }
       }
       return 0;
     });

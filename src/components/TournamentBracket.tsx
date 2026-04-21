@@ -28,8 +28,9 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
   const finalist = matches.find(m => m.round === maxRound && m.winnerId);
   const champion = finalist ? getPlayer(finalist.winnerId) : null;
 
-  // Configurable tiebreaker order
+  // Configurable tiebreaker order and H2H priority
   const [tiebreakerOrder, setTiebreakerOrder] = useState<TiebreakerCriterion[]>(DEFAULT_TIEBREAKER_ORDER);
+  const [h2hPriority, setH2hPriority] = useState(false);
 
   const moveCriterion = useCallback((idx: number, dir: -1 | 1) => {
     setTiebreakerOrder(prev => {
@@ -52,7 +53,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
     if (!allMatches || !players || matches.length === 0) return null;
     const groupMatches = allMatches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
     if (groupMatches.length === 0) return null;
-    const { winners, runnersUp } = computeQualifiedPlayers(groupMatches, players, 2, tiebreakerOrder);
+    const { winners, runnersUp } = computeQualifiedPlayers(groupMatches, players, 2, tiebreakerOrder, h2hPriority);
     const seeded = [...winners, ...runnersUp];
     if (seeded.length < 2) return null;
 
@@ -71,7 +72,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
       const isBye = (p1 && !p2) || (!p1 && p2);
       return { position: idx + 1, p1, p2, s1, s2, seed1, seed2, isBye };
     });
-  }, [allMatches, players, matches, presentRounds, getPlayer, tiebreakerOrder]);
+  }, [allMatches, players, matches, presentRounds, getPlayer, tiebreakerOrder, h2hPriority]);
 
   const [seedingOpen, setSeedingOpen] = useState(false);
 
@@ -176,8 +177,21 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
                   ))}
                 </div>
               </div>
+              {/* H2H priority toggle */}
+              <label className="flex items-center gap-2 text-xs cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={h2hPriority}
+                  onChange={(e) => setH2hPriority(e.target.checked)}
+                  className="rounded border-border accent-primary h-3.5 w-3.5"
+                />
+                <span className="font-medium">Direkter Vergleich (H2H) hat Vorrang</span>
+                <span className="text-muted-foreground text-[10px]">
+                  {h2hPriority ? '— H2H wird vor der Tiebreaker-Reihenfolge geprüft' : '— H2H greift nur als letzter Fallback'}
+                </span>
+              </label>
               <p className="text-[11px] text-muted-foreground">
-                Setzung: Gruppensieger (nach {tiebreakerOrder.map(c => criterionLabels[c]).join(' → ')}), dann Gruppenzweite nach gleicher Logik. Seed #1 trifft auf den niedrigsten Seed.
+                Setzung: Gruppensieger (nach {h2hPriority ? 'H2H → ' : ''}{tiebreakerOrder.map(c => criterionLabels[c]).join(' → ')}{!h2hPriority ? ' → H2H' : ''}), dann Gruppenzweite nach gleicher Logik. Seed #1 trifft auf den niedrigsten Seed.
               </p>
               <div className="space-y-1.5">
                 {seedingDetails.map((d) => (
