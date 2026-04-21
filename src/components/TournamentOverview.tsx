@@ -1159,8 +1159,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                 ))}
               </div>
             </div>
-          );
-        })
+          ));
+        })()
       )}
 
       {/* Photo Retrospective */}
