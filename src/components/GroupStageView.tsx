@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Trophy, Medal } from 'lucide-react';
+import { ArrowRight, Trophy, Medal, Info } from 'lucide-react';
 import { computeQualifiedPlayers } from '@/services/byeValidation';
 
 interface GroupStanding {
