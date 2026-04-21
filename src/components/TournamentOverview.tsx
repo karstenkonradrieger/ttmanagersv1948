@@ -406,13 +406,12 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
             p2?.name || (isBye ? 'Freilos' : 'TBD'),
             isBye ? '–' : `${wins.p1}:${wins.p2}${upgraded ? ' (Bo5)' : ''}`,
             isBye ? '–' : formatSets(m.sets),
-            isBye ? (p1?.name || '–') : (winner?.name || '–'),
           ];
         });
 
         autoTable(doc, {
           startY,
-          head: [[bucket.label, 'Spieler 1', 'Spieler 2', 'Sätze', 'Ergebnisse', 'Gewinner']],
+          head: [[bucket.label, 'Spieler 1', 'Spieler 2', 'Sätze', 'Ergebnisse']],
           body: tableData,
           theme: 'grid',
           headStyles: {
@@ -420,6 +419,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
             textColor: [255, 255, 255],
             fontStyle: 'bold',
             fontSize: 8,
+            overflow: 'linebreak' as any,
           },
           styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
           columnStyles: {
@@ -427,8 +427,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
             1: { cellWidth: 'auto' },
             2: { cellWidth: 'auto' },
             3: { cellWidth: 16, halign: 'center' },
-            4: { cellWidth: 50 },
-            5: { cellWidth: 'auto' },
+            4: { cellWidth: 55 },
           },
         });
 
