@@ -145,9 +145,39 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="rounded-lg border border-border/50 bg-muted/30 p-3 space-y-2">
-              <p className="text-[11px] text-muted-foreground mb-2">
-                Setzung: Gruppensieger (nach Siege → Satzdiff → Punktdiff), dann Gruppenzweite nach gleicher Logik. Seed #1 trifft auf den niedrigsten Seed.
+            <div className="rounded-lg border border-border/50 bg-muted/30 p-3 space-y-3">
+              {/* Tiebreaker order config */}
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-semibold text-muted-foreground">Tiebreaker-Reihenfolge (anpassbar):</p>
+                <div className="flex flex-col gap-1">
+                  {tiebreakerOrder.map((criterion, idx) => (
+                    <div key={criterion} className="flex items-center gap-1.5 text-xs bg-background/60 border border-border/30 rounded-md px-2 py-1">
+                      <span className="font-bold text-muted-foreground min-w-[16px]">{idx + 1}.</span>
+                      <span className="flex-1 font-medium">{criterionLabels[criterion]}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        disabled={idx === 0}
+                        onClick={() => moveCriterion(idx, -1)}
+                      >
+                        <ArrowUp className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        disabled={idx === tiebreakerOrder.length - 1}
+                        onClick={() => moveCriterion(idx, 1)}
+                      >
+                        <ArrowDown className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Setzung: Gruppensieger (nach {tiebreakerOrder.map(c => criterionLabels[c]).join(' → ')}), dann Gruppenzweite nach gleicher Logik. Seed #1 trifft auf den niedrigsten Seed.
               </p>
               <div className="space-y-1.5">
                 {seedingDetails.map((d) => (
