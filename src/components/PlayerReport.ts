@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { Match, Player, SetScore } from '@/types/tournament';
 
 function getSetWins(sets: SetScore[]): { p1: number; p2: number } {
