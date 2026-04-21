@@ -101,9 +101,17 @@ export async function generatePlayerReport({
   let y = 10;
   const logoStartY = y;
 
-  // Header (drawn first so logo overlays on top)
+  // Filter label top-right
+  const filterLabel = phaseFilter === 'group' ? 'Nur Gruppenphase' : phaseFilter === 'ko' ? 'Nur K.O.-Runde' : 'Alle Spiele';
+  doc.setFontSize(8);
+  doc.setFont(undefined!, 'italic');
+  doc.setTextColor(120);
+  doc.text(filterLabel, w - 10, y + 2, { align: 'right' });
+
+  // Header
   doc.setFontSize(14);
   doc.setFont(undefined!, 'bold');
+  doc.setTextColor(0);
   doc.text('Spielerbericht', 10, y + 5);
   y += 10;
 
