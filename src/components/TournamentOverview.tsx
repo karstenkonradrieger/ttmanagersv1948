@@ -55,9 +55,11 @@ interface Props {
   onUpdateScore?: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
 }
 
-function getRoundName(round: number, totalRounds: number, mode?: string): string {
+function getRoundName(round: number, totalRounds: number, mode?: string, groupNumber?: number | null, koRounds?: number): string {
+  if (groupNumber != null) return `Gruppe ${groupNumber} – Runde ${round + 1}`;
   if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
-  const diff = totalRounds - round;
+  const rounds = koRounds != null && koRounds > 0 ? koRounds : totalRounds;
+  const diff = rounds - round;
   if (diff === 1) return 'Finale';
   if (diff === 2) return 'Halbfinale';
   if (diff === 3) return 'Viertelfinale';
@@ -353,144 +355,181 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
 
     let startY = motto ? 40 : 36;
 
-    for (let r = 0; r < rounds; r++) {
-      const roundMatches = matchesByRound[r];
-      if (!roundMatches || roundMatches.length === 0) continue;
+    // Separate group and KO matches
+    const allGroupMatches = matches.filter(m => m.groupNumber != null).sort((a, b) => (a.groupNumber ?? 0) - (b.groupNumber ?? 0) || a.round - b.round || a.position - b.position);
+    const allKoMatches = matches.filter(m => m.groupNumber == null).sort((a, b) => a.round - b.round || a.position - b.position);
+    const koRounds = allKoMatches.length > 0 ? Math.max(...allKoMatches.map(m => m.round)) + 1 : 0;
 
-      const roundName = getRoundName(r, rounds, mode);
+    const hasGroupAndKo = allGroupMatches.length > 0 && allKoMatches.length > 0;
 
-      const tableData = roundMatches.map((m, idx) => {
-        const p1 = getPlayer(m.player1Id);
-        const p2 = getPlayer(m.player2Id);
-        const wins = getSetWins(m.sets);
-        const winner = getPlayer(m.winnerId);
-        const isBye = !m.player2Id && m.player1Id;
-        const upgraded = wasUpgradedBestOf(m, bestOf);
-        
-        return [
-          `${idx + 1}`,
-          p1?.name || (isBye ? '–' : 'TBD'),
-          p2?.name || (isBye ? 'Freilos' : 'TBD'),
-          isBye ? '–' : `${wins.p1}:${wins.p2}${upgraded ? ' (Bo5)' : ''}`,
-          isBye ? '–' : formatSets(m.sets),
-          isBye ? (p1?.name || '–') : (winner?.name || '–'),
-        ];
-      });
+    // Helper to render a section of matches as tables + photos
+    const renderMatchSection = async (sectionMatches: Match[], sectionLabel: string | null) => {
+      if (sectionMatches.length === 0) return;
 
-      autoTable(doc, {
-        startY,
-        head: [[roundName, 'Spieler 1', 'Spieler 2', 'Sätze', 'Ergebnisse', 'Gewinner']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: { 
-          fillColor: [34, 197, 94],
-          textColor: [255, 255, 255],
-          fontStyle: 'bold',
-          fontSize: 8,
-        },
-        styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
-        columnStyles: {
-          0: { cellWidth: 10, halign: 'center' },
-          1: { cellWidth: 'auto' },
-          2: { cellWidth: 'auto' },
-          3: { cellWidth: 16, halign: 'center' },
-          4: { cellWidth: 50 },
-          5: { cellWidth: 'auto' },
-        },
-      });
+      // Section heading
+      if (sectionLabel) {
+        if (startY > 170) { doc.addPage(); startY = 20; }
+        doc.setFontSize(13);
+        doc.setFont(undefined!, 'bold');
+        doc.setTextColor(34, 197, 94);
+        doc.text(sectionLabel, 14, startY + 4);
+        doc.setTextColor(0);
+        doc.setFont(undefined!, 'normal');
+        startY += 10;
+      }
 
-      startY = (doc as any).lastAutoTable.finalY + 4;
-
-      // Load and render photos for completed matches in this round
-      const completedInRound = roundMatches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id);
-      if (completedInRound.length > 0) {
-        const matchIds = completedInRound.map(m => m.id);
-        const { data: roundPhotos } = await supabase
-          .from('match_photos')
-          .select('*')
-          .eq('tournament_id', tournamentId)
-          .eq('photo_type', 'match')
-          .in('match_id', matchIds)
-          .order('created_at', { ascending: true });
-
-        if (roundPhotos && roundPhotos.length > 0) {
-          // Group photos by match
-          const photosByMatch = new Map<string, typeof roundPhotos>();
-          for (const photo of roundPhotos) {
-            if (!photo.match_id) continue;
-            const existing = photosByMatch.get(photo.match_id) || [];
-            existing.push(photo);
-            photosByMatch.set(photo.match_id, existing);
-          }
-
-          const pageH = doc.internal.pageSize.getHeight();
-          const photoRatio = 4 / 3;
-          const photoW = 55; // compact width per photo
-          const photoH = photoW / photoRatio;
-          const gap = 3;
-
-          for (const [matchId, photos] of photosByMatch) {
-            const matchObj = completedInRound.find(m => m.id === matchId);
-            if (!matchObj) continue;
-
-            // Check if we need a new page
-            if (startY + photoH + 6 > pageH - 10) {
-              doc.addPage();
-              startY = 20;
-            }
-
-            // Match label
-            const p1 = getPlayer(matchObj.player1Id);
-            const p2 = getPlayer(matchObj.player2Id);
-            doc.setFontSize(6);
-            doc.setTextColor(120);
-            doc.text(`${p1?.name || '?'} vs ${p2?.name || '?'}`, 14, startY + 2);
-            doc.setTextColor(0);
-            startY += 4;
-
-            // Load and render up to 2 photos side by side
-            const loaded: string[] = [];
-            for (const photo of photos.slice(0, 2)) {
-              try {
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                await new Promise<void>((resolve, reject) => {
-                  img.onload = () => resolve();
-                  img.onerror = () => reject();
-                  img.src = photo.photo_url;
-                });
-                const canvas = document.createElement('canvas');
-                canvas.width = img.naturalWidth;
-                canvas.height = img.naturalHeight;
-                canvas.getContext('2d')!.drawImage(img, 0, 0);
-                loaded.push(canvas.toDataURL('image/jpeg', 0.8));
-              } catch {
-                // skip
-              }
-            }
-
-            if (loaded.length === 1) {
-              const x = (pageW - photoW) / 2;
-              doc.addImage(loaded[0], 'JPEG', x, startY, photoW, photoH);
-            } else if (loaded.length >= 2) {
-              const totalW = photoW * 2 + gap;
-              const startX = (pageW - totalW) / 2;
-              doc.addImage(loaded[0], 'JPEG', startX, startY, photoW, photoH);
-              doc.addImage(loaded[1], 'JPEG', startX + photoW + gap, startY, photoW, photoH);
-            }
-
-            if (loaded.length > 0) {
-              startY += photoH + gap;
-            }
-          }
-          startY += 4;
+      // Group matches by a display key (group+round for group phase, round for KO)
+      type Bucket = { label: string; matches: Match[] };
+      const buckets: Bucket[] = [];
+      for (const m of sectionMatches) {
+        const label = getRoundName(m.round, rounds, mode, m.groupNumber, koRounds);
+        const last = buckets[buckets.length - 1];
+        if (last && last.label === label) {
+          last.matches.push(m);
+        } else {
+          buckets.push({ label, matches: [m] });
         }
       }
 
-      if (startY > 170 && r < rounds - 1) {
-        doc.addPage();
-        startY = 20;
+      for (const bucket of buckets) {
+        const tableData = bucket.matches.map((m, idx) => {
+          const p1 = getPlayer(m.player1Id);
+          const p2 = getPlayer(m.player2Id);
+          const wins = getSetWins(m.sets);
+          const winner = getPlayer(m.winnerId);
+          const isBye = !m.player2Id && m.player1Id;
+          const upgraded = wasUpgradedBestOf(m, bestOf);
+
+          return [
+            `${idx + 1}`,
+            p1?.name || (isBye ? '–' : 'TBD'),
+            p2?.name || (isBye ? 'Freilos' : 'TBD'),
+            isBye ? '–' : `${wins.p1}:${wins.p2}${upgraded ? ' (Bo5)' : ''}`,
+            isBye ? '–' : formatSets(m.sets),
+            isBye ? (p1?.name || '–') : (winner?.name || '–'),
+          ];
+        });
+
+        autoTable(doc, {
+          startY,
+          head: [[bucket.label, 'Spieler 1', 'Spieler 2', 'Sätze', 'Ergebnisse', 'Gewinner']],
+          body: tableData,
+          theme: 'grid',
+          headStyles: {
+            fillColor: [34, 197, 94],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            fontSize: 8,
+          },
+          styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+          columnStyles: {
+            0: { cellWidth: 10, halign: 'center' },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 'auto' },
+            3: { cellWidth: 16, halign: 'center' },
+            4: { cellWidth: 50 },
+            5: { cellWidth: 'auto' },
+          },
+        });
+
+        startY = (doc as any).lastAutoTable.finalY + 4;
+
+        // Photos
+        const completedInBucket = bucket.matches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id);
+        if (completedInBucket.length > 0) {
+          const matchIds = completedInBucket.map(m => m.id);
+          const { data: bucketPhotos } = await supabase
+            .from('match_photos')
+            .select('*')
+            .eq('tournament_id', tournamentId)
+            .eq('photo_type', 'match')
+            .in('match_id', matchIds)
+            .order('created_at', { ascending: true });
+
+          if (bucketPhotos && bucketPhotos.length > 0) {
+            const photosByMatch = new Map<string, typeof bucketPhotos>();
+            for (const photo of bucketPhotos) {
+              if (!photo.match_id) continue;
+              const existing = photosByMatch.get(photo.match_id) || [];
+              existing.push(photo);
+              photosByMatch.set(photo.match_id, existing);
+            }
+
+            const pageH = doc.internal.pageSize.getHeight();
+            const photoRatio = 4 / 3;
+            const photoW = 55;
+            const photoH = photoW / photoRatio;
+            const gap = 3;
+
+            for (const [matchId, photos] of photosByMatch) {
+              const matchObj = completedInBucket.find(m => m.id === matchId);
+              if (!matchObj) continue;
+
+              if (startY + photoH + 6 > pageH - 10) {
+                doc.addPage();
+                startY = 20;
+              }
+
+              const p1 = getPlayer(matchObj.player1Id);
+              const p2 = getPlayer(matchObj.player2Id);
+              doc.setFontSize(6);
+              doc.setTextColor(120);
+              doc.text(`${p1?.name || '?'} vs ${p2?.name || '?'}`, 14, startY + 2);
+              doc.setTextColor(0);
+              startY += 4;
+
+              const loaded: string[] = [];
+              for (const photo of photos.slice(0, 2)) {
+                try {
+                  const img = new Image();
+                  img.crossOrigin = 'anonymous';
+                  await new Promise<void>((resolve, reject) => {
+                    img.onload = () => resolve();
+                    img.onerror = () => reject();
+                    img.src = photo.photo_url;
+                  });
+                  const canvas = document.createElement('canvas');
+                  canvas.width = img.naturalWidth;
+                  canvas.height = img.naturalHeight;
+                  canvas.getContext('2d')!.drawImage(img, 0, 0);
+                  loaded.push(canvas.toDataURL('image/jpeg', 0.8));
+                } catch {
+                  // skip
+                }
+              }
+
+              if (loaded.length === 1) {
+                const x = (pageW - photoW) / 2;
+                doc.addImage(loaded[0], 'JPEG', x, startY, photoW, photoH);
+              } else if (loaded.length >= 2) {
+                const totalW = photoW * 2 + gap;
+                const startX = (pageW - totalW) / 2;
+                doc.addImage(loaded[0], 'JPEG', startX, startY, photoW, photoH);
+                doc.addImage(loaded[1], 'JPEG', startX + photoW + gap, startY, photoW, photoH);
+              }
+
+              if (loaded.length > 0) {
+                startY += photoH + gap;
+              }
+            }
+            startY += 4;
+          }
+        }
+
+        if (startY > 170) {
+          doc.addPage();
+          startY = 20;
+        }
       }
+    };
+
+    if (hasGroupAndKo) {
+      await renderMatchSection(allGroupMatches, 'Gruppenphase');
+      await renderMatchSection(allKoMatches, 'K.O.-Runde');
+    } else {
+      // Single-phase tournament – no section header needed
+      const allSorted = [...matches].sort((a, b) => a.round - b.round || a.position - b.position);
+      await renderMatchSection(allSorted, null);
     }
 
     // Summary
@@ -1080,15 +1119,28 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
           onUpdateScore={onUpdateScore}
         />
       ) : (
-        matchesByRound.map((roundMatches, r) => {
-          if (roundMatches.length === 0) return null;
-          const roundName = getRoundName(r, rounds, mode);
-
-          return (
-            <div key={r}>
-              <h4 className="font-bold text-sm mb-2 text-primary">{roundName}</h4>
+        (() => {
+          const allKo = matches.filter(m => m.groupNumber == null);
+          const uiKoRounds = allKo.length > 0 ? Math.max(...allKo.map(m => m.round)) + 1 : 0;
+          // For group_knockout: group by group+round, for others by round
+          type UiBucket = { label: string; matches: Match[] };
+          const uiBuckets: UiBucket[] = [];
+          const sorted = [...matches].sort((a, b) => {
+            const gA = a.groupNumber ?? -1, gB = b.groupNumber ?? -1;
+            if (gA !== gB) return gA - gB;
+            return a.round - b.round || a.position - b.position;
+          });
+          for (const m of sorted) {
+            const label = getRoundName(m.round, rounds, mode, m.groupNumber, uiKoRounds);
+            const last = uiBuckets[uiBuckets.length - 1];
+            if (last && last.label === label) { last.matches.push(m); }
+            else { uiBuckets.push({ label, matches: [m] }); }
+          }
+          return uiBuckets.map((bucket, bi) => (
+            <div key={bi}>
+              <h4 className="font-bold text-sm mb-2 text-primary">{bucket.label}</h4>
               <div className="space-y-2">
-                {roundMatches.map((m) => (
+                {bucket.matches.map((m) => (
                     <OverviewMatchRow
                       key={m.id}
                       match={m}
@@ -1107,8 +1159,8 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                 ))}
               </div>
             </div>
-          );
-        })
+          ));
+        })()
       )}
 
       {/* Photo Retrospective */}
@@ -1264,19 +1316,30 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
               );
             }
 
+            const allKo2 = matches.filter(m => m.groupNumber == null);
+            const photoKoRounds = allKo2.length > 0 ? Math.max(...allKo2.map(m => m.round)) + 1 : 0;
+            const completedAll = matches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id)
+              .sort((a, b) => {
+                const gA = a.groupNumber ?? -1, gB = b.groupNumber ?? -1;
+                if (gA !== gB) return gA - gB;
+                return a.round - b.round || a.position - b.position;
+              });
+            type PhotoBucket2 = { label: string; matches: Match[] };
+            const photoBuckets: PhotoBucket2[] = [];
+            for (const m of completedAll) {
+              const label = getRoundName(m.round, rounds, mode, m.groupNumber, photoKoRounds);
+              const last = photoBuckets[photoBuckets.length - 1];
+              if (last && last.label === label) { last.matches.push(m); }
+              else { photoBuckets.push({ label, matches: [m] }); }
+            }
             return (
               <div className="space-y-3">
-                {matchesByRound.map((roundMatches, r) => {
-                  const completedInRound = roundMatches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id);
-                  if (completedInRound.length === 0) return null;
-                  const roundLabel = getRoundName(r, rounds, mode);
-                  return (
-                    <div key={`photos-${r}`}>
-                      <h5 className="text-xs font-semibold text-muted-foreground mb-2">{roundLabel}</h5>
-                      {completedInRound.map(m => renderPhotoCard(m, roundLabel))}
-                    </div>
-                  );
-                })}
+                {photoBuckets.map((bucket, bi) => (
+                  <div key={`photos-${bi}`}>
+                    <h5 className="text-xs font-semibold text-muted-foreground mb-2">{bucket.label}</h5>
+                    {bucket.matches.map(m => renderPhotoCard(m, bucket.label))}
+                  </div>
+                ))}
                 {ceremony}
               </div>
             );
