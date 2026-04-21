@@ -8,7 +8,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { UserPlus, Trash2, Trophy, Pencil, Check, X, Camera, FileText, FileCheck, Clock } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
-import { generatePlayerReport } from '@/components/PlayerReport';
+import { generatePlayerReport, PlayerReportPhaseFilter } from '@/components/PlayerReport';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { LogicAgentValidator } from '@/components/LogicAgentValidator';
 import { printPhotoConsentForm, printAllPhotoConsentForms } from '@/components/PhotoConsentForm';
 import { toast } from 'sonner';
@@ -458,32 +459,46 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                     </Button>
                   )}
                   {started && matches.length > 0 && getPlayer && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        generatePlayerReport({
-                          player,
-                          matches,
-                          getPlayer,
-                          getParticipantName,
-                          tournamentName,
-                          tournamentId,
-                          totalRounds,
-                          logoUrl,
-                          bestOf,
-                          tournamentDate,
-                          venueString,
-                          motto: '',
-                          mode,
-                        });
-                        toast.success(`Spielerbericht für ${player.name} wird erstellt…`);
-                      }}
-                      className="text-muted-foreground hover:text-foreground"
-                      title="Spielerbericht PDF"
-                    >
-                      <FileText className="h-4 w-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-foreground"
+                          title="Spielerbericht PDF"
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {(['all', 'group', 'ko'] as PlayerReportPhaseFilter[]).map(f => (
+                          <DropdownMenuItem
+                            key={f}
+                            onClick={() => {
+                              generatePlayerReport({
+                                player,
+                                matches,
+                                getPlayer,
+                                getParticipantName,
+                                tournamentName,
+                                tournamentId,
+                                totalRounds,
+                                logoUrl,
+                                bestOf,
+                                tournamentDate,
+                                venueString,
+                                motto: '',
+                                mode,
+                                phaseFilter: f,
+                              });
+                              toast.success(`Spielerbericht für ${player.name} wird erstellt…`);
+                            }}
+                          >
+                            {f === 'all' ? 'Alle Spiele' : f === 'group' ? 'Nur Gruppenphase' : 'Nur K.O.-Runde'}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
 
                   <Button
