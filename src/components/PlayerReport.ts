@@ -218,7 +218,7 @@ export async function generatePlayerReport({
   // Separate group and KO matches
   const groupMatches = playerMatches.filter(m => m.groupNumber != null);
   const koMatches = playerMatches.filter(m => m.groupNumber == null);
-  const koRounds = koMatches.length > 0 ? Math.max(...koMatches.map(m => m.round)) + 1 : 0;
+  const koMaxRound = koMatches.length > 0 ? Math.max(...koMatches.map(m => m.round)) : -1;
 
   const renderMatchTable = (title: string, sectionMatches: Match[]) => {
     if (sectionMatches.length === 0) return;
