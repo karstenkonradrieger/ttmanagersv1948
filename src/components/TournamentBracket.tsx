@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { Match, Player } from '@/types/tournament';
 import { Trophy, ChevronDown, ChevronUp, Info, ArrowUp, ArrowDown } from 'lucide-react';
 import { getRoundLabel } from './bracketLabels';
