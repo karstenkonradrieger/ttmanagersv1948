@@ -1298,33 +1298,46 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
               ).length;
               if (playerMatchCount === 0) return null;
               return (
-                <Button
-                  key={s.player.id}
-                  variant="outline"
-                  size="sm"
-                  className="h-auto py-2 px-3 justify-start text-left"
-                  onClick={() => generatePlayerReport({
-                    player: s.player,
-                    matches,
-                    getPlayer,
-                    getParticipantName,
-                    tournamentName,
-                    tournamentId,
-                    totalRounds: rounds,
-                    logoUrl,
-                    bestOf,
-                    tournamentDate,
-                    venueString,
-                    motto,
-                    mode,
-                  })}
-                >
-                  <User className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <div className="min-w-0">
-                    <p className="font-semibold text-xs truncate">{s.player.name}</p>
-                    <p className="text-xs text-muted-foreground">{playerMatchCount} Spiele · {s.matchesWon} Siege</p>
-                  </div>
-                </Button>
+                <DropdownMenu key={s.player.id}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-auto py-2 px-3 justify-start text-left"
+                    >
+                      <User className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-semibold text-xs truncate">{s.player.name}</p>
+                        <p className="text-xs text-muted-foreground">{playerMatchCount} Spiele · {s.matchesWon} Siege</p>
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    {(['all', 'group', 'ko'] as PlayerReportPhaseFilter[]).map(f => (
+                      <DropdownMenuItem
+                        key={f}
+                        onClick={() => generatePlayerReport({
+                          player: s.player,
+                          matches,
+                          getPlayer,
+                          getParticipantName,
+                          tournamentName,
+                          tournamentId,
+                          totalRounds: rounds,
+                          logoUrl,
+                          bestOf,
+                          tournamentDate,
+                          venueString,
+                          motto,
+                          mode,
+                          phaseFilter: f,
+                        })}
+                      >
+                        {f === 'all' ? 'Alle Spiele' : f === 'group' ? 'Nur Gruppenphase' : 'Nur K.O.-Runde'}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               );
             })}
           </div>
