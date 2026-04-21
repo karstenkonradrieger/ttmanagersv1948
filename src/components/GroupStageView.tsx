@@ -112,6 +112,11 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
 
   const allGroupsComplete = groupData.every(g => g.allCompleted);
 
+  const qualifiedData = useMemo(() => {
+    if (!allGroupsComplete) return null;
+    return computeQualifiedPlayers(matches, players);
+  }, [allGroupsComplete, matches, players]);
+
   return (
     <div className="space-y-6 animate-slide-up">
       <div className="flex items-center justify-between">
@@ -196,6 +201,102 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
           </div>
         </div>
       ))}
+
+      {/* Qualification Preview */}
+      {allGroupsComplete && qualifiedData && (qualifiedData.winners.length > 0 || qualifiedData.runnersUp.length > 0) && (
+        <div className="bg-card rounded-lg p-4 card-shadow border-2 border-primary/30">
+          <h4 className="font-bold text-primary mb-3 flex items-center gap-2">
+            <Trophy className="h-4 w-4" />
+            Qualifiziert für die K.O.-Phase
+          </h4>
+
+          <div className="space-y-4">
+            {/* Group Winners */}
+            {qualifiedData.winners.length > 0 && (
+              <div>
+                <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-yellow-500/20 text-yellow-600 text-[10px] font-bold">1</span>
+                  Gruppensieger
+                </h5>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-1.5 px-2 text-xs font-bold text-muted-foreground">Seed</th>
+                        <th className="text-left py-1.5 px-2 text-xs font-bold text-muted-foreground">Spieler</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Gruppe</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Siege</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Satz-Diff</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Pkt-Diff</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {qualifiedData.winners.map((q, i) => (
+                        <tr key={q.playerId} className="border-b border-border/50 bg-yellow-500/5">
+                          <td className="py-1.5 px-2 font-bold text-primary">{i + 1}</td>
+                          <td className="py-1.5 px-2 font-semibold">{getParticipantName(q.playerId)}</td>
+                          <td className="text-center py-1.5 px-2">
+                            <span className="inline-flex items-center justify-center h-5 min-w-[20px] rounded bg-primary/10 text-primary text-xs font-bold px-1">
+                              {String.fromCharCode(65 + q.groupNumber)}
+                            </span>
+                          </td>
+                          <td className="text-center py-1.5 px-2 font-bold">{q.won}</td>
+                          <td className="text-center py-1.5 px-2">{q.setsDiff > 0 ? '+' : ''}{q.setsDiff}</td>
+                          <td className="text-center py-1.5 px-2 text-muted-foreground">{q.pointsDiff > 0 ? '+' : ''}{q.pointsDiff}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Runners-up */}
+            {qualifiedData.runnersUp.length > 0 && (
+              <div>
+                <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-slate-400/20 text-slate-500 text-[10px] font-bold">2</span>
+                  Gruppenzweite
+                </h5>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-1.5 px-2 text-xs font-bold text-muted-foreground">Seed</th>
+                        <th className="text-left py-1.5 px-2 text-xs font-bold text-muted-foreground">Spieler</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Gruppe</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Siege</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Satz-Diff</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Pkt-Diff</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {qualifiedData.runnersUp.map((q, i) => (
+                        <tr key={q.playerId} className="border-b border-border/50">
+                          <td className="py-1.5 px-2 font-bold text-muted-foreground">{qualifiedData.winners.length + i + 1}</td>
+                          <td className="py-1.5 px-2 font-semibold">{getParticipantName(q.playerId)}</td>
+                          <td className="text-center py-1.5 px-2">
+                            <span className="inline-flex items-center justify-center h-5 min-w-[20px] rounded bg-primary/10 text-primary text-xs font-bold px-1">
+                              {String.fromCharCode(65 + q.groupNumber)}
+                            </span>
+                          </td>
+                          <td className="text-center py-1.5 px-2 font-bold">{q.won}</td>
+                          <td className="text-center py-1.5 px-2">{q.setsDiff > 0 ? '+' : ''}{q.setsDiff}</td>
+                          <td className="text-center py-1.5 px-2 text-muted-foreground">{q.pointsDiff > 0 ? '+' : ''}{q.pointsDiff}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <p className="text-xs text-muted-foreground mt-3">
+            Setzliste: Gruppensieger nach Leistung (Siege → Satzdifferenz → Punktdifferenz), dann Gruppenzweite nach gleichen Kriterien.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
