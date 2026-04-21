@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { Match, Player, SetScore } from '@/types/tournament';
 
 function getSetWins(sets: SetScore[]): { p1: number; p2: number } {
@@ -94,6 +95,12 @@ export async function generatePlayerReport({
     : phaseFilter === 'ko'
       ? allPlayerMatches.filter(m => m.groupNumber == null)
       : allPlayerMatches;
+
+  if (playerMatches.length === 0) {
+    const filterLabel = phaseFilter === 'group' ? 'Gruppenphase' : phaseFilter === 'ko' ? 'K.O.-Runde' : 'gewählten Filter';
+    toast.error(`Keine Spiele für ${player.name} in der ${filterLabel} vorhanden.`);
+    return;
+  }
 
   const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
   const w = doc.internal.pageSize.getWidth();
