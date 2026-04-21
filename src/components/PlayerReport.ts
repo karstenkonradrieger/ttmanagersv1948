@@ -243,7 +243,7 @@ export async function generatePlayerReport({
       }).join(', ');
 
       return [
-        getRoundName(m, totalRounds, koRounds, mode),
+        getRoundName(m, totalRounds, koMaxRound, mode),
         getName(opponentId),
         `${mySets}:${oppSets}`,
         setsStr,
