@@ -23,7 +23,8 @@ interface QualifiedPlayer {
 export function computeQualifiedPlayers(
   groupMatches: Match[],
   players: Player[],
-  qualifyPerGroup: number = 2
+  qualifyPerGroup: number = 2,
+  tiebreakerOrder: TiebreakerCriterion[] = DEFAULT_TIEBREAKER_ORDER
 ): {
   winners: QualifiedPlayer[];
   runnersUp: QualifiedPlayer[];
