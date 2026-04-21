@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Trophy, Medal } from 'lucide-react';
+import { ArrowRight, Trophy, Medal, Info } from 'lucide-react';
 import { computeQualifiedPlayers } from '@/services/byeValidation';
 
 interface GroupStanding {
@@ -90,6 +90,70 @@ export function computeGroupStandings(
   return standings;
 }
 
+interface TiebreakerInfo {
+  players: [string, string]; // names
+  decidedBy: 'h2h' | 'setDiff' | 'pointDiff' | 'none';
+  label: string;
+  detail: string;
+}
+
+function detectTiebreakers(
+  standings: GroupStanding[],
+  groupMatches: Match[],
+): TiebreakerInfo[] {
+  const results: TiebreakerInfo[] = [];
+  for (let i = 0; i < standings.length - 1; i++) {
+    const a = standings[i];
+    const b = standings[i + 1];
+    if (a.won !== b.won) continue; // no tie
+
+    // Same wins — find which tiebreaker decided
+    const h2h = groupMatches.find(
+      m => m.status === 'completed' &&
+        ((m.player1Id === a.playerId && m.player2Id === b.playerId) ||
+         (m.player1Id === b.playerId && m.player2Id === a.playerId))
+    );
+    if (h2h && h2h.winnerId === a.playerId) {
+      results.push({
+        players: [a.name, b.name],
+        decidedBy: 'h2h',
+        label: 'Direkter Vergleich',
+        detail: `${a.name} gewann gegen ${b.name}`,
+      });
+    } else {
+      const aDiff = a.setsWon - a.setsLost;
+      const bDiff = b.setsWon - b.setsLost;
+      if (aDiff !== bDiff) {
+        results.push({
+          players: [a.name, b.name],
+          decidedBy: 'setDiff',
+          label: 'Satzdifferenz',
+          detail: `${a.name} (${aDiff > 0 ? '+' : ''}${aDiff}) vor ${b.name} (${bDiff > 0 ? '+' : ''}${bDiff})`,
+        });
+      } else {
+        const aPDiff = a.pointsWon - a.pointsLost;
+        const bPDiff = b.pointsWon - b.pointsLost;
+        if (aPDiff !== bPDiff) {
+          results.push({
+            players: [a.name, b.name],
+            decidedBy: 'pointDiff',
+            label: 'Punktdifferenz',
+            detail: `${a.name} (${aPDiff > 0 ? '+' : ''}${aPDiff}) vor ${b.name} (${bPDiff > 0 ? '+' : ''}${bPDiff})`,
+          });
+        } else {
+          results.push({
+            players: [a.name, b.name],
+            decidedBy: 'none',
+            label: 'Vollständiger Gleichstand',
+            detail: `${a.name} und ${b.name} sind in allen Kriterien gleich`,
+          });
+        }
+      }
+    }
+  }
+  return results;
+}
+
 interface Props {
   matches: Match[];
   players: Player[];
@@ -100,12 +164,13 @@ interface Props {
 
 export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount }: Props) {
   const groupData = useMemo(() => {
-    const groups: { groupNumber: number; standings: GroupStanding[]; matches: Match[]; allCompleted: boolean }[] = [];
+    const groups: { groupNumber: number; standings: GroupStanding[]; matches: Match[]; allCompleted: boolean; tiebreakers: TiebreakerInfo[] }[] = [];
     for (let g = 0; g < groupCount; g++) {
       const gMatches = matches.filter(m => m.groupNumber === g);
       const standings = computeGroupStandings(gMatches, getParticipantName);
       const allCompleted = gMatches.length > 0 && gMatches.every(m => m.status === 'completed');
-      groups.push({ groupNumber: g, standings, matches: gMatches, allCompleted });
+      const tiebreakers = allCompleted ? detectTiebreakers(standings, gMatches) : [];
+      groups.push({ groupNumber: g, standings, matches: gMatches, allCompleted, tiebreakers });
     }
     return groups;
   }, [matches, getParticipantName, groupCount]);
@@ -171,7 +236,29 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
             </table>
           </div>
 
-          {/* Group matches */}
+          {/* Tiebreaker info */}
+          {group.tiebreakers.length > 0 && (
+            <div className="mt-2 px-2 py-1.5 rounded-md bg-muted/50 border border-border/50">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground mb-1">
+                <Info className="h-3 w-3" />
+                Gleichstand behandelt
+              </div>
+              {group.tiebreakers.map((tb, i) => (
+                <div key={i} className="text-xs text-muted-foreground flex items-start gap-1.5 mt-0.5">
+                  <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                    tb.decidedBy === 'h2h' ? 'bg-primary/15 text-primary' :
+                    tb.decidedBy === 'setDiff' ? 'bg-accent/50 text-accent-foreground' :
+                    tb.decidedBy === 'pointDiff' ? 'bg-muted text-muted-foreground' :
+                    'bg-destructive/15 text-destructive'
+                  }`}>
+                    {tb.label}
+                  </span>
+                  <span>{tb.detail}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="mt-3 space-y-1">
             {group.matches.map(m => {
               const p1Wins = m.sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
