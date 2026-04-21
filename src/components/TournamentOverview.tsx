@@ -524,10 +524,99 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     };
 
     if (hasGroupAndKo) {
-      await renderMatchSection(allGroupMatches, 'Gruppenphase');
+      // --- Group phase: one table per group + standings ---
+      if (startY > 170) { doc.addPage(); startY = 20; }
+      doc.setFontSize(13);
+      doc.setFont(undefined!, 'bold');
+      doc.setTextColor(34, 197, 94);
+      doc.text('Gruppenphase', 14, startY + 4);
+      doc.setTextColor(0);
+      doc.setFont(undefined!, 'normal');
+      startY += 10;
+
+      const groupNumbers = [...new Set(allGroupMatches.map(m => m.groupNumber!))].sort((a, b) => a - b);
+      const getParticipantNameLocal = (id: string | null) => {
+        if (!id) return 'Unbekannt';
+        const p = getPlayer(id);
+        return p?.name || 'Unbekannt';
+      };
+
+      for (const gNum of groupNumbers) {
+        const gMatches = allGroupMatches.filter(m => m.groupNumber === gNum);
+        const groupLabel = `Gruppe ${gNum}`;
+
+        // Match table
+        const tableData = gMatches.map((m, idx) => {
+          const p1 = getPlayer(m.player1Id);
+          const p2 = getPlayer(m.player2Id);
+          const wins = getSetWins(m.sets);
+          const isBye = !m.player2Id && m.player1Id;
+          const upgraded = wasUpgradedBestOf(m, bestOf);
+          return [
+            `${idx + 1}`,
+            p1?.name || (isBye ? '–' : 'TBD'),
+            p2?.name || (isBye ? 'Freilos' : 'TBD'),
+            isBye ? '–' : `${wins.p1}:${wins.p2}${upgraded ? ' (Bo5)' : ''}`,
+            isBye ? '–' : formatSets(m.sets),
+          ];
+        });
+
+        autoTable(doc, {
+          startY,
+          head: [[groupLabel, 'Spieler 1', 'Spieler 2', 'Sätze', 'Ergebnisse']],
+          body: tableData,
+          theme: 'grid',
+          headStyles: { fillColor: [34, 197, 94], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
+          styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+          columnStyles: {
+            0: { cellWidth: 10, halign: 'center' },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 'auto' },
+            3: { cellWidth: 16, halign: 'center' },
+            4: { cellWidth: 55 },
+          },
+        });
+        startY = (doc as any).lastAutoTable.finalY + 2;
+
+        // Standings table
+        const standings = computeGroupStandings(gMatches, getParticipantNameLocal);
+        if (standings.length > 0) {
+          const standingsData = standings.map((s, i) => [
+            `${i + 1}`,
+            s.name,
+            `${s.played}`,
+            `${s.won}`,
+            `${s.lost}`,
+            `${s.setsWon}:${s.setsLost}`,
+            `${s.pointsWon}:${s.pointsLost}`,
+          ]);
+
+          autoTable(doc, {
+            startY,
+            head: [['#', 'Spieler', 'Sp.', 'S', 'N', 'Sätze', 'Punkte']],
+            body: standingsData,
+            theme: 'grid',
+            headStyles: { fillColor: [59, 130, 246], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 7 },
+            styles: { fontSize: 7, cellPadding: 1.5 },
+            columnStyles: {
+              0: { cellWidth: 8, halign: 'center' },
+              1: { cellWidth: 'auto' },
+              2: { cellWidth: 12, halign: 'center' },
+              3: { cellWidth: 12, halign: 'center' },
+              4: { cellWidth: 12, halign: 'center' },
+              5: { cellWidth: 22, halign: 'center' },
+              6: { cellWidth: 22, halign: 'center' },
+            },
+          });
+          startY = (doc as any).lastAutoTable.finalY + 6;
+        }
+
+        if (startY > 170) { doc.addPage(); startY = 20; }
+      }
+
+      // --- KO phase ---
       await renderMatchSection(allKoMatches, 'K.O.-Runde');
     } else {
-      // Single-phase tournament – no section header needed
       const allSorted = [...matches].sort((a, b) => a.round - b.round || a.position - b.position);
       await renderMatchSection(allSorted, null);
     }
