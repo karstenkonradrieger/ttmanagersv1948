@@ -177,8 +177,21 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
                   ))}
                 </div>
               </div>
+              {/* H2H priority toggle */}
+              <label className="flex items-center gap-2 text-xs cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={h2hPriority}
+                  onChange={(e) => setH2hPriority(e.target.checked)}
+                  className="rounded border-border accent-primary h-3.5 w-3.5"
+                />
+                <span className="font-medium">Direkter Vergleich (H2H) hat Vorrang</span>
+                <span className="text-muted-foreground text-[10px]">
+                  {h2hPriority ? '— H2H wird vor der Tiebreaker-Reihenfolge geprüft' : '— H2H greift nur als letzter Fallback'}
+                </span>
+              </label>
               <p className="text-[11px] text-muted-foreground">
-                Setzung: Gruppensieger (nach {tiebreakerOrder.map(c => criterionLabels[c]).join(' → ')}), dann Gruppenzweite nach gleicher Logik. Seed #1 trifft auf den niedrigsten Seed.
+                Setzung: Gruppensieger (nach {h2hPriority ? 'H2H → ' : ''}{tiebreakerOrder.map(c => criterionLabels[c]).join(' → ')}{!h2hPriority ? ' → H2H' : ''}), dann Gruppenzweite nach gleicher Logik. Seed #1 trifft auf den niedrigsten Seed.
               </p>
               <div className="space-y-1.5">
                 {seedingDetails.map((d) => (
