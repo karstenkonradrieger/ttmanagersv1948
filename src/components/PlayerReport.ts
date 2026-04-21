@@ -47,14 +47,20 @@ interface PlayerReportOptions {
   mode?: string;
 }
 
-function getRoundName(round: number, totalRounds: number, mode?: string): string {
-  if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
-  const diff = totalRounds - round;
+function getRoundName(match: Match, totalRounds: number, koRounds: number, mode?: string): string {
+  // Group phase match
+  if (match.groupNumber != null) {
+    return `Gruppe ${match.groupNumber} – Runde ${match.round + 1}`;
+  }
+  if (mode === 'round_robin' || mode === 'swiss') return `Runde ${match.round + 1}`;
+  // KO phase: use koRounds for correct naming
+  const rounds = koRounds > 0 ? koRounds : totalRounds;
+  const diff = rounds - match.round;
   if (diff === 1) return 'Finale';
   if (diff === 2) return 'Halbfinale';
   if (diff === 3) return 'Viertelfinale';
   if (diff === 4) return 'Achtelfinale';
-  return `Runde ${round + 1}`;
+  return `Runde ${match.round + 1}`;
 }
 
 export async function generatePlayerReport({
@@ -182,14 +188,21 @@ export async function generatePlayerReport({
   doc.line(10, y, w - 10, y);
   y += 4;
 
-  doc.setFontSize(10);
-  doc.setFont(undefined!, 'bold');
-  doc.setTextColor(0);
-  doc.text('Spielergebnisse', 10, y);
-  y += 2;
+  // Separate group and KO matches
+  const groupMatches = playerMatches.filter(m => m.groupNumber != null);
+  const koMatches = playerMatches.filter(m => m.groupNumber == null);
+  const koRounds = koMatches.length > 0 ? Math.max(...koMatches.map(m => m.round)) + 1 : 0;
 
-  if (playerMatches.length > 0) {
-    const tableData = playerMatches.map((m) => {
+  const renderMatchTable = (title: string, sectionMatches: Match[]) => {
+    if (sectionMatches.length === 0) return;
+
+    doc.setFontSize(10);
+    doc.setFont(undefined!, 'bold');
+    doc.setTextColor(0);
+    doc.text(title, 10, y);
+    y += 2;
+
+    const tableData = sectionMatches.map((m) => {
       const isP1 = m.player1Id === player.id;
       const opponentId = isP1 ? m.player2Id : m.player1Id;
       const wins = getSetWins(m.sets);
@@ -203,7 +216,7 @@ export async function generatePlayerReport({
       }).join(', ');
 
       return [
-        getRoundName(m.round, totalRounds, mode),
+        getRoundName(m, totalRounds, koRounds, mode),
         getName(opponentId),
         `${mySets}:${oppSets}`,
         setsStr,
@@ -224,7 +237,7 @@ export async function generatePlayerReport({
       },
       styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
       columnStyles: {
-        0: { cellWidth: 30 },
+        0: { cellWidth: 36 },
         2: { cellWidth: 16, halign: 'center' },
         4: { cellWidth: 24 },
       },
@@ -241,6 +254,13 @@ export async function generatePlayerReport({
     });
 
     y = (doc as any).lastAutoTable.finalY + 8;
+  };
+
+  if (groupMatches.length > 0 && koMatches.length > 0) {
+    renderMatchTable('Gruppenphase', groupMatches);
+    renderMatchTable('K.O.-Runde', koMatches);
+  } else {
+    renderMatchTable('Spielergebnisse', playerMatches);
   }
 
   // Footer on every page
