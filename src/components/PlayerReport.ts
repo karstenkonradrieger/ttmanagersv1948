@@ -80,13 +80,20 @@ export async function generatePlayerReport({
   venueString,
   motto,
   mode,
+  phaseFilter = 'all',
 }: PlayerReportOptions) {
   const getName = (id: string | null) =>
     getParticipantName ? getParticipantName(id) : (getPlayer(id)?.name || 'Unbekannt');
 
-  const playerMatches = matches.filter(
+  const allPlayerMatches = matches.filter(
     m => (m.player1Id === player.id || m.player2Id === player.id) && m.status === 'completed' && m.sets.length > 0
   ).sort((a, b) => a.round - b.round || a.position - b.position);
+
+  const playerMatches = phaseFilter === 'group'
+    ? allPlayerMatches.filter(m => m.groupNumber != null)
+    : phaseFilter === 'ko'
+      ? allPlayerMatches.filter(m => m.groupNumber == null)
+      : allPlayerMatches;
 
   const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
   const w = doc.internal.pageSize.getWidth();
