@@ -680,6 +680,8 @@ const Index = () => {
                                   ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
                                   : getPlayer
                                 }
+                                allMatches={tournament.matches}
+                                players={tournament.players}
                               />
                             </div>
                           </CollapsibleContent>
