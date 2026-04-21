@@ -90,6 +90,70 @@ export function computeGroupStandings(
   return standings;
 }
 
+interface TiebreakerInfo {
+  players: [string, string]; // names
+  decidedBy: 'h2h' | 'setDiff' | 'pointDiff' | 'none';
+  label: string;
+  detail: string;
+}
+
+function detectTiebreakers(
+  standings: GroupStanding[],
+  groupMatches: Match[],
+): TiebreakerInfo[] {
+  const results: TiebreakerInfo[] = [];
+  for (let i = 0; i < standings.length - 1; i++) {
+    const a = standings[i];
+    const b = standings[i + 1];
+    if (a.won !== b.won) continue; // no tie
+
+    // Same wins — find which tiebreaker decided
+    const h2h = groupMatches.find(
+      m => m.status === 'completed' &&
+        ((m.player1Id === a.playerId && m.player2Id === b.playerId) ||
+         (m.player1Id === b.playerId && m.player2Id === a.playerId))
+    );
+    if (h2h && h2h.winnerId === a.playerId) {
+      results.push({
+        players: [a.name, b.name],
+        decidedBy: 'h2h',
+        label: 'Direkter Vergleich',
+        detail: `${a.name} gewann gegen ${b.name}`,
+      });
+    } else {
+      const aDiff = a.setsWon - a.setsLost;
+      const bDiff = b.setsWon - b.setsLost;
+      if (aDiff !== bDiff) {
+        results.push({
+          players: [a.name, b.name],
+          decidedBy: 'setDiff',
+          label: 'Satzdifferenz',
+          detail: `${a.name} (${aDiff > 0 ? '+' : ''}${aDiff}) vor ${b.name} (${bDiff > 0 ? '+' : ''}${bDiff})`,
+        });
+      } else {
+        const aPDiff = a.pointsWon - a.pointsLost;
+        const bPDiff = b.pointsWon - b.pointsLost;
+        if (aPDiff !== bPDiff) {
+          results.push({
+            players: [a.name, b.name],
+            decidedBy: 'pointDiff',
+            label: 'Punktdifferenz',
+            detail: `${a.name} (${aPDiff > 0 ? '+' : ''}${aPDiff}) vor ${b.name} (${bPDiff > 0 ? '+' : ''}${bPDiff})`,
+          });
+        } else {
+          results.push({
+            players: [a.name, b.name],
+            decidedBy: 'none',
+            label: 'Vollständiger Gleichstand',
+            detail: `${a.name} und ${b.name} sind in allen Kriterien gleich`,
+          });
+        }
+      }
+    }
+  }
+  return results;
+}
+
 interface Props {
   matches: Match[];
   players: Player[];
