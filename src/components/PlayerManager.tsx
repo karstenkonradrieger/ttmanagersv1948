@@ -459,32 +459,46 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                     </Button>
                   )}
                   {started && matches.length > 0 && getPlayer && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        generatePlayerReport({
-                          player,
-                          matches,
-                          getPlayer,
-                          getParticipantName,
-                          tournamentName,
-                          tournamentId,
-                          totalRounds,
-                          logoUrl,
-                          bestOf,
-                          tournamentDate,
-                          venueString,
-                          motto: '',
-                          mode,
-                        });
-                        toast.success(`Spielerbericht für ${player.name} wird erstellt…`);
-                      }}
-                      className="text-muted-foreground hover:text-foreground"
-                      title="Spielerbericht PDF"
-                    >
-                      <FileText className="h-4 w-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-foreground"
+                          title="Spielerbericht PDF"
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {(['all', 'group', 'ko'] as PlayerReportPhaseFilter[]).map(f => (
+                          <DropdownMenuItem
+                            key={f}
+                            onClick={() => {
+                              generatePlayerReport({
+                                player,
+                                matches,
+                                getPlayer,
+                                getParticipantName,
+                                tournamentName,
+                                tournamentId,
+                                totalRounds,
+                                logoUrl,
+                                bestOf,
+                                tournamentDate,
+                                venueString,
+                                motto: '',
+                                mode,
+                                phaseFilter: f,
+                              });
+                              toast.success(`Spielerbericht für ${player.name} wird erstellt…`);
+                            }}
+                          >
+                            {f === 'all' ? 'Alle Spiele' : f === 'group' ? 'Nur Gruppenphase' : 'Nur K.O.-Runde'}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
 
                   <Button
