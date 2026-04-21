@@ -28,12 +28,31 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
   const finalist = matches.find(m => m.round === maxRound && m.winnerId);
   const champion = finalist ? getPlayer(finalist.winnerId) : null;
 
+  // Configurable tiebreaker order
+  const [tiebreakerOrder, setTiebreakerOrder] = useState<TiebreakerCriterion[]>(DEFAULT_TIEBREAKER_ORDER);
+
+  const moveCriterion = useCallback((idx: number, dir: -1 | 1) => {
+    setTiebreakerOrder(prev => {
+      const next = [...prev];
+      const target = idx + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[idx], next[target]] = [next[target], next[idx]];
+      return next;
+    });
+  }, []);
+
+  const criterionLabels: Record<TiebreakerCriterion, string> = {
+    wins: 'Siege',
+    setsDiff: 'Satzdifferenz',
+    pointsDiff: 'Punktdifferenz',
+  };
+
   // Compute seeding details for first KO round when group data is available
   const seedingDetails = useMemo(() => {
     if (!allMatches || !players || matches.length === 0) return null;
     const groupMatches = allMatches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
     if (groupMatches.length === 0) return null;
-    const { winners, runnersUp } = computeQualifiedPlayers(groupMatches, players);
+    const { winners, runnersUp } = computeQualifiedPlayers(groupMatches, players, 2, tiebreakerOrder);
     const seeded = [...winners, ...runnersUp];
     if (seeded.length < 2) return null;
 
@@ -52,7 +71,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
       const isBye = (p1 && !p2) || (!p1 && p2);
       return { position: idx + 1, p1, p2, s1, s2, seed1, seed2, isBye };
     });
-  }, [allMatches, players, matches, presentRounds, getPlayer]);
+  }, [allMatches, players, matches, presentRounds, getPlayer, tiebreakerOrder]);
 
   const [seedingOpen, setSeedingOpen] = useState(false);
 
