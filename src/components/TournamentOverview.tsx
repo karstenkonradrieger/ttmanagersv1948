@@ -55,15 +55,16 @@ interface Props {
   onUpdateScore?: (matchId: string, sets: SetScore[], effectiveBestOf?: number) => void;
 }
 
-function getRoundName(round: number, totalRounds: number, mode?: string, groupNumber?: number | null, koRounds?: number): string {
+function getRoundName(round: number, totalRounds: number, mode?: string, groupNumber?: number | null, koMaxRound?: number): string {
   if (groupNumber != null) return `Gruppe ${groupNumber} – Runde ${round + 1}`;
   if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
-  const rounds = koRounds != null && koRounds > 0 ? koRounds : totalRounds;
-  const diff = rounds - round;
-  if (diff === 1) return 'Finale';
-  if (diff === 2) return 'Halbfinale';
-  if (diff === 3) return 'Viertelfinale';
-  if (diff === 4) return 'Achtelfinale';
+  // koMaxRound = highest round number among KO matches (0-indexed)
+  const maxR = koMaxRound != null && koMaxRound >= 0 ? koMaxRound : totalRounds - 1;
+  const diff = maxR - round;
+  if (diff === 0) return 'Finale';
+  if (diff === 1) return 'Halbfinale';
+  if (diff === 2) return 'Viertelfinale';
+  if (diff === 3) return 'Achtelfinale';
   return `Runde ${round + 1}`;
 }
 
@@ -358,7 +359,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
     // Separate group and KO matches
     const allGroupMatches = matches.filter(m => m.groupNumber != null).sort((a, b) => (a.groupNumber ?? 0) - (b.groupNumber ?? 0) || a.round - b.round || a.position - b.position);
     const allKoMatches = matches.filter(m => m.groupNumber == null).sort((a, b) => a.round - b.round || a.position - b.position);
-    const koRounds = allKoMatches.length > 0 ? Math.max(...allKoMatches.map(m => m.round)) + 1 : 0;
+    const koMaxRound = allKoMatches.length > 0 ? Math.max(...allKoMatches.map(m => m.round)) : -1;
 
     const hasGroupAndKo = allGroupMatches.length > 0 && allKoMatches.length > 0;
 
@@ -382,7 +383,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       type Bucket = { label: string; matches: Match[] };
       const buckets: Bucket[] = [];
       for (const m of sectionMatches) {
-        const label = getRoundName(m.round, rounds, mode, m.groupNumber, koRounds);
+        const label = getRoundName(m.round, rounds, mode, m.groupNumber, koMaxRound);
         const last = buckets[buckets.length - 1];
         if (last && last.label === label) {
           last.matches.push(m);
@@ -1120,7 +1121,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       ) : (
         (() => {
           const allKo = matches.filter(m => m.groupNumber == null);
-          const uiKoRounds = allKo.length > 0 ? Math.max(...allKo.map(m => m.round)) + 1 : 0;
+          const uiKoRounds = allKo.length > 0 ? Math.max(...allKo.map(m => m.round)) : -1;
           // For group_knockout: group by group+round, for others by round
           type UiBucket = { label: string; matches: Match[] };
           const uiBuckets: UiBucket[] = [];
@@ -1316,7 +1317,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
             }
 
             const allKo2 = matches.filter(m => m.groupNumber == null);
-            const photoKoRounds = allKo2.length > 0 ? Math.max(...allKo2.map(m => m.round)) + 1 : 0;
+            const photoKoRounds = allKo2.length > 0 ? Math.max(...allKo2.map(m => m.round)) : -1;
             const completedAll = matches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id)
               .sort((a, b) => {
                 const gA = a.groupNumber ?? -1, gB = b.groupNumber ?? -1;
