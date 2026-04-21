@@ -57,6 +57,14 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
 
   const tierLabel = (rank: number) => rank === 1 ? 'Gruppensieger' : rank === 2 ? 'Gruppenzweiter' : `Gr.-${rank}.`;
 
+  if (matches.length === 0) {
+    return (
+      <div className="text-center text-muted-foreground py-12">
+        Starte das Turnier, um den Bracket zu sehen
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="overflow-x-auto pb-4">
