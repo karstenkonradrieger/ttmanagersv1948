@@ -1,5 +1,8 @@
 import { Match, Player } from '@/types/tournament';
 
+export type TiebreakerCriterion = 'wins' | 'setsDiff' | 'pointsDiff';
+export const DEFAULT_TIEBREAKER_ORDER: TiebreakerCriterion[] = ['wins', 'setsDiff', 'pointsDiff'];
+
 interface QualifiedPlayer {
   playerId: string;
   groupNumber: number;
