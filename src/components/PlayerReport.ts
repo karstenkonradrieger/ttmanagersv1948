@@ -206,6 +206,16 @@ export async function generatePlayerReport({
   doc.setDrawColor(200);
   doc.line(10, y, w - 10, y);
   y += 4;
+  if (playerMatches.length === 0) {
+    const filterLabel = phaseFilter === 'group' ? 'Gruppenphase' : phaseFilter === 'ko' ? 'K.O.-Runde' : 'gewählten Filter';
+    doc.setFillColor(245, 245, 245);
+    doc.roundedRect(10, y, w - 20, 14, 2, 2, 'F');
+    doc.setFontSize(9);
+    doc.setFont(undefined!, 'italic');
+    doc.setTextColor(120);
+    doc.text(`Keine Spiele im Filter „${filterLabel}" vorhanden.`, w / 2, y + 8.5, { align: 'center' });
+    y += 20;
+  }
 
   // Separate group and KO matches
   const groupMatches = playerMatches.filter(m => m.groupNumber != null);
