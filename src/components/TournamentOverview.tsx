@@ -1121,7 +1121,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
       ) : (
         (() => {
           const allKo = matches.filter(m => m.groupNumber == null);
-          const uiKoRounds = allKo.length > 0 ? Math.max(...allKo.map(m => m.round)) + 1 : 0;
+          const uiKoRounds = allKo.length > 0 ? Math.max(...allKo.map(m => m.round)) : -1;
           // For group_knockout: group by group+round, for others by round
           type UiBucket = { label: string; matches: Match[] };
           const uiBuckets: UiBucket[] = [];
@@ -1317,7 +1317,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
             }
 
             const allKo2 = matches.filter(m => m.groupNumber == null);
-            const photoKoRounds = allKo2.length > 0 ? Math.max(...allKo2.map(m => m.round)) + 1 : 0;
+            const photoKoRounds = allKo2.length > 0 ? Math.max(...allKo2.map(m => m.round)) : -1;
             const completedAll = matches.filter(m => m.status === 'completed' && m.player1Id && m.player2Id)
               .sort((a, b) => {
                 const gA = a.groupNumber ?? -1, gB = b.groupNumber ?? -1;
