@@ -215,7 +215,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
             {qualifiedData.winners.length > 0 && (
               <div>
                 <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-yellow-500/20 text-yellow-600 text-[10px] font-bold">1</span>
+                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold">1</span>
                   Gruppensieger
                 </h5>
                 <div className="overflow-x-auto">
@@ -232,7 +232,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                     </thead>
                     <tbody>
                       {qualifiedData.winners.map((q, i) => (
-                        <tr key={q.playerId} className="border-b border-border/50 bg-yellow-500/5">
+                        <tr key={q.playerId} className="border-b border-border/50 bg-accent/10">
                           <td className="py-1.5 px-2 font-bold text-primary">{i + 1}</td>
                           <td className="py-1.5 px-2 font-semibold">{getParticipantName(q.playerId)}</td>
                           <td className="text-center py-1.5 px-2">
@@ -255,7 +255,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
             {qualifiedData.runnersUp.length > 0 && (
               <div>
                 <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-slate-400/20 text-slate-500 text-[10px] font-bold">2</span>
+                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">2</span>
                   Gruppenzweite
                 </h5>
                 <div className="overflow-x-auto">
