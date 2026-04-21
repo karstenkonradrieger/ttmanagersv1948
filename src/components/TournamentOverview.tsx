@@ -1119,15 +1119,28 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
           onUpdateScore={onUpdateScore}
         />
       ) : (
-        matchesByRound.map((roundMatches, r) => {
-          if (roundMatches.length === 0) return null;
-          const roundName = getRoundName(r, rounds, mode);
-
-          return (
-            <div key={r}>
-              <h4 className="font-bold text-sm mb-2 text-primary">{roundName}</h4>
+        (() => {
+          const allKo = matches.filter(m => m.groupNumber == null);
+          const uiKoRounds = allKo.length > 0 ? Math.max(...allKo.map(m => m.round)) + 1 : 0;
+          // For group_knockout: group by group+round, for others by round
+          type UiBucket = { label: string; matches: Match[] };
+          const uiBuckets: UiBucket[] = [];
+          const sorted = [...matches].sort((a, b) => {
+            const gA = a.groupNumber ?? -1, gB = b.groupNumber ?? -1;
+            if (gA !== gB) return gA - gB;
+            return a.round - b.round || a.position - b.position;
+          });
+          for (const m of sorted) {
+            const label = getRoundName(m.round, rounds, mode, m.groupNumber, uiKoRounds);
+            const last = uiBuckets[uiBuckets.length - 1];
+            if (last && last.label === label) { last.matches.push(m); }
+            else { uiBuckets.push({ label, matches: [m] }); }
+          }
+          return uiBuckets.map((bucket, bi) => (
+            <div key={bi}>
+              <h4 className="font-bold text-sm mb-2 text-primary">{bucket.label}</h4>
               <div className="space-y-2">
-                {roundMatches.map((m) => (
+                {bucket.matches.map((m) => (
                     <OverviewMatchRow
                       key={m.id}
                       match={m}
