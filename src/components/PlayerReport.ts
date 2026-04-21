@@ -96,7 +96,13 @@ export async function generatePlayerReport({
       ? allPlayerMatches.filter(m => m.groupNumber == null)
       : allPlayerMatches;
 
-  const doc = new jsPDF({ orientation: 'portrait', format: 'a4' });
+  if (playerMatches.length === 0) {
+    const filterLabel = phaseFilter === 'group' ? 'Gruppenphase' : phaseFilter === 'ko' ? 'K.O.-Runde' : 'gewählten Filter';
+    toast.error(`Keine Spiele für ${player.name} in der ${filterLabel} vorhanden.`);
+    return;
+  }
+
+
   const w = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   let y = 10;
