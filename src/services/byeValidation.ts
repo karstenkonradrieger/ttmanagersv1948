@@ -54,8 +54,18 @@ export function computeQualifiedPlayers(
       }
     }
 
+    const getVal = (s: { won: number; setsWon: number; setsLost: number; pointsWon: number; pointsLost: number }, key: TiebreakerCriterion) => {
+      if (key === 'wins') return s.won;
+      if (key === 'setsDiff') return s.setsWon - s.setsLost;
+      return s.pointsWon - s.pointsLost;
+    };
+
     const standings = [...map.values()].sort((a, b) => {
-      if (b.won !== a.won) return b.won - a.won;
+      for (const criterion of tiebreakerOrder) {
+        const diff = getVal(b, criterion) - getVal(a, criterion);
+        if (diff !== 0) return diff;
+      }
+      // H2H as final fallback within group
       const h2h = gMatches.find(m => m.status === 'completed' &&
         ((m.player1Id === a.playerId && m.player2Id === b.playerId) ||
           (m.player1Id === b.playerId && m.player2Id === a.playerId)));
@@ -63,10 +73,7 @@ export function computeQualifiedPlayers(
         if (h2h.winnerId === a.playerId) return -1;
         if (h2h.winnerId === b.playerId) return 1;
       }
-      const aDiff = a.setsWon - a.setsLost;
-      const bDiff = b.setsWon - b.setsLost;
-      if (bDiff !== aDiff) return bDiff - aDiff;
-      return (b.pointsWon - b.pointsLost) - (a.pointsWon - a.pointsLost);
+      return 0;
     });
 
     for (let i = 0; i < Math.min(qualifyPerGroup, standings.length); i++) {
@@ -79,9 +86,12 @@ export function computeQualifiedPlayers(
   }
 
   const perfSort = (a: QualifiedPlayer, b: QualifiedPlayer) => {
-    if (b.won !== a.won) return b.won - a.won;
-    if (b.setsDiff !== a.setsDiff) return b.setsDiff - a.setsDiff;
-    return b.pointsDiff - a.pointsDiff;
+    for (const criterion of tiebreakerOrder) {
+      const aVal = criterion === 'wins' ? a.won : criterion === 'setsDiff' ? a.setsDiff : a.pointsDiff;
+      const bVal = criterion === 'wins' ? b.won : criterion === 'setsDiff' ? b.setsDiff : b.pointsDiff;
+      if (bVal !== aVal) return bVal - aVal;
+    }
+    return 0;
   };
 
   const byRank: QualifiedPlayer[][] = [];
