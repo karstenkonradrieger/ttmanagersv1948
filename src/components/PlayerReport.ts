@@ -31,6 +31,8 @@ async function loadImage(url: string): Promise<string | null> {
   }
 }
 
+export type PlayerReportPhaseFilter = 'all' | 'group' | 'ko';
+
 interface PlayerReportOptions {
   player: Player;
   matches: Match[];
@@ -45,6 +47,7 @@ interface PlayerReportOptions {
   venueString?: string;
   motto?: string;
   mode?: string;
+  phaseFilter?: PlayerReportPhaseFilter;
 }
 
 function getRoundName(match: Match, totalRounds: number, koRounds: number, mode?: string): string {
