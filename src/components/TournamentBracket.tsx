@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { Match, Player } from '@/types/tournament';
-import { Trophy, ChevronDown, Info } from 'lucide-react';
+import { Trophy, ChevronDown, ChevronUp, Info, ArrowUp, ArrowDown } from 'lucide-react';
 import { getRoundLabel } from './bracketLabels';
-import { computeQualifiedPlayers } from '@/services/byeValidation';
+import { computeQualifiedPlayers, TiebreakerCriterion, DEFAULT_TIEBREAKER_ORDER } from '@/services/byeValidation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   matches: Match[];
@@ -27,12 +28,31 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
   const finalist = matches.find(m => m.round === maxRound && m.winnerId);
   const champion = finalist ? getPlayer(finalist.winnerId) : null;
 
+  // Configurable tiebreaker order
+  const [tiebreakerOrder, setTiebreakerOrder] = useState<TiebreakerCriterion[]>(DEFAULT_TIEBREAKER_ORDER);
+
+  const moveCriterion = useCallback((idx: number, dir: -1 | 1) => {
+    setTiebreakerOrder(prev => {
+      const next = [...prev];
+      const target = idx + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[idx], next[target]] = [next[target], next[idx]];
+      return next;
+    });
+  }, []);
+
+  const criterionLabels: Record<TiebreakerCriterion, string> = {
+    wins: 'Siege',
+    setsDiff: 'Satzdifferenz',
+    pointsDiff: 'Punktdifferenz',
+  };
+
   // Compute seeding details for first KO round when group data is available
   const seedingDetails = useMemo(() => {
     if (!allMatches || !players || matches.length === 0) return null;
     const groupMatches = allMatches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
     if (groupMatches.length === 0) return null;
-    const { winners, runnersUp } = computeQualifiedPlayers(groupMatches, players);
+    const { winners, runnersUp } = computeQualifiedPlayers(groupMatches, players, 2, tiebreakerOrder);
     const seeded = [...winners, ...runnersUp];
     if (seeded.length < 2) return null;
 
@@ -51,7 +71,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
       const isBye = (p1 && !p2) || (!p1 && p2);
       return { position: idx + 1, p1, p2, s1, s2, seed1, seed2, isBye };
     });
-  }, [allMatches, players, matches, presentRounds, getPlayer]);
+  }, [allMatches, players, matches, presentRounds, getPlayer, tiebreakerOrder]);
 
   const [seedingOpen, setSeedingOpen] = useState(false);
 
@@ -125,9 +145,39 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="rounded-lg border border-border/50 bg-muted/30 p-3 space-y-2">
-              <p className="text-[11px] text-muted-foreground mb-2">
-                Setzung: Gruppensieger (nach Siege → Satzdiff → Punktdiff), dann Gruppenzweite nach gleicher Logik. Seed #1 trifft auf den niedrigsten Seed.
+            <div className="rounded-lg border border-border/50 bg-muted/30 p-3 space-y-3">
+              {/* Tiebreaker order config */}
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-semibold text-muted-foreground">Tiebreaker-Reihenfolge (anpassbar):</p>
+                <div className="flex flex-col gap-1">
+                  {tiebreakerOrder.map((criterion, idx) => (
+                    <div key={criterion} className="flex items-center gap-1.5 text-xs bg-background/60 border border-border/30 rounded-md px-2 py-1">
+                      <span className="font-bold text-muted-foreground min-w-[16px]">{idx + 1}.</span>
+                      <span className="flex-1 font-medium">{criterionLabels[criterion]}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        disabled={idx === 0}
+                        onClick={() => moveCriterion(idx, -1)}
+                      >
+                        <ArrowUp className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        disabled={idx === tiebreakerOrder.length - 1}
+                        onClick={() => moveCriterion(idx, 1)}
+                      >
+                        <ArrowDown className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Setzung: Gruppensieger (nach {tiebreakerOrder.map(c => criterionLabels[c]).join(' → ')}), dann Gruppenzweite nach gleicher Logik. Seed #1 trifft auf den niedrigsten Seed.
               </p>
               <div className="space-y-1.5">
                 {seedingDetails.map((d) => (
