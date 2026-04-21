@@ -37,53 +37,148 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
   const finalist = matches.find(m => m.round === maxRound && m.winnerId);
   const champion = finalist ? getPlayer(finalist.winnerId) : null;
 
+  // Compute seeding details for first KO round when group data is available
+  const seedingDetails = useMemo(() => {
+    if (!allMatches || !players) return null;
+    const groupMatches = allMatches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
+    if (groupMatches.length === 0) return null;
+    const { winners, runnersUp } = computeQualifiedPlayers(groupMatches, players);
+    const seeded = [...winners, ...runnersUp];
+    if (seeded.length < 2) return null;
+
+    // Reconstruct bracket slot assignments (same logic as useTournamentDb)
+    const firstRoundMatches = matches
+      .filter(m => m.round === (presentRounds[0] ?? 0))
+      .sort((a, b) => a.position - b.position);
+
+    return firstRoundMatches.map((m, idx) => {
+      const p1 = m.player1Id ? getPlayer(m.player1Id) : null;
+      const p2 = m.player2Id ? getPlayer(m.player2Id) : null;
+      const s1 = seeded.find(s => s.playerId === m.player1Id);
+      const s2 = seeded.find(s => s.playerId === m.player2Id);
+      const seed1 = s1 ? seeded.indexOf(s1) + 1 : null;
+      const seed2 = s2 ? seeded.indexOf(s2) + 1 : null;
+      const isBye = (p1 && !p2) || (!p1 && p2);
+      return { position: idx + 1, p1, p2, s1, s2, seed1, seed2, isBye };
+    });
+  }, [allMatches, players, matches, presentRounds, getPlayer]);
+
+  const [seedingOpen, setSeedingOpen] = useState(false);
+
+  const tierLabel = (rank: number) => rank === 1 ? 'Gruppensieger' : rank === 2 ? 'Gruppenzweiter' : `Gr.-${rank}.`;
+
   return (
-    <div className="overflow-x-auto pb-4">
-      <div className="flex gap-6 min-w-max items-start">
-        {presentRounds.map((r, idx) => {
-          const roundMatches = matches
-            .filter(m => m.round === r)
-            .sort((a, b) => a.position - b.position);
+    <div className="space-y-4">
+      <div className="overflow-x-auto pb-4">
+        <div className="flex gap-6 min-w-max items-start">
+          {presentRounds.map((r, idx) => {
+            const roundMatches = matches
+              .filter(m => m.round === r)
+              .sort((a, b) => a.position - b.position);
 
-          const isFinal = r === maxRound;
+            const isFinal = r === maxRound;
 
-          return (
-            <div key={r} className="flex flex-col min-w-[220px]">
-              <div className={`text-center mb-3 pb-2 border-b ${isFinal ? 'border-primary/40' : 'border-border/40'}`}>
-                <h3 className={`text-xs font-bold uppercase tracking-widest ${isFinal ? 'text-primary' : 'text-muted-foreground'}`}>
-                  {roundNames(r)}
-                </h3>
-                <span className="text-[10px] text-muted-foreground/60">
-                  {roundMatches.length} {roundMatches.length === 1 ? 'Spiel' : 'Spiele'}
-                </span>
+            return (
+              <div key={r} className="flex flex-col min-w-[220px]">
+                <div className={`text-center mb-3 pb-2 border-b ${isFinal ? 'border-primary/40' : 'border-border/40'}`}>
+                  <h3 className={`text-xs font-bold uppercase tracking-widest ${isFinal ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {roundNames(r)}
+                  </h3>
+                  <span className="text-[10px] text-muted-foreground/60">
+                    {roundMatches.length} {roundMatches.length === 1 ? 'Spiel' : 'Spiele'}
+                  </span>
+                </div>
+                <div
+                  className="flex flex-col justify-around flex-1"
+                  style={{ gap: `${Math.max(Math.pow(2, idx) * 8, 12)}px` }}
+                >
+                  {roundMatches.map(match => (
+                    <BracketMatch key={match.id} match={match} getPlayer={getPlayer} isFinal={isFinal} />
+                  ))}
+                </div>
               </div>
-              <div
-                className="flex flex-col justify-around flex-1"
-                style={{ gap: `${Math.max(Math.pow(2, idx) * 8, 12)}px` }}
-              >
-                {roundMatches.map(match => (
-                  <BracketMatch key={match.id} match={match} getPlayer={getPlayer} isFinal={isFinal} />
+            );
+          })}
+
+          {champion && (
+            <div className="flex flex-col min-w-[180px] items-center justify-center">
+              <div className="text-center mb-3 pb-2 border-b border-primary/40 w-full">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-primary">Sieger</h3>
+              </div>
+              <div className="flex flex-col items-center gap-2 mt-4 p-4 rounded-xl bg-primary/10 border-2 border-primary/30">
+                <Trophy className="h-8 w-8 text-primary" />
+                <span className="font-extrabold text-lg text-primary">{champion.name}</span>
+                {champion.club && (
+                  <span className="text-xs text-muted-foreground">{champion.club}</span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {seedingDetails && seedingDetails.length > 0 && (
+        <Collapsible open={seedingOpen} onOpenChange={setSeedingOpen}>
+          <CollapsibleTrigger asChild>
+            <button className="flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors w-full py-2">
+              <Info className="h-3.5 w-3.5" />
+              <span>Setzlogik-Details (1. K.O.-Runde)</span>
+              <ChevronDown className={`h-3.5 w-3.5 ml-auto transition-transform ${seedingOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="rounded-lg border border-border/50 bg-muted/30 p-3 space-y-2">
+              <p className="text-[11px] text-muted-foreground mb-2">
+                Setzung: Gruppensieger (nach Siege → Satzdiff → Punktdiff), dann Gruppenzweite nach gleicher Logik. Seed #1 trifft auf den niedrigsten Seed.
+              </p>
+              <div className="space-y-1.5">
+                {seedingDetails.map((d) => (
+                  <div key={d.position} className="flex items-start gap-2 text-xs rounded-md bg-background/60 border border-border/30 px-2.5 py-1.5">
+                    <span className="font-bold text-muted-foreground min-w-[24px]">#{d.position}</span>
+                    <div className="flex-1 space-y-0.5">
+                      {d.isBye ? (
+                        <span className="text-muted-foreground italic">
+                          {d.p1?.name || d.p2?.name} — Freilos (Seed {d.seed1 ?? d.seed2})
+                        </span>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-1 flex-wrap">
+                            <span className="font-semibold">{d.p1?.name ?? 'TBD'}</span>
+                            {d.seed1 && (
+                              <span className="px-1 py-px rounded text-[10px] bg-primary/15 text-primary font-bold">
+                                Seed {d.seed1}
+                              </span>
+                            )}
+                            {d.s1 && (
+                              <span className="text-muted-foreground text-[10px]">
+                                ({tierLabel(d.s1.rank)}, Gr.{d.s1.groupNumber + 1}: {d.s1.won}S, ±{d.s1.setsDiff > 0 ? '+' : ''}{d.s1.setsDiff} Sätze, ±{d.s1.pointsDiff > 0 ? '+' : ''}{d.s1.pointsDiff} Pkt)
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-muted-foreground/60 text-[10px] pl-1">vs.</div>
+                          <div className="flex items-center gap-1 flex-wrap">
+                            <span className="font-semibold">{d.p2?.name ?? 'TBD'}</span>
+                            {d.seed2 && (
+                              <span className="px-1 py-px rounded text-[10px] bg-accent/50 text-accent-foreground font-bold">
+                                Seed {d.seed2}
+                              </span>
+                            )}
+                            {d.s2 && (
+                              <span className="text-muted-foreground text-[10px]">
+                                ({tierLabel(d.s2.rank)}, Gr.{d.s2.groupNumber + 1}: {d.s2.won}S, ±{d.s2.setsDiff > 0 ? '+' : ''}{d.s2.setsDiff} Sätze, ±{d.s2.pointsDiff > 0 ? '+' : ''}{d.s2.pointsDiff} Pkt)
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
-          );
-        })}
-
-        {champion && (
-          <div className="flex flex-col min-w-[180px] items-center justify-center">
-            <div className="text-center mb-3 pb-2 border-b border-primary/40 w-full">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-primary">Sieger</h3>
-            </div>
-            <div className="flex flex-col items-center gap-2 mt-4 p-4 rounded-xl bg-primary/10 border-2 border-primary/30">
-              <Trophy className="h-8 w-8 text-primary" />
-              <span className="font-extrabold text-lg text-primary">{champion.name}</span>
-              {champion.club && (
-                <span className="text-xs text-muted-foreground">{champion.club}</span>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
     </div>
   );
 }
