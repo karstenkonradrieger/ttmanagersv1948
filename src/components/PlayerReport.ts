@@ -51,19 +51,17 @@ interface PlayerReportOptions {
   phaseFilter?: PlayerReportPhaseFilter;
 }
 
-function getRoundName(match: Match, totalRounds: number, koRounds: number, mode?: string): string {
-  // Group phase match
+function getRoundName(match: Match, totalRounds: number, koMaxRound: number, mode?: string): string {
   if (match.groupNumber != null) {
     return `Gruppe ${match.groupNumber} – Runde ${match.round + 1}`;
   }
   if (mode === 'round_robin' || mode === 'swiss') return `Runde ${match.round + 1}`;
-  // KO phase: use koRounds for correct naming
-  const rounds = koRounds > 0 ? koRounds : totalRounds;
-  const diff = rounds - match.round;
-  if (diff === 1) return 'Finale';
-  if (diff === 2) return 'Halbfinale';
-  if (diff === 3) return 'Viertelfinale';
-  if (diff === 4) return 'Achtelfinale';
+  const maxR = koMaxRound >= 0 ? koMaxRound : totalRounds - 1;
+  const diff = maxR - match.round;
+  if (diff === 0) return 'Finale';
+  if (diff === 1) return 'Halbfinale';
+  if (diff === 2) return 'Viertelfinale';
+  if (diff === 3) return 'Achtelfinale';
   return `Runde ${match.round + 1}`;
 }
 
