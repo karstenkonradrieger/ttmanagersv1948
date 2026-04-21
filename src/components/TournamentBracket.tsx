@@ -46,16 +46,12 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
     return false;
   });
 
-  useEffect(() => {
-    const isInitial = initialRender.current;
-    initialRender.current = false;
-    localStorage.setItem(LS_KEY, JSON.stringify({ order: tiebreakerOrder, h2hPriority }));
-    if (!isInitial) {
-      toast.success('Tiebreaker-Konfiguration gespeichert');
-    }
-  }, [tiebreakerOrder, h2hPriority]);
-
   const initialRender = useRef(true);
+  useEffect(() => {
+    if (initialRender.current) { initialRender.current = false; return; }
+    localStorage.setItem(LS_KEY, JSON.stringify({ order: tiebreakerOrder, h2hPriority }));
+    toast.success('Tiebreaker-Konfiguration gespeichert');
+  }, [tiebreakerOrder, h2hPriority]);
 
   const moveCriterion = useCallback((idx: number, dir: -1 | 1) => {
     setTiebreakerOrder(prev => {
