@@ -30,7 +30,7 @@ import { KaiserScoring } from '@/components/KaiserScoring';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings, Film, Video, RefreshCw, SkipForward } from 'lucide-react';
+import { ChevronDown, Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings, Film, Video, RefreshCw, SkipForward, Undo2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
@@ -67,6 +67,8 @@ const Index = () => {
     updateDetails,
     advanceToKnockout,
     redistributeKnockoutByes,
+    undoKoRedistribution,
+    koUndoSnapshot,
     resetTournament,
     generateNextSwissRound,
     addTeam,
@@ -674,6 +676,17 @@ const Index = () => {
                                 <RefreshCw className="h-3.5 w-3.5" />
                                 <span className="hidden sm:inline">K.O.-Auslosung ändern</span>
                               </Button>
+                              {koUndoSnapshot && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5 border-amber-500/40 text-amber-600 hover:bg-amber-500/10"
+                                  onClick={() => undoKoRedistribution()}
+                                >
+                                  <Undo2 className="h-3.5 w-3.5" />
+                                  <span className="hidden sm:inline">Rückgängig</span>
+                                </Button>
+                              )}
                               <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-primary/15 text-primary hidden sm:inline">
                                 Phase 2
                               </span>
