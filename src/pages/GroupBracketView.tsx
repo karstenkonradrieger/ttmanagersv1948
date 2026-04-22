@@ -15,6 +15,7 @@ const GroupBracketView = () => {
   const isDoubles = tournament.type === 'doubles';
   const [groupOpen, setGroupOpen] = useState(true);
   const [koOpen, setKoOpen] = useState(true);
+  const [pendingOnly, setPendingOnly] = useState(false);
 
   const getParticipantNameLocal = isDoubles
     ? getParticipantName
