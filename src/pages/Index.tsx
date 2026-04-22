@@ -942,6 +942,82 @@ const Index = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Redistribute KO dialog */}
+      <Dialog open={showRedistributeDialog} onOpenChange={setShowRedistributeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>K.O.-Auslosung ändern</DialogTitle>
+            <DialogDescription>
+              Die K.O.-Runde wird neu ausgelost. Gruppenendstände bleiben erhalten.
+            </DialogDescription>
+          </DialogHeader>
+          {(() => {
+            const groupMatches = tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
+            const data = computeQualifiedPlayers(groupMatches, tournament.players, 3);
+            const baseCount = data.winners.length + data.runnersUp.length;
+            const nextPow2 = Math.pow(2, Math.ceil(Math.log2(baseCount)));
+            const byeCount = nextPow2 - baseCount;
+            const thirdsNeeded = Math.min(byeCount, data.thirds.length);
+            const thirdsAvailable = data.thirds.length;
+
+            return (
+              <div className="space-y-3">
+                <div className="text-sm text-muted-foreground">
+                  <p>{baseCount} Spieler qualifiziert (Gruppensieger + Gruppenzweite)</p>
+                  {byeCount > 0 && (
+                    <p className="mt-1">Nächste 2er-Potenz: {nextPow2} → <strong>{byeCount} {byeCount === 1 ? 'Platz' : 'Plätze'}</strong> zu füllen</p>
+                  )}
+                  {byeCount === 0 && (
+                    <p className="mt-1 text-primary font-medium">Perfekte Anzahl — keine Freilose nötig!</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-3 h-auto py-3"
+                    onClick={() => {
+                      setShowRedistributeDialog(false);
+                      redistributeKnockoutByes(false);
+                    }}
+                  >
+                    <SkipForward className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <div className="text-left">
+                      <p className="font-semibold">Mit Freilosen</p>
+                      <p className="text-xs text-muted-foreground">
+                        {byeCount > 0
+                          ? `${byeCount} Freilos${byeCount > 1 ? 'e' : ''} für die besten Gruppensieger`
+                          : 'Keine Freilose nötig'}
+                      </p>
+                    </div>
+                  </Button>
+
+                  {byeCount > 0 && thirdsAvailable > 0 && (
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start gap-3 h-auto py-3 border-primary/30"
+                      onClick={() => {
+                        setShowRedistributeDialog(false);
+                        redistributeKnockoutByes(true);
+                      }}
+                    >
+                      <Users className="h-4 w-4 shrink-0 text-primary" />
+                      <div className="text-left">
+                        <p className="font-semibold">Beste Gruppendritte einbeziehen</p>
+                        <p className="text-xs text-muted-foreground">
+                          {thirdsNeeded} beste{thirdsNeeded === 1 ? 'r' : ''} Gruppendritte{thirdsNeeded === 1 ? 'r' : ''} qualifizier{thirdsNeeded === 1 ? 't' : 'en'} sich
+                          {thirdsNeeded < byeCount && ` (${byeCount - thirdsNeeded} Freilos${byeCount - thirdsNeeded > 1 ? 'e' : ''} verbleiben)`}
+                        </p>
+                      </div>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </PageTransition>
   );
 };
