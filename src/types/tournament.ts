@@ -207,4 +207,5 @@ export interface Tournament {
   certificateExtraSizes: Record<string, number>;
   certificateHiddenFields: string[];
   openingVideoUrl: string | null;
+  koQualificationMode: 'byes' | 'thirds';
 }

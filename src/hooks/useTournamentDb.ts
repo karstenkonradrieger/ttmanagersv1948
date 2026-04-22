@@ -47,6 +47,7 @@ const emptyTournament: Tournament = {
   certificateExtraSizes: {},
   certificateHiddenFields: [],
   openingVideoUrl: null,
+  koQualificationMode: 'byes',
 };
 
 export function useTournamentDb(tournamentId: string | null) {
@@ -1413,9 +1414,11 @@ export function useTournamentDb(tournamentId: string | null) {
         );
       }
 
+      const koMode = includeThirds ? 'thirds' : 'byes';
       await tournamentService.updateTournament(tournamentId, {
         phase: 'knockout',
         rounds: koRounds,
+        ko_qualification_mode: koMode,
       });
 
       setTournament(prev => ({
@@ -1423,6 +1426,7 @@ export function useTournamentDb(tournamentId: string | null) {
         matches: [...prev.matches, ...propagated],
         rounds: koRounds,
         phase: 'knockout',
+        koQualificationMode: koMode as 'byes' | 'thirds',
       }));
 
       toast.success(`K.O.-Runde mit ${qualifiedCount} Spielern gestartet`);
@@ -1555,7 +1559,8 @@ export function useTournamentDb(tournamentId: string | null) {
         );
       }
 
-      await tournamentService.updateTournament(tournamentId, { rounds: koRounds });
+      const koMode = includeThirds ? 'thirds' : 'byes';
+      await tournamentService.updateTournament(tournamentId, { rounds: koRounds, ko_qualification_mode: koMode });
 
       setTournament(prev => ({
         ...prev,
@@ -1564,6 +1569,7 @@ export function useTournamentDb(tournamentId: string | null) {
           ...propagated,
         ],
         rounds: koRounds,
+        koQualificationMode: koMode as 'byes' | 'thirds',
       }));
 
       toast.success('K.O.-Bracket neu erzeugt – Freilose korrekt verteilt.');
