@@ -30,12 +30,12 @@ import { KaiserScoring } from '@/components/KaiserScoring';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings, Film, Video, RefreshCw } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ChevronDown, Users, Swords, PenLine, Monitor, RotateCcw, Play, ArrowLeft, Loader2, ClipboardList, LogOut, Building2, Users2, Pencil, FileDown, Shield, Settings, Film, Video, RefreshCw, SkipForward } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
 import { PageTransition, FadeIn } from '@/components/ui/motion';
-import { hasMisallocatedByes } from '@/services/byeValidation';
+import { hasMisallocatedByes, computeQualifiedPlayers } from '@/services/byeValidation';
 
 const Index = () => {
   const { signOut } = useAuth();
@@ -88,6 +88,7 @@ const Index = () => {
   const [nameValue, setNameValue] = useState('');
   const [groupSectionOpen, setGroupSectionOpen] = useState(false);
   const [koSectionOpen, setKoSectionOpen] = useState(true);
+  const [showRedistributeDialog, setShowRedistributeDialog] = useState(false);
 
   const isDoubles = tournament.type === 'doubles';
   const isTeam = tournament.type === 'team';
@@ -662,21 +663,24 @@ const Index = () => {
                               </button>
                             </CollapsibleTrigger>
                             <div className="flex items-center gap-2 px-3 border-l border-primary/20">
-                              {hasMisallocatedByes(tournament.matches, tournament.players) && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="gap-1.5 border-destructive/50 text-destructive hover:bg-destructive/10"
-                                  onClick={() => {
-                                    if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
-                                      redistributeKnockoutByes();
-                                    }
-                                  }}
-                                >
-                                  <RefreshCw className="h-3.5 w-3.5" />
-                                  <span className="hidden sm:inline">Freilose neu verteilen</span>
-                                </Button>
-                              )}
+                              {(() => {
+                                const koMatches = tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
+                                const hasPlayed = koMatches.some(m =>
+                                  m.status === 'active' || (m.status === 'completed' && m.sets && m.sets.length > 0)
+                                );
+                                if (!hasPlayed) return (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5"
+                                    onClick={() => setShowRedistributeDialog(true)}
+                                  >
+                                    <RefreshCw className="h-3.5 w-3.5" />
+                                    <span className="hidden sm:inline">K.O.-Auslosung ändern</span>
+                                  </Button>
+                                );
+                                return null;
+                              })()}
                               <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-primary/15 text-primary hidden sm:inline">
                                 Phase 2
                               </span>
@@ -936,6 +940,82 @@ const Index = () => {
               className="max-w-full max-h-[90vh] rounded"
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Redistribute KO dialog */}
+      <Dialog open={showRedistributeDialog} onOpenChange={setShowRedistributeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>K.O.-Auslosung ändern</DialogTitle>
+            <DialogDescription>
+              Die K.O.-Runde wird neu ausgelost. Gruppenendstände bleiben erhalten.
+            </DialogDescription>
+          </DialogHeader>
+          {(() => {
+            const groupMatches = tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
+            const data = computeQualifiedPlayers(groupMatches, tournament.players, 3);
+            const baseCount = data.winners.length + data.runnersUp.length;
+            const nextPow2 = Math.pow(2, Math.ceil(Math.log2(baseCount)));
+            const byeCount = nextPow2 - baseCount;
+            const thirdsNeeded = Math.min(byeCount, data.thirds.length);
+            const thirdsAvailable = data.thirds.length;
+
+            return (
+              <div className="space-y-3">
+                <div className="text-sm text-muted-foreground">
+                  <p>{baseCount} Spieler qualifiziert (Gruppensieger + Gruppenzweite)</p>
+                  {byeCount > 0 && (
+                    <p className="mt-1">Nächste 2er-Potenz: {nextPow2} → <strong>{byeCount} {byeCount === 1 ? 'Platz' : 'Plätze'}</strong> zu füllen</p>
+                  )}
+                  {byeCount === 0 && (
+                    <p className="mt-1 text-primary font-medium">Perfekte Anzahl — keine Freilose nötig!</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-3 h-auto py-3"
+                    onClick={() => {
+                      setShowRedistributeDialog(false);
+                      redistributeKnockoutByes(false);
+                    }}
+                  >
+                    <SkipForward className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <div className="text-left">
+                      <p className="font-semibold">Mit Freilosen</p>
+                      <p className="text-xs text-muted-foreground">
+                        {byeCount > 0
+                          ? `${byeCount} Freilos${byeCount > 1 ? 'e' : ''} für die besten Gruppensieger`
+                          : 'Keine Freilose nötig'}
+                      </p>
+                    </div>
+                  </Button>
+
+                  {byeCount > 0 && thirdsAvailable > 0 && (
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start gap-3 h-auto py-3 border-primary/30"
+                      onClick={() => {
+                        setShowRedistributeDialog(false);
+                        redistributeKnockoutByes(true);
+                      }}
+                    >
+                      <Users className="h-4 w-4 shrink-0 text-primary" />
+                      <div className="text-left">
+                        <p className="font-semibold">Beste Gruppendritte einbeziehen</p>
+                        <p className="text-xs text-muted-foreground">
+                          {thirdsNeeded} beste{thirdsNeeded === 1 ? 'r' : ''} Gruppendritte{thirdsNeeded === 1 ? 'r' : ''} qualifizier{thirdsNeeded === 1 ? 't' : 'en'} sich
+                          {thirdsNeeded < byeCount && ` (${byeCount - thirdsNeeded} Freilos${byeCount - thirdsNeeded > 1 ? 'e' : ''} verbleiben)`}
+                        </p>
+                      </div>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </PageTransition>
