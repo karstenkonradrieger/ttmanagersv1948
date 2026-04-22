@@ -1324,23 +1324,29 @@ export function useTournamentDb(tournamentId: string | null) {
   }, [tournamentId]);
 
   // Advance from group phase to knockout phase
-  const advanceToKnockout = useCallback(async () => {
+  const advanceToKnockout = useCallback(async (includeThirds: boolean = false) => {
     if (!tournamentId || tournament.mode !== 'group_knockout' || tournament.phase !== 'group') return;
 
     const groupMatches = tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
 
     // Compute group standings + cross-group performance ranking
-    const { winners, runnersUp } = computeQualifiedPlayers(groupMatches, tournament.players);
+    const qualifyPerGroup = includeThirds ? 3 : 2;
+    const { winners, runnersUp, thirds } = computeQualifiedPlayers(groupMatches, tournament.players, qualifyPerGroup);
 
-    if (winners.length + runnersUp.length < 2) return;
+    const baseQualified = [...winners.map(w => w.playerId), ...runnersUp.map(r => r.playerId)];
 
-    // Seed order: best winner first (seed 1), then remaining winners, then
-    // runners-up by performance. seedBracketSlots() ensures top seeds get byes
-    // when qualifier count is not a power of two.
-    const seeded: string[] = [
-      ...winners.map(w => w.playerId),
-      ...runnersUp.map(r => r.playerId),
-    ];
+    let seeded: string[];
+    if (includeThirds && thirds.length > 0) {
+      // Add exactly enough thirds to reach the next power of 2
+      const baseCount = baseQualified.length;
+      const nextPow2 = Math.pow(2, Math.ceil(Math.log2(baseCount)));
+      const thirdsNeeded = Math.min(nextPow2 - baseCount, thirds.length);
+      seeded = [...baseQualified, ...thirds.slice(0, thirdsNeeded).map(t => t.playerId)];
+    } else {
+      seeded = baseQualified;
+    }
+
+    if (seeded.length < 2) return;
     const qualifiedCount = seeded.length;
 
     const n = seeded.length;

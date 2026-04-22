@@ -587,7 +587,7 @@ const Index = () => {
                         matches={tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null)}
                         players={tournament.players}
                         getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
-                        onAdvanceToKnockout={advanceToKnockout}
+                        onAdvanceToKnockout={(includeThirds) => advanceToKnockout(includeThirds)}
                         groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? 0)), 0) + 1}
                       />
                     </>
