@@ -1654,7 +1654,7 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId, koUndoSnapshot, tournament.matches]);
 
-
+  const resetTournament = useCallback(async () => {
     if (!tournamentId) return;
 
     // Check if any sets have been played
