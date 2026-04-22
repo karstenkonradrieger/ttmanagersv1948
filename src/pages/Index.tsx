@@ -436,7 +436,18 @@ const Index = () => {
                 Im neuen Fenster öffnen
               </Button>
             )}
-            {tab === 'bracket' && (isRoundRobin || isGroupKnockout) && (
+            {tab === 'bracket' && isGroupKnockout && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(`/groups/${selectedTournamentId}`, '_blank')}
+                className="gap-1 text-xs"
+              >
+                <Monitor className="h-3 w-3" />
+                Im neuen Fenster öffnen
+              </Button>
+            )}
+            {tab === 'bracket' && isRoundRobin && (
               <Button
                 variant="outline"
                 size="sm"
@@ -444,7 +455,7 @@ const Index = () => {
                 className="gap-1 text-xs"
               >
                 <Monitor className="h-3 w-3" />
-                {isGroupKnockout ? 'Gruppen im neuen Fenster' : 'Tabelle im neuen Fenster'}
+                Tabelle im neuen Fenster
               </Button>
             )}
           </div>

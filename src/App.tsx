@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import LiveView from "./pages/LiveView";
 import StandingsView from "./pages/StandingsView";
 import DoublesView from "./pages/DoublesView";
+import GroupBracketView from "./pages/GroupBracketView";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="/live/:id" element={<LiveView />} />
             <Route path="/standings/:id" element={<StandingsView />} />
             <Route path="/doubles/:id" element={<DoublesView />} />
+            <Route path="/groups/:id" element={<GroupBracketView />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
