@@ -5,6 +5,8 @@ import { GroupStageView } from '@/components/GroupStageView';
 import { TournamentBracket } from '@/components/TournamentBracket';
 import { SponsorLogos } from '@/components/SponsorLogos';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Loader2, ChevronDown } from 'lucide-react';
 
 const GroupBracketView = () => {
