@@ -67,6 +67,8 @@ const Index = () => {
     updateDetails,
     advanceToKnockout,
     redistributeKnockoutByes,
+    undoKoRedistribution,
+    koUndoSnapshot,
     resetTournament,
     generateNextSwissRound,
     addTeam,
