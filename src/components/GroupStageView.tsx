@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Trophy, Medal, Info, ChevronDown } from 'lucide-react';
+import { ArrowRight, Trophy, Medal, Info, ChevronDown, Users, SkipForward } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { computeQualifiedPlayers } from '@/services/byeValidation';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface GroupStanding {
   playerId: string;
