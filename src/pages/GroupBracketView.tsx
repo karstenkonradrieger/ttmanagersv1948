@@ -5,6 +5,8 @@ import { GroupStageView } from '@/components/GroupStageView';
 import { TournamentBracket } from '@/components/TournamentBracket';
 import { SponsorLogos } from '@/components/SponsorLogos';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Loader2, ChevronDown } from 'lucide-react';
 
 const GroupBracketView = () => {
@@ -13,6 +15,7 @@ const GroupBracketView = () => {
   const isDoubles = tournament.type === 'doubles';
   const [groupOpen, setGroupOpen] = useState(true);
   const [koOpen, setKoOpen] = useState(true);
+  const [pendingOnly, setPendingOnly] = useState(false);
 
   const getParticipantNameLocal = isDoubles
     ? getParticipantName
@@ -75,12 +78,19 @@ const GroupBracketView = () => {
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="p-4">
+              <div className="p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Switch id="pending-toggle" checked={pendingOnly} onCheckedChange={setPendingOnly} />
+                    <Label htmlFor="pending-toggle" className="text-xs text-muted-foreground cursor-pointer">
+                      Nur offene Spiele anzeigen
+                    </Label>
+                  </div>
                   <GroupStageView
                     matches={groupMatches}
                     players={tournament.players}
                     getParticipantName={getParticipantNameLocal}
                     groupCount={groupCount}
+                    showPendingOnly={pendingOnly}
                   />
                 </div>
               </CollapsibleContent>
