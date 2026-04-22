@@ -436,7 +436,7 @@ const Index = () => {
                 Im neuen Fenster öffnen
               </Button>
             )}
-            {tab === 'bracket' && isRoundRobin && (
+            {tab === 'bracket' && (isRoundRobin || isGroupKnockout) && (
               <Button
                 variant="outline"
                 size="sm"
@@ -444,7 +444,7 @@ const Index = () => {
                 className="gap-1 text-xs"
               >
                 <Monitor className="h-3 w-3" />
-                Tabelle im neuen Fenster
+                {isGroupKnockout ? 'Gruppen im neuen Fenster' : 'Tabelle im neuen Fenster'}
               </Button>
             )}
           </div>
