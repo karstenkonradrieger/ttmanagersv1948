@@ -656,7 +656,9 @@ const Index = () => {
                                 <div className="min-w-0">
                                   <h3 className="text-base font-bold leading-tight text-primary">K.O.-Runde</h3>
                                   <p className="text-xs text-muted-foreground truncate">
-                                    {koSectionOpen ? 'Finalrunden um den Turniersieg' : 'Klick zum Anzeigen des K.O.-Brackets'}
+                                    {koSectionOpen
+                                      ? (tournament.koQualificationMode === 'thirds' ? 'Beste Gruppendritte qualifiziert' : 'Mit Freilosen')
+                                      : 'Klick zum Anzeigen des K.O.-Brackets'}
                                   </p>
                                 </div>
                                 <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ml-auto ${koSectionOpen ? 'rotate-180' : ''}`} />
