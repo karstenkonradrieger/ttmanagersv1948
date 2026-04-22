@@ -1491,6 +1491,13 @@ export function useTournamentDb(tournamentId: string | null) {
 
     const koMatches = tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
 
+    // Save snapshot for undo
+    setKoUndoSnapshot({
+      koMatches: koMatches.map(m => ({ ...m })),
+      rounds: tournament.rounds,
+      koQualificationMode: tournament.koQualificationMode,
+    });
+
     // Recompute group standings + cross-group performance ranking
     const groupMatches = tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
     const qualifyPerGroup = includeThirds ? 3 : 2;
