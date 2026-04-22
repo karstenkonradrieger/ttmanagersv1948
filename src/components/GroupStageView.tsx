@@ -160,7 +160,7 @@ interface Props {
   matches: Match[];
   players: Player[];
   getParticipantName: (id: string | null) => string;
-  onAdvanceToKnockout?: () => void;
+  onAdvanceToKnockout?: (includeThirds: boolean) => void;
   groupCount: number;
 }
 
