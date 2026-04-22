@@ -161,9 +161,10 @@ interface Props {
   getParticipantName: (id: string | null) => string;
   onAdvanceToKnockout?: () => void;
   groupCount: number;
+  showPendingOnly?: boolean;
 }
 
-export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount }: Props) {
+export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount, showPendingOnly = false }: Props) {
   const groupData = useMemo(() => {
     const groups: { groupNumber: number; standings: GroupStanding[]; matches: Match[]; allCompleted: boolean; tiebreakers: TiebreakerInfo[] }[] = [];
     for (let g = 0; g < groupCount; g++) {
@@ -261,7 +262,9 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
           )}
 
           <div className="mt-3 space-y-1">
-            {group.matches.map(m => {
+            {group.matches
+              .filter(m => !showPendingOnly || m.status !== 'completed')
+              .map(m => {
               const p1Wins = m.sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
               const p2Wins = m.sets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
               return (
@@ -286,6 +289,9 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                 </div>
               );
             })}
+            {showPendingOnly && group.matches.every(m => m.status === 'completed') && (
+              <p className="text-xs text-muted-foreground italic">Alle Spiele abgeschlossen</p>
+            )}
           </div>
         </div>
       ))}
