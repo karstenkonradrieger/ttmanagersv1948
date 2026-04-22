@@ -78,12 +78,19 @@ const GroupBracketView = () => {
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="p-4">
+              <div className="p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Switch id="pending-toggle" checked={pendingOnly} onCheckedChange={setPendingOnly} />
+                    <Label htmlFor="pending-toggle" className="text-xs text-muted-foreground cursor-pointer">
+                      Nur offene Spiele anzeigen
+                    </Label>
+                  </div>
                   <GroupStageView
                     matches={groupMatches}
                     players={tournament.players}
                     getParticipantName={getParticipantNameLocal}
                     groupCount={groupCount}
+                    showPendingOnly={pendingOnly}
                   />
                 </div>
               </CollapsibleContent>
