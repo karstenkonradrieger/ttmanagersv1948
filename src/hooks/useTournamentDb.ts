@@ -2016,6 +2016,8 @@ export function useTournamentDb(tournamentId: string | null) {
     getParticipantName,
     advanceToKnockout,
     redistributeKnockoutByes,
+    undoKoRedistribution,
+    koUndoSnapshot,
     resetTournament,
     generateNextSwissRound,
     addTeam,
