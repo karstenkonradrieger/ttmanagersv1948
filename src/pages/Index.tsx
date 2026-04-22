@@ -88,6 +88,7 @@ const Index = () => {
   const [nameValue, setNameValue] = useState('');
   const [groupSectionOpen, setGroupSectionOpen] = useState(false);
   const [koSectionOpen, setKoSectionOpen] = useState(true);
+  const [showRedistributeDialog, setShowRedistributeDialog] = useState(false);
 
   const isDoubles = tournament.type === 'doubles';
   const isTeam = tournament.type === 'team';
