@@ -1472,7 +1472,7 @@ export function useTournamentDb(tournamentId: string | null) {
   // Redistribute byes in the current KO bracket: deletes pending KO matches and
   // regenerates them with correct performance-based seeding. Only allowed when no
   // KO match has been played yet.
-  const redistributeKnockoutByes = useCallback(async () => {
+  const redistributeKnockoutByes = useCallback(async (includeThirds: boolean = false) => {
     if (!tournamentId || tournament.mode !== 'group_knockout' || tournament.phase !== 'knockout') {
       toast.error('Freilose können nur in der K.O.-Phase neu verteilt werden.');
       return;
@@ -1483,20 +1483,31 @@ export function useTournamentDb(tournamentId: string | null) {
       m.status === 'active' || (m.status === 'completed' && m.sets && m.sets.length > 0)
     );
     if (hasPlayed) {
-      toast.error('Freilose können nicht neu verteilt werden, da bereits K.O.-Spiele gespielt wurden.');
+      toast.error('K.O.-Runde kann nicht neu ausgelost werden, da bereits K.O.-Spiele gespielt wurden.');
       return;
     }
 
     // Recompute group standings + cross-group performance ranking
     const groupMatches = tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
-    const { winners, runnersUp } = computeQualifiedPlayers(groupMatches, tournament.players);
+    const qualifyPerGroup = includeThirds ? 3 : 2;
+    const { winners, runnersUp, thirds } = computeQualifiedPlayers(groupMatches, tournament.players, qualifyPerGroup);
 
-    if (winners.length + runnersUp.length < 2) {
+    const baseQualified = [...winners.map(w => w.playerId), ...runnersUp.map(r => r.playerId)];
+
+    let seeded: string[];
+    if (includeThirds && thirds.length > 0) {
+      const baseCount = baseQualified.length;
+      const nextPow2 = Math.pow(2, Math.ceil(Math.log2(baseCount)));
+      const thirdsNeeded = Math.min(nextPow2 - baseCount, thirds.length);
+      seeded = [...baseQualified, ...thirds.slice(0, thirdsNeeded).map(t => t.playerId)];
+    } else {
+      seeded = baseQualified;
+    }
+
+    if (seeded.length < 2) {
       toast.error('Zu wenig qualifizierte Spieler für eine K.O.-Runde.');
       return;
     }
-
-    const seeded: string[] = [...winners.map(w => w.playerId), ...runnersUp.map(r => r.playerId)];
 
     const n = seeded.length;
     const slots = Math.pow(2, Math.ceil(Math.log2(n)));
