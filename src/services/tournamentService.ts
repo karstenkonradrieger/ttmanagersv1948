@@ -316,6 +316,7 @@ export async function updateTournament(id: string, updates: Partial<{
   certificate_font_size: number;
   certificate_text_color: string;
   certificate_line_sizes: number[];
+  ko_qualification_mode: string;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')
