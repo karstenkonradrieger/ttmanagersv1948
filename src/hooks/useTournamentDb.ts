@@ -1483,13 +1483,6 @@ export function useTournamentDb(tournamentId: string | null) {
     }
 
     const koMatches = tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
-    const hasPlayed = koMatches.some(m =>
-      m.status === 'active' || (m.status === 'completed' && m.sets && m.sets.length > 0)
-    );
-    if (hasPlayed) {
-      toast.error('K.O.-Runde kann nicht neu ausgelost werden, da bereits K.O.-Spiele gespielt wurden.');
-      return;
-    }
 
     // Recompute group standings + cross-group performance ranking
     const groupMatches = tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);

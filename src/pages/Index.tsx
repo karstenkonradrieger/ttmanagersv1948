@@ -665,24 +665,15 @@ const Index = () => {
                               </button>
                             </CollapsibleTrigger>
                             <div className="flex items-center gap-2 px-3 border-l border-primary/20">
-                              {(() => {
-                                const koMatches = tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
-                                const hasPlayed = koMatches.some(m =>
-                                  m.status === 'active' || (m.status === 'completed' && m.sets && m.sets.length > 0)
-                                );
-                                if (!hasPlayed) return (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="gap-1.5"
-                                    onClick={() => setShowRedistributeDialog(true)}
-                                  >
-                                    <RefreshCw className="h-3.5 w-3.5" />
-                                    <span className="hidden sm:inline">K.O.-Auslosung ändern</span>
-                                  </Button>
-                                );
-                                return null;
-                              })()}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5"
+                                onClick={() => setShowRedistributeDialog(true)}
+                              >
+                                <RefreshCw className="h-3.5 w-3.5" />
+                                <span className="hidden sm:inline">K.O.-Auslosung ändern</span>
+                              </Button>
                               <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-primary/15 text-primary hidden sm:inline">
                                 Phase 2
                               </span>
@@ -956,15 +947,26 @@ const Index = () => {
           </DialogHeader>
           {(() => {
             const groupMatches = tournament.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
+            const koMatches = tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
+            const hasPlayed = koMatches.some(m =>
+              m.status === 'active' || (m.status === 'completed' && m.sets && m.sets.length > 0)
+            );
             const data = computeQualifiedPlayers(groupMatches, tournament.players, 3);
             const baseCount = data.winners.length + data.runnersUp.length;
             const nextPow2 = Math.pow(2, Math.ceil(Math.log2(baseCount)));
             const byeCount = nextPow2 - baseCount;
             const thirdsNeeded = Math.min(byeCount, data.thirds.length);
             const thirdsAvailable = data.thirds.length;
+            const currentMode = tournament.koQualificationMode;
 
             return (
               <div className="space-y-3">
+                {hasPlayed && (
+                  <div className="rounded-md bg-destructive/10 border border-destructive/30 p-3 text-sm text-destructive">
+                    ⚠️ Es wurden bereits K.O.-Spiele gespielt. Beim Ändern werden alle K.O.-Ergebnisse gelöscht und die Runde komplett neu ausgelost.
+                  </div>
+                )}
+
                 <div className="text-sm text-muted-foreground">
                   <p>{baseCount} Spieler qualifiziert (Gruppensieger + Gruppenzweite)</p>
                   {byeCount > 0 && (
@@ -978,14 +980,14 @@ const Index = () => {
                 <div className="space-y-2">
                   <Button
                     variant="outline"
-                    className="w-full justify-start gap-3 h-auto py-3"
+                    className={`w-full justify-start gap-3 h-auto py-3 ${currentMode === 'byes' ? 'border-primary bg-primary/5 ring-1 ring-primary/30' : ''}`}
                     onClick={() => {
                       setShowRedistributeDialog(false);
                       redistributeKnockoutByes(false);
                     }}
                   >
                     <SkipForward className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    <div className="text-left">
+                    <div className="text-left flex-1">
                       <p className="font-semibold">Mit Freilosen</p>
                       <p className="text-xs text-muted-foreground">
                         {byeCount > 0
@@ -993,25 +995,27 @@ const Index = () => {
                           : 'Keine Freilose nötig'}
                       </p>
                     </div>
+                    {currentMode === 'byes' && <span className="text-xs font-medium text-primary">Aktiv</span>}
                   </Button>
 
                   {byeCount > 0 && thirdsAvailable > 0 && (
                     <Button
                       variant="outline"
-                      className="w-full justify-start gap-3 h-auto py-3 border-primary/30"
+                      className={`w-full justify-start gap-3 h-auto py-3 ${currentMode === 'thirds' ? 'border-primary bg-primary/5 ring-1 ring-primary/30' : 'border-primary/30'}`}
                       onClick={() => {
                         setShowRedistributeDialog(false);
                         redistributeKnockoutByes(true);
                       }}
                     >
                       <Users className="h-4 w-4 shrink-0 text-primary" />
-                      <div className="text-left">
+                      <div className="text-left flex-1">
                         <p className="font-semibold">Beste Gruppendritte einbeziehen</p>
                         <p className="text-xs text-muted-foreground">
                           {thirdsNeeded} beste{thirdsNeeded === 1 ? 'r' : ''} Gruppendritte{thirdsNeeded === 1 ? 'r' : ''} qualifizier{thirdsNeeded === 1 ? 't' : 'en'} sich
                           {thirdsNeeded < byeCount && ` (${byeCount - thirdsNeeded} Freilos${byeCount - thirdsNeeded > 1 ? 'e' : ''} verbleiben)`}
                         </p>
                       </div>
+                      {currentMode === 'thirds' && <span className="text-xs font-medium text-primary">Aktiv</span>}
                     </Button>
                   )}
                 </div>
