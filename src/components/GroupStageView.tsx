@@ -165,6 +165,8 @@ interface Props {
 }
 
 export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount }: Props) {
+  const [showAdvanceDialog, setShowAdvanceDialog] = useState(false);
+
   const groupData = useMemo(() => {
     const groups: { groupNumber: number; standings: GroupStanding[]; matches: Match[]; allCompleted: boolean; tiebreakers: TiebreakerInfo[] }[] = [];
     for (let g = 0; g < groupCount; g++) {
@@ -184,17 +186,95 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
     return computeQualifiedPlayers(matches, players);
   }, [allGroupsComplete, matches, players]);
 
+  // Compute thirds data for the dialog
+  const thirdsData = useMemo(() => {
+    if (!allGroupsComplete) return null;
+    const data = computeQualifiedPlayers(matches, players, 3);
+    const baseCount = data.winners.length + data.runnersUp.length;
+    const nextPow2 = Math.pow(2, Math.ceil(Math.log2(baseCount)));
+    const byeCount = nextPow2 - baseCount;
+    const thirdsNeeded = Math.min(byeCount, data.thirds.length);
+    const thirdsAvailable = data.thirds.length;
+    return { baseCount, nextPow2, byeCount, thirdsNeeded, thirdsAvailable, thirds: data.thirds };
+  }, [allGroupsComplete, matches, players]);
+
   return (
     <div className="space-y-6 animate-slide-up">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold">📊 Gruppenphase</h3>
         {allGroupsComplete && onAdvanceToKnockout && (
-          <Button onClick={onAdvanceToKnockout} className="glow-green gap-1.5">
+          <Button onClick={() => setShowAdvanceDialog(true)} className="glow-green gap-1.5">
             <ArrowRight className="h-4 w-4" />
             Weiter zur K.O.-Runde
           </Button>
         )}
       </div>
+
+      {/* Advance mode dialog */}
+      <Dialog open={showAdvanceDialog} onOpenChange={setShowAdvanceDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Modus für die K.O.-Runde</DialogTitle>
+            <DialogDescription>
+              Wie soll die K.O.-Runde aufgefüllt werden?
+            </DialogDescription>
+          </DialogHeader>
+          {thirdsData && (
+            <div className="space-y-3">
+              <div className="text-sm text-muted-foreground">
+                <p>{thirdsData.baseCount} Spieler qualifiziert (Gruppensieger + Gruppenzweite)</p>
+                {thirdsData.byeCount > 0 && (
+                  <p className="mt-1">Nächste 2er-Potenz: {thirdsData.nextPow2} → <strong>{thirdsData.byeCount} {thirdsData.byeCount === 1 ? 'Platz' : 'Plätze'}</strong> zu füllen</p>
+                )}
+                {thirdsData.byeCount === 0 && (
+                  <p className="mt-1 text-primary font-medium">Perfekte Anzahl — keine Freilose nötig!</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-3 h-auto py-3"
+                  onClick={() => {
+                    setShowAdvanceDialog(false);
+                    onAdvanceToKnockout(false);
+                  }}
+                >
+                  <SkipForward className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <div className="text-left">
+                    <p className="font-semibold">Mit Freilosen</p>
+                    <p className="text-xs text-muted-foreground">
+                      {thirdsData.byeCount > 0
+                        ? `${thirdsData.byeCount} Freilos${thirdsData.byeCount > 1 ? 'e' : ''} für die besten Gruppensieger`
+                        : 'Keine Freilose nötig'}
+                    </p>
+                  </div>
+                </Button>
+
+                {thirdsData.byeCount > 0 && thirdsData.thirdsAvailable > 0 && (
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-3 h-auto py-3 border-primary/30"
+                    onClick={() => {
+                      setShowAdvanceDialog(false);
+                      onAdvanceToKnockout(true);
+                    }}
+                  >
+                    <Users className="h-4 w-4 shrink-0 text-primary" />
+                    <div className="text-left">
+                      <p className="font-semibold">Beste Gruppendritte einbeziehen</p>
+                      <p className="text-xs text-muted-foreground">
+                        {thirdsData.thirdsNeeded} beste{thirdsData.thirdsNeeded === 1 ? 'r' : ''} Gruppendritte{thirdsData.thirdsNeeded === 1 ? 'r' : ''} qualifizier{thirdsData.thirdsNeeded === 1 ? 't' : 'en'} sich
+                        {thirdsData.thirdsNeeded < thirdsData.byeCount && ` (${thirdsData.byeCount - thirdsData.thirdsNeeded} Freilos${thirdsData.byeCount - thirdsData.thirdsNeeded > 1 ? 'e' : ''} verbleiben)`}
+                      </p>
+                    </div>
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {groupData.map(group => (
         <div key={group.groupNumber} className="bg-card rounded-lg p-4 card-shadow">
