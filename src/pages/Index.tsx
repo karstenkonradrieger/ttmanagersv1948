@@ -663,21 +663,24 @@ const Index = () => {
                               </button>
                             </CollapsibleTrigger>
                             <div className="flex items-center gap-2 px-3 border-l border-primary/20">
-                              {hasMisallocatedByes(tournament.matches, tournament.players) && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="gap-1.5 border-destructive/50 text-destructive hover:bg-destructive/10"
-                                  onClick={() => {
-                                    if (confirm('K.O.-Bracket neu erzeugen und Freilose nach Gruppenleistung verteilen? Funktioniert nur, solange noch keine K.O.-Spiele gespielt wurden.')) {
-                                      redistributeKnockoutByes();
-                                    }
-                                  }}
-                                >
-                                  <RefreshCw className="h-3.5 w-3.5" />
-                                  <span className="hidden sm:inline">Freilose neu verteilen</span>
-                                </Button>
-                              )}
+                              {(() => {
+                                const koMatches = tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
+                                const hasPlayed = koMatches.some(m =>
+                                  m.status === 'active' || (m.status === 'completed' && m.sets && m.sets.length > 0)
+                                );
+                                if (!hasPlayed) return (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5"
+                                    onClick={() => setShowRedistributeDialog(true)}
+                                  >
+                                    <RefreshCw className="h-3.5 w-3.5" />
+                                    <span className="hidden sm:inline">K.O.-Auslosung ändern</span>
+                                  </Button>
+                                );
+                                return null;
+                              })()}
                               <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-primary/15 text-primary hidden sm:inline">
                                 Phase 2
                               </span>
