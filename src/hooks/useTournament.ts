@@ -222,6 +222,7 @@ export function useTournament() {
       certificateExtraSizes: {},
       certificateHiddenFields: [],
       openingVideoUrl: null,
+      koQualificationMode: 'byes',
     });
   }, []);
 
