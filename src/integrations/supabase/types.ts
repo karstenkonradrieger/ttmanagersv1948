@@ -678,6 +678,7 @@ export type Database = {
           google_maps_link: string | null
           id: string
           kaiser_duration_minutes: number
+          ko_qualification_mode: string
           logo_url: string | null
           mode: string
           motto: string
@@ -717,6 +718,7 @@ export type Database = {
           google_maps_link?: string | null
           id?: string
           kaiser_duration_minutes?: number
+          ko_qualification_mode?: string
           logo_url?: string | null
           mode?: string
           motto?: string
@@ -756,6 +758,7 @@ export type Database = {
           google_maps_link?: string | null
           id?: string
           kaiser_duration_minutes?: number
+          ko_qualification_mode?: string
           logo_url?: string | null
           mode?: string
           motto?: string

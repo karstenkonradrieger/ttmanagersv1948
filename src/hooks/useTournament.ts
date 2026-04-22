@@ -52,6 +52,7 @@ function loadTournament(): Tournament {
     certificateExtraSizes: {},
     certificateHiddenFields: [],
     openingVideoUrl: null,
+    koQualificationMode: 'byes',
   };
 }
 
@@ -221,6 +222,7 @@ export function useTournament() {
       certificateExtraSizes: {},
       certificateHiddenFields: [],
       openingVideoUrl: null,
+      koQualificationMode: 'byes',
     });
   }, []);
 

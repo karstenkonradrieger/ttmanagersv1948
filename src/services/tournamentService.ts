@@ -167,6 +167,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     certificateExtraSizes: (tournament as any).certificate_extra_sizes && typeof (tournament as any).certificate_extra_sizes === 'object' ? (tournament as any).certificate_extra_sizes : {},
     certificateHiddenFields: Array.isArray((tournament as any).certificate_hidden_fields) ? (tournament as any).certificate_hidden_fields : [],
     openingVideoUrl: (tournament as any).opening_video_url || null,
+    koQualificationMode: ((tournament as any).ko_qualification_mode === 'thirds' ? 'thirds' : 'byes') as 'byes' | 'thirds',
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -315,6 +316,7 @@ export async function updateTournament(id: string, updates: Partial<{
   certificate_font_size: number;
   certificate_text_color: string;
   certificate_line_sizes: number[];
+  ko_qualification_mode: string;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')
