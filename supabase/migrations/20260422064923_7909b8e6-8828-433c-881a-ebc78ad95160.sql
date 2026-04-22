@@ -1,0 +1,2 @@
+ALTER TABLE public.match_photos DROP CONSTRAINT match_photos_photo_type_check;
+ALTER TABLE public.match_photos ADD CONSTRAINT match_photos_photo_type_check CHECK (photo_type = ANY (ARRAY['match'::text, 'ceremony'::text, 'pre_tournament'::text]));
