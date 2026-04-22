@@ -1586,7 +1586,75 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId, tournament.mode, tournament.phase, tournament.matches, tournament.players]);
 
-  const resetTournament = useCallback(async () => {
+  // Undo last KO redistribution: restore the snapshot
+  const undoKoRedistribution = useCallback(async () => {
+    if (!tournamentId || !koUndoSnapshot) {
+      toast.error('Kein Rückgängig-Schritt verfügbar.');
+      return;
+    }
+
+    try {
+      // Delete current KO matches
+      const currentKoMatches = tournament.matches.filter(m => m.groupNumber === undefined || m.groupNumber === null);
+      if (currentKoMatches.length > 0) {
+        await tournamentService.deleteMatchesByIds(currentKoMatches.map(m => m.id));
+      }
+
+      // Re-create the snapshot matches
+      const matchesData: Omit<Match, 'id'>[] = koUndoSnapshot.koMatches.map(m => ({
+        round: m.round,
+        position: m.position,
+        player1Id: m.player1Id,
+        player2Id: m.player2Id,
+        sets: m.sets,
+        winnerId: m.winnerId,
+        status: m.status,
+        groupNumber: null,
+        completedAt: m.completedAt || null,
+        homeTeamId: m.homeTeamId || null,
+        awayTeamId: m.awayTeamId || null,
+        bracketType: m.bracketType || 'main',
+        table: m.table,
+      }));
+
+      const created = await tournamentService.createMatches(tournamentId, matchesData);
+
+      // Propagate winners for bye matches
+      const propagated = propagateWinners(created);
+      const toUpdate = propagated.filter((m, i) =>
+        m.player1Id !== created[i].player1Id || m.player2Id !== created[i].player2Id
+      );
+      if (toUpdate.length > 0) {
+        await tournamentService.updateMultipleMatches(
+          toUpdate.map(m => ({ id: m.id, data: { player1_id: m.player1Id, player2_id: m.player2Id } }))
+        );
+      }
+
+      const prevMode = koUndoSnapshot.koQualificationMode;
+      await tournamentService.updateTournament(tournamentId, {
+        rounds: koUndoSnapshot.rounds,
+        ko_qualification_mode: prevMode,
+      });
+
+      setTournament(prev => ({
+        ...prev,
+        matches: [
+          ...prev.matches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null),
+          ...propagated,
+        ],
+        rounds: koUndoSnapshot.rounds,
+        koQualificationMode: prevMode,
+      }));
+
+      setKoUndoSnapshot(null);
+      toast.success('K.O.-Auslosung rückgängig gemacht.');
+    } catch (error) {
+      console.error('Error undoing KO redistribution:', error);
+      toast.error('Fehler beim Rückgängig-Machen.');
+    }
+  }, [tournamentId, koUndoSnapshot, tournament.matches]);
+
+
     if (!tournamentId) return;
 
     // Check if any sets have been played
