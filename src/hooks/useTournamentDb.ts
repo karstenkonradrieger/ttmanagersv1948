@@ -50,9 +50,16 @@ const emptyTournament: Tournament = {
   koQualificationMode: 'byes',
 };
 
+interface KoSnapshot {
+  koMatches: Match[];
+  rounds: number;
+  koQualificationMode: 'byes' | 'thirds';
+}
+
 export function useTournamentDb(tournamentId: string | null) {
   const [tournament, setTournament] = useState<Tournament>(emptyTournament);
   const [loading, setLoading] = useState(false);
+  const [koUndoSnapshot, setKoUndoSnapshot] = useState<KoSnapshot | null>(null);
 
   // Load tournament data
   const loadTournament = useCallback(async () => {
