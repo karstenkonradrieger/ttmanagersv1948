@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN ko_qualification_mode text NOT NULL DEFAULT 'byes';
