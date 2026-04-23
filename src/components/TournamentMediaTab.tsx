@@ -81,8 +81,10 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
 
     setUploadingSoundtrack(true);
     try {
-      const url = await uploadSoundtrack(tournamentId, file);
-      setSoundtrackUrl(url);
+      await uploadSoundtrack(tournamentId, file);
+      // Re-read from tournament record to confirm persistence
+      const savedUrl = await getSoundtrackUrl(tournamentId);
+      setSoundtrackUrl(savedUrl);
       toast.success('Soundtrack hochgeladen');
     } catch (err) {
       console.error('Soundtrack upload error:', err);
@@ -96,7 +98,9 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
   const handleRemoveSoundtrack = async () => {
     try {
       await removeSoundtrack(tournamentId);
-      setSoundtrackUrl(null);
+      // Re-read from tournament record to confirm removal
+      const savedUrl = await getSoundtrackUrl(tournamentId);
+      setSoundtrackUrl(savedUrl);
       toast.success('Soundtrack entfernt');
     } catch {
       toast.error('Fehler beim Entfernen');
