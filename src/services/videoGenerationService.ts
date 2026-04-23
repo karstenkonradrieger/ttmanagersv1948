@@ -688,8 +688,14 @@ export async function uploadSoundtrack(
   const ext = file.name.split('.').pop() || 'mp3';
   const fileName = `${tournamentId}/soundtrack.${ext}`;
 
-  // Remove existing soundtrack
-  await supabase.storage.from('tournament-videos').remove([fileName]).catch(() => {});
+  // Remove old soundtrack files first
+  const { data: existing } = await supabase.storage.from('tournament-videos').list(tournamentId);
+  if (existing) {
+    const old = existing.filter(f => f.name.startsWith('soundtrack.'));
+    if (old.length > 0) {
+      await supabase.storage.from('tournament-videos').remove(old.map(f => `${tournamentId}/${f.name}`));
+    }
+  }
 
   const { error } = await supabase.storage
     .from('tournament-videos')
@@ -701,11 +707,30 @@ export async function uploadSoundtrack(
     .from('tournament-videos')
     .getPublicUrl(fileName);
 
-  return urlData.publicUrl;
+  const publicUrl = urlData.publicUrl;
+
+  // Save URL on tournament record
+  await supabase
+    .from('tournaments')
+    .update({ soundtrack_url: publicUrl } as any)
+    .eq('id', tournamentId);
+
+  return publicUrl;
 }
 
 export async function getSoundtrackUrl(tournamentId: string): Promise<string | null> {
-  // List files in the tournament folder looking for soundtrack
+  // Read from tournament record first
+  const { data: tournament } = await supabase
+    .from('tournaments')
+    .select('soundtrack_url')
+    .eq('id', tournamentId)
+    .single();
+
+  if (tournament && (tournament as any).soundtrack_url) {
+    return (tournament as any).soundtrack_url;
+  }
+
+  // Fallback: check storage listing (for existing soundtracks before migration)
   const { data } = await supabase.storage
     .from('tournament-videos')
     .list(tournamentId);
@@ -719,7 +744,15 @@ export async function getSoundtrackUrl(tournamentId: string): Promise<string | n
     .from('tournament-videos')
     .getPublicUrl(`${tournamentId}/${soundtrackFile.name}`);
 
-  return urlData.publicUrl;
+  const publicUrl = urlData.publicUrl;
+
+  // Backfill tournament record
+  await supabase
+    .from('tournaments')
+    .update({ soundtrack_url: publicUrl } as any)
+    .eq('id', tournamentId);
+
+  return publicUrl;
 }
 
 export async function removeSoundtrack(tournamentId: string): Promise<void> {
@@ -727,12 +760,18 @@ export async function removeSoundtrack(tournamentId: string): Promise<void> {
     .from('tournament-videos')
     .list(tournamentId);
 
-  if (!data) return;
-
-  const soundtrackFiles = data.filter(f => f.name.startsWith('soundtrack.'));
-  if (soundtrackFiles.length > 0) {
-    await supabase.storage
-      .from('tournament-videos')
-      .remove(soundtrackFiles.map(f => `${tournamentId}/${f.name}`));
+  if (data) {
+    const soundtrackFiles = data.filter(f => f.name.startsWith('soundtrack.'));
+    if (soundtrackFiles.length > 0) {
+      await supabase.storage
+        .from('tournament-videos')
+        .remove(soundtrackFiles.map(f => `${tournamentId}/${f.name}`));
+    }
   }
+
+  // Clear URL on tournament record
+  await supabase
+    .from('tournaments')
+    .update({ soundtrack_url: null } as any)
+    .eq('id', tournamentId);
 }

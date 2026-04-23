@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN soundtrack_url text DEFAULT NULL;

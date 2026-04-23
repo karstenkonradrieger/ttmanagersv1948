@@ -687,6 +687,7 @@ export type Database = {
           organizer_name: string
           phase: string | null
           rounds: number
+          soundtrack_url: string | null
           sport: string
           started: boolean
           table_count: number
@@ -727,6 +728,7 @@ export type Database = {
           organizer_name?: string
           phase?: string | null
           rounds?: number
+          soundtrack_url?: string | null
           sport?: string
           started?: boolean
           table_count?: number
@@ -767,6 +769,7 @@ export type Database = {
           organizer_name?: string
           phase?: string | null
           rounds?: number
+          soundtrack_url?: string | null
           sport?: string
           started?: boolean
           table_count?: number
