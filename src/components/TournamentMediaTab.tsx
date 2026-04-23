@@ -236,7 +236,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
                         return (
                           <div key={`g${gn}`} className="mb-3">
                             <h4 className="text-sm font-semibold text-muted-foreground mb-2">
-                              Gruppe {(gn ?? 0) + 1}
+                              Gruppe {String.fromCharCode(65 + (gn ?? 0))}
                             </h4>
                             <div className="space-y-3 pl-2 border-l-2 border-border">
                               {renderMatchList(gMatches)}

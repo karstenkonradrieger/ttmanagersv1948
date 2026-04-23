@@ -52,6 +52,7 @@ export async function collectTournamentMedia(
   let matchMap: Record<string, any> = {};
   let matchList: any[] = [];
   let totalRounds = 0;
+  let koTotalRounds = 0;
   let tournamentMode = 'knockout';
   if (getParticipantName) {
     const { data: matches } = await supabase
@@ -64,6 +65,8 @@ export async function collectTournamentMedia(
         matchMap[m.id] = m;
         if (m.round > totalRounds) totalRounds = m.round;
       }
+      const koMatches = matches.filter(m => m.group_number === null || m.group_number === undefined);
+      koTotalRounds = koMatches.length > 0 ? Math.max(0, ...koMatches.map(m => m.round)) : 0;
     }
     const { data: tournament } = await supabase
       .from('tournaments')
@@ -84,7 +87,10 @@ export async function collectTournamentMedia(
         if (s.player1 >= 11 && s.player1 - s.player2 >= 2) w1++;
         else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) w2++;
       }
-      const roundLabel = getRoundLabel(match.round, totalRounds + 1, tournamentMode);
+      const isGroupMatch = match.group_number !== null && match.group_number !== undefined;
+      const roundLabel = isGroupMatch
+        ? `Gruppe ${String.fromCharCode(65 + match.group_number)}`
+        : getRoundLabel(match.round, koTotalRounds + 1, tournamentMode);
       overlay = {
         player1: getParticipantName(match.player1_id),
         player2: getParticipantName(match.player2_id),
