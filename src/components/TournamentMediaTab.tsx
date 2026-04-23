@@ -166,7 +166,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
   };
 
   const completedMatches = matches.filter(m => m.status === 'completed');
-  const rounds = Math.max(0, ...matches.map(m => m.round));
+  
 
   return (
     <div className="space-y-6">
