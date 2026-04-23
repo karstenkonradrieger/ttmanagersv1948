@@ -52,6 +52,7 @@ export async function collectTournamentMedia(
   let matchMap: Record<string, any> = {};
   let matchList: any[] = [];
   let totalRounds = 0;
+  let koTotalRounds = 0;
   let tournamentMode = 'knockout';
   if (getParticipantName) {
     const { data: matches } = await supabase
