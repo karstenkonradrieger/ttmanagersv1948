@@ -42,7 +42,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
   const [soundtrackUrl, setSoundtrackUrl] = useState<string | null>(null);
   const [uploadingSoundtrack, setUploadingSoundtrack] = useState(false);
   const [soundtrackVolume, setSoundtrackVolume] = useState<number>(0.4);
-  const [photoDuration, setPhotoDuration] = useState<number>(3000);
+  const [photoDuration, setPhotoDuration] = useState<number>(8000);
   const soundtrackInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -350,6 +350,14 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
 
           {soundtrackUrl ? (
             <div className="space-y-2">
+              <p className="text-xs font-medium text-foreground">
+                🎵 {(() => {
+                  try {
+                    const pathname = decodeURIComponent(new URL(soundtrackUrl).pathname);
+                    return pathname.split('/').pop() || 'Soundtrack';
+                  } catch { return 'Soundtrack'; }
+                })()}
+              </p>
               <audio src={soundtrackUrl} controls className="w-full max-w-md" />
               <div className="flex gap-2">
                 <Button
