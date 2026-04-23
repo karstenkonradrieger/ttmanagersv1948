@@ -205,7 +205,8 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
             {(() => {
               const groupMatches = completedMatches.filter(m => m.groupNumber != null);
               const koMatches = completedMatches.filter(m => m.groupNumber == null);
-              const koRounds = koMatches.length > 0 ? Math.max(0, ...koMatches.map(m => m.round)) : 0;
+              const distinctKoRounds = Array.from(new Set(koMatches.map(m => m.round))).sort((a, b) => a - b);
+              const totalKoRounds = distinctKoRounds.length;
 
               const renderMatchList = (matchList: typeof completedMatches) =>
                 matchList.map(match => {
@@ -248,13 +249,12 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
                   {koMatches.length > 0 && (
                     <div>
                       <h3 className="text-sm font-bold mb-2">K.O.-Phase</h3>
-                      {Array.from({ length: koRounds + 1 }, (_, r) => {
+                      {distinctKoRounds.map((r, idx) => {
                         const rMatches = koMatches.filter(m => m.round === r);
-                        if (rMatches.length === 0) return null;
                         return (
                           <div key={`ko${r}`} className="mb-3">
                             <h4 className="text-sm font-semibold text-muted-foreground mb-2">
-                              {getRoundLabel(r, koRounds + 1)}
+                              {getRoundLabel(idx, totalKoRounds)}
                             </h4>
                             <div className="space-y-3 pl-2 border-l-2 border-border">
                               {renderMatchList(rMatches)}
