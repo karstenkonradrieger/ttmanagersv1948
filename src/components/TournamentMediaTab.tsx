@@ -202,36 +202,71 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {Array.from({ length: rounds + 1 }, (_, r) => {
-              const roundMatches = completedMatches.filter(m => m.round === r);
-              if (roundMatches.length === 0) return null;
+            {(() => {
+              const groupMatches = completedMatches.filter(m => m.groupNumber != null);
+              const koMatches = completedMatches.filter(m => m.groupNumber == null);
+              const koRounds = koMatches.length > 0 ? Math.max(0, ...koMatches.map(m => m.round)) : 0;
+
+              const renderMatchList = (matchList: typeof completedMatches) =>
+                matchList.map(match => {
+                  const p1 = getParticipantName?.(match.player1Id) || '?';
+                  const p2 = getParticipantName?.(match.player2Id) || '?';
+                  return (
+                    <div key={match.id} className="pl-3">
+                      <p className="text-xs font-medium mb-1">{p1} vs {p2}</p>
+                      <MatchPhotos
+                        tournamentId={tournamentId}
+                        matchId={match.id}
+                        photoType="match"
+                        maxPhotos={2}
+                        maxVideos={1}
+                      />
+                    </div>
+                  );
+                });
 
               return (
-                <div key={r}>
-                  <h4 className="text-sm font-semibold text-muted-foreground mb-2">
-                    {getRoundLabel(r, rounds + 1)}
-                  </h4>
-                  <div className="space-y-3 pl-2 border-l-2 border-border">
-                    {roundMatches.map(match => {
-                      const p1 = getParticipantName?.(match.player1Id) || '?';
-                      const p2 = getParticipantName?.(match.player2Id) || '?';
-                      return (
-                        <div key={match.id} className="pl-3">
-                          <p className="text-xs font-medium mb-1">{p1} vs {p2}</p>
-                          <MatchPhotos
-                            tournamentId={tournamentId}
-                            matchId={match.id}
-                            photoType="match"
-                            maxPhotos={2}
-                            maxVideos={1}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                <>
+                  {groupMatches.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-bold mb-2">Gruppenphase</h3>
+                      {Array.from(new Set(groupMatches.map(m => m.groupNumber))).sort((a, b) => (a ?? 0) - (b ?? 0)).map(gn => {
+                        const gMatches = groupMatches.filter(m => m.groupNumber === gn);
+                        return (
+                          <div key={`g${gn}`} className="mb-3">
+                            <h4 className="text-sm font-semibold text-muted-foreground mb-2">
+                              Gruppe {(gn ?? 0) + 1}
+                            </h4>
+                            <div className="space-y-3 pl-2 border-l-2 border-border">
+                              {renderMatchList(gMatches)}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {koMatches.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-bold mb-2">K.O.-Phase</h3>
+                      {Array.from({ length: koRounds + 1 }, (_, r) => {
+                        const rMatches = koMatches.filter(m => m.round === r);
+                        if (rMatches.length === 0) return null;
+                        return (
+                          <div key={`ko${r}`} className="mb-3">
+                            <h4 className="text-sm font-semibold text-muted-foreground mb-2">
+                              {getRoundLabel(r, koRounds + 1)}
+                            </h4>
+                            <div className="space-y-3 pl-2 border-l-2 border-border">
+                              {renderMatchList(rMatches)}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
               );
-            })}
+            })()}
           </CardContent>
         </Card>
       )}
