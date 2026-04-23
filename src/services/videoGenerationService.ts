@@ -64,6 +64,8 @@ export async function collectTournamentMedia(
         matchMap[m.id] = m;
         if (m.round > totalRounds) totalRounds = m.round;
       }
+      const koMatches = matches.filter(m => m.group_number === null || m.group_number === undefined);
+      koTotalRounds = koMatches.length > 0 ? Math.max(0, ...koMatches.map(m => m.round)) : 0;
     }
     const { data: tournament } = await supabase
       .from('tournaments')
