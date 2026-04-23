@@ -88,9 +88,10 @@ export async function collectTournamentMedia(
         else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) w2++;
       }
       const isGroupMatch = match.group_number !== null && match.group_number !== undefined;
+      const effectiveKoRounds = koTotalRounds > 0 ? koTotalRounds : totalRounds;
       const roundLabel = isGroupMatch
         ? `Gruppe ${String.fromCharCode(65 + match.group_number)}`
-        : getRoundLabel(match.round, koTotalRounds + 1, tournamentMode);
+        : getRoundLabel(match.round, effectiveKoRounds + 1, tournamentMode);
       overlay = {
         player1: getParticipantName(match.player1_id),
         player2: getParticipantName(match.player2_id),
