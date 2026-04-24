@@ -162,9 +162,10 @@ interface Props {
   getParticipantName: (id: string | null) => string;
   onAdvanceToKnockout?: (includeThirds: boolean) => void;
   groupCount: number;
+  koQualificationMode?: 'byes' | 'thirds';
 }
 
-export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount }: Props) {
+export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount, koQualificationMode = 'byes' }: Props) {
   const [showAdvanceDialog, setShowAdvanceDialog] = useState(false);
 
   const groupData = useMemo(() => {
