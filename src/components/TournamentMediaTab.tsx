@@ -341,6 +341,13 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
             Lade eine Audiodatei hoch, die als musikalische Untermalung im Videoclip verwendet wird.
           </p>
 
+          {refreshingSoundtrack && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Soundtrack wird aktualisiert…
+            </div>
+          )}
+
           {/* Volume selection */}
           <div className="space-y-1">
             <label className="text-xs font-medium">Lautstärke im Videoclip</label>
