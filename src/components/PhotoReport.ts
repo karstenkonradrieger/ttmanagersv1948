@@ -1,6 +1,15 @@
 import jsPDF from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
-import { Match, Player } from '@/types/tournament';
+import { Match, Player, SetScore } from '@/types/tournament';
+
+function getSetWins(sets: SetScore[]): { p1: number; p2: number } {
+  let p1 = 0, p2 = 0;
+  for (const s of sets) {
+    if (s.player1 >= 11 && s.player1 - s.player2 >= 2) p1++;
+    else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) p2++;
+  }
+  return { p1, p2 };
+}
 
 async function loadImage(url: string): Promise<string | null> {
   try {
@@ -34,14 +43,22 @@ interface PhotoReportOptions {
   mode?: string;
 }
 
-function getRoundName(round: number, totalRounds: number, mode?: string): string {
-  if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
-  const diff = totalRounds - round;
-  if (diff === 1) return 'Finale';
-  if (diff === 2) return 'Halbfinale';
-  if (diff === 3) return 'Viertelfinale';
-  if (diff === 4) return 'Achtelfinale';
-  return `Runde ${round + 1}`;
+function getRoundName(match: Match, koMaxRound: number, mode?: string): string {
+  if (match.groupNumber != null) {
+    return `Gruppe ${String.fromCharCode(65 + match.groupNumber)} – Runde ${match.round + 1}`;
+  }
+  if (mode === 'round_robin' || mode === 'swiss') return `Runde ${match.round + 1}`;
+  const maxR = koMaxRound >= 0 ? koMaxRound : match.round;
+  const diff = maxR - match.round;
+  if (diff === 0) return 'Finale';
+  if (diff === 1) return 'Halbfinale';
+  if (diff === 2) return 'Viertelfinale';
+  if (diff === 3) return 'Achtelfinale';
+  return `Runde ${match.round + 1}`;
+}
+
+function isGroupMatch(m: Match): boolean {
+  return m.groupNumber != null;
 }
 
 export async function generatePhotoReport({
