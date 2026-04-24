@@ -630,6 +630,7 @@ const Index = () => {
                                 players={tournament.players}
                                 getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
                                 groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? 0)), 0) + 1}
+                                koQualificationMode={tournament.koQualificationMode}
                               />
                             </div>
                           </CollapsibleContent>
