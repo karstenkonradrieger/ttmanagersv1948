@@ -535,6 +535,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                 {[
                   { label: 'Gruppensieger', list: qualifiedData.winners, seedOffset: 0 },
                   { label: 'Gruppenzweite', list: qualifiedData.runnersUp, seedOffset: qualifiedData.winners.length },
+                  { label: 'Beste Gruppendritte', list: qualifiedData.thirds, seedOffset: qualifiedData.winners.length + qualifiedData.runnersUp.length },
                 ].filter(t => t.list.length > 1).map(tier => (
                   <div key={tier.label}>
                     <p className="text-[11px] font-bold text-foreground mb-1">{tier.label} – Reihenfolge</p>
