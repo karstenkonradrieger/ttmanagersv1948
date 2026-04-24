@@ -102,6 +102,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
     setUploadingSoundtrack(true);
     try {
       await uploadSoundtrack(tournamentId, file);
+      setRefreshingSoundtrack(true);
       // Invalidate caches first so the next read is fresh
       await invalidateTournamentCaches();
       // Re-read from tournament record to confirm persistence
@@ -113,12 +114,14 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
       console.error('Soundtrack upload error:', err);
       toast.error('Fehler beim Hochladen des Soundtracks');
     } finally {
+      setRefreshingSoundtrack(false);
       setUploadingSoundtrack(false);
       if (soundtrackInputRef.current) soundtrackInputRef.current.value = '';
     }
   };
 
   const handleRemoveSoundtrack = async () => {
+    setRefreshingSoundtrack(true);
     try {
       await removeSoundtrack(tournamentId);
       // Invalidate caches so the cleared value propagates
@@ -129,6 +132,8 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
       toast.success('Soundtrack entfernt');
     } catch {
       toast.error('Fehler beim Entfernen');
+    } finally {
+      setRefreshingSoundtrack(false);
     }
   };
 
