@@ -1,6 +1,15 @@
 import jsPDF from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
-import { Match, Player } from '@/types/tournament';
+import { Match, Player, SetScore } from '@/types/tournament';
+
+function getSetWins(sets: SetScore[]): { p1: number; p2: number } {
+  let p1 = 0, p2 = 0;
+  for (const s of sets) {
+    if (s.player1 >= 11 && s.player1 - s.player2 >= 2) p1++;
+    else if (s.player2 >= 11 && s.player2 - s.player1 >= 2) p2++;
+  }
+  return { p1, p2 };
+}
 
 async function loadImage(url: string): Promise<string | null> {
   try {
@@ -34,14 +43,22 @@ interface PhotoReportOptions {
   mode?: string;
 }
 
-function getRoundName(round: number, totalRounds: number, mode?: string): string {
-  if (mode === 'round_robin' || mode === 'swiss') return `Runde ${round + 1}`;
-  const diff = totalRounds - round;
-  if (diff === 1) return 'Finale';
-  if (diff === 2) return 'Halbfinale';
-  if (diff === 3) return 'Viertelfinale';
-  if (diff === 4) return 'Achtelfinale';
-  return `Runde ${round + 1}`;
+function getRoundName(match: Match, koMaxRound: number, mode?: string): string {
+  if (match.groupNumber != null) {
+    return `Gruppe ${String.fromCharCode(65 + match.groupNumber)} – Runde ${match.round + 1}`;
+  }
+  if (mode === 'round_robin' || mode === 'swiss') return `Runde ${match.round + 1}`;
+  const maxR = koMaxRound >= 0 ? koMaxRound : match.round;
+  const diff = maxR - match.round;
+  if (diff === 0) return 'Finale';
+  if (diff === 1) return 'Halbfinale';
+  if (diff === 2) return 'Viertelfinale';
+  if (diff === 3) return 'Achtelfinale';
+  return `Runde ${match.round + 1}`;
+}
+
+function isGroupMatch(m: Match): boolean {
+  return m.groupNumber != null;
 }
 
 export async function generatePhotoReport({
@@ -131,7 +148,7 @@ export async function generatePhotoReport({
   const totalRowW = colCount * photoW + (colCount - 1) * gap;
   const startX = (pageW - totalRowW) / 2;
 
-  // ---- Match photos by round ----
+  // ---- Match photos grouped by phase/round ----
   if (matchPhotos.length > 0) {
     // Group by match_id
     const photosByMatch = new Map<string, typeof matchPhotos>();
@@ -142,49 +159,99 @@ export async function generatePhotoReport({
       photosByMatch.set(p.match_id, arr);
     }
 
-    // Group matches by round
-    for (let r = 0; r < rounds; r++) {
-      const roundMatches = matches
-        .filter(m => m.round === r && photosByMatch.has(m.id))
-        .sort((a, b) => a.position - b.position);
+    // Compute koMaxRound: highest round number among non-group matches that have photos
+    const koMatchesAll = matches.filter(m => !isGroupMatch(m));
+    const koMaxRound = koMatchesAll.length > 0
+      ? Math.max(...koMatchesAll.map(m => m.round))
+      : -1;
 
-      if (roundMatches.length === 0) continue;
+    // Build buckets in display order: all groups first (A, B, …), then KO rounds ascending
+    type Bucket = { label: string; matches: Match[] };
+    const buckets: Bucket[] = [];
 
+    const groupMatchesWithPhotos = matches.filter(m => isGroupMatch(m) && photosByMatch.has(m.id));
+    if (groupMatchesWithPhotos.length > 0) {
+      const groupNumbers = Array.from(new Set(groupMatchesWithPhotos.map(m => m.groupNumber!))).sort((a, b) => a - b);
+      for (const g of groupNumbers) {
+        const gm = groupMatchesWithPhotos
+          .filter(m => m.groupNumber === g)
+          .sort((a, b) => a.round - b.round || a.position - b.position);
+        if (gm.length === 0) continue;
+        buckets.push({ label: `Gruppenphase – Gruppe ${String.fromCharCode(65 + g)}`, matches: gm });
+      }
+    }
+
+    const koMatchesWithPhotos = matches.filter(m => !isGroupMatch(m) && photosByMatch.has(m.id));
+    if (koMatchesWithPhotos.length > 0) {
+      const koRounds = Array.from(new Set(koMatchesWithPhotos.map(m => m.round))).sort((a, b) => a - b);
+      for (const r of koRounds) {
+        const rm = koMatchesWithPhotos
+          .filter(m => m.round === r)
+          .sort((a, b) => a.position - b.position);
+        if (rm.length === 0) continue;
+        const sample = rm[0];
+        const label = (mode === 'round_robin' || mode === 'swiss')
+          ? `Runde ${r + 1}`
+          : getRoundName(sample, koMaxRound, mode);
+        buckets.push({ label, matches: rm });
+      }
+    }
+
+    for (const bucket of buckets) {
       doc.addPage();
       y = 16;
 
-      const roundName = getRoundName(r, rounds, mode);
       doc.setFontSize(12);
       doc.setFont(undefined!, 'bold');
       doc.setTextColor(0);
-      doc.text(roundName, margin, y);
+      doc.text(bucket.label, margin, y);
       y += 3;
       // Decorative line under heading
       doc.setDrawColor(34, 197, 94);
       doc.setLineWidth(0.5);
-      doc.line(margin, y, margin + doc.getTextWidth(roundName), y);
+      doc.line(margin, y, margin + doc.getTextWidth(bucket.label), y);
       doc.setDrawColor(0);
       y += 5;
 
-      for (const match of roundMatches) {
+      for (const match of bucket.matches) {
         const photos = photosByMatch.get(match.id);
         if (!photos || photos.length === 0) continue;
 
         const p1 = getPlayer(match.player1Id);
         const p2 = getPlayer(match.player2Id);
 
-        // Check space for label + photo row
-        if (y + photoH + 8 > pageH - 10) {
+        // Check space for label + result + photo row
+        if (y + photoH + 12 > pageH - 10) {
           doc.addPage();
           y = 16;
         }
 
-        // Match label
+        // Match label (players)
         doc.setFontSize(8);
         doc.setFont(undefined!, 'bold');
         doc.setTextColor(60);
         doc.text(`${p1?.name || '?'} vs ${p2?.name || '?'}`, margin, y);
+
+        // Result on the right
+        if (match.status === 'completed' && match.sets && match.sets.length > 0) {
+          const wins = getSetWins(match.sets);
+          const setsStr = match.sets.map(s => `${s.player1}:${s.player2}`).join(', ');
+          const winnerName = match.winnerId === match.player1Id
+            ? p1?.name
+            : match.winnerId === match.player2Id
+              ? p2?.name
+              : null;
+          const resultText = `${wins.p1}:${wins.p2}  (${setsStr})${winnerName ? `  •  Sieger: ${winnerName}` : ''}`;
+          doc.setFont(undefined!, 'normal');
+          doc.setTextColor(80);
+          doc.text(resultText, pageW - margin, y, { align: 'right' });
+        } else if (match.status !== 'completed') {
+          doc.setFont(undefined!, 'italic');
+          doc.setTextColor(140);
+          doc.text('ausstehend', pageW - margin, y, { align: 'right' });
+        }
         doc.setFont(undefined!, 'normal');
+        doc.setTextColor(0);
         y += 4;
 
         // Load and render photos
