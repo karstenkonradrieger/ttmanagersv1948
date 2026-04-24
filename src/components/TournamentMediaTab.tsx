@@ -43,6 +43,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
   
   const [soundtrackUrl, setSoundtrackUrl] = useState<string | null>(null);
   const [uploadingSoundtrack, setUploadingSoundtrack] = useState(false);
+  const [refreshingSoundtrack, setRefreshingSoundtrack] = useState(false);
   const [soundtrackVolume, setSoundtrackVolume] = useState<number>(0.4);
   const [photoDuration, setPhotoDuration] = useState<number>(8000);
   const soundtrackInputRef = useRef<HTMLInputElement>(null);
@@ -101,6 +102,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
     setUploadingSoundtrack(true);
     try {
       await uploadSoundtrack(tournamentId, file);
+      setRefreshingSoundtrack(true);
       // Invalidate caches first so the next read is fresh
       await invalidateTournamentCaches();
       // Re-read from tournament record to confirm persistence
@@ -112,12 +114,14 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
       console.error('Soundtrack upload error:', err);
       toast.error('Fehler beim Hochladen des Soundtracks');
     } finally {
+      setRefreshingSoundtrack(false);
       setUploadingSoundtrack(false);
       if (soundtrackInputRef.current) soundtrackInputRef.current.value = '';
     }
   };
 
   const handleRemoveSoundtrack = async () => {
+    setRefreshingSoundtrack(true);
     try {
       await removeSoundtrack(tournamentId);
       // Invalidate caches so the cleared value propagates
@@ -128,6 +132,8 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
       toast.success('Soundtrack entfernt');
     } catch {
       toast.error('Fehler beim Entfernen');
+    } finally {
+      setRefreshingSoundtrack(false);
     }
   };
 
@@ -334,6 +340,13 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
           <p className="text-xs text-muted-foreground">
             Lade eine Audiodatei hoch, die als musikalische Untermalung im Videoclip verwendet wird.
           </p>
+
+          {refreshingSoundtrack && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Soundtrack wird aktualisiert…
+            </div>
+          )}
 
           {/* Volume selection */}
           <div className="space-y-1">
