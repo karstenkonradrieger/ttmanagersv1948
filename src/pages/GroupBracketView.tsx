@@ -81,6 +81,7 @@ const GroupBracketView = () => {
                     players={tournament.players}
                     getParticipantName={getParticipantNameLocal}
                     groupCount={groupCount}
+                    koQualificationMode={tournament.koQualificationMode}
                   />
                 </div>
               </CollapsibleContent>

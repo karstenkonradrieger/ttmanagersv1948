@@ -162,9 +162,10 @@ interface Props {
   getParticipantName: (id: string | null) => string;
   onAdvanceToKnockout?: (includeThirds: boolean) => void;
   groupCount: number;
+  koQualificationMode?: 'byes' | 'thirds';
 }
 
-export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount }: Props) {
+export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount, koQualificationMode = 'byes' }: Props) {
   const [showAdvanceDialog, setShowAdvanceDialog] = useState(false);
 
   const groupData = useMemo(() => {
@@ -183,8 +184,19 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
 
   const qualifiedData = useMemo(() => {
     if (!allGroupsComplete) return null;
-    return computeQualifiedPlayers(matches, players);
-  }, [allGroupsComplete, matches, players]);
+    const base = computeQualifiedPlayers(matches, players, 3);
+    const baseCount = base.winners.length + base.runnersUp.length;
+    const nextPow2 = baseCount > 0 ? Math.pow(2, Math.ceil(Math.log2(baseCount))) : 0;
+    const byeCount = Math.max(0, nextPow2 - baseCount);
+    const thirdsNeeded = Math.min(byeCount, base.thirds.length);
+    const includeThirds = koQualificationMode === 'thirds' && thirdsNeeded > 0;
+    return {
+      winners: base.winners,
+      runnersUp: base.runnersUp,
+      thirds: includeThirds ? base.thirds.slice(0, thirdsNeeded) : [],
+      includeThirds,
+    };
+  }, [allGroupsComplete, matches, players, koQualificationMode]);
 
   // Compute thirds data for the dialog
   const thirdsData = useMemo(() => {
@@ -459,6 +471,51 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                 </div>
               </div>
             )}
+
+            {/* Qualified Thirds (only when KO mode = thirds) */}
+            {qualifiedData.thirds.length > 0 && (
+              <div>
+                <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-bold">3</span>
+                  Beste Gruppendritte
+                  <span className="ml-1 text-[10px] font-normal normal-case tracking-normal text-muted-foreground">
+                    (rücken für Freilose nach)
+                  </span>
+                </h5>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-1.5 px-2 text-xs font-bold text-muted-foreground">Seed</th>
+                        <th className="text-left py-1.5 px-2 text-xs font-bold text-muted-foreground">Spieler</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Gruppe</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Siege</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Satz-Diff</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Pkt-Diff</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {qualifiedData.thirds.map((q, i) => (
+                        <tr key={q.playerId} className="border-b border-border/50 bg-amber-500/5">
+                          <td className="py-1.5 px-2 font-bold text-amber-700 dark:text-amber-400">
+                            {qualifiedData.winners.length + qualifiedData.runnersUp.length + i + 1}
+                          </td>
+                          <td className="py-1.5 px-2 font-semibold">{getParticipantName(q.playerId)}</td>
+                          <td className="text-center py-1.5 px-2">
+                            <span className="inline-flex items-center justify-center h-5 min-w-[20px] rounded bg-primary/10 text-primary text-xs font-bold px-1">
+                              {String.fromCharCode(65 + q.groupNumber)}
+                            </span>
+                          </td>
+                          <td className="text-center py-1.5 px-2 font-bold">{q.won}</td>
+                          <td className="text-center py-1.5 px-2">{q.setsDiff > 0 ? '+' : ''}{q.setsDiff}</td>
+                          <td className="text-center py-1.5 px-2 text-muted-foreground">{q.pointsDiff > 0 ? '+' : ''}{q.pointsDiff}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Setzlogik-Details */}
@@ -478,6 +535,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                 {[
                   { label: 'Gruppensieger', list: qualifiedData.winners, seedOffset: 0 },
                   { label: 'Gruppenzweite', list: qualifiedData.runnersUp, seedOffset: qualifiedData.winners.length },
+                  { label: 'Beste Gruppendritte', list: qualifiedData.thirds, seedOffset: qualifiedData.winners.length + qualifiedData.runnersUp.length },
                 ].filter(t => t.list.length > 1).map(tier => (
                   <div key={tier.label}>
                     <p className="text-[11px] font-bold text-foreground mb-1">{tier.label} – Reihenfolge</p>
