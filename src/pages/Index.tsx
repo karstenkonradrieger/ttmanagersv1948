@@ -592,6 +592,7 @@ const Index = () => {
                         getParticipantName={isDoubles ? getParticipantName : (id) => getPlayer(id)?.name || '—'}
                         onAdvanceToKnockout={(includeThirds) => advanceToKnockout(includeThirds)}
                         groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? 0)), 0) + 1}
+                        koQualificationMode={tournament.koQualificationMode}
                       />
                     </>
                   ) : (
