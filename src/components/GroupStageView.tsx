@@ -184,8 +184,19 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
 
   const qualifiedData = useMemo(() => {
     if (!allGroupsComplete) return null;
-    return computeQualifiedPlayers(matches, players);
-  }, [allGroupsComplete, matches, players]);
+    const base = computeQualifiedPlayers(matches, players, 3);
+    const baseCount = base.winners.length + base.runnersUp.length;
+    const nextPow2 = baseCount > 0 ? Math.pow(2, Math.ceil(Math.log2(baseCount))) : 0;
+    const byeCount = Math.max(0, nextPow2 - baseCount);
+    const thirdsNeeded = Math.min(byeCount, base.thirds.length);
+    const includeThirds = koQualificationMode === 'thirds' && thirdsNeeded > 0;
+    return {
+      winners: base.winners,
+      runnersUp: base.runnersUp,
+      thirds: includeThirds ? base.thirds.slice(0, thirdsNeeded) : [],
+      includeThirds,
+    };
+  }, [allGroupsComplete, matches, players, koQualificationMode]);
 
   // Compute thirds data for the dialog
   const thirdsData = useMemo(() => {
