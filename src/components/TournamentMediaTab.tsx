@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { MatchPhotos } from '@/components/MatchPhotos';
 import { Match } from '@/types/tournament';
@@ -35,6 +36,7 @@ function getRoundLabel(round: number, totalRounds: number, mode?: string): strin
 }
 
 export function TournamentMediaTab({ tournamentId, tournamentName, matches, getParticipantName, started, logoUrl }: Props) {
+  const queryClient = useQueryClient();
   const [generatingVideo, setGeneratingVideo] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -64,6 +66,23 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
     }
   };
 
+  // Append cache-busting param so browser/CDN never serve a stale audio file
+  // (the storage URL stays the same when re-uploading with upsert: true)
+  const withCacheBust = (url: string | null): string | null => {
+    if (!url) return null;
+    const sep = url.includes('?') ? '&' : '?';
+    return `${url}${sep}t=${Date.now()}`;
+  };
+
+  // Invalidate any cached tournament data so other views re-fetch the new soundtrack_url
+  const invalidateTournamentCaches = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['tournament', tournamentId] }),
+      queryClient.invalidateQueries({ queryKey: ['tournaments'] }),
+      queryClient.invalidateQueries({ queryKey: ['soundtrack', tournamentId] }),
+    ]);
+  };
+
   const loadSoundtrack = async () => {
     const url = await getSoundtrackUrl(tournamentId);
     setSoundtrackUrl(url);
@@ -82,9 +101,12 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
     setUploadingSoundtrack(true);
     try {
       await uploadSoundtrack(tournamentId, file);
+      // Invalidate caches first so the next read is fresh
+      await invalidateTournamentCaches();
       // Re-read from tournament record to confirm persistence
       const savedUrl = await getSoundtrackUrl(tournamentId);
-      setSoundtrackUrl(savedUrl);
+      // Cache-bust to force <audio> + video generator to load the new file
+      setSoundtrackUrl(withCacheBust(savedUrl));
       toast.success('Soundtrack hochgeladen');
     } catch (err) {
       console.error('Soundtrack upload error:', err);
@@ -98,6 +120,8 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
   const handleRemoveSoundtrack = async () => {
     try {
       await removeSoundtrack(tournamentId);
+      // Invalidate caches so the cleared value propagates
+      await invalidateTournamentCaches();
       // Re-read from tournament record to confirm removal
       const savedUrl = await getSoundtrackUrl(tournamentId);
       setSoundtrackUrl(savedUrl);
@@ -106,6 +130,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
       toast.error('Fehler beim Entfernen');
     }
   };
+
 
   const handleGenerateVideo = async () => {
     setGeneratingVideo(true);
