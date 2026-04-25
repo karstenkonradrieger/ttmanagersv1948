@@ -41,14 +41,16 @@ export function computeQualifiedPlayers(
 
   for (let g = 0; g < groupCount; g++) {
     const gMatches = groupMatches.filter(m => m.groupNumber === g);
-    const map = new Map<string, { playerId: string; won: number; setsWon: number; setsLost: number; pointsWon: number; pointsLost: number }>();
+    const map = new Map<string, { playerId: string; played: number; won: number; setsWon: number; setsLost: number; pointsWon: number; pointsLost: number }>();
 
     for (const m of gMatches) {
       if (!m.player1Id || !m.player2Id || m.status !== 'completed') continue;
-      if (!map.has(m.player1Id)) map.set(m.player1Id, { playerId: m.player1Id, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
-      if (!map.has(m.player2Id)) map.set(m.player2Id, { playerId: m.player2Id, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
+      if (!map.has(m.player1Id)) map.set(m.player1Id, { playerId: m.player1Id, played: 0, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
+      if (!map.has(m.player2Id)) map.set(m.player2Id, { playerId: m.player2Id, played: 0, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
       const s1 = map.get(m.player1Id)!;
       const s2 = map.get(m.player2Id)!;
+      s1.played++;
+      s2.played++;
       if (m.winnerId === m.player1Id) s1.won++;
       else if (m.winnerId === m.player2Id) s2.won++;
       for (const s of m.sets) {
