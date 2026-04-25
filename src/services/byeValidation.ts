@@ -99,7 +99,11 @@ export function computeQualifiedPlayers(
       const s = standings[i];
       qualified.push({
         playerId: s.playerId, groupNumber: g, rank: i + 1,
-        won: s.won, setsDiff: s.setsWon - s.setsLost, pointsDiff: s.pointsWon - s.pointsLost,
+        won: s.won,
+        played: s.played,
+        winQuotient: s.played > 0 ? s.won / s.played : 0,
+        setsDiff: s.setsWon - s.setsLost,
+        pointsDiff: s.pointsWon - s.pointsLost,
       });
     }
   }
@@ -113,9 +117,19 @@ export function computeQualifiedPlayers(
     return 0;
   };
 
+  // Special "best thirds" comparator: groups can be unequal in size, so wins
+  // alone is unfair. Use win quotient (wins / played), then set diff, then
+  // point diff as tiebreakers.
+  const thirdsPerfSort = (a: QualifiedPlayer, b: QualifiedPlayer) => {
+    if (b.winQuotient !== a.winQuotient) return b.winQuotient - a.winQuotient;
+    if (b.setsDiff !== a.setsDiff) return b.setsDiff - a.setsDiff;
+    return b.pointsDiff - a.pointsDiff;
+  };
+
   const byRank: QualifiedPlayer[][] = [];
   for (let r = 1; r <= qualifyPerGroup; r++) {
-    byRank.push(qualified.filter(q => q.rank === r).sort(perfSort));
+    const sorter = r === 3 ? thirdsPerfSort : perfSort;
+    byRank.push(qualified.filter(q => q.rank === r).sort(sorter));
   }
 
   return {
