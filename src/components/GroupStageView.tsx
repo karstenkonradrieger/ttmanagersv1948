@@ -489,7 +489,8 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                         <th className="text-left py-1.5 px-2 text-xs font-bold text-muted-foreground">Seed</th>
                         <th className="text-left py-1.5 px-2 text-xs font-bold text-muted-foreground">Spieler</th>
                         <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Gruppe</th>
-                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Siege</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">S/Sp</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground" title="Siege geteilt durch Spiele">Quote</th>
                         <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Satz-Diff</th>
                         <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Pkt-Diff</th>
                       </tr>
@@ -506,7 +507,8 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                               {String.fromCharCode(65 + q.groupNumber)}
                             </span>
                           </td>
-                          <td className="text-center py-1.5 px-2 font-bold">{q.won}</td>
+                          <td className="text-center py-1.5 px-2">{q.won}/{q.played}</td>
+                          <td className="text-center py-1.5 px-2 font-bold">{q.winQuotient.toFixed(2)}</td>
                           <td className="text-center py-1.5 px-2">{q.setsDiff > 0 ? '+' : ''}{q.setsDiff}</td>
                           <td className="text-center py-1.5 px-2 text-muted-foreground">{q.pointsDiff > 0 ? '+' : ''}{q.pointsDiff}</td>
                         </tr>
@@ -533,9 +535,9 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
               <div className="mt-1 space-y-3 px-1">
                 {/* Explain seeding within each tier */}
                 {[
-                  { label: 'Gruppensieger', list: qualifiedData.winners, seedOffset: 0 },
-                  { label: 'Gruppenzweite', list: qualifiedData.runnersUp, seedOffset: qualifiedData.winners.length },
-                  { label: 'Beste Gruppendritte', list: qualifiedData.thirds, seedOffset: qualifiedData.winners.length + qualifiedData.runnersUp.length },
+                  { label: 'Gruppensieger', list: qualifiedData.winners, seedOffset: 0, useQuotient: false },
+                  { label: 'Gruppenzweite', list: qualifiedData.runnersUp, seedOffset: qualifiedData.winners.length, useQuotient: false },
+                  { label: 'Beste Gruppendritte', list: qualifiedData.thirds, seedOffset: qualifiedData.winners.length + qualifiedData.runnersUp.length, useQuotient: true },
                 ].filter(t => t.list.length > 1).map(tier => (
                   <div key={tier.label}>
                     <p className="text-[11px] font-bold text-foreground mb-1">{tier.label} – Reihenfolge</p>
@@ -545,7 +547,17 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                         const next = tier.list[i + 1];
                         let comparison = '';
                         if (next) {
-                          if (q.won !== next.won) {
+                          if (tier.useQuotient) {
+                            if (q.winQuotient !== next.winQuotient) {
+                              comparison = `Quote ${q.winQuotient.toFixed(2)} vs. ${next.winQuotient.toFixed(2)} → höherer Leistungs-Quotient`;
+                            } else if (q.setsDiff !== next.setsDiff) {
+                              comparison = `Quote gleich (${q.winQuotient.toFixed(2)}), Sätze ${q.setsDiff > 0 ? '+' : ''}${q.setsDiff} vs. ${next.setsDiff > 0 ? '+' : ''}${next.setsDiff}`;
+                            } else if (q.pointsDiff !== next.pointsDiff) {
+                              comparison = `Quote & Sätze gleich, Punkte ${q.pointsDiff > 0 ? '+' : ''}${q.pointsDiff} vs. ${next.pointsDiff > 0 ? '+' : ''}${next.pointsDiff}`;
+                            } else {
+                              comparison = 'Alle Kriterien identisch';
+                            }
+                          } else if (q.won !== next.won) {
                             comparison = `${q.won}S vs. ${next.won}S → mehr Siege`;
                           } else if (q.setsDiff !== next.setsDiff) {
                             comparison = `Siege gleich (${q.won}), Sätze ${q.setsDiff > 0 ? '+' : ''}${q.setsDiff} vs. ${next.setsDiff > 0 ? '+' : ''}${next.setsDiff}`;
@@ -555,12 +567,15 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                             comparison = 'Alle Kriterien identisch';
                           }
                         }
+                        const stats = tier.useQuotient
+                          ? `${q.won}/${q.played} (Quote ${q.winQuotient.toFixed(2)}), Sätze${q.setsDiff > 0 ? '+' : ''}${q.setsDiff}, Pkt${q.pointsDiff > 0 ? '+' : ''}${q.pointsDiff}`
+                          : `${q.won}S, Sätze${q.setsDiff > 0 ? '+' : ''}${q.setsDiff}, Pkt${q.pointsDiff > 0 ? '+' : ''}${q.pointsDiff}`;
                         return (
                           <div key={q.playerId} className="flex items-start gap-2 text-[11px]">
                             <span className="font-bold text-primary w-4 text-right shrink-0">#{seed}</span>
                             <span className="font-semibold shrink-0">{getParticipantName(q.playerId)}</span>
                             <span className="text-muted-foreground">
-                              (Gr.{String.fromCharCode(65 + q.groupNumber)}: {q.won}S, Sätze{q.setsDiff > 0 ? '+' : ''}{q.setsDiff}, Pkt{q.pointsDiff > 0 ? '+' : ''}{q.pointsDiff})
+                              (Gr.{String.fromCharCode(65 + q.groupNumber)}: {stats})
                             </span>
                             {comparison && (
                               <span className="text-muted-foreground/70 italic ml-auto text-right">
@@ -574,7 +589,8 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                   </div>
                 ))}
                 <p className="text-[10px] text-muted-foreground/60 mt-1">
-                  Kriterien: 1. Siege → 2. Satzdifferenz → 3. Punktdifferenz. Bei zwei Spielern gleicher Gruppe zusätzlich direkter Vergleich.
+                  Sieger & Zweite: 1. Siege → 2. Satzdifferenz → 3. Punktdifferenz (zzgl. direkter Vergleich in der Gruppe).<br />
+                  Beste Dritte: 1. Leistungs-Quotient (Siege/Spiele) → 2. Satzdifferenz → 3. Punktdifferenz – fair bei ungleich großen Gruppen.
                 </p>
               </div>
             </CollapsibleContent>

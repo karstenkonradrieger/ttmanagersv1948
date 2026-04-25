@@ -8,6 +8,10 @@ interface QualifiedPlayer {
   groupNumber: number;
   rank: number;
   won: number;
+  /** Number of completed group games this player participated in. */
+  played: number;
+  /** wins / played (0 when no games played). Used to fairly compare players from groups of unequal size. */
+  winQuotient: number;
   setsDiff: number;
   pointsDiff: number;
 }
@@ -37,14 +41,16 @@ export function computeQualifiedPlayers(
 
   for (let g = 0; g < groupCount; g++) {
     const gMatches = groupMatches.filter(m => m.groupNumber === g);
-    const map = new Map<string, { playerId: string; won: number; setsWon: number; setsLost: number; pointsWon: number; pointsLost: number }>();
+    const map = new Map<string, { playerId: string; played: number; won: number; setsWon: number; setsLost: number; pointsWon: number; pointsLost: number }>();
 
     for (const m of gMatches) {
       if (!m.player1Id || !m.player2Id || m.status !== 'completed') continue;
-      if (!map.has(m.player1Id)) map.set(m.player1Id, { playerId: m.player1Id, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
-      if (!map.has(m.player2Id)) map.set(m.player2Id, { playerId: m.player2Id, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
+      if (!map.has(m.player1Id)) map.set(m.player1Id, { playerId: m.player1Id, played: 0, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
+      if (!map.has(m.player2Id)) map.set(m.player2Id, { playerId: m.player2Id, played: 0, won: 0, setsWon: 0, setsLost: 0, pointsWon: 0, pointsLost: 0 });
       const s1 = map.get(m.player1Id)!;
       const s2 = map.get(m.player2Id)!;
+      s1.played++;
+      s2.played++;
       if (m.winnerId === m.player1Id) s1.won++;
       else if (m.winnerId === m.player2Id) s2.won++;
       for (const s of m.sets) {
@@ -93,7 +99,11 @@ export function computeQualifiedPlayers(
       const s = standings[i];
       qualified.push({
         playerId: s.playerId, groupNumber: g, rank: i + 1,
-        won: s.won, setsDiff: s.setsWon - s.setsLost, pointsDiff: s.pointsWon - s.pointsLost,
+        won: s.won,
+        played: s.played,
+        winQuotient: s.played > 0 ? s.won / s.played : 0,
+        setsDiff: s.setsWon - s.setsLost,
+        pointsDiff: s.pointsWon - s.pointsLost,
       });
     }
   }
@@ -107,9 +117,19 @@ export function computeQualifiedPlayers(
     return 0;
   };
 
+  // Special "best thirds" comparator: groups can be unequal in size, so wins
+  // alone is unfair. Use win quotient (wins / played), then set diff, then
+  // point diff as tiebreakers.
+  const thirdsPerfSort = (a: QualifiedPlayer, b: QualifiedPlayer) => {
+    if (b.winQuotient !== a.winQuotient) return b.winQuotient - a.winQuotient;
+    if (b.setsDiff !== a.setsDiff) return b.setsDiff - a.setsDiff;
+    return b.pointsDiff - a.pointsDiff;
+  };
+
   const byRank: QualifiedPlayer[][] = [];
   for (let r = 1; r <= qualifyPerGroup; r++) {
-    byRank.push(qualified.filter(q => q.rank === r).sort(perfSort));
+    const sorter = r === 3 ? thirdsPerfSort : perfSort;
+    byRank.push(qualified.filter(q => q.rank === r).sort(sorter));
   }
 
   return {
