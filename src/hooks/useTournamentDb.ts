@@ -1523,27 +1523,41 @@ export function useTournamentDb(tournamentId: string | null) {
     const qualifyPerGroup = includeThirds ? 3 : 2;
     const { winners, runnersUp, thirds } = computeQualifiedPlayers(groupMatches, tournament.players, qualifyPerGroup);
 
-    const baseQualified = [...winners.map(w => w.playerId), ...runnersUp.map(r => r.playerId)];
-
-    let seeded: string[];
+    // Build seed tiers and validate (de-dup, offset checks, bracket size)
+    const tiers: SeedTier[] = [
+      { label: 'Gruppensieger', offset: 0, ids: winners.map(w => w.playerId) },
+      { label: 'Gruppenzweite', offset: winners.length, ids: runnersUp.map(r => r.playerId) },
+    ];
     if (includeThirds && thirds.length > 0) {
-      const baseCount = baseQualified.length;
-      const nextPow2 = Math.pow(2, Math.ceil(Math.log2(baseCount)));
-      const thirdsNeeded = Math.min(nextPow2 - baseCount, thirds.length);
-      seeded = [...baseQualified, ...thirds.slice(0, thirdsNeeded).map(t => t.playerId)];
-    } else {
-      seeded = baseQualified;
+      const baseCount = winners.length + runnersUp.length;
+      const nextPow2 = Math.pow(2, Math.ceil(Math.log2(Math.max(2, baseCount))));
+      const thirdsNeeded = Math.min(Math.max(0, nextPow2 - baseCount), thirds.length);
+      tiers.push({
+        label: 'Beste Gruppendritte',
+        offset: baseCount,
+        ids: thirds.slice(0, thirdsNeeded).map(t => t.playerId),
+      });
     }
 
-    if (seeded.length < 2) {
-      toast.error('Zu wenig qualifizierte Spieler für eine K.O.-Runde.');
+    const validation = validateSeeding(tiers);
+    for (const w of validation.warnings) console.warn('[Seeding]', w);
+    if (!validation.ok) {
+      console.error('[Seeding] Validation failed:', validation.errors);
+      toast.error(`Neuverteilung abgebrochen: ${validation.errors[0]}`);
       return;
     }
 
-    const n = seeded.length;
-    const slots = Math.pow(2, Math.ceil(Math.log2(n)));
+    const seeded = validation.seeds;
+    const slots = validation.slots;
     const koRounds = Math.log2(slots);
     const seededSlots: (string | null)[] = seedBracketSlots(seeded, slots);
+
+    const slotsCheck = validateBracketSlots(seededSlots, seeded.length);
+    if (!slotsCheck.ok) {
+      console.error('[Bracket] Structural validation failed:', slotsCheck.errors);
+      toast.error(`Neuverteilung abgebrochen: ${slotsCheck.errors[0]}`);
+      return;
+    }
 
     const koMatchesData: Omit<Match, 'id'>[] = [];
     for (let i = 0; i < slots / 2; i++) {
