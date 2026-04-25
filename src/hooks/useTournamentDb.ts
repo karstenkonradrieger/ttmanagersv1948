@@ -5,6 +5,7 @@ import * as tournamentService from '@/services/tournamentService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { computeQualifiedPlayers } from '@/services/byeValidation';
+import { validateSeeding, validateBracketSlots, type SeedTier } from '@/services/seedingValidation';
 import { computeConsolationSeeds, buildConsolationMatches, isMainRound0Complete, hasConsolationBracket } from '@/services/consolationBracket';
 
 const emptyTournament: Tournament = {
@@ -1341,28 +1342,47 @@ export function useTournamentDb(tournamentId: string | null) {
     const qualifyPerGroup = includeThirds ? 3 : 2;
     const { winners, runnersUp, thirds } = computeQualifiedPlayers(groupMatches, tournament.players, qualifyPerGroup);
 
-    const baseQualified = [...winners.map(w => w.playerId), ...runnersUp.map(r => r.playerId)];
+    // Build seed tiers (winners, runners-up, optionally best thirds)
+    const tiers: SeedTier[] = [
+      { label: 'Gruppensieger', offset: 0, ids: winners.map(w => w.playerId) },
+      { label: 'Gruppenzweite', offset: winners.length, ids: runnersUp.map(r => r.playerId) },
+    ];
 
-    let seeded: string[];
     if (includeThirds && thirds.length > 0) {
-      // Add exactly enough thirds to reach the next power of 2
-      const baseCount = baseQualified.length;
-      const nextPow2 = Math.pow(2, Math.ceil(Math.log2(baseCount)));
-      const thirdsNeeded = Math.min(nextPow2 - baseCount, thirds.length);
-      seeded = [...baseQualified, ...thirds.slice(0, thirdsNeeded).map(t => t.playerId)];
-    } else {
-      seeded = baseQualified;
+      const baseCount = winners.length + runnersUp.length;
+      const nextPow2 = Math.pow(2, Math.ceil(Math.log2(Math.max(2, baseCount))));
+      const thirdsNeeded = Math.min(Math.max(0, nextPow2 - baseCount), thirds.length);
+      tiers.push({
+        label: 'Beste Gruppendritte',
+        offset: baseCount,
+        ids: thirds.slice(0, thirdsNeeded).map(t => t.playerId),
+      });
     }
 
-    if (seeded.length < 2) return;
-    const qualifiedCount = seeded.length;
+    // Run protective seeding validation (de-dupes, checks offsets, etc.)
+    const validation = validateSeeding(tiers);
+    for (const w of validation.warnings) console.warn('[Seeding]', w);
+    if (!validation.ok) {
+      console.error('[Seeding] Validation failed:', validation.errors);
+      toast.error(`K.O.-Aufbau abgebrochen: ${validation.errors[0]}`);
+      return;
+    }
 
-    const n = seeded.length;
-    const slots = Math.pow(2, Math.ceil(Math.log2(n)));
+    const seeded = validation.seeds;
+    const slots = validation.slots;
     const koRounds = Math.log2(slots);
+    const qualifiedCount = seeded.length;
 
     // Place seeds into bracket so byes go to top seeds (no empty matches)
     const seededSlots: (string | null)[] = seedBracketSlots(seeded, slots);
+
+    // Final structural check before persisting any KO matches
+    const slotsCheck = validateBracketSlots(seededSlots, qualifiedCount);
+    if (!slotsCheck.ok) {
+      console.error('[Bracket] Structural validation failed:', slotsCheck.errors);
+      toast.error(`K.O.-Aufbau abgebrochen: ${slotsCheck.errors[0]}`);
+      return;
+    }
 
     const koMatchesData: Omit<Match, 'id'>[] = [];
 
@@ -1503,27 +1523,41 @@ export function useTournamentDb(tournamentId: string | null) {
     const qualifyPerGroup = includeThirds ? 3 : 2;
     const { winners, runnersUp, thirds } = computeQualifiedPlayers(groupMatches, tournament.players, qualifyPerGroup);
 
-    const baseQualified = [...winners.map(w => w.playerId), ...runnersUp.map(r => r.playerId)];
-
-    let seeded: string[];
+    // Build seed tiers and validate (de-dup, offset checks, bracket size)
+    const tiers: SeedTier[] = [
+      { label: 'Gruppensieger', offset: 0, ids: winners.map(w => w.playerId) },
+      { label: 'Gruppenzweite', offset: winners.length, ids: runnersUp.map(r => r.playerId) },
+    ];
     if (includeThirds && thirds.length > 0) {
-      const baseCount = baseQualified.length;
-      const nextPow2 = Math.pow(2, Math.ceil(Math.log2(baseCount)));
-      const thirdsNeeded = Math.min(nextPow2 - baseCount, thirds.length);
-      seeded = [...baseQualified, ...thirds.slice(0, thirdsNeeded).map(t => t.playerId)];
-    } else {
-      seeded = baseQualified;
+      const baseCount = winners.length + runnersUp.length;
+      const nextPow2 = Math.pow(2, Math.ceil(Math.log2(Math.max(2, baseCount))));
+      const thirdsNeeded = Math.min(Math.max(0, nextPow2 - baseCount), thirds.length);
+      tiers.push({
+        label: 'Beste Gruppendritte',
+        offset: baseCount,
+        ids: thirds.slice(0, thirdsNeeded).map(t => t.playerId),
+      });
     }
 
-    if (seeded.length < 2) {
-      toast.error('Zu wenig qualifizierte Spieler für eine K.O.-Runde.');
+    const validation = validateSeeding(tiers);
+    for (const w of validation.warnings) console.warn('[Seeding]', w);
+    if (!validation.ok) {
+      console.error('[Seeding] Validation failed:', validation.errors);
+      toast.error(`Neuverteilung abgebrochen: ${validation.errors[0]}`);
       return;
     }
 
-    const n = seeded.length;
-    const slots = Math.pow(2, Math.ceil(Math.log2(n)));
+    const seeded = validation.seeds;
+    const slots = validation.slots;
     const koRounds = Math.log2(slots);
     const seededSlots: (string | null)[] = seedBracketSlots(seeded, slots);
+
+    const slotsCheck = validateBracketSlots(seededSlots, seeded.length);
+    if (!slotsCheck.ok) {
+      console.error('[Bracket] Structural validation failed:', slotsCheck.errors);
+      toast.error(`Neuverteilung abgebrochen: ${slotsCheck.errors[0]}`);
+      return;
+    }
 
     const koMatchesData: Omit<Match, 'id'>[] = [];
     for (let i = 0; i < slots / 2; i++) {
@@ -2056,12 +2090,33 @@ function standardSeedOrder(size: number): number[] {
 // Place participants into bracket slots so that byes are assigned to top seeds.
 // `participants` is in seed order (best first). Returns array of length `slots`
 // where null entries represent byes.
+//
+// Safety: bracket size is forced to a power of 2 that is >= participants.length.
+// Duplicate participant ids are dropped (the first occurrence wins) so the same
+// player cannot land in two slots if a caller passes in an inconsistent seed list.
 function seedBracketSlots(participants: (string | null)[], slots: number): (string | null)[] {
-  const order = standardSeedOrder(slots); // seed number per slot index
-  const result: (string | null)[] = Array(slots).fill(null);
-  for (let i = 0; i < slots; i++) {
+  // De-duplicate while preserving order; treat null/empty as "no participant".
+  const cleaned: (string | null)[] = [];
+  const seen = new Set<string>();
+  for (const p of participants) {
+    if (p && !seen.has(p)) {
+      seen.add(p);
+      cleaned.push(p);
+    }
+  }
+
+  // Force bracket size to a valid power of 2 that fits all unique participants.
+  const minSlots = Math.max(2, cleaned.length);
+  let safeSlots = Math.max(slots, minSlots);
+  if ((safeSlots & (safeSlots - 1)) !== 0) {
+    safeSlots = Math.pow(2, Math.ceil(Math.log2(safeSlots)));
+  }
+
+  const order = standardSeedOrder(safeSlots); // seed number per slot index
+  const result: (string | null)[] = Array(safeSlots).fill(null);
+  for (let i = 0; i < safeSlots; i++) {
     const seedNum = order[i]; // 1-based
-    result[i] = seedNum <= participants.length ? participants[seedNum - 1] : null;
+    result[i] = seedNum <= cleaned.length ? cleaned[seedNum - 1] : null;
   }
   return result;
 }
