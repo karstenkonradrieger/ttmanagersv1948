@@ -489,7 +489,8 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                         <th className="text-left py-1.5 px-2 text-xs font-bold text-muted-foreground">Seed</th>
                         <th className="text-left py-1.5 px-2 text-xs font-bold text-muted-foreground">Spieler</th>
                         <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Gruppe</th>
-                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Siege</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">S/Sp</th>
+                        <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground" title="Siege geteilt durch Spiele">Quote</th>
                         <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Satz-Diff</th>
                         <th className="text-center py-1.5 px-2 text-xs font-bold text-muted-foreground">Pkt-Diff</th>
                       </tr>
@@ -506,7 +507,8 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                               {String.fromCharCode(65 + q.groupNumber)}
                             </span>
                           </td>
-                          <td className="text-center py-1.5 px-2 font-bold">{q.won}</td>
+                          <td className="text-center py-1.5 px-2">{q.won}/{q.played}</td>
+                          <td className="text-center py-1.5 px-2 font-bold">{q.winQuotient.toFixed(2)}</td>
                           <td className="text-center py-1.5 px-2">{q.setsDiff > 0 ? '+' : ''}{q.setsDiff}</td>
                           <td className="text-center py-1.5 px-2 text-muted-foreground">{q.pointsDiff > 0 ? '+' : ''}{q.pointsDiff}</td>
                         </tr>
