@@ -2056,12 +2056,33 @@ function standardSeedOrder(size: number): number[] {
 // Place participants into bracket slots so that byes are assigned to top seeds.
 // `participants` is in seed order (best first). Returns array of length `slots`
 // where null entries represent byes.
+//
+// Safety: bracket size is forced to a power of 2 that is >= participants.length.
+// Duplicate participant ids are dropped (the first occurrence wins) so the same
+// player cannot land in two slots if a caller passes in an inconsistent seed list.
 function seedBracketSlots(participants: (string | null)[], slots: number): (string | null)[] {
-  const order = standardSeedOrder(slots); // seed number per slot index
-  const result: (string | null)[] = Array(slots).fill(null);
-  for (let i = 0; i < slots; i++) {
+  // De-duplicate while preserving order; treat null/empty as "no participant".
+  const cleaned: (string | null)[] = [];
+  const seen = new Set<string>();
+  for (const p of participants) {
+    if (p && !seen.has(p)) {
+      seen.add(p);
+      cleaned.push(p);
+    }
+  }
+
+  // Force bracket size to a valid power of 2 that fits all unique participants.
+  const minSlots = Math.max(2, cleaned.length);
+  let safeSlots = Math.max(slots, minSlots);
+  if ((safeSlots & (safeSlots - 1)) !== 0) {
+    safeSlots = Math.pow(2, Math.ceil(Math.log2(safeSlots)));
+  }
+
+  const order = standardSeedOrder(safeSlots); // seed number per slot index
+  const result: (string | null)[] = Array(safeSlots).fill(null);
+  for (let i = 0; i < safeSlots; i++) {
     const seedNum = order[i]; // 1-based
-    result[i] = seedNum <= participants.length ? participants[seedNum - 1] : null;
+    result[i] = seedNum <= cleaned.length ? cleaned[seedNum - 1] : null;
   }
   return result;
 }
