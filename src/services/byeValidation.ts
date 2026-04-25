@@ -8,6 +8,10 @@ interface QualifiedPlayer {
   groupNumber: number;
   rank: number;
   won: number;
+  /** Number of completed group games this player participated in. */
+  played: number;
+  /** wins / played (0 when no games played). Used to fairly compare players from groups of unequal size. */
+  winQuotient: number;
   setsDiff: number;
   pointsDiff: number;
 }
