@@ -551,11 +551,11 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                             if (q.winQuotient !== next.winQuotient) {
                               comparison = `Quote ${q.winQuotient.toFixed(2)} vs. ${next.winQuotient.toFixed(2)} → höherer Leistungs-Quotient`;
                             } else if (q.setsDiff !== next.setsDiff) {
-                              comparison = `Quote gleich (${q.winQuotient.toFixed(2)}), Sätze ${q.setsDiff > 0 ? '+' : ''}${q.setsDiff} vs. ${next.setsDiff > 0 ? '+' : ''}${next.setsDiff}`;
+                              comparison = `Quote gleich (${q.winQuotient.toFixed(2)}) → Tie-Breaker: Satzdifferenz greift (${q.setsDiff > 0 ? '+' : ''}${q.setsDiff} vs. ${next.setsDiff > 0 ? '+' : ''}${next.setsDiff})`;
                             } else if (q.pointsDiff !== next.pointsDiff) {
-                              comparison = `Quote & Sätze gleich, Punkte ${q.pointsDiff > 0 ? '+' : ''}${q.pointsDiff} vs. ${next.pointsDiff > 0 ? '+' : ''}${next.pointsDiff}`;
+                              comparison = `Quote (${q.winQuotient.toFixed(2)}) & Satzdiff (${q.setsDiff > 0 ? '+' : ''}${q.setsDiff}) gleich → Tie-Breaker: Punktdifferenz greift (${q.pointsDiff > 0 ? '+' : ''}${q.pointsDiff} vs. ${next.pointsDiff > 0 ? '+' : ''}${next.pointsDiff})`;
                             } else {
-                              comparison = 'Alle Kriterien identisch';
+                              comparison = 'Alle Kriterien identisch – Losentscheid erforderlich';
                             }
                           } else if (q.won !== next.won) {
                             comparison = `${q.won}S vs. ${next.won}S → mehr Siege`;
