@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { toast } from 'sonner';
 import { DoublesPair, Match, Player, SetScore, Sponsor, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
@@ -699,20 +699,37 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
 
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // Refs for fast keyboard navigation between set inputs
+  const inputRefs = useRef<Array<{ p1: HTMLInputElement | null; p2: HTMLInputElement | null }>>([]);
+  const registerRef = (idx: number, field: 'p1' | 'p2') => (el: HTMLInputElement | null) => {
+    if (!inputRefs.current[idx]) inputRefs.current[idx] = { p1: null, p2: null };
+    inputRefs.current[idx][field] = el;
+  };
+  const focusInput = (idx: number, field: 'p1' | 'p2') => {
+    requestAnimationFrame(() => {
+      const el = inputRefs.current[idx]?.[field];
+      if (el) { el.focus(); el.select(); }
+    });
+  };
+
   const maxSets = effectiveBestOf * 2 - 1;
   const p1Wins = sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
   const p2Wins = sets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
   const matchOver = p1Wins >= effectiveBestOf || p2Wins >= effectiveBestOf;
 
+  const isSetComplete = (s: SetScore) =>
+    (s.player1 >= 11 || s.player2 >= 11) && Math.abs(s.player1 - s.player2) >= 2;
+
   const updateSet = (idx: number, field: 'player1' | 'player2', value: number) => {
     const updated = [...sets];
-    updated[idx] = { ...updated[idx], [field]: value };
+    updated[idx] = { ...updated[idx], [field]: Math.max(0, Math.min(99, value)) };
     setSets(updated);
   };
 
   const addSet = () => {
     if (sets.length < maxSets && !matchOver) {
       setSets([...sets, { player1: handicapP1, player2: handicapP2 }]);
+      focusInput(sets.length, 'p1');
     }
   };
 
@@ -737,6 +754,43 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
     }
     setValidationError(null);
     onUpdateScore(match.id, sets, effectiveBestOf);
+  };
+
+  // Keyboard handler: Enter advances or saves; Tab on p2 -> next set p1
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, idx: number, field: 'player1' | 'player2') => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const current = sets[idx];
+      // If current set complete, jump to next set or save
+      if (isSetComplete(current)) {
+        const willMatchEnd =
+          sets.slice(0, idx + 1).filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length >= effectiveBestOf ||
+          sets.slice(0, idx + 1).filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length >= effectiveBestOf;
+        if (willMatchEnd) {
+          saveScore();
+          return;
+        }
+        if (idx + 1 < sets.length) {
+          focusInput(idx + 1, 'p1');
+        } else if (sets.length < maxSets) {
+          addSet();
+        } else {
+          saveScore();
+        }
+      } else if (field === 'player1') {
+        focusInput(idx, 'p2');
+      } else {
+        // p2 not complete yet, stay
+        focusInput(idx, 'p2');
+      }
+    } else if (e.key === 'Tab' && !e.shiftKey && field === 'player2' && idx === sets.length - 1 && isSetComplete(sets[idx]) && !matchOver && sets.length < maxSets) {
+      e.preventDefault();
+      addSet();
+    }
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.select();
   };
 
   return (
@@ -780,33 +834,68 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
         </Button>
       </div>
 
+      <p className="text-[10px] text-muted-foreground text-center mb-2">
+        💡 Tipp: Zahlen tippen, <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">Enter</kbd> springt zum nächsten Feld bzw. speichert. <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">11</kbd>-Buttons für Schnellsieg.
+      </p>
       <div className="space-y-2">
-        {sets.map((set, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground w-8">S{i + 1}</span>
-            <Input
-              type="number"
-              value={set.player1 || ''}
-              onChange={e => updateSet(i, 'player1', parseInt(e.target.value) || 0)}
-              className="h-12 text-center text-lg font-bold bg-secondary flex-1"
-              min={0}
-            />
-            <span className="text-muted-foreground">:</span>
-            <Input
-              type="number"
-              value={set.player2 || ''}
-              onChange={e => updateSet(i, 'player2', parseInt(e.target.value) || 0)}
-              className="h-12 text-center text-lg font-bold bg-secondary flex-1"
-              min={0}
-            />
+        {sets.map((set, i) => {
+          const setComplete = isSetComplete(set);
+          return (
+          <div key={i} className={`flex items-center gap-2 rounded-md transition-colors ${setComplete ? 'bg-primary/5 ring-1 ring-primary/20 p-1' : ''}`}>
+            <span className="text-xs text-muted-foreground w-8 text-center">S{i + 1}</span>
+            <div className="flex-1 flex flex-col gap-1">
+              <Input
+                ref={registerRef(i, 'p1')}
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={set.player1 || ''}
+                onChange={e => updateSet(i, 'player1', parseInt(e.target.value) || 0)}
+                onFocus={handleFocus}
+                onKeyDown={e => handleKeyDown(e, i, 'player1')}
+                className="h-12 text-center text-lg font-bold bg-secondary"
+                min={0}
+                max={99}
+                aria-label={`Satz ${i + 1} – Spieler 1 Punkte`}
+              />
+              <div className="flex gap-0.5 justify-center">
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] flex-1 min-w-0" onClick={() => { updateSet(i, 'player1', 11); focusInput(i, 'p2'); }}>11</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player1', Math.max(0, set.player1 - 1))}>−</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player1', set.player1 + 1)}>+</Button>
+              </div>
+            </div>
+            <span className="text-muted-foreground text-lg">:</span>
+            <div className="flex-1 flex flex-col gap-1">
+              <Input
+                ref={registerRef(i, 'p2')}
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={set.player2 || ''}
+                onChange={e => updateSet(i, 'player2', parseInt(e.target.value) || 0)}
+                onFocus={handleFocus}
+                onKeyDown={e => handleKeyDown(e, i, 'player2')}
+                className="h-12 text-center text-lg font-bold bg-secondary"
+                min={0}
+                max={99}
+                aria-label={`Satz ${i + 1} – Spieler 2 Punkte`}
+              />
+              <div className="flex gap-0.5 justify-center">
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] flex-1 min-w-0" onClick={() => { updateSet(i, 'player2', 11); focusInput(i, 'p1'); }}>11</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player2', Math.max(0, set.player2 - 1))}>−</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player2', set.player2 + 1)}>+</Button>
+              </div>
+            </div>
             {sets.length > 1 && (
-              <Button variant="ghost" size="icon" onClick={() => removeSet(i)} className="h-10 w-10 text-muted-foreground">
+              <Button variant="ghost" size="icon" onClick={() => removeSet(i)} className="h-10 w-10 text-muted-foreground self-start" aria-label={`Satz ${i + 1} entfernen`}>
                 <X className="h-4 w-4" />
               </Button>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
+
 
       <div className="flex gap-2 mt-4">
         {!matchOver && sets.length < maxSets && (
