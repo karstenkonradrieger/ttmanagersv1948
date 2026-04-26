@@ -299,10 +299,11 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
         </Collapsible>
       )}
     </div>
+    </TooltipProvider>
   );
 }
 
-function BracketMatch({ match, getPlayer, isFinal }: { match: Match; getPlayer: (id: string | null) => Player | null; isFinal: boolean }) {
+function BracketMatch({ match, getPlayer, isFinal, seedMap, tierLabel }: { match: Match; getPlayer: (id: string | null) => Player | null; isFinal: boolean; seedMap?: Map<string, SeedInfo>; tierLabel?: (rank: number) => string }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
   const p1Wins = match.sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
