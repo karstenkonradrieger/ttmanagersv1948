@@ -143,6 +143,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
   }
 
   return (
+    <TooltipProvider delayDuration={150}>
     <div className="space-y-4">
       <div className="overflow-x-auto pb-4">
         <div className="flex gap-6 min-w-max items-start">
