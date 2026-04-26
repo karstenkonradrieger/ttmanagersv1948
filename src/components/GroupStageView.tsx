@@ -3,8 +3,53 @@ import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Trophy, Medal, Info, ChevronDown, Users, SkipForward } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { computeQualifiedPlayers } from '@/services/byeValidation';
+import { computeQualifiedPlayers, type QualifiedPlayer } from '@/services/byeValidation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+
+/** Erklärt für einen Seed innerhalb einer Tier-Liste den greifenden Tie-Breaker
+ *  zum jeweils nächst-niedrigeren bzw. höheren Seed. */
+function buildSeedTieBreakerExplanation(
+  list: QualifiedPlayer[],
+  index: number,
+  useQuotient: boolean,
+): string | null {
+  const cur = list[index];
+  if (!cur) return null;
+  const prev = list[index - 1];
+  const next = list[index + 1];
+  const fmt = (n: number) => `${n > 0 ? '+' : ''}${n}`;
+  const lines: string[] = [];
+
+  const compare = (a: QualifiedPlayer, b: QualifiedPlayer, label: string) => {
+    if (useQuotient) {
+      if (a.winQuotient !== b.winQuotient) {
+        return `${label}: Leistungs-Quotient ${a.winQuotient.toFixed(2)} vs. ${b.winQuotient.toFixed(2)}`;
+      }
+      if (a.setsDiff !== b.setsDiff) {
+        return `${label}: Quote gleich (${a.winQuotient.toFixed(2)}) → Tie-Breaker Satzdifferenz greift (${fmt(a.setsDiff)} vs. ${fmt(b.setsDiff)})`;
+      }
+      if (a.pointsDiff !== b.pointsDiff) {
+        return `${label}: Quote & Satzdiff gleich → Tie-Breaker Punktdifferenz greift (${fmt(a.pointsDiff)} vs. ${fmt(b.pointsDiff)})`;
+      }
+      return `${label}: Alle Kriterien identisch – Losentscheid erforderlich`;
+    }
+    if (a.won !== b.won) {
+      return `${label}: ${a.won} vs. ${b.won} Siege`;
+    }
+    if (a.setsDiff !== b.setsDiff) {
+      return `${label}: Siege gleich (${a.won}) → Tie-Breaker Satzdifferenz greift (${fmt(a.setsDiff)} vs. ${fmt(b.setsDiff)})`;
+    }
+    if (a.pointsDiff !== b.pointsDiff) {
+      return `${label}: Siege & Satzdiff gleich → Tie-Breaker Punktdifferenz greift (${fmt(a.pointsDiff)} vs. ${fmt(b.pointsDiff)})`;
+    }
+    return `${label}: Alle Kriterien identisch – Losentscheid erforderlich`;
+  };
+
+  if (prev) lines.push(compare(cur, prev, '↑ ggü. höherem Seed'));
+  if (next) lines.push(compare(cur, next, '↓ ggü. nächstem Seed'));
+  return lines.length ? lines.join('\n') : null;
+}
 
 interface GroupStanding {
   playerId: string;
@@ -412,9 +457,22 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                       </tr>
                     </thead>
                     <tbody>
-                      {qualifiedData.winners.map((q, i) => (
+                      {qualifiedData.winners.map((q, i) => {
+                        const tip = buildSeedTieBreakerExplanation(qualifiedData.winners, i, false);
+                        return (
                         <tr key={q.playerId} className="border-b border-border/50 bg-accent/10">
-                          <td className="py-1.5 px-2 font-bold text-primary">{i + 1}</td>
+                          <td className="py-1.5 px-2 font-bold text-primary">
+                            <TooltipProvider delayDuration={150}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="cursor-help underline decoration-dotted underline-offset-2">{i + 1}</span>
+                                </TooltipTrigger>
+                                <TooltipContent side="right" className="max-w-xs whitespace-pre-line text-xs">
+                                  {tip ?? 'Einziger Spieler in dieser Stufe – kein Vergleich nötig.'}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </td>
                           <td className="py-1.5 px-2 font-semibold">{getParticipantName(q.playerId)}</td>
                           <td className="text-center py-1.5 px-2">
                             <span className="inline-flex items-center justify-center h-5 min-w-[20px] rounded bg-primary/10 text-primary text-xs font-bold px-1">
@@ -425,7 +483,8 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                           <td className="text-center py-1.5 px-2">{q.setsDiff > 0 ? '+' : ''}{q.setsDiff}</td>
                           <td className="text-center py-1.5 px-2 text-muted-foreground">{q.pointsDiff > 0 ? '+' : ''}{q.pointsDiff}</td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -452,9 +511,22 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                       </tr>
                     </thead>
                     <tbody>
-                      {qualifiedData.runnersUp.map((q, i) => (
+                      {qualifiedData.runnersUp.map((q, i) => {
+                        const tip = buildSeedTieBreakerExplanation(qualifiedData.runnersUp, i, false);
+                        return (
                         <tr key={q.playerId} className="border-b border-border/50">
-                          <td className="py-1.5 px-2 font-bold text-muted-foreground">{qualifiedData.winners.length + i + 1}</td>
+                          <td className="py-1.5 px-2 font-bold text-muted-foreground">
+                            <TooltipProvider delayDuration={150}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="cursor-help underline decoration-dotted underline-offset-2">{qualifiedData.winners.length + i + 1}</span>
+                                </TooltipTrigger>
+                                <TooltipContent side="right" className="max-w-xs whitespace-pre-line text-xs">
+                                  {tip ?? 'Einziger Spieler in dieser Stufe – kein Vergleich nötig.'}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </td>
                           <td className="py-1.5 px-2 font-semibold">{getParticipantName(q.playerId)}</td>
                           <td className="text-center py-1.5 px-2">
                             <span className="inline-flex items-center justify-center h-5 min-w-[20px] rounded bg-primary/10 text-primary text-xs font-bold px-1">
@@ -465,7 +537,8 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                           <td className="text-center py-1.5 px-2">{q.setsDiff > 0 ? '+' : ''}{q.setsDiff}</td>
                           <td className="text-center py-1.5 px-2 text-muted-foreground">{q.pointsDiff > 0 ? '+' : ''}{q.pointsDiff}</td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -496,10 +569,23 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                       </tr>
                     </thead>
                     <tbody>
-                      {qualifiedData.thirds.map((q, i) => (
+                      {qualifiedData.thirds.map((q, i) => {
+                        const tip = buildSeedTieBreakerExplanation(qualifiedData.thirds, i, true);
+                        return (
                         <tr key={q.playerId} className="border-b border-border/50 bg-amber-500/5">
                           <td className="py-1.5 px-2 font-bold text-amber-700 dark:text-amber-400">
-                            {qualifiedData.winners.length + qualifiedData.runnersUp.length + i + 1}
+                            <TooltipProvider delayDuration={150}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="cursor-help underline decoration-dotted underline-offset-2">
+                                    {qualifiedData.winners.length + qualifiedData.runnersUp.length + i + 1}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="right" className="max-w-xs whitespace-pre-line text-xs">
+                                  {tip ?? 'Einziger Spieler in dieser Stufe – kein Vergleich nötig.'}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </td>
                           <td className="py-1.5 px-2 font-semibold">{getParticipantName(q.playerId)}</td>
                           <td className="text-center py-1.5 px-2">
@@ -512,7 +598,8 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                           <td className="text-center py-1.5 px-2">{q.setsDiff > 0 ? '+' : ''}{q.setsDiff}</td>
                           <td className="text-center py-1.5 px-2 text-muted-foreground">{q.pointsDiff > 0 ? '+' : ''}{q.pointsDiff}</td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
