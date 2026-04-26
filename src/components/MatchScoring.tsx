@@ -847,7 +847,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
       </div>
 
       <p className="text-[10px] text-muted-foreground text-center mb-2">
-        💡 Tipp: Zahlen tippen, <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">Enter</kbd> springt zum nächsten Feld bzw. speichert. <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">11</kbd>-Buttons für Schnellsieg.
+        💡 Tipp: Zahlen tippen, <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">Enter</kbd> springt/speichert · <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">Backspace</kbd> in leerem Feld löscht den Satz · <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">11</kbd> für Schnellsieg.
       </p>
       <div className="space-y-2">
         {sets.map((set, i) => {
