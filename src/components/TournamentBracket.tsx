@@ -334,6 +334,8 @@ function BracketMatch({ match, getPlayer, isFinal, seedMap, tierLabel }: { match
         sets={match.sets}
         playerKey="player1"
         isActive={isActive}
+        seedInfo={match.player1Id ? seedMap?.get(match.player1Id) : undefined}
+        tierLabel={tierLabel}
       />
       <div className="h-px bg-border/40 mx-2" />
       <PlayerSlot
@@ -344,6 +346,8 @@ function BracketMatch({ match, getPlayer, isFinal, seedMap, tierLabel }: { match
         sets={match.sets}
         playerKey="player2"
         isActive={isActive}
+        seedInfo={match.player2Id ? seedMap?.get(match.player2Id) : undefined}
+        tierLabel={tierLabel}
       />
       {isActive && match.table && (
         <div className="bg-primary/15 text-primary text-[10px] text-center py-0.5 font-bold uppercase tracking-wider">
