@@ -105,6 +105,31 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
     });
   }, [allMatches, players, matches, presentRounds, getPlayer, tiebreakerOrder, h2hPriority]);
 
+  const tierLabelShort = (rank: number) => rank === 1 ? 'Gruppensieger' : rank === 2 ? 'Gruppenzweiter' : rank === 3 ? 'Gruppendritter' : `Gr.-${rank}.`;
+
+  // Map playerId -> SeedInfo for first-round tooltips
+  const seedMap = useMemo(() => {
+    const map = new Map<string, SeedInfo>();
+    if (!allMatches || !players) return map;
+    const groupMatches = allMatches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
+    if (groupMatches.length === 0) return map;
+    const { winners, runnersUp, bestThirds } = computeQualifiedPlayers(groupMatches, players, 2, tiebreakerOrder, h2hPriority) as any;
+    const seeded = [...winners, ...runnersUp, ...(bestThirds ?? [])];
+    seeded.forEach((s, idx) => {
+      map.set(s.playerId, {
+        seed: idx + 1,
+        rank: s.rank,
+        groupNumber: s.groupNumber,
+        won: s.won,
+        setsDiff: s.setsDiff,
+        pointsDiff: s.pointsDiff,
+      });
+    });
+    return map;
+  }, [allMatches, players, tiebreakerOrder, h2hPriority]);
+
+  const firstRound = presentRounds[0] ?? 0;
+
   const [seedingOpen, setSeedingOpen] = useState(false);
 
   const tierLabel = (rank: number) => rank === 1 ? 'Gruppensieger' : rank === 2 ? 'Gruppenzweiter' : `Gr.-${rank}.`;
