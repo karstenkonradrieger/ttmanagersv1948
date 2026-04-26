@@ -786,6 +786,18 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
     } else if (e.key === 'Tab' && !e.shiftKey && field === 'player2' && idx === sets.length - 1 && isSetComplete(sets[idx]) && !matchOver && sets.length < maxSets) {
       e.preventDefault();
       addSet();
+    } else if ((e.key === 'Backspace' || e.key === 'Delete') && sets.length > 1) {
+      const current = sets[idx];
+      const fieldEmpty = (field === 'player1' ? current.player1 : current.player2) === 0;
+      const setEmpty = current.player1 === 0 && current.player2 === 0;
+      // Backspace on already-empty field OR Shift+Backspace anywhere → remove set
+      if ((e.key === 'Backspace' && (setEmpty || (fieldEmpty && e.shiftKey))) || (e.key === 'Delete' && e.shiftKey)) {
+        e.preventDefault();
+        const targetIdx = idx > 0 ? idx - 1 : 0;
+        removeSet(idx);
+        focusInput(targetIdx, 'p2');
+        toast.success(`Satz ${idx + 1} entfernt`, { duration: 1500 });
+      }
     }
   };
 
