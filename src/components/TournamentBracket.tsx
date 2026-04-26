@@ -358,7 +358,7 @@ function BracketMatch({ match, getPlayer, isFinal, seedMap, tierLabel }: { match
   );
 }
 
-function PlayerSlot({ player, wins, isWinner, isLoser, sets, playerKey, isActive }: {
+function PlayerSlot({ player, wins, isWinner, isLoser, sets, playerKey, isActive, seedInfo, tierLabel }: {
   player: Player | null;
   wins: number;
   isWinner: boolean;
@@ -366,8 +366,25 @@ function PlayerSlot({ player, wins, isWinner, isLoser, sets, playerKey, isActive
   sets: Array<{ player1: number; player2: number }>;
   playerKey: 'player1' | 'player2';
   isActive: boolean;
+  seedInfo?: SeedInfo;
+  tierLabel?: (rank: number) => string;
 }) {
   const hasSets = sets.length > 0 && sets.some(s => s.player1 > 0 || s.player2 > 0);
+
+  const nameEl = (
+    <span className={`truncate flex-1 min-w-0 ${
+      isWinner ? 'font-bold text-primary' :
+      isLoser ? 'text-muted-foreground' :
+      player ? 'font-medium' : 'text-muted-foreground/50 italic'
+    } ${seedInfo ? 'cursor-help underline decoration-dotted decoration-primary/40 underline-offset-2' : ''}`}>
+      {player?.name || 'TBD'}
+      {seedInfo && (
+        <span className="ml-1.5 px-1 py-px rounded text-[9px] bg-primary/15 text-primary font-bold align-middle">
+          #{seedInfo.seed}
+        </span>
+      )}
+    </span>
+  );
 
   return (
     <div className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
@@ -378,14 +395,22 @@ function PlayerSlot({ player, wins, isWinner, isLoser, sets, playerKey, isActive
         isWinner ? 'bg-primary' : isActive ? 'bg-primary animate-pulse' : player ? 'bg-muted-foreground/30' : 'bg-transparent'
       }`} />
 
-      {/* Player name */}
-      <span className={`truncate flex-1 min-w-0 ${
-        isWinner ? 'font-bold text-primary' :
-        isLoser ? 'text-muted-foreground' :
-        player ? 'font-medium' : 'text-muted-foreground/50 italic'
-      }`}>
-        {player?.name || 'TBD'}
-      </span>
+      {/* Player name (with optional seed tooltip) */}
+      {seedInfo && player ? (
+        <Tooltip>
+          <TooltipTrigger asChild>{nameEl}</TooltipTrigger>
+          <TooltipContent side="top" className="max-w-xs">
+            <div className="space-y-1 text-xs">
+              <div className="font-bold text-primary">Seed #{seedInfo.seed} – {tierLabel?.(seedInfo.rank) ?? `Rang ${seedInfo.rank}`}</div>
+              <div className="text-muted-foreground">aus Gruppe {seedInfo.groupNumber + 1}</div>
+              <div className="text-muted-foreground">
+                {seedInfo.won} Siege · Satzdiff. {seedInfo.setsDiff > 0 ? '+' : ''}{seedInfo.setsDiff} · Punktdiff. {seedInfo.pointsDiff > 0 ? '+' : ''}{seedInfo.pointsDiff}
+              </div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      ) : nameEl}
+
 
       {/* Set scores */}
       {hasSets && (
