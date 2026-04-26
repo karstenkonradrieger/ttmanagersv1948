@@ -569,10 +569,23 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                       </tr>
                     </thead>
                     <tbody>
-                      {qualifiedData.thirds.map((q, i) => (
+                      {qualifiedData.thirds.map((q, i) => {
+                        const tip = buildSeedTieBreakerExplanation(qualifiedData.thirds, i, true);
+                        return (
                         <tr key={q.playerId} className="border-b border-border/50 bg-amber-500/5">
                           <td className="py-1.5 px-2 font-bold text-amber-700 dark:text-amber-400">
-                            {qualifiedData.winners.length + qualifiedData.runnersUp.length + i + 1}
+                            <TooltipProvider delayDuration={150}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="cursor-help underline decoration-dotted underline-offset-2">
+                                    {qualifiedData.winners.length + qualifiedData.runnersUp.length + i + 1}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="right" className="max-w-xs whitespace-pre-line text-xs">
+                                  {tip ?? 'Einziger Spieler in dieser Stufe – kein Vergleich nötig.'}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </td>
                           <td className="py-1.5 px-2 font-semibold">{getParticipantName(q.playerId)}</td>
                           <td className="text-center py-1.5 px-2">
@@ -585,7 +598,8 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                           <td className="text-center py-1.5 px-2">{q.setsDiff > 0 ? '+' : ''}{q.setsDiff}</td>
                           <td className="text-center py-1.5 px-2 text-muted-foreground">{q.pointsDiff > 0 ? '+' : ''}{q.pointsDiff}</td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
