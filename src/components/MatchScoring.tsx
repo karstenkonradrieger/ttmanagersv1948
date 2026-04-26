@@ -834,33 +834,68 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
         </Button>
       </div>
 
+      <p className="text-[10px] text-muted-foreground text-center mb-2">
+        💡 Tipp: Zahlen tippen, <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">Enter</kbd> springt zum nächsten Feld bzw. speichert. <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">11</kbd>-Buttons für Schnellsieg.
+      </p>
       <div className="space-y-2">
-        {sets.map((set, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground w-8">S{i + 1}</span>
-            <Input
-              type="number"
-              value={set.player1 || ''}
-              onChange={e => updateSet(i, 'player1', parseInt(e.target.value) || 0)}
-              className="h-12 text-center text-lg font-bold bg-secondary flex-1"
-              min={0}
-            />
-            <span className="text-muted-foreground">:</span>
-            <Input
-              type="number"
-              value={set.player2 || ''}
-              onChange={e => updateSet(i, 'player2', parseInt(e.target.value) || 0)}
-              className="h-12 text-center text-lg font-bold bg-secondary flex-1"
-              min={0}
-            />
+        {sets.map((set, i) => {
+          const setComplete = isSetComplete(set);
+          return (
+          <div key={i} className={`flex items-center gap-2 rounded-md transition-colors ${setComplete ? 'bg-primary/5 ring-1 ring-primary/20 p-1' : ''}`}>
+            <span className="text-xs text-muted-foreground w-8 text-center">S{i + 1}</span>
+            <div className="flex-1 flex flex-col gap-1">
+              <Input
+                ref={registerRef(i, 'p1')}
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={set.player1 || ''}
+                onChange={e => updateSet(i, 'player1', parseInt(e.target.value) || 0)}
+                onFocus={handleFocus}
+                onKeyDown={e => handleKeyDown(e, i, 'player1')}
+                className="h-12 text-center text-lg font-bold bg-secondary"
+                min={0}
+                max={99}
+                aria-label={`Satz ${i + 1} – Spieler 1 Punkte`}
+              />
+              <div className="flex gap-0.5 justify-center">
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] flex-1 min-w-0" onClick={() => { updateSet(i, 'player1', 11); focusInput(i, 'p2'); }}>11</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player1', Math.max(0, set.player1 - 1))}>−</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player1', set.player1 + 1)}>+</Button>
+              </div>
+            </div>
+            <span className="text-muted-foreground text-lg">:</span>
+            <div className="flex-1 flex flex-col gap-1">
+              <Input
+                ref={registerRef(i, 'p2')}
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={set.player2 || ''}
+                onChange={e => updateSet(i, 'player2', parseInt(e.target.value) || 0)}
+                onFocus={handleFocus}
+                onKeyDown={e => handleKeyDown(e, i, 'player2')}
+                className="h-12 text-center text-lg font-bold bg-secondary"
+                min={0}
+                max={99}
+                aria-label={`Satz ${i + 1} – Spieler 2 Punkte`}
+              />
+              <div className="flex gap-0.5 justify-center">
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] flex-1 min-w-0" onClick={() => { updateSet(i, 'player2', 11); focusInput(i, 'p1'); }}>11</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player2', Math.max(0, set.player2 - 1))}>−</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player2', set.player2 + 1)}>+</Button>
+              </div>
+            </div>
             {sets.length > 1 && (
-              <Button variant="ghost" size="icon" onClick={() => removeSet(i)} className="h-10 w-10 text-muted-foreground">
+              <Button variant="ghost" size="icon" onClick={() => removeSet(i)} className="h-10 w-10 text-muted-foreground self-start" aria-label={`Satz ${i + 1} entfernen`}>
                 <X className="h-4 w-4" />
               </Button>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
+
 
       <div className="flex gap-2 mt-4">
         {!matchOver && sets.length < maxSets && (
