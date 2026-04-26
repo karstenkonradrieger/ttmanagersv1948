@@ -168,7 +168,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
                   style={{ gap: `${Math.max(Math.pow(2, idx) * 8, 12)}px` }}
                 >
                   {roundMatches.map(match => (
-                    <BracketMatch key={match.id} match={match} getPlayer={getPlayer} isFinal={isFinal} />
+                    <BracketMatch key={match.id} match={match} getPlayer={getPlayer} isFinal={isFinal} seedMap={r === firstRound ? seedMap : undefined} tierLabel={tierLabelShort} />
                   ))}
                 </div>
               </div>
