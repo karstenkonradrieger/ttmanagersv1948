@@ -3,8 +3,53 @@ import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Trophy, Medal, Info, ChevronDown, Users, SkipForward } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { computeQualifiedPlayers } from '@/services/byeValidation';
+import { computeQualifiedPlayers, type QualifiedPlayer } from '@/services/byeValidation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+
+/** Erklärt für einen Seed innerhalb einer Tier-Liste den greifenden Tie-Breaker
+ *  zum jeweils nächst-niedrigeren bzw. höheren Seed. */
+function buildSeedTieBreakerExplanation(
+  list: QualifiedPlayer[],
+  index: number,
+  useQuotient: boolean,
+): string | null {
+  const cur = list[index];
+  if (!cur) return null;
+  const prev = list[index - 1];
+  const next = list[index + 1];
+  const fmt = (n: number) => `${n > 0 ? '+' : ''}${n}`;
+  const lines: string[] = [];
+
+  const compare = (a: QualifiedPlayer, b: QualifiedPlayer, label: string) => {
+    if (useQuotient) {
+      if (a.winQuotient !== b.winQuotient) {
+        return `${label}: Leistungs-Quotient ${a.winQuotient.toFixed(2)} vs. ${b.winQuotient.toFixed(2)}`;
+      }
+      if (a.setsDiff !== b.setsDiff) {
+        return `${label}: Quote gleich (${a.winQuotient.toFixed(2)}) → Tie-Breaker Satzdifferenz greift (${fmt(a.setsDiff)} vs. ${fmt(b.setsDiff)})`;
+      }
+      if (a.pointsDiff !== b.pointsDiff) {
+        return `${label}: Quote & Satzdiff gleich → Tie-Breaker Punktdifferenz greift (${fmt(a.pointsDiff)} vs. ${fmt(b.pointsDiff)})`;
+      }
+      return `${label}: Alle Kriterien identisch – Losentscheid erforderlich`;
+    }
+    if (a.won !== b.won) {
+      return `${label}: ${a.won} vs. ${b.won} Siege`;
+    }
+    if (a.setsDiff !== b.setsDiff) {
+      return `${label}: Siege gleich (${a.won}) → Tie-Breaker Satzdifferenz greift (${fmt(a.setsDiff)} vs. ${fmt(b.setsDiff)})`;
+    }
+    if (a.pointsDiff !== b.pointsDiff) {
+      return `${label}: Siege & Satzdiff gleich → Tie-Breaker Punktdifferenz greift (${fmt(a.pointsDiff)} vs. ${fmt(b.pointsDiff)})`;
+    }
+    return `${label}: Alle Kriterien identisch – Losentscheid erforderlich`;
+  };
+
+  if (prev) lines.push(compare(cur, prev, '↑ ggü. höherem Seed'));
+  if (next) lines.push(compare(cur, next, '↓ ggü. nächstem Seed'));
+  return lines.length ? lines.join('\n') : null;
+}
 
 interface GroupStanding {
   playerId: string;
