@@ -699,20 +699,37 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
 
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // Refs for fast keyboard navigation between set inputs
+  const inputRefs = useRef<Array<{ p1: HTMLInputElement | null; p2: HTMLInputElement | null }>>([]);
+  const registerRef = (idx: number, field: 'p1' | 'p2') => (el: HTMLInputElement | null) => {
+    if (!inputRefs.current[idx]) inputRefs.current[idx] = { p1: null, p2: null };
+    inputRefs.current[idx][field] = el;
+  };
+  const focusInput = (idx: number, field: 'p1' | 'p2') => {
+    requestAnimationFrame(() => {
+      const el = inputRefs.current[idx]?.[field];
+      if (el) { el.focus(); el.select(); }
+    });
+  };
+
   const maxSets = effectiveBestOf * 2 - 1;
   const p1Wins = sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
   const p2Wins = sets.filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length;
   const matchOver = p1Wins >= effectiveBestOf || p2Wins >= effectiveBestOf;
 
+  const isSetComplete = (s: SetScore) =>
+    (s.player1 >= 11 || s.player2 >= 11) && Math.abs(s.player1 - s.player2) >= 2;
+
   const updateSet = (idx: number, field: 'player1' | 'player2', value: number) => {
     const updated = [...sets];
-    updated[idx] = { ...updated[idx], [field]: value };
+    updated[idx] = { ...updated[idx], [field]: Math.max(0, Math.min(99, value)) };
     setSets(updated);
   };
 
   const addSet = () => {
     if (sets.length < maxSets && !matchOver) {
       setSets([...sets, { player1: handicapP1, player2: handicapP2 }]);
+      focusInput(sets.length, 'p1');
     }
   };
 
@@ -737,6 +754,43 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
     }
     setValidationError(null);
     onUpdateScore(match.id, sets, effectiveBestOf);
+  };
+
+  // Keyboard handler: Enter advances or saves; Tab on p2 -> next set p1
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, idx: number, field: 'player1' | 'player2') => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const current = sets[idx];
+      // If current set complete, jump to next set or save
+      if (isSetComplete(current)) {
+        const willMatchEnd =
+          sets.slice(0, idx + 1).filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length >= effectiveBestOf ||
+          sets.slice(0, idx + 1).filter(s => s.player2 >= 11 && s.player2 - s.player1 >= 2).length >= effectiveBestOf;
+        if (willMatchEnd) {
+          saveScore();
+          return;
+        }
+        if (idx + 1 < sets.length) {
+          focusInput(idx + 1, 'p1');
+        } else if (sets.length < maxSets) {
+          addSet();
+        } else {
+          saveScore();
+        }
+      } else if (field === 'player1') {
+        focusInput(idx, 'p2');
+      } else {
+        // p2 not complete yet, stay
+        focusInput(idx, 'p2');
+      }
+    } else if (e.key === 'Tab' && !e.shiftKey && field === 'player2' && idx === sets.length - 1 && isSetComplete(sets[idx]) && !matchOver && sets.length < maxSets) {
+      e.preventDefault();
+      addSet();
+    }
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.select();
   };
 
   return (
