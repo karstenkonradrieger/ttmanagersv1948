@@ -786,6 +786,18 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
     } else if (e.key === 'Tab' && !e.shiftKey && field === 'player2' && idx === sets.length - 1 && isSetComplete(sets[idx]) && !matchOver && sets.length < maxSets) {
       e.preventDefault();
       addSet();
+    } else if ((e.key === 'Backspace' || e.key === 'Delete') && sets.length > 1) {
+      const current = sets[idx];
+      const fieldEmpty = (field === 'player1' ? current.player1 : current.player2) === 0;
+      const setEmpty = current.player1 === 0 && current.player2 === 0;
+      // Backspace on already-empty field OR Shift+Backspace anywhere → remove set
+      if ((e.key === 'Backspace' && (setEmpty || (fieldEmpty && e.shiftKey))) || (e.key === 'Delete' && e.shiftKey)) {
+        e.preventDefault();
+        const targetIdx = idx > 0 ? idx - 1 : 0;
+        removeSet(idx);
+        focusInput(targetIdx, 'p2');
+        toast.success(`Satz ${idx + 1} entfernt`, { duration: 1500 });
+      }
     }
   };
 
@@ -835,7 +847,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
       </div>
 
       <p className="text-[10px] text-muted-foreground text-center mb-2">
-        💡 Tipp: Zahlen tippen, <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">Enter</kbd> springt zum nächsten Feld bzw. speichert. <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">11</kbd>-Buttons für Schnellsieg.
+        💡 Tipp: Zahlen tippen, <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">Enter</kbd> springt/speichert · <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">Backspace</kbd> in leerem Feld löscht den Satz · <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">11</kbd> für Schnellsieg.
       </p>
       <div className="space-y-2">
         {sets.map((set, i) => {
