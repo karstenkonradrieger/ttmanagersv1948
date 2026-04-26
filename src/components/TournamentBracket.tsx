@@ -5,7 +5,17 @@ import { getRoundLabel } from './bracketLabels';
 import { computeQualifiedPlayers, TiebreakerCriterion, DEFAULT_TIEBREAKER_ORDER } from '@/services/byeValidation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
+
+type SeedInfo = {
+  seed: number;
+  rank: number;
+  groupNumber: number;
+  won: number;
+  setsDiff: number;
+  pointsDiff: number;
+};
 
 interface Props {
   matches: Match[];
