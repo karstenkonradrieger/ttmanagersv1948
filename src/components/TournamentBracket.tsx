@@ -5,7 +5,17 @@ import { getRoundLabel } from './bracketLabels';
 import { computeQualifiedPlayers, TiebreakerCriterion, DEFAULT_TIEBREAKER_ORDER } from '@/services/byeValidation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
+
+type SeedInfo = {
+  seed: number;
+  rank: number;
+  groupNumber: number;
+  won: number;
+  setsDiff: number;
+  pointsDiff: number;
+};
 
 interface Props {
   matches: Match[];
@@ -95,6 +105,31 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
     });
   }, [allMatches, players, matches, presentRounds, getPlayer, tiebreakerOrder, h2hPriority]);
 
+  const tierLabelShort = (rank: number) => rank === 1 ? 'Gruppensieger' : rank === 2 ? 'Gruppenzweiter' : rank === 3 ? 'Gruppendritter' : `Gr.-${rank}.`;
+
+  // Map playerId -> SeedInfo for first-round tooltips
+  const seedMap = useMemo(() => {
+    const map = new Map<string, SeedInfo>();
+    if (!allMatches || !players) return map;
+    const groupMatches = allMatches.filter(m => m.groupNumber !== undefined && m.groupNumber !== null);
+    if (groupMatches.length === 0) return map;
+    const { winners, runnersUp, bestThirds } = computeQualifiedPlayers(groupMatches, players, 2, tiebreakerOrder, h2hPriority) as any;
+    const seeded = [...winners, ...runnersUp, ...(bestThirds ?? [])];
+    seeded.forEach((s, idx) => {
+      map.set(s.playerId, {
+        seed: idx + 1,
+        rank: s.rank,
+        groupNumber: s.groupNumber,
+        won: s.won,
+        setsDiff: s.setsDiff,
+        pointsDiff: s.pointsDiff,
+      });
+    });
+    return map;
+  }, [allMatches, players, tiebreakerOrder, h2hPriority]);
+
+  const firstRound = presentRounds[0] ?? 0;
+
   const [seedingOpen, setSeedingOpen] = useState(false);
 
   const tierLabel = (rank: number) => rank === 1 ? 'Gruppensieger' : rank === 2 ? 'Gruppenzweiter' : `Gr.-${rank}.`;
@@ -108,6 +143,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
   }
 
   return (
+    <TooltipProvider delayDuration={150}>
     <div className="space-y-4">
       <div className="overflow-x-auto pb-4">
         <div className="flex gap-6 min-w-max items-start">
@@ -133,7 +169,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
                   style={{ gap: `${Math.max(Math.pow(2, idx) * 8, 12)}px` }}
                 >
                   {roundMatches.map(match => (
-                    <BracketMatch key={match.id} match={match} getPlayer={getPlayer} isFinal={isFinal} />
+                    <BracketMatch key={match.id} match={match} getPlayer={getPlayer} isFinal={isFinal} seedMap={r === firstRound ? seedMap : undefined} tierLabel={tierLabelShort} />
                   ))}
                 </div>
               </div>
@@ -263,10 +299,11 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
         </Collapsible>
       )}
     </div>
+    </TooltipProvider>
   );
 }
 
-function BracketMatch({ match, getPlayer, isFinal }: { match: Match; getPlayer: (id: string | null) => Player | null; isFinal: boolean }) {
+function BracketMatch({ match, getPlayer, isFinal, seedMap, tierLabel }: { match: Match; getPlayer: (id: string | null) => Player | null; isFinal: boolean; seedMap?: Map<string, SeedInfo>; tierLabel?: (rank: number) => string }) {
   const p1 = getPlayer(match.player1Id);
   const p2 = getPlayer(match.player2Id);
   const p1Wins = match.sets.filter(s => s.player1 >= 11 && s.player1 - s.player2 >= 2).length;
@@ -297,6 +334,8 @@ function BracketMatch({ match, getPlayer, isFinal }: { match: Match; getPlayer: 
         sets={match.sets}
         playerKey="player1"
         isActive={isActive}
+        seedInfo={match.player1Id ? seedMap?.get(match.player1Id) : undefined}
+        tierLabel={tierLabel}
       />
       <div className="h-px bg-border/40 mx-2" />
       <PlayerSlot
@@ -307,6 +346,8 @@ function BracketMatch({ match, getPlayer, isFinal }: { match: Match; getPlayer: 
         sets={match.sets}
         playerKey="player2"
         isActive={isActive}
+        seedInfo={match.player2Id ? seedMap?.get(match.player2Id) : undefined}
+        tierLabel={tierLabel}
       />
       {isActive && match.table && (
         <div className="bg-primary/15 text-primary text-[10px] text-center py-0.5 font-bold uppercase tracking-wider">
@@ -317,7 +358,7 @@ function BracketMatch({ match, getPlayer, isFinal }: { match: Match; getPlayer: 
   );
 }
 
-function PlayerSlot({ player, wins, isWinner, isLoser, sets, playerKey, isActive }: {
+function PlayerSlot({ player, wins, isWinner, isLoser, sets, playerKey, isActive, seedInfo, tierLabel }: {
   player: Player | null;
   wins: number;
   isWinner: boolean;
@@ -325,8 +366,25 @@ function PlayerSlot({ player, wins, isWinner, isLoser, sets, playerKey, isActive
   sets: Array<{ player1: number; player2: number }>;
   playerKey: 'player1' | 'player2';
   isActive: boolean;
+  seedInfo?: SeedInfo;
+  tierLabel?: (rank: number) => string;
 }) {
   const hasSets = sets.length > 0 && sets.some(s => s.player1 > 0 || s.player2 > 0);
+
+  const nameEl = (
+    <span className={`truncate flex-1 min-w-0 ${
+      isWinner ? 'font-bold text-primary' :
+      isLoser ? 'text-muted-foreground' :
+      player ? 'font-medium' : 'text-muted-foreground/50 italic'
+    } ${seedInfo ? 'cursor-help underline decoration-dotted decoration-primary/40 underline-offset-2' : ''}`}>
+      {player?.name || 'TBD'}
+      {seedInfo && (
+        <span className="ml-1.5 px-1 py-px rounded text-[9px] bg-primary/15 text-primary font-bold align-middle">
+          #{seedInfo.seed}
+        </span>
+      )}
+    </span>
+  );
 
   return (
     <div className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
@@ -337,14 +395,22 @@ function PlayerSlot({ player, wins, isWinner, isLoser, sets, playerKey, isActive
         isWinner ? 'bg-primary' : isActive ? 'bg-primary animate-pulse' : player ? 'bg-muted-foreground/30' : 'bg-transparent'
       }`} />
 
-      {/* Player name */}
-      <span className={`truncate flex-1 min-w-0 ${
-        isWinner ? 'font-bold text-primary' :
-        isLoser ? 'text-muted-foreground' :
-        player ? 'font-medium' : 'text-muted-foreground/50 italic'
-      }`}>
-        {player?.name || 'TBD'}
-      </span>
+      {/* Player name (with optional seed tooltip) */}
+      {seedInfo && player ? (
+        <Tooltip>
+          <TooltipTrigger asChild>{nameEl}</TooltipTrigger>
+          <TooltipContent side="top" className="max-w-xs">
+            <div className="space-y-1 text-xs">
+              <div className="font-bold text-primary">Seed #{seedInfo.seed} – {tierLabel?.(seedInfo.rank) ?? `Rang ${seedInfo.rank}`}</div>
+              <div className="text-muted-foreground">aus Gruppe {seedInfo.groupNumber + 1}</div>
+              <div className="text-muted-foreground">
+                {seedInfo.won} Siege · Satzdiff. {seedInfo.setsDiff > 0 ? '+' : ''}{seedInfo.setsDiff} · Punktdiff. {seedInfo.pointsDiff > 0 ? '+' : ''}{seedInfo.pointsDiff}
+              </div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      ) : nameEl}
+
 
       {/* Set scores */}
       {hasSets && (
