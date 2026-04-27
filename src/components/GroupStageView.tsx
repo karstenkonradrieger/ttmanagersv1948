@@ -261,14 +261,23 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
 
   return (
     <div className="space-y-6 animate-slide-up">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-lg font-bold">📊 Gruppenphase</h3>
-        {allGroupsComplete && onAdvanceToKnockout && (
-          <Button onClick={() => setShowAdvanceDialog(true)} className="glow-green gap-1.5">
-            <ArrowRight className="h-4 w-4" />
-            Weiter zur K.O.-Runde
-          </Button>
-        )}
+        <div className="flex items-center gap-2 flex-wrap">
+          {allGroupsComplete && bestOf !== undefined && onUpdateBestOf && (
+            <BestOfSwitcher
+              bestOf={bestOf}
+              onUpdateBestOf={onUpdateBestOf}
+              context="vor der K.O.-Runde"
+            />
+          )}
+          {allGroupsComplete && onAdvanceToKnockout && (
+            <Button onClick={() => setShowAdvanceDialog(true)} className="glow-green gap-1.5">
+              <ArrowRight className="h-4 w-4" />
+              Weiter zur K.O.-Runde
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Advance mode dialog */}
