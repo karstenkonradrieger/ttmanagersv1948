@@ -906,8 +906,15 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
               </div>
             </div>
             {sets.length > 1 && (
-              <Button variant="ghost" size="icon" onClick={() => removeSet(i)} className="h-10 w-10 text-muted-foreground self-start" aria-label={`Satz ${i + 1} entfernen`}>
-                <X className="h-4 w-4" />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => removeSetWithFocus(i, 'p1')}
+                className="h-14 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30 self-center gap-1.5 font-semibold"
+                aria-label={`Satz ${i + 1} löschen`}
+              >
+                <X className="h-5 w-5" />
+                <span className="text-xs hidden sm:inline">Satz löschen</span>
               </Button>
             )}
           </div>
