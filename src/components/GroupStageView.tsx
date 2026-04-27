@@ -208,9 +208,12 @@ interface Props {
   onAdvanceToKnockout?: (includeThirds: boolean) => void;
   groupCount: number;
   koQualificationMode?: 'byes' | 'thirds';
+  /** Current bestOf — when provided together with onUpdateBestOf, a switcher is shown before KO start */
+  bestOf?: number;
+  onUpdateBestOf?: (bestOf: number) => void | Promise<void>;
 }
 
-export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount, koQualificationMode = 'byes' }: Props) {
+export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount, koQualificationMode = 'byes', bestOf, onUpdateBestOf }: Props) {
   const [showAdvanceDialog, setShowAdvanceDialog] = useState(false);
 
   const groupData = useMemo(() => {
