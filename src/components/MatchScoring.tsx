@@ -699,6 +699,29 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
 
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // Reset upgrade flag if global bestOf changed (e.g. tournament switched to Bo5)
+  useEffect(() => {
+    if (!canUpgradeBestOf && upgradedBestOf) setUpgradedBestOf(false);
+  }, [canUpgradeBestOf, upgradedBestOf]);
+
+  // React to Best-of changes: trim excess empty sets if Bo lowered, no auto-add
+  // (user can press "+ Satz" or just keep typing — maxSets is reactive).
+  useEffect(() => {
+    const newMax = effectiveBestOf * 2 - 1;
+    if (sets.length > newMax) {
+      // Drop trailing untouched sets (player1 === handicapP1 && player2 === handicapP2 && both 0-ish)
+      const trimmed = [...sets];
+      while (trimmed.length > newMax) {
+        const last = trimmed[trimmed.length - 1];
+        const isEmpty = last.player1 === handicapP1 && last.player2 === handicapP2;
+        if (!isEmpty) break;
+        trimmed.pop();
+      }
+      if (trimmed.length !== sets.length) setSets(trimmed);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveBestOf]);
+
   // Refs for fast keyboard navigation between set inputs
   const inputRefs = useRef<Array<{ p1: HTMLInputElement | null; p2: HTMLInputElement | null }>>([]);
   const registerRef = (idx: number, field: 'p1' | 'p2') => (el: HTMLInputElement | null) => {
