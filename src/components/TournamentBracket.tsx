@@ -7,6 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
+import { BestOfSwitcher } from './BestOfSwitcher';
 
 type SeedInfo = {
   seed: number;
@@ -25,9 +26,12 @@ interface Props {
   allMatches?: Match[];
   /** All tournament players – needed for seeding details */
   players?: Player[];
+  /** Current bestOf — when provided with onUpdateBestOf, a switcher is shown before the final */
+  bestOf?: number;
+  onUpdateBestOf?: (bestOf: number) => void | Promise<void>;
 }
 
-export function TournamentBracket({ matches, rounds, getPlayer, allMatches, players }: Props) {
+export function TournamentBracket({ matches, rounds, getPlayer, allMatches, players, bestOf, onUpdateBestOf }: Props) {
   const presentRounds = useMemo(() =>
     Array.from(new Set(matches.map(m => m.round))).sort((a, b) => a - b),
     [matches]
@@ -142,9 +146,27 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
     );
   }
 
+  // Finale-Switcher: vor dem Finale (höchste Runde, Match noch pending, keine Sets gespielt)
+  const finalMatches = matches.filter(m => m.round === maxRound);
+  const finalNotStarted =
+    finalMatches.length > 0 &&
+    finalMatches.every(m => m.status !== 'completed' && (!m.sets || m.sets.length === 0)) &&
+    finalMatches.some(m => m.player1Id && m.player2Id);
+  const showFinalBestOfSwitcher = !!onUpdateBestOf && bestOf !== undefined && finalNotStarted;
+
   return (
     <TooltipProvider delayDuration={150}>
     <div className="space-y-4">
+      {showFinalBestOfSwitcher && (
+        <div className="flex items-center justify-end gap-2 px-1">
+          <span className="text-xs text-muted-foreground">Vor dem Finale:</span>
+          <BestOfSwitcher
+            bestOf={bestOf!}
+            onUpdateBestOf={onUpdateBestOf!}
+            context="vor dem Finale"
+          />
+        </div>
+      )}
       <div className="overflow-x-auto pb-4">
         <div className="flex gap-6 min-w-max items-start">
           {presentRounds.map((r, idx) => {

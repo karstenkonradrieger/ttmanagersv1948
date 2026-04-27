@@ -6,6 +6,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { computeQualifiedPlayers, type QualifiedPlayer } from '@/services/byeValidation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { BestOfSwitcher } from './BestOfSwitcher';
 
 /** Erklärt für einen Seed innerhalb einer Tier-Liste den greifenden Tie-Breaker
  *  zum jeweils nächst-niedrigeren bzw. höheren Seed. */
@@ -208,9 +209,12 @@ interface Props {
   onAdvanceToKnockout?: (includeThirds: boolean) => void;
   groupCount: number;
   koQualificationMode?: 'byes' | 'thirds';
+  /** Current bestOf — when provided together with onUpdateBestOf, a switcher is shown before KO start */
+  bestOf?: number;
+  onUpdateBestOf?: (bestOf: number) => void | Promise<void>;
 }
 
-export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount, koQualificationMode = 'byes' }: Props) {
+export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount, koQualificationMode = 'byes', bestOf, onUpdateBestOf }: Props) {
   const [showAdvanceDialog, setShowAdvanceDialog] = useState(false);
 
   const groupData = useMemo(() => {
@@ -257,14 +261,23 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
 
   return (
     <div className="space-y-6 animate-slide-up">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-lg font-bold">📊 Gruppenphase</h3>
-        {allGroupsComplete && onAdvanceToKnockout && (
-          <Button onClick={() => setShowAdvanceDialog(true)} className="glow-green gap-1.5">
-            <ArrowRight className="h-4 w-4" />
-            Weiter zur K.O.-Runde
-          </Button>
-        )}
+        <div className="flex items-center gap-2 flex-wrap">
+          {allGroupsComplete && bestOf !== undefined && onUpdateBestOf && (
+            <BestOfSwitcher
+              bestOf={bestOf}
+              onUpdateBestOf={onUpdateBestOf}
+              context="vor der K.O.-Runde"
+            />
+          )}
+          {allGroupsComplete && onAdvanceToKnockout && (
+            <Button onClick={() => setShowAdvanceDialog(true)} className="glow-green gap-1.5">
+              <ArrowRight className="h-4 w-4" />
+              Weiter zur K.O.-Runde
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Advance mode dialog */}
