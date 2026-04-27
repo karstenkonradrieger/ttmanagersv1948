@@ -756,6 +756,8 @@ const Index = () => {
                     ? (id) => id ? { id, name: getParticipantName(id), club: '', gender: '', birthDate: null, ttr: 0, postalCode: '', city: '', street: '', houseNumber: '', phone: '' } : null
                     : getPlayer
                   }
+                  bestOf={tournament.bestOf}
+                  onUpdateBestOf={updateBestOf}
                 />
               )}
             </TabsContent>
