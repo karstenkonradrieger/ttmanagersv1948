@@ -707,6 +707,8 @@ const Index = () => {
                                 }
                                 allMatches={tournament.matches}
                                 players={tournament.players}
+                                bestOf={tournament.bestOf}
+                                onUpdateBestOf={updateBestOf}
                               />
                             </div>
                           </CollapsibleContent>
