@@ -6,6 +6,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { computeQualifiedPlayers, type QualifiedPlayer } from '@/services/byeValidation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { BestOfSwitcher } from './BestOfSwitcher';
 
 /** Erklärt für einen Seed innerhalb einer Tier-Liste den greifenden Tie-Breaker
  *  zum jeweils nächst-niedrigeren bzw. höheren Seed. */
