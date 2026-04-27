@@ -793,9 +793,13 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
       // Backspace on already-empty field OR Shift+Backspace anywhere → remove set
       if ((e.key === 'Backspace' && (setEmpty || (fieldEmpty && e.shiftKey))) || (e.key === 'Delete' && e.shiftKey)) {
         e.preventDefault();
-        const targetIdx = idx > 0 ? idx - 1 : 0;
+        const focusField: 'p1' | 'p2' = field === 'player1' ? 'p1' : 'p2';
+        const newLength = sets.length - 1;
+        // If a middle set is removed, keep focus at same index & field on the now-shifted set.
+        // If the last set is removed, fall back to the previous set, preserving the field side.
+        const targetIdx = idx < newLength ? idx : Math.max(0, newLength - 1);
         removeSet(idx);
-        focusInput(targetIdx, 'p2');
+        focusInput(targetIdx, focusField);
         toast.success(`Satz ${idx + 1} entfernt`, { duration: 1500 });
       }
     }
