@@ -739,6 +739,16 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
     }
   };
 
+  // Shared deletion + focus logic (used by keyboard shortcut and touch button)
+  const removeSetWithFocus = (idx: number, field: 'p1' | 'p2' = 'p1') => {
+    if (sets.length <= 1) return;
+    const newLength = sets.length - 1;
+    const targetIdx = idx < newLength ? idx : Math.max(0, newLength - 1);
+    removeSet(idx);
+    focusInput(targetIdx, field);
+    toast.success(`Satz ${idx + 1} entfernt`, { duration: 1500 });
+  };
+
   const saveScore = () => {
     // Logic Agent: Validate ITTF 2-point rule
     for (let i = 0; i < sets.length; i++) {
