@@ -739,6 +739,16 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
     }
   };
 
+  // Shared deletion + focus logic (used by keyboard shortcut and touch button)
+  const removeSetWithFocus = (idx: number, field: 'p1' | 'p2' = 'p1') => {
+    if (sets.length <= 1) return;
+    const newLength = sets.length - 1;
+    const targetIdx = idx < newLength ? idx : Math.max(0, newLength - 1);
+    removeSet(idx);
+    focusInput(targetIdx, field);
+    toast.success(`Satz ${idx + 1} entfernt`, { duration: 1500 });
+  };
+
   const saveScore = () => {
     // Logic Agent: Validate ITTF 2-point rule
     for (let i = 0; i < sets.length; i++) {
@@ -793,14 +803,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
       // Backspace on already-empty field OR Shift+Backspace anywhere → remove set
       if ((e.key === 'Backspace' && (setEmpty || (fieldEmpty && e.shiftKey))) || (e.key === 'Delete' && e.shiftKey)) {
         e.preventDefault();
-        const focusField: 'p1' | 'p2' = field === 'player1' ? 'p1' : 'p2';
-        const newLength = sets.length - 1;
-        // If a middle set is removed, keep focus at same index & field on the now-shifted set.
-        // If the last set is removed, fall back to the previous set, preserving the field side.
-        const targetIdx = idx < newLength ? idx : Math.max(0, newLength - 1);
-        removeSet(idx);
-        focusInput(targetIdx, focusField);
-        toast.success(`Satz ${idx + 1} entfernt`, { duration: 1500 });
+        removeSetWithFocus(idx, field === 'player1' ? 'p1' : 'p2');
       }
     }
   };
@@ -903,8 +906,15 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
               </div>
             </div>
             {sets.length > 1 && (
-              <Button variant="ghost" size="icon" onClick={() => removeSet(i)} className="h-10 w-10 text-muted-foreground self-start" aria-label={`Satz ${i + 1} entfernen`}>
-                <X className="h-4 w-4" />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => removeSetWithFocus(i, 'p1')}
+                className="h-14 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30 self-center gap-1.5 font-semibold"
+                aria-label={`Satz ${i + 1} löschen`}
+              >
+                <X className="h-5 w-5" />
+                <span className="text-xs hidden sm:inline">Satz löschen</span>
               </Button>
             )}
           </div>
