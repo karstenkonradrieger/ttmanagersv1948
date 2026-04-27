@@ -25,9 +25,12 @@ interface Props {
   allMatches?: Match[];
   /** All tournament players – needed for seeding details */
   players?: Player[];
+  /** Current bestOf — when provided with onUpdateBestOf, a switcher is shown before the final */
+  bestOf?: number;
+  onUpdateBestOf?: (bestOf: number) => void | Promise<void>;
 }
 
-export function TournamentBracket({ matches, rounds, getPlayer, allMatches, players }: Props) {
+export function TournamentBracket({ matches, rounds, getPlayer, allMatches, players, bestOf, onUpdateBestOf }: Props) {
   const presentRounds = useMemo(() =>
     Array.from(new Set(matches.map(m => m.round))).sort((a, b) => a - b),
     [matches]
