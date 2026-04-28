@@ -86,7 +86,7 @@ interface Props {
 
 export function CreateTournamentWizard({ onCreated, userId, createTournament }: Props) {
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState(1);
+  const [tab, setTab] = useState<'general' | 'mode' | 'certificate'>('general');
   const [creating, setCreating] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
