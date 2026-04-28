@@ -461,141 +461,6 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               />
             </div>
 
-            {/* Certificate Text */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Text für Siegerurkunden</Label>
-              <Textarea
-                value={data.certificateText}
-                onChange={e => update({ certificateText: e.target.value })}
-                rows={3}
-                className="text-sm"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Platzhalter: <code className="bg-muted px-1 rounded">{'{turniername}'}</code> <code className="bg-muted px-1 rounded">{'{spieler}'}</code> <code className="bg-muted px-1 rounded">{'{verein}'}</code> <code className="bg-muted px-1 rounded">{'{platz}'}</code>
-              </p>
-            </div>
-
-            {/* Certificate Background */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">
-                <ImagePlus className="inline h-4 w-4 mr-1" />
-                Hintergrundbild / Rahmen für Urkunden
-              </Label>
-
-              {/* Predefined frames */}
-              <div className="grid grid-cols-5 gap-2 mb-2">
-                {[
-                  { label: 'Keiner', url: null },
-                  { label: 'Klassisch Gold', url: '/certificate-frames/frame-classic-gold.png' },
-                  { label: 'Sport Rot', url: '/certificate-frames/frame-sport-red.png' },
-                  { label: 'Natur Grün', url: '/certificate-frames/frame-nature-green.png' },
-                  { label: 'Modern Blau', url: '/certificate-frames/frame-modern-blue.png' },
-                ].map((frame) => {
-                  const isSelected = frame.url === null
-                    ? !data.certificateBgUrl || data.certificateBgUrl === ''
-                    : data.certificateBgUrl === frame.url;
-                  return (
-                    <button
-                      key={frame.label}
-                      type="button"
-                      className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 transition-colors ${
-                        isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-muted-foreground'
-                      }`}
-                      onClick={() => update({ certificateBgUrl: frame.url })}
-                    >
-                      {frame.url ? (
-                        <img src={frame.url} alt={frame.label} className="h-14 w-10 object-cover rounded" />
-                      ) : (
-                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-muted-foreground text-xs">–</div>
-                      )}
-                      <span className="text-[10px] text-muted-foreground leading-tight text-center">{frame.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Custom upload */}
-              {data.certificateBgUrl && !['/certificate-frames/frame-classic-gold.png', '/certificate-frames/frame-sport-red.png', '/certificate-frames/frame-nature-green.png', '/certificate-frames/frame-modern-blue.png'].includes(data.certificateBgUrl) ? (
-                <div className="flex items-center gap-2">
-                  <img src={data.certificateBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeCertBg}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div>
-                  <input ref={certBgInputRef} type="file" accept="image/*" className="hidden" onChange={handleCertBgUpload} />
-                  <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg}>
-                    {uploadingCertBg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                    Eigenes Bild hochladen
-                  </Button>
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground mt-1">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
-            </div>
-
-            {/* Certificate Font Settings */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-sm font-semibold mb-1 block">Schriftart</Label>
-                <select
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  value={data.certificateFontFamily}
-                  onChange={e => update({ certificateFontFamily: e.target.value })}
-                >
-                  <option value="Helvetica">Helvetica (Sans-Serif)</option>
-                  <option value="Times">Times (Serif)</option>
-                  <option value="Courier">Courier (Monospace)</option>
-                  <option value="Dancing Script">Dancing Script (Schreibschrift)</option>
-                  <option value="Great Vibes">Great Vibes (Kalligraphie)</option>
-                  <option value="Playfair Display">Playfair Display (Elegant Serif)</option>
-                  <option value="Montserrat">Montserrat (Modern Sans)</option>
-                  <option value="Lora">Lora (Buch-Serif)</option>
-                  <option value="Raleway">Raleway (Dünn Sans)</option>
-                </select>
-              </div>
-              <div>
-                <Label className="text-sm font-semibold mb-1 block">Schriftgröße</Label>
-                <select
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  value={data.certificateFontSize}
-                  onChange={e => update({ certificateFontSize: Number(e.target.value) })}
-                >
-                  {[14, 16, 18, 20, 22, 24, 28].map(s => (
-                    <option key={s} value={s}>{s} pt</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="cert-font-bold-wizard"
-                checked={data.certificateFontBold}
-                onChange={e => update({ certificateFontBold: e.target.checked })}
-                className="h-4 w-4 rounded border-input"
-              />
-              <Label htmlFor="cert-font-bold-wizard" className="text-sm font-semibold cursor-pointer">Fettdruck</Label>
-            </div>
-            {/* Text Color */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={data.certificateTextColor}
-                  onChange={e => update({ certificateTextColor: e.target.value })}
-                  className="w-10 h-10 rounded border border-input cursor-pointer"
-                />
-                <input
-                  className="w-28 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
-                  value={data.certificateTextColor}
-                  onChange={e => update({ certificateTextColor: e.target.value })}
-                  maxLength={7}
-                />
-              </div>
-            </div>
-
             {/* Organizer */}
             <div>
               <Label className="text-sm font-semibold mb-1 block">Veranstalter</Label>
@@ -608,14 +473,12 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
 
             <p className="text-xs text-muted-foreground">Sponsoren können nach dem Erstellen in den Turniereinstellungen hinzugefügt werden.</p>
 
-            <Button onClick={() => setStep(2)} disabled={!canProceedStep1} className="w-full">
-              Weiter <ArrowRight className="ml-2 h-4 w-4" />
+            <Button onClick={() => setTab('mode')} disabled={!canProceedStep1} className="w-full">
+              Weiter zu Modus
             </Button>
-           </div>
-        )}
+          </TabsContent>
 
-        {step === 2 && (
-          <div className="space-y-4 pt-2">
+          <TabsContent value="mode" className="space-y-4">
             {/* Tournament Type */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Turniertyp</Label>
@@ -689,18 +552,152 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               </RadioGroup>
             </div>
 
-            {/* Buttons */}
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Zurück
-              </Button>
-              <Button onClick={handleCreate} disabled={creating} className="flex-1">
-                {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Erstellen
-              </Button>
+            <Button onClick={() => setTab('certificate')} className="w-full">
+              Weiter zu Urkunden
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="certificate" className="space-y-4">
+            {/* Certificate Text */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">Text für Siegerurkunden</Label>
+              <Textarea
+                value={data.certificateText}
+                onChange={e => update({ certificateText: e.target.value })}
+                rows={3}
+                className="text-sm"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Platzhalter: <code className="bg-muted px-1 rounded">{'{turniername}'}</code> <code className="bg-muted px-1 rounded">{'{spieler}'}</code> <code className="bg-muted px-1 rounded">{'{verein}'}</code> <code className="bg-muted px-1 rounded">{'{platz}'}</code>
+              </p>
             </div>
-          </div>
-        )}
+
+            {/* Certificate Background */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">
+                <ImagePlus className="inline h-4 w-4 mr-1" />
+                Hintergrundbild / Rahmen für Urkunden
+              </Label>
+
+              <div className="grid grid-cols-5 gap-2 mb-2">
+                {[
+                  { label: 'Keiner', url: null },
+                  { label: 'Klassisch Gold', url: '/certificate-frames/frame-classic-gold.png' },
+                  { label: 'Sport Rot', url: '/certificate-frames/frame-sport-red.png' },
+                  { label: 'Natur Grün', url: '/certificate-frames/frame-nature-green.png' },
+                  { label: 'Modern Blau', url: '/certificate-frames/frame-modern-blue.png' },
+                ].map((frame) => {
+                  const isSelected = frame.url === null
+                    ? !data.certificateBgUrl || data.certificateBgUrl === ''
+                    : data.certificateBgUrl === frame.url;
+                  return (
+                    <button
+                      key={frame.label}
+                      type="button"
+                      className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 transition-colors ${
+                        isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-muted-foreground'
+                      }`}
+                      onClick={() => update({ certificateBgUrl: frame.url })}
+                    >
+                      {frame.url ? (
+                        <img src={frame.url} alt={frame.label} className="h-14 w-10 object-cover rounded" />
+                      ) : (
+                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-muted-foreground text-xs">–</div>
+                      )}
+                      <span className="text-[10px] text-muted-foreground leading-tight text-center">{frame.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {data.certificateBgUrl && !['/certificate-frames/frame-classic-gold.png', '/certificate-frames/frame-sport-red.png', '/certificate-frames/frame-nature-green.png', '/certificate-frames/frame-modern-blue.png'].includes(data.certificateBgUrl) ? (
+                <div className="flex items-center gap-2">
+                  <img src={data.certificateBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeCertBg}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <input ref={certBgInputRef} type="file" accept="image/*" className="hidden" onChange={handleCertBgUpload} />
+                  <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg}>
+                    {uploadingCertBg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                    Eigenes Bild hochladen
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
+            </div>
+
+            {/* Certificate Font Settings */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-sm font-semibold mb-1 block">Schriftart</Label>
+                <select
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={data.certificateFontFamily}
+                  onChange={e => update({ certificateFontFamily: e.target.value })}
+                >
+                  <option value="Helvetica">Helvetica (Sans-Serif)</option>
+                  <option value="Times">Times (Serif)</option>
+                  <option value="Courier">Courier (Monospace)</option>
+                  <option value="Dancing Script">Dancing Script (Schreibschrift)</option>
+                  <option value="Great Vibes">Great Vibes (Kalligraphie)</option>
+                  <option value="Playfair Display">Playfair Display (Elegant Serif)</option>
+                  <option value="Montserrat">Montserrat (Modern Sans)</option>
+                  <option value="Lora">Lora (Buch-Serif)</option>
+                  <option value="Raleway">Raleway (Dünn Sans)</option>
+                </select>
+              </div>
+              <div>
+                <Label className="text-sm font-semibold mb-1 block">Schriftgröße</Label>
+                <select
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={data.certificateFontSize}
+                  onChange={e => update({ certificateFontSize: Number(e.target.value) })}
+                >
+                  {[14, 16, 18, 20, 22, 24, 28].map(s => (
+                    <option key={s} value={s}>{s} pt</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="cert-font-bold-wizard"
+                checked={data.certificateFontBold}
+                onChange={e => update({ certificateFontBold: e.target.checked })}
+                className="h-4 w-4 rounded border-input"
+              />
+              <Label htmlFor="cert-font-bold-wizard" className="text-sm font-semibold cursor-pointer">Fettdruck</Label>
+            </div>
+
+            {/* Text Color */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={data.certificateTextColor}
+                  onChange={e => update({ certificateTextColor: e.target.value })}
+                  className="w-10 h-10 rounded border border-input cursor-pointer"
+                />
+                <input
+                  className="w-28 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
+                  value={data.certificateTextColor}
+                  onChange={e => update({ certificateTextColor: e.target.value })}
+                  maxLength={7}
+                />
+              </div>
+            </div>
+
+            <Button onClick={handleCreate} disabled={creating || !canProceedStep1} className="w-full">
+              {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Turnier erstellen
+            </Button>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
