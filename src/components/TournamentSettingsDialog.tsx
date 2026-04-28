@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Settings2, Upload, X, Loader2, ImagePlus, Video, Play, Plus } from 'lucide-react';
 import { TournamentMode, TournamentType, TeamMode, Sponsor } from '@/types/tournament';
 import { supabase } from '@/integrations/supabase/client';
