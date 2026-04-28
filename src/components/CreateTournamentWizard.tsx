@@ -587,7 +587,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               </RadioGroup>
             </div>
 
-            <Button onClick={() => setTab('certificate')} className="w-full">
+            {!canProceedMode && (
+              <p className="text-xs text-destructive">Pflichtfelder fehlen: {modeErrors.join(', ')}</p>
+            )}
+
+            <Button onClick={() => tryChangeTab('certificate')} disabled={!canProceedMode} className="w-full">
               Weiter zu Urkunden
             </Button>
           </TabsContent>
