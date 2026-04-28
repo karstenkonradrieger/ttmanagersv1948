@@ -731,7 +731,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               </div>
             </div>
 
-            <Button onClick={handleCreate} disabled={creating || !canProceedStep1} className="w-full">
+            {certificateErrors.length > 0 && (
+              <p className="text-xs text-destructive">Pflichtfelder fehlen: {certificateErrors.join(', ')}</p>
+            )}
+
+            <Button onClick={handleCreate} disabled={creating || !canCreate} className="w-full">
               {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Turnier erstellen
             </Button>
