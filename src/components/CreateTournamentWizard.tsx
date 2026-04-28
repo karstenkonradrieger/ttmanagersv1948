@@ -259,7 +259,38 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     update({ certificateBgUrl: null });
   };
 
-  const canProceedStep1 = data.name.trim().length > 0;
+  const generalErrors: string[] = [];
+  if (!data.name.trim()) generalErrors.push('Turniername');
+  if (data.sport === '__custom' && !customSport.trim()) generalErrors.push('Sportart');
+  if (!data.organizerName.trim()) generalErrors.push('Veranstalter');
+
+  const modeErrors: string[] = [];
+  if (!data.mode) modeErrors.push('Turniermodus');
+  if (!data.bestOf) modeErrors.push('Gewinnsätze');
+  if (data.type === 'team' && !data.teamMode) modeErrors.push('Mannschaftssystem');
+
+  const certificateErrors: string[] = [];
+  if (!data.certificateText.trim()) certificateErrors.push('Urkundentext');
+
+  const canProceedStep1 = generalErrors.length === 0;
+  const canProceedMode = modeErrors.length === 0;
+  const canCreate = canProceedStep1 && canProceedMode && certificateErrors.length === 0;
+
+  const tryChangeTab = (next: typeof tab) => {
+    if (next === 'mode' || next === 'certificate') {
+      if (!canProceedStep1) {
+        toast.error(`Bitte fülle im Tab „Allgemein" aus: ${generalErrors.join(', ')}`);
+        return;
+      }
+    }
+    if (next === 'certificate') {
+      if (!canProceedMode) {
+        toast.error(`Bitte fülle im Tab „Modus" aus: ${modeErrors.join(', ')}`);
+        return;
+      }
+    }
+    setTab(next);
+  };
 
   const handleCreate = async () => {
     setCreating(true);
