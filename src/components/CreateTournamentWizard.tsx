@@ -312,13 +312,17 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>
-            Neues Turnier – Schritt {step} von 2
-          </DialogTitle>
+          <DialogTitle>Neues Turnier</DialogTitle>
         </DialogHeader>
 
-        {step === 1 && (
-          <div className="space-y-4 pt-2">
+        <Tabs value={tab} onValueChange={v => setTab(v as typeof tab)} className="pt-2">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="general">Allgemein</TabsTrigger>
+            <TabsTrigger value="mode" disabled={!canProceedStep1}>Modus</TabsTrigger>
+            <TabsTrigger value="certificate" disabled={!canProceedStep1}>Urkunden</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="general" className="space-y-4">
             {/* Name + Logo */}
             <div className="flex gap-3 items-end">
               <div className="flex-1">
