@@ -125,7 +125,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
-      setStep(1);
+      setTab('general');
       setData({
         name: '',
         sport: 'Tischtennis',
