@@ -259,7 +259,38 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     update({ certificateBgUrl: null });
   };
 
-  const canProceedStep1 = data.name.trim().length > 0;
+  const generalErrors: string[] = [];
+  if (!data.name.trim()) generalErrors.push('Turniername');
+  if (data.sport === '__custom' && !customSport.trim()) generalErrors.push('Sportart');
+  if (!data.organizerName.trim()) generalErrors.push('Veranstalter');
+
+  const modeErrors: string[] = [];
+  if (!data.mode) modeErrors.push('Turniermodus');
+  if (!data.bestOf) modeErrors.push('Gewinnsätze');
+  if (data.type === 'team' && !data.teamMode) modeErrors.push('Mannschaftssystem');
+
+  const certificateErrors: string[] = [];
+  if (!data.certificateText.trim()) certificateErrors.push('Urkundentext');
+
+  const canProceedStep1 = generalErrors.length === 0;
+  const canProceedMode = modeErrors.length === 0;
+  const canCreate = canProceedStep1 && canProceedMode && certificateErrors.length === 0;
+
+  const tryChangeTab = (next: typeof tab) => {
+    if (next === 'mode' || next === 'certificate') {
+      if (!canProceedStep1) {
+        toast.error(`Bitte fülle im Tab „Allgemein" aus: ${generalErrors.join(', ')}`);
+        return;
+      }
+    }
+    if (next === 'certificate') {
+      if (!canProceedMode) {
+        toast.error(`Bitte fülle im Tab „Modus" aus: ${modeErrors.join(', ')}`);
+        return;
+      }
+    }
+    setTab(next);
+  };
 
   const handleCreate = async () => {
     setCreating(true);
@@ -315,11 +346,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           <DialogTitle>Neues Turnier</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={tab} onValueChange={v => setTab(v as typeof tab)} className="pt-2">
+        <Tabs value={tab} onValueChange={v => tryChangeTab(v as typeof tab)} className="pt-2">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="general">Allgemein</TabsTrigger>
             <TabsTrigger value="mode" disabled={!canProceedStep1}>Modus</TabsTrigger>
-            <TabsTrigger value="certificate" disabled={!canProceedStep1}>Urkunden</TabsTrigger>
+            <TabsTrigger value="certificate" disabled={!canProceedStep1 || !canProceedMode}>Urkunden</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-4">
@@ -473,7 +504,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
 
             <p className="text-xs text-muted-foreground">Sponsoren können nach dem Erstellen in den Turniereinstellungen hinzugefügt werden.</p>
 
-            <Button onClick={() => setTab('mode')} disabled={!canProceedStep1} className="w-full">
+            {!canProceedStep1 && (
+              <p className="text-xs text-destructive">Pflichtfelder fehlen: {generalErrors.join(', ')}</p>
+            )}
+
+            <Button onClick={() => tryChangeTab('mode')} disabled={!canProceedStep1} className="w-full">
               Weiter zu Modus
             </Button>
           </TabsContent>
@@ -552,7 +587,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               </RadioGroup>
             </div>
 
-            <Button onClick={() => setTab('certificate')} className="w-full">
+            {!canProceedMode && (
+              <p className="text-xs text-destructive">Pflichtfelder fehlen: {modeErrors.join(', ')}</p>
+            )}
+
+            <Button onClick={() => tryChangeTab('certificate')} disabled={!canProceedMode} className="w-full">
               Weiter zu Urkunden
             </Button>
           </TabsContent>
@@ -692,7 +731,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               </div>
             </div>
 
-            <Button onClick={handleCreate} disabled={creating || !canProceedStep1} className="w-full">
+            {certificateErrors.length > 0 && (
+              <p className="text-xs text-destructive">Pflichtfelder fehlen: {certificateErrors.join(', ')}</p>
+            )}
+
+            <Button onClick={handleCreate} disabled={creating || !canCreate} className="w-full">
               {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Turnier erstellen
             </Button>
