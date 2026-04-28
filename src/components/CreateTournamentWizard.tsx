@@ -504,7 +504,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
 
             <p className="text-xs text-muted-foreground">Sponsoren können nach dem Erstellen in den Turniereinstellungen hinzugefügt werden.</p>
 
-            <Button onClick={() => setTab('mode')} disabled={!canProceedStep1} className="w-full">
+            {!canProceedStep1 && (
+              <p className="text-xs text-destructive">Pflichtfelder fehlen: {generalErrors.join(', ')}</p>
+            )}
+
+            <Button onClick={() => tryChangeTab('mode')} disabled={!canProceedStep1} className="w-full">
               Weiter zu Modus
             </Button>
           </TabsContent>
