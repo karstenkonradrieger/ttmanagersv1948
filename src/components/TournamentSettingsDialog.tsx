@@ -294,334 +294,350 @@ export function TournamentSettingsDialog({
         <DialogHeader>
           <DialogTitle>Turnier-Einstellungen</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 pt-2">
-          {/* Tournament date */}
-          <div>
-            <Label className="text-sm font-semibold mb-1 block">Turniertag</Label>
-            <Input
-              type="date"
-              value={localDate}
-              onChange={e => setLocalDate(e.target.value)}
-            />
-          </div>
+        <Tabs defaultValue="general" className="pt-2">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="general">Allgemein</TabsTrigger>
+            <TabsTrigger value="mode">Modus</TabsTrigger>
+            <TabsTrigger value="certificate">Urkunden</TabsTrigger>
+          </TabsList>
 
-          {/* Motto */}
-          <div>
-            <Label className="text-sm font-semibold mb-1 block">Turniermotto</Label>
-            <Input
-              placeholder="z.B. Sommerfest-Turnier"
-              value={localMotto}
-              onChange={e => setLocalMotto(e.target.value)}
-            />
-          </div>
-
-          {/* Opening Video */}
-          <div>
-            <Label className="text-sm font-semibold mb-1 block">
-              <Video className="inline h-4 w-4 mr-1" />
-              Eröffnungsvideo
-            </Label>
-            {localOpeningVideoUrl ? (
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setOpeningVideoPlayerOpen(true)}>
-                  <Play className="mr-1 h-4 w-4" />
-                  Abspielen
-                </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeOpeningVideo}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <div>
-                <input ref={openingVideoInputRef} type="file" accept="video/*" className="hidden" onChange={handleOpeningVideoUpload} />
-                <Button variant="outline" size="sm" onClick={() => openingVideoInputRef.current?.click()} disabled={uploadingOpeningVideo}>
-                  {uploadingOpeningVideo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                  Video hochladen
-                </Button>
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-1">Wird vor dem Turnier in einem separaten Fenster abgespielt (max. 200 MB)</p>
-          </div>
-
-          {/* Venue */}
-          <div>
-            <Label className="text-sm font-semibold mb-1 block">Veranstaltungsort</Label>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="col-span-2">
-                <Input placeholder="Straße" value={localStreet} onChange={e => setLocalStreet(e.target.value)} />
-              </div>
-              <Input placeholder="Hausnr." value={localHouseNumber} onChange={e => setLocalHouseNumber(e.target.value)} />
+          <TabsContent value="general" className="space-y-4">
+            {/* Tournament date */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">Turniertag</Label>
+              <Input
+                type="date"
+                value={localDate}
+                onChange={e => setLocalDate(e.target.value)}
+              />
             </div>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              <Input placeholder="PLZ" value={localPostalCode} onChange={e => setLocalPostalCode(e.target.value)} />
-              <div className="col-span-2">
-                <Input placeholder="Ort" value={localCity} onChange={e => setLocalCity(e.target.value)} />
-              </div>
-            </div>
-          </div>
 
-          {/* Break time */}
-          <div>
-            <Label className="text-sm font-semibold mb-2 block">Pausenzeit zwischen Spielen</Label>
-            <RadioGroup value={String(localBreakMinutes)} onValueChange={(v) => setLocalBreakMinutes(parseInt(v))} className="flex gap-4">
-              {[0, 3, 5, 10].map(min => (
-                <div key={min} className="flex items-center space-x-2">
-                  <RadioGroupItem value={String(min)} id={`break-${min}`} />
-                  <Label htmlFor={`break-${min}`} className="text-sm cursor-pointer">{min === 0 ? 'Keine' : `${min} Min.`}</Label>
+            {/* Motto */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">Turniermotto</Label>
+              <Input
+                placeholder="z.B. Sommerfest-Turnier"
+                value={localMotto}
+                onChange={e => setLocalMotto(e.target.value)}
+              />
+            </div>
+
+            {/* Opening Video */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">
+                <Video className="inline h-4 w-4 mr-1" />
+                Eröffnungsvideo
+              </Label>
+              {localOpeningVideoUrl ? (
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setOpeningVideoPlayerOpen(true)}>
+                    <Play className="mr-1 h-4 w-4" />
+                    Abspielen
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeOpeningVideo}>
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
-              ))}
-            </RadioGroup>
-          </div>
-
-          {/* Certificate Text */}
-          <div>
-            <Label className="text-sm font-semibold mb-1 block">Text für Siegerurkunden</Label>
-            <Textarea
-              value={localCertText}
-              onChange={e => setLocalCertText(e.target.value)}
-              rows={3}
-              className="text-sm"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Platzhalter: <code className="bg-muted px-1 rounded">{'{turniername}'}</code> <code className="bg-muted px-1 rounded">{'{spieler}'}</code> <code className="bg-muted px-1 rounded">{'{verein}'}</code> <code className="bg-muted px-1 rounded">{'{platz}'}</code>
-            </p>
-          </div>
-
-          {/* Certificate Background */}
-          <div>
-            <Label className="text-sm font-semibold mb-1 block">
-              <ImagePlus className="inline h-4 w-4 mr-1" />
-              Hintergrundbild / Rahmen für Urkunden
-            </Label>
-
-            {/* Predefined frames */}
-            <div className="grid grid-cols-5 gap-2 mb-2">
-              {[
-                { label: 'Keiner', url: null },
-                { label: 'Klassisch Gold', url: '/certificate-frames/frame-classic-gold.png' },
-                { label: 'Sport Rot', url: '/certificate-frames/frame-sport-red.png' },
-                { label: 'Natur Grün', url: '/certificate-frames/frame-nature-green.png' },
-                { label: 'Modern Blau', url: '/certificate-frames/frame-modern-blue.png' },
-              ].map((frame) => {
-                const isSelected = frame.url === null
-                  ? !localCertBgUrl || localCertBgUrl === ''
-                  : localCertBgUrl === frame.url;
-                return (
-                  <button
-                    key={frame.label}
-                    type="button"
-                    className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 transition-colors ${
-                      isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-muted-foreground'
-                    }`}
-                    onClick={() => setLocalCertBgUrl(frame.url)}
-                  >
-                    {frame.url ? (
-                      <img src={frame.url} alt={frame.label} className="h-14 w-10 object-cover rounded" />
-                    ) : (
-                      <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-muted-foreground text-xs">–</div>
-                    )}
-                    <span className="text-[10px] text-muted-foreground leading-tight text-center">{frame.label}</span>
-                  </button>
-                );
-              })}
+              ) : (
+                <div>
+                  <input ref={openingVideoInputRef} type="file" accept="video/*" className="hidden" onChange={handleOpeningVideoUpload} />
+                  <Button variant="outline" size="sm" onClick={() => openingVideoInputRef.current?.click()} disabled={uploadingOpeningVideo}>
+                    {uploadingOpeningVideo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                    Video hochladen
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Wird vor dem Turnier in einem separaten Fenster abgespielt (max. 200 MB)</p>
             </div>
 
-            {/* Custom upload */}
-            {localCertBgUrl && !['/certificate-frames/frame-classic-gold.png', '/certificate-frames/frame-sport-red.png', '/certificate-frames/frame-nature-green.png', '/certificate-frames/frame-modern-blue.png'].includes(localCertBgUrl) ? (
-              <div className="flex items-center gap-2">
-                <img src={localCertBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeCertBg}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <div>
-                <input ref={certBgInputRef} type="file" accept="image/*" className="hidden" onChange={handleCertBgUpload} />
-                <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg}>
-                  {uploadingCertBg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                  Eigenes Bild hochladen
-                </Button>
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-1">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
-          </div>
-
-          {/* Certificate Font Settings */}
-          <div className="grid grid-cols-2 gap-3">
+            {/* Venue */}
             <div>
-              <Label className="text-sm font-semibold mb-1 block">Schriftart</Label>
-              <select
-                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={localFontFamily}
-                onChange={e => setLocalFontFamily(e.target.value)}
-              >
-                <option value="Helvetica">Helvetica (Sans-Serif)</option>
-                <option value="Times">Times (Serif)</option>
-                <option value="Courier">Courier (Monospace)</option>
-                <option value="Dancing Script">Dancing Script (Schreibschrift)</option>
-                <option value="Great Vibes">Great Vibes (Kalligraphie)</option>
-                <option value="Playfair Display">Playfair Display (Elegant Serif)</option>
-                <option value="Montserrat">Montserrat (Modern Sans)</option>
-                <option value="Lora">Lora (Buch-Serif)</option>
-                <option value="Raleway">Raleway (Dünn Sans)</option>
-              </select>
+              <Label className="text-sm font-semibold mb-1 block">Veranstaltungsort</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-2">
+                  <Input placeholder="Straße" value={localStreet} onChange={e => setLocalStreet(e.target.value)} />
+                </div>
+                <Input placeholder="Hausnr." value={localHouseNumber} onChange={e => setLocalHouseNumber(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                <Input placeholder="PLZ" value={localPostalCode} onChange={e => setLocalPostalCode(e.target.value)} />
+                <div className="col-span-2">
+                  <Input placeholder="Ort" value={localCity} onChange={e => setLocalCity(e.target.value)} />
+                </div>
+              </div>
             </div>
+
+            {/* Organizer */}
             <div>
-              <Label className="text-sm font-semibold mb-1 block">Schriftgröße</Label>
-              <select
-                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={localFontSize}
-                onChange={e => setLocalFontSize(Number(e.target.value))}
-              >
-                {[14, 16, 18, 20, 22, 24, 28].map(s => (
-                  <option key={s} value={s}>{s} pt</option>
+              <Label className="text-sm font-semibold mb-1 block">Veranstalter</Label>
+              <Input
+                placeholder="Name des Veranstalters"
+                value={localOrganizerName}
+                onChange={e => setLocalOrganizerName(e.target.value)}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="mode" className="space-y-4">
+            {/* Mode */}
+            <div className={started ? 'opacity-50' : ''}>
+              <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
+              <RadioGroup value={localMode} onValueChange={(v) => setLocalMode(v as TournamentMode)} disabled={started} className="flex flex-col gap-3">
+                {[
+                  { value: 'knockout', label: 'K.-o.-System (Einfach-K.o.)', desc: 'Wer verliert, scheidet sofort aus. Ideal bei Zeitnot.' },
+                  { value: 'double_knockout', label: 'Doppel-K.-o.-System', desc: 'Jeder darf einmal verlieren. Erst bei der zweiten Niederlage ist man raus.' },
+                  { value: 'round_robin', label: 'Jeder gegen Jeden (Round Robin)', desc: 'Alle Teilnehmer spielen gegen alle anderen.' },
+                  { value: 'group_knockout', label: 'Kombiniertes System', desc: 'Erst Gruppenphase (4er-Gruppen), dann K.O. für die Besten.' },
+                  { value: 'swiss', label: 'Schweizer System', desc: 'Ähnliche Bilanzen spielen gegeneinander. Kein Ausscheiden.' },
+                  { value: 'kaiser', label: 'Kaiserspiel (King of the Hill)', desc: 'Gewinner rücken auf, Verlierer ab. Timer-basiert.' },
+                  { value: 'handicap', label: 'Vorgabeturnier (Handicap)', desc: 'Schwächere starten mit Punktevorsprung pro Satz.' },
+                ].map(opt => (
+                  <div key={opt.value} className="flex items-start space-x-2">
+                    <RadioGroupItem value={opt.value} id={`edit-mode-${opt.value}`} disabled={started} className="mt-0.5" />
+                    <div>
+                      <Label htmlFor={`edit-mode-${opt.value}`} className="text-sm font-medium cursor-pointer">{opt.label}</Label>
+                      <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                    </div>
+                  </div>
                 ))}
-              </select>
+              </RadioGroup>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="cert-font-bold-settings"
-              checked={!!localFontBold}
-              onChange={e => setLocalFontBold(e.target.checked)}
-              className="h-4 w-4 rounded border-input"
-            />
-            <Label htmlFor="cert-font-bold-settings" className="text-sm font-semibold cursor-pointer">Fettdruck</Label>
-          </div>
-          {/* Text Color */}
-          <div>
-            <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>
+
+            <div className={started ? 'opacity-50' : ''}>
+              <Label className="text-sm font-semibold mb-2 block">Turniertyp</Label>
+              <RadioGroup value={localType} onValueChange={(v) => setLocalType(v as TournamentType)} disabled={started} className="flex gap-4">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="singles" id="edit-type-singles" disabled={started} />
+                  <Label htmlFor="edit-type-singles" className="text-sm cursor-pointer">Einzel</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="doubles" id="edit-type-doubles" disabled={started} />
+                  <Label htmlFor="edit-type-doubles" className="text-sm cursor-pointer">Doppel</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="team" id="edit-type-team" disabled={started} />
+                  <Label htmlFor="edit-type-team" className="text-sm cursor-pointer">Mannschaft</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className={started ? 'opacity-50' : ''}>
+              <Label className="text-sm font-semibold mb-2 block">Gewinnsätze</Label>
+              <RadioGroup value={String(localBestOf)} onValueChange={(v) => setLocalBestOf(parseInt(v))} disabled={started} className="flex gap-4">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="2" id="edit-bestof-2" disabled={started} />
+                  <Label htmlFor="edit-bestof-2" className="text-sm cursor-pointer">2 Gewinnsätze (Best of 3)</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="3" id="edit-bestof-3" disabled={started} />
+                  <Label htmlFor="edit-bestof-3" className="text-sm cursor-pointer">3 Gewinnsätze (Best of 5)</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* Break time */}
+            <div>
+              <Label className="text-sm font-semibold mb-2 block">Pausenzeit zwischen Spielen</Label>
+              <RadioGroup value={String(localBreakMinutes)} onValueChange={(v) => setLocalBreakMinutes(parseInt(v))} className="flex gap-4">
+                {[0, 3, 5, 10].map(min => (
+                  <div key={min} className="flex items-center space-x-2">
+                    <RadioGroupItem value={String(min)} id={`break-${min}`} />
+                    <Label htmlFor={`break-${min}`} className="text-sm cursor-pointer">{min === 0 ? 'Keine' : `${min} Min.`}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="certificate" className="space-y-4">
+            {/* Certificate Text */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">Text für Siegerurkunden</Label>
+              <Textarea
+                value={localCertText}
+                onChange={e => setLocalCertText(e.target.value)}
+                rows={3}
+                className="text-sm"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Platzhalter: <code className="bg-muted px-1 rounded">{'{turniername}'}</code> <code className="bg-muted px-1 rounded">{'{spieler}'}</code> <code className="bg-muted px-1 rounded">{'{verein}'}</code> <code className="bg-muted px-1 rounded">{'{platz}'}</code>
+              </p>
+            </div>
+
+            {/* Certificate Background */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">
+                <ImagePlus className="inline h-4 w-4 mr-1" />
+                Hintergrundbild / Rahmen für Urkunden
+              </Label>
+
+              <div className="grid grid-cols-5 gap-2 mb-2">
+                {[
+                  { label: 'Keiner', url: null },
+                  { label: 'Klassisch Gold', url: '/certificate-frames/frame-classic-gold.png' },
+                  { label: 'Sport Rot', url: '/certificate-frames/frame-sport-red.png' },
+                  { label: 'Natur Grün', url: '/certificate-frames/frame-nature-green.png' },
+                  { label: 'Modern Blau', url: '/certificate-frames/frame-modern-blue.png' },
+                ].map((frame) => {
+                  const isSelected = frame.url === null
+                    ? !localCertBgUrl || localCertBgUrl === ''
+                    : localCertBgUrl === frame.url;
+                  return (
+                    <button
+                      key={frame.label}
+                      type="button"
+                      className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 transition-colors ${
+                        isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-muted-foreground'
+                      }`}
+                      onClick={() => setLocalCertBgUrl(frame.url)}
+                    >
+                      {frame.url ? (
+                        <img src={frame.url} alt={frame.label} className="h-14 w-10 object-cover rounded" />
+                      ) : (
+                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-muted-foreground text-xs">–</div>
+                      )}
+                      <span className="text-[10px] text-muted-foreground leading-tight text-center">{frame.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {localCertBgUrl && !['/certificate-frames/frame-classic-gold.png', '/certificate-frames/frame-sport-red.png', '/certificate-frames/frame-nature-green.png', '/certificate-frames/frame-modern-blue.png'].includes(localCertBgUrl) ? (
+                <div className="flex items-center gap-2">
+                  <img src={localCertBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeCertBg}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <input ref={certBgInputRef} type="file" accept="image/*" className="hidden" onChange={handleCertBgUpload} />
+                  <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg}>
+                    {uploadingCertBg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                    Eigenes Bild hochladen
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
+            </div>
+
+            {/* Certificate Font Settings */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-sm font-semibold mb-1 block">Schriftart</Label>
+                <select
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={localFontFamily}
+                  onChange={e => setLocalFontFamily(e.target.value)}
+                >
+                  <option value="Helvetica">Helvetica (Sans-Serif)</option>
+                  <option value="Times">Times (Serif)</option>
+                  <option value="Courier">Courier (Monospace)</option>
+                  <option value="Dancing Script">Dancing Script (Schreibschrift)</option>
+                  <option value="Great Vibes">Great Vibes (Kalligraphie)</option>
+                  <option value="Playfair Display">Playfair Display (Elegant Serif)</option>
+                  <option value="Montserrat">Montserrat (Modern Sans)</option>
+                  <option value="Lora">Lora (Buch-Serif)</option>
+                  <option value="Raleway">Raleway (Dünn Sans)</option>
+                </select>
+              </div>
+              <div>
+                <Label className="text-sm font-semibold mb-1 block">Schriftgröße</Label>
+                <select
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={localFontSize}
+                  onChange={e => setLocalFontSize(Number(e.target.value))}
+                >
+                  {[14, 16, 18, 20, 22, 24, 28].map(s => (
+                    <option key={s} value={s}>{s} pt</option>
+                  ))}
+                </select>
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               <input
-                type="color"
-                value={localTextColor}
-                onChange={e => setLocalTextColor(e.target.value)}
-                className="w-10 h-10 rounded border border-input cursor-pointer"
+                type="checkbox"
+                id="cert-font-bold-settings"
+                checked={!!localFontBold}
+                onChange={e => setLocalFontBold(e.target.checked)}
+                className="h-4 w-4 rounded border-input"
               />
-              <Input
-                value={localTextColor}
-                onChange={e => setLocalTextColor(e.target.value)}
-                className="w-28 font-mono text-sm"
-                maxLength={7}
-              />
+              <Label htmlFor="cert-font-bold-settings" className="text-sm font-semibold cursor-pointer">Fettdruck</Label>
             </div>
-          </div>
-          <div>
-            <Label className="text-sm font-semibold mb-1 block">Veranstalter</Label>
-            <Input
-              placeholder="Name des Veranstalters"
-              value={localOrganizerName}
-              onChange={e => setLocalOrganizerName(e.target.value)}
-            />
-          </div>
 
-          {/* Sponsoren (bis zu 5) */}
-          <div>
-            <Label className="text-sm font-semibold mb-2 block">Sponsoren (max. 5)</Label>
-            <div className="space-y-3">
-              {localSponsors.map((sponsor, idx) => (
-                <div key={idx} className="border border-border rounded-lg p-3 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Input
-                      placeholder={`Sponsor ${idx + 1}`}
-                      value={sponsor.name}
-                      onChange={e => setLocalSponsors(prev => prev.map((s, i) => i === idx ? { ...s, name: e.target.value } : s))}
-                      className="flex-1"
-                    />
-                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeSponsorSlot(idx)}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {sponsor.logoUrl ? (
-                      <>
-                        <img src={sponsor.logoUrl} alt="Logo" className="h-10 border border-border rounded p-1 object-contain" />
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeSponsorLogo(idx)}>
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <input
-                          ref={el => { sponsorLogoInputRefs.current[idx] = el; }}
-                          type="file" accept="image/*" className="hidden"
-                          onChange={e => handleSponsorLogoUpload(e, idx)}
-                        />
-                        <Button variant="outline" size="sm" onClick={() => sponsorLogoInputRefs.current[idx]?.click()} disabled={uploadingSponsorLogoIdx === idx}>
-                          {uploadingSponsorLogoIdx === idx ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Upload className="mr-1 h-3 w-3" />}
-                          Logo
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
+            {/* Text Color */}
+            <div>
+              <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={localTextColor}
+                  onChange={e => setLocalTextColor(e.target.value)}
+                  className="w-10 h-10 rounded border border-input cursor-pointer"
+                />
+                <Input
+                  value={localTextColor}
+                  onChange={e => setLocalTextColor(e.target.value)}
+                  className="w-28 font-mono text-sm"
+                  maxLength={7}
+                />
+              </div>
             </div>
-            {localSponsors.length < 5 && (
-              <Button variant="outline" size="sm" className="mt-2" onClick={addSponsorSlot}>
-                <Plus className="mr-1 h-3 w-3" /> Sponsor hinzufügen
-              </Button>
-            )}
-          </div>
 
-          {/* Mode */}
-          <div className={started ? 'opacity-50' : ''}>
-            <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
-            <RadioGroup value={localMode} onValueChange={(v) => setLocalMode(v as TournamentMode)} disabled={started} className="flex flex-col gap-3">
-              {[
-                { value: 'knockout', label: 'K.-o.-System (Einfach-K.o.)', desc: 'Wer verliert, scheidet sofort aus. Ideal bei Zeitnot.' },
-                { value: 'double_knockout', label: 'Doppel-K.-o.-System', desc: 'Jeder darf einmal verlieren. Erst bei der zweiten Niederlage ist man raus.' },
-                { value: 'round_robin', label: 'Jeder gegen Jeden (Round Robin)', desc: 'Alle Teilnehmer spielen gegen alle anderen.' },
-                { value: 'group_knockout', label: 'Kombiniertes System', desc: 'Erst Gruppenphase (4er-Gruppen), dann K.O. für die Besten.' },
-                { value: 'swiss', label: 'Schweizer System', desc: 'Ähnliche Bilanzen spielen gegeneinander. Kein Ausscheiden.' },
-                { value: 'kaiser', label: 'Kaiserspiel (King of the Hill)', desc: 'Gewinner rücken auf, Verlierer ab. Timer-basiert.' },
-                { value: 'handicap', label: 'Vorgabeturnier (Handicap)', desc: 'Schwächere starten mit Punktevorsprung pro Satz.' },
-              ].map(opt => (
-                <div key={opt.value} className="flex items-start space-x-2">
-                  <RadioGroupItem value={opt.value} id={`edit-mode-${opt.value}`} disabled={started} className="mt-0.5" />
-                  <div>
-                    <Label htmlFor={`edit-mode-${opt.value}`} className="text-sm font-medium cursor-pointer">{opt.label}</Label>
-                    <p className="text-xs text-muted-foreground">{opt.desc}</p>
+            {/* Sponsoren (bis zu 5) */}
+            <div>
+              <Label className="text-sm font-semibold mb-2 block">Sponsoren (max. 5)</Label>
+              <div className="space-y-3">
+                {localSponsors.map((sponsor, idx) => (
+                  <div key={idx} className="border border-border rounded-lg p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder={`Sponsor ${idx + 1}`}
+                        value={sponsor.name}
+                        onChange={e => setLocalSponsors(prev => prev.map((s, i) => i === idx ? { ...s, name: e.target.value } : s))}
+                        className="flex-1"
+                      />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeSponsorSlot(idx)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {sponsor.logoUrl ? (
+                        <>
+                          <img src={sponsor.logoUrl} alt="Logo" className="h-10 border border-border rounded p-1 object-contain" />
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeSponsorLogo(idx)}>
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <input
+                            ref={el => { sponsorLogoInputRefs.current[idx] = el; }}
+                            type="file" accept="image/*" className="hidden"
+                            onChange={e => handleSponsorLogoUpload(e, idx)}
+                          />
+                          <Button variant="outline" size="sm" onClick={() => sponsorLogoInputRefs.current[idx]?.click()} disabled={uploadingSponsorLogoIdx === idx}>
+                            {uploadingSponsorLogoIdx === idx ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Upload className="mr-1 h-3 w-3" />}
+                            Logo
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </RadioGroup>
-          </div>
-          <div className={started ? 'opacity-50' : ''}>
-            <Label className="text-sm font-semibold mb-2 block">Turniertyp</Label>
-            <RadioGroup value={localType} onValueChange={(v) => setLocalType(v as TournamentType)} disabled={started} className="flex gap-4">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="singles" id="edit-type-singles" disabled={started} />
-                <Label htmlFor="edit-type-singles" className="text-sm cursor-pointer">Einzel</Label>
+                ))}
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="doubles" id="edit-type-doubles" disabled={started} />
-                <Label htmlFor="edit-type-doubles" className="text-sm cursor-pointer">Doppel</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="team" id="edit-type-team" disabled={started} />
-                <Label htmlFor="edit-type-team" className="text-sm cursor-pointer">Mannschaft</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          <div className={started ? 'opacity-50' : ''}>
-            <Label className="text-sm font-semibold mb-2 block">Gewinnsätze</Label>
-            <RadioGroup value={String(localBestOf)} onValueChange={(v) => setLocalBestOf(parseInt(v))} disabled={started} className="flex gap-4">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="2" id="edit-bestof-2" disabled={started} />
-                <Label htmlFor="edit-bestof-2" className="text-sm cursor-pointer">2 Gewinnsätze (Best of 3)</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="3" id="edit-bestof-3" disabled={started} />
-                <Label htmlFor="edit-bestof-3" className="text-sm cursor-pointer">3 Gewinnsätze (Best of 5)</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          <Button onClick={handleSave} disabled={saving} className="w-full">
-            {saving ? 'Speichern...' : 'Speichern'}
-          </Button>
-        </div>
+              {localSponsors.length < 5 && (
+                <Button variant="outline" size="sm" className="mt-2" onClick={addSponsorSlot}>
+                  <Plus className="mr-1 h-3 w-3" /> Sponsor hinzufügen
+                </Button>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <Button onClick={handleSave} disabled={saving} className="w-full mt-4">
+          {saving ? 'Speichern...' : 'Speichern'}
+        </Button>
       </DialogContent>
     </Dialog>
 
