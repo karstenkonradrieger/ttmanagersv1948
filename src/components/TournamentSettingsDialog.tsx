@@ -340,6 +340,7 @@ export function TournamentSettingsDialog({
 
       toast.success('Einstellungen gespeichert');
       try { localStorage.removeItem(draftKey); } catch {}
+      setHasDraft(false);
       setOpen(false);
     } catch {
       toast.error('Fehler beim Speichern');
