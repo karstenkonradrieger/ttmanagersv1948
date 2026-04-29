@@ -149,17 +149,8 @@ export function TournamentSettingsDialog({
     localTextColor, localFontBold, localOpeningVideoUrl,
   ]);
 
-  // Restore draft on mount (covers full page reload while dialog was closed too — only restore on open)
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(draftKey)) {
-        // Auto-open dialog so user sees their unsaved changes after reload
-        setOpen(true);
-        handleOpen(true);
-      }
-    } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Note: drafts are restored when the user reopens the dialog (handleOpen).
+
 
 
   const handleSponsorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
