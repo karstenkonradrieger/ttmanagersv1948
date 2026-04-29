@@ -744,6 +744,38 @@ export function TournamentSettingsDialog({
         )}
       </DialogContent>
     </Dialog>
+
+    <AlertDialog open={confirmCloseOpen} onOpenChange={setConfirmCloseOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Entwurf verwerfen?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Du hast ungespeicherte Änderungen. Möchtest du sie speichern oder verwerfen?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2 sm:gap-2">
+          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+          <Button
+            variant="outline"
+            onClick={() => {
+              discardDraft();
+              setConfirmCloseOpen(false);
+              setOpen(false);
+            }}
+          >
+            Verwerfen & Schließen
+          </Button>
+          <AlertDialogAction
+            onClick={async () => {
+              setConfirmCloseOpen(false);
+              await handleSave();
+            }}
+          >
+            Speichern
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </>
   );
 }
