@@ -110,6 +110,30 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+
+  /* Form Typography Tokens — einheitliche Schriftbild-Sprache für Dialog-Formulare.
+     Verwende diese statt einzelner text-muted-foreground/opacity-Klassen, damit
+     Tabs und Felder visuell konsistent bleiben. */
+  .form-section {
+    @apply space-y-2;
+  }
+  .form-section-locked {
+    /* Ersetzt opacity-50 Wrapper: Felder bleiben visuell klar lesbar,
+       Sperrung erfolgt funktional via `disabled` der Inputs. */
+    @apply space-y-2;
+  }
+  .form-label {
+    @apply text-sm font-semibold mb-2 block text-foreground;
+  }
+  .form-option-label {
+    @apply text-sm font-medium cursor-pointer text-foreground;
+  }
+  .form-option-desc {
+    @apply text-xs text-foreground/70;
+  }
+  .form-hint {
+    @apply text-xs text-foreground/60 mt-1;
+  }
   .glass {
     backdrop-filter: blur(12px);
     background: hsl(222 47% 11% / 0.85);
