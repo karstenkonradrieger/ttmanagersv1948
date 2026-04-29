@@ -486,8 +486,8 @@ export function TournamentSettingsDialog({
                   <div key={opt.value} className="flex items-start space-x-2">
                     <RadioGroupItem value={opt.value} id={`edit-mode-${opt.value}`} disabled={started} className="mt-0.5" />
                     <div>
-                      <Label htmlFor={`edit-mode-${opt.value}`} className="text-sm font-medium cursor-pointer">{opt.label}</Label>
-                      <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                      <Label htmlFor={`edit-mode-${opt.value}`} className="text-sm font-medium cursor-pointer text-foreground">{opt.label}</Label>
+                      <p className="text-xs text-foreground/70">{opt.desc}</p>
                     </div>
                   </div>
                 ))}
