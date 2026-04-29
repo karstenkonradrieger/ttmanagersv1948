@@ -99,7 +99,14 @@ export function TournamentSettingsDialog({
     try { return !!localStorage.getItem(draftKey); } catch { return false; }
   });
 
+  const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
+
   const handleOpen = (isOpen: boolean) => {
+    if (!isOpen && open && hasDraft && !saving) {
+      // Intercept close while a draft exists
+      setConfirmCloseOpen(true);
+      return;
+    }
     if (isOpen) {
       // Try to load draft from localStorage first
       let draft: any = null;
