@@ -93,30 +93,74 @@ export function TournamentSettingsDialog({
   const certBgInputRef = useRef<HTMLInputElement>(null);
   const openingVideoInputRef = useRef<HTMLInputElement>(null);
 
+  const draftKey = `tt-tournament-settings-draft-${tournamentId}`;
+
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
-      setLocalMode(mode);
-      setLocalType(type);
-      setLocalBestOf(bestOf);
-      setLocalDate(tournamentDate || '');
-      setLocalStreet(venueStreet);
-      setLocalHouseNumber(venueHouseNumber);
-      setLocalPostalCode(venuePostalCode);
-      setLocalCity(venueCity);
-      setLocalMotto(motto);
-      setLocalBreakMinutes(breakMinutes);
-      setLocalCertText(certificateText);
-      setLocalOrganizerName(organizerName);
-      setLocalSponsors(sponsors.map(s => ({ ...s })));
-      setLocalCertBgUrl(certificateBgUrl);
-      setLocalFontFamily(certificateFontFamily);
-      setLocalFontSize(certificateFontSize);
-      setLocalTextColor(certificateTextColor);
-      setLocalFontBold(!!certificateExtraSizes.fontBold);
-      setLocalOpeningVideoUrl(openingVideoUrl);
+      // Try to load draft from localStorage first
+      let draft: any = null;
+      try {
+        const raw = localStorage.getItem(draftKey);
+        if (raw) draft = JSON.parse(raw);
+      } catch {}
+
+      setLocalMode(draft?.localMode ?? mode);
+      setLocalType(draft?.localType ?? type);
+      setLocalBestOf(draft?.localBestOf ?? bestOf);
+      setLocalDate(draft?.localDate ?? (tournamentDate || ''));
+      setLocalStreet(draft?.localStreet ?? venueStreet);
+      setLocalHouseNumber(draft?.localHouseNumber ?? venueHouseNumber);
+      setLocalPostalCode(draft?.localPostalCode ?? venuePostalCode);
+      setLocalCity(draft?.localCity ?? venueCity);
+      setLocalMotto(draft?.localMotto ?? motto);
+      setLocalBreakMinutes(draft?.localBreakMinutes ?? breakMinutes);
+      setLocalCertText(draft?.localCertText ?? certificateText);
+      setLocalOrganizerName(draft?.localOrganizerName ?? organizerName);
+      setLocalSponsors(draft?.localSponsors ?? sponsors.map(s => ({ ...s })));
+      setLocalCertBgUrl(draft?.localCertBgUrl ?? certificateBgUrl);
+      setLocalFontFamily(draft?.localFontFamily ?? certificateFontFamily);
+      setLocalFontSize(draft?.localFontSize ?? certificateFontSize);
+      setLocalTextColor(draft?.localTextColor ?? certificateTextColor);
+      setLocalFontBold(draft?.localFontBold ?? !!certificateExtraSizes.fontBold);
+      setLocalOpeningVideoUrl(draft?.localOpeningVideoUrl ?? openingVideoUrl);
+
+      if (draft) toast.info('Nicht gespeicherter Entwurf wiederhergestellt');
     }
     setOpen(isOpen);
   };
+
+  // Persist draft to localStorage whenever any field changes while dialog is open
+  useEffect(() => {
+    if (!open) return;
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({
+        localMode, localType, localBestOf, localDate,
+        localStreet, localHouseNumber, localPostalCode, localCity,
+        localMotto, localBreakMinutes, localCertText, localOrganizerName,
+        localSponsors, localCertBgUrl, localFontFamily, localFontSize,
+        localTextColor, localFontBold, localOpeningVideoUrl,
+      }));
+    } catch {}
+  }, [open, draftKey,
+    localMode, localType, localBestOf, localDate,
+    localStreet, localHouseNumber, localPostalCode, localCity,
+    localMotto, localBreakMinutes, localCertText, localOrganizerName,
+    localSponsors, localCertBgUrl, localFontFamily, localFontSize,
+    localTextColor, localFontBold, localOpeningVideoUrl,
+  ]);
+
+  // Restore draft on mount (covers full page reload while dialog was closed too — only restore on open)
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(draftKey)) {
+        // Auto-open dialog so user sees their unsaved changes after reload
+        setOpen(true);
+        handleOpen(true);
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const handleSponsorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     const file = e.target.files?.[0];
