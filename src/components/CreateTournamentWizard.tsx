@@ -515,28 +515,28 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
 
           <TabsContent value="mode" className="space-y-4">
             {/* Tournament Type */}
-            <div>
-              <Label className="text-sm font-semibold mb-2 block">Turniertyp</Label>
+            <div className="form-section">
+              <Label className="form-label">Turniertyp</Label>
               <RadioGroup value={data.type} onValueChange={v => update({ type: v as TournamentType })} className="flex gap-4">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="singles" id="wiz-type-singles" />
-                  <Label htmlFor="wiz-type-singles" className="text-sm cursor-pointer">Einzel</Label>
+                  <Label htmlFor="wiz-type-singles" className="form-option-label">Einzel</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="doubles" id="wiz-type-doubles" />
-                  <Label htmlFor="wiz-type-doubles" className="text-sm cursor-pointer">Doppel</Label>
+                  <Label htmlFor="wiz-type-doubles" className="form-option-label">Doppel</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="team" id="wiz-type-team" />
-                  <Label htmlFor="wiz-type-team" className="text-sm cursor-pointer">Mannschaft</Label>
+                  <Label htmlFor="wiz-type-team" className="form-option-label">Mannschaft</Label>
                 </div>
               </RadioGroup>
             </div>
 
             {/* Team Mode (only for team type) */}
             {data.type === 'team' && (
-              <div>
-                <Label className="text-sm font-semibold mb-2 block">Mannschaftssystem</Label>
+              <div className="form-section">
+                <Label className="form-label">Mannschaftssystem</Label>
                 <RadioGroup value={data.teamMode} onValueChange={v => update({ teamMode: v as TeamMode })} className="flex flex-col gap-3">
                   {[
                     { value: 'bundessystem', label: 'Bundessystem (4er)', desc: '2 Doppel + 8 Einzel.' },
@@ -547,8 +547,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                     <div key={opt.value} className="flex items-start space-x-2">
                       <RadioGroupItem value={opt.value} id={`wiz-team-${opt.value}`} className="mt-0.5" />
                       <div>
-                        <Label htmlFor={`wiz-team-${opt.value}`} className="text-sm font-medium cursor-pointer">{opt.label}</Label>
-                        <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                        <Label htmlFor={`wiz-team-${opt.value}`} className="form-option-label">{opt.label}</Label>
+                        <p className="form-option-desc">{opt.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -557,15 +557,15 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             )}
 
             {/* Tournament Mode */}
-            <div>
-              <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
+            <div className="form-section">
+              <Label className="form-label">Turniermodus</Label>
               <RadioGroup value={data.mode} onValueChange={v => update({ mode: v as TournamentMode })} className="flex flex-col gap-3">
                 {MODE_OPTIONS.all.map(opt => (
                   <div key={opt.value} className="flex items-start space-x-2">
                     <RadioGroupItem value={opt.value} id={`wiz-mode-${opt.value}`} className="mt-0.5" />
                     <div>
-                      <Label htmlFor={`wiz-mode-${opt.value}`} className="text-sm font-medium cursor-pointer">{opt.label}</Label>
-                      <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                      <Label htmlFor={`wiz-mode-${opt.value}`} className="form-option-label">{opt.label}</Label>
+                      <p className="form-option-desc">{opt.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -573,16 +573,16 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             </div>
 
             {/* Best Of */}
-            <div>
-              <Label className="text-sm font-semibold mb-2 block">Gewinnsätze</Label>
+            <div className="form-section">
+              <Label className="form-label">Gewinnsätze</Label>
               <RadioGroup value={String(data.bestOf)} onValueChange={v => update({ bestOf: parseInt(v) })} className="flex gap-4">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="2" id="wiz-bestof-2" />
-                  <Label htmlFor="wiz-bestof-2" className="text-sm cursor-pointer">2 Gewinnsätze (Best of 3)</Label>
+                  <Label htmlFor="wiz-bestof-2" className="form-option-label">2 Gewinnsätze (Best of 3)</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="3" id="wiz-bestof-3" />
-                  <Label htmlFor="wiz-bestof-3" className="text-sm cursor-pointer">3 Gewinnsätze (Best of 5)</Label>
+                  <Label htmlFor="wiz-bestof-3" className="form-option-label">3 Gewinnsätze (Best of 5)</Label>
                 </div>
               </RadioGroup>
             </div>
