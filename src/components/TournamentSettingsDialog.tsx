@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -98,7 +99,14 @@ export function TournamentSettingsDialog({
     try { return !!localStorage.getItem(draftKey); } catch { return false; }
   });
 
+  const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
+
   const handleOpen = (isOpen: boolean) => {
+    if (!isOpen && open && hasDraft && !saving) {
+      // Intercept close while a draft exists
+      setConfirmCloseOpen(true);
+      return;
+    }
     if (isOpen) {
       // Try to load draft from localStorage first
       let draft: any = null;
@@ -736,6 +744,38 @@ export function TournamentSettingsDialog({
         )}
       </DialogContent>
     </Dialog>
+
+    <AlertDialog open={confirmCloseOpen} onOpenChange={setConfirmCloseOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Entwurf verwerfen?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Du hast ungespeicherte Änderungen. Möchtest du sie speichern oder verwerfen?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2 sm:gap-2">
+          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+          <Button
+            variant="outline"
+            onClick={() => {
+              discardDraft();
+              setConfirmCloseOpen(false);
+              setOpen(false);
+            }}
+          >
+            Verwerfen & Schließen
+          </Button>
+          <AlertDialogAction
+            onClick={async () => {
+              setConfirmCloseOpen(false);
+              await handleSave();
+            }}
+          >
+            Speichern
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </>
   );
 }
