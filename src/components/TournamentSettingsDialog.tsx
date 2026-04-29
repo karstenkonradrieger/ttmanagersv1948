@@ -94,6 +94,9 @@ export function TournamentSettingsDialog({
   const openingVideoInputRef = useRef<HTMLInputElement>(null);
 
   const draftKey = `tt-tournament-settings-draft-${tournamentId}`;
+  const [hasDraft, setHasDraft] = useState<boolean>(() => {
+    try { return !!localStorage.getItem(draftKey); } catch { return false; }
+  });
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
@@ -124,6 +127,7 @@ export function TournamentSettingsDialog({
       setLocalFontBold(draft?.localFontBold ?? !!certificateExtraSizes.fontBold);
       setLocalOpeningVideoUrl(draft?.localOpeningVideoUrl ?? openingVideoUrl);
 
+      setHasDraft(!!draft);
       if (draft) toast.info('Nicht gespeicherter Entwurf wiederhergestellt');
     }
     setOpen(isOpen);
@@ -140,6 +144,7 @@ export function TournamentSettingsDialog({
         localSponsors, localCertBgUrl, localFontFamily, localFontSize,
         localTextColor, localFontBold, localOpeningVideoUrl,
       }));
+      setHasDraft(true);
     } catch {}
   }, [open, draftKey,
     localMode, localType, localBestOf, localDate,
@@ -149,7 +154,32 @@ export function TournamentSettingsDialog({
     localTextColor, localFontBold, localOpeningVideoUrl,
   ]);
 
-  // Note: drafts are restored when the user reopens the dialog (handleOpen).
+  const discardDraft = () => {
+    try { localStorage.removeItem(draftKey); } catch {}
+    setHasDraft(false);
+    // Reset fields to props
+    setLocalMode(mode);
+    setLocalType(type);
+    setLocalBestOf(bestOf);
+    setLocalDate(tournamentDate || '');
+    setLocalStreet(venueStreet);
+    setLocalHouseNumber(venueHouseNumber);
+    setLocalPostalCode(venuePostalCode);
+    setLocalCity(venueCity);
+    setLocalMotto(motto);
+    setLocalBreakMinutes(breakMinutes);
+    setLocalCertText(certificateText);
+    setLocalOrganizerName(organizerName);
+    setLocalSponsors(sponsors.map(s => ({ ...s })));
+    setLocalCertBgUrl(certificateBgUrl);
+    setLocalFontFamily(certificateFontFamily);
+    setLocalFontSize(certificateFontSize);
+    setLocalTextColor(certificateTextColor);
+    setLocalFontBold(!!certificateExtraSizes.fontBold);
+    setLocalOpeningVideoUrl(openingVideoUrl);
+    toast.info('Entwurf verworfen');
+  };
+
 
 
 
@@ -310,6 +340,7 @@ export function TournamentSettingsDialog({
 
       toast.success('Einstellungen gespeichert');
       try { localStorage.removeItem(draftKey); } catch {}
+      setHasDraft(false);
       setOpen(false);
     } catch {
       toast.error('Fehler beim Speichern');
@@ -322,13 +353,29 @@ export function TournamentSettingsDialog({
     <>
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground relative">
           <Settings2 className="h-4 w-4" />
+          {hasDraft && (
+            <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-amber-500 ring-2 ring-background" title="Ungespeicherter Entwurf" />
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Turnier-Einstellungen</DialogTitle>
+          <div className="flex items-center justify-between gap-2 pr-6">
+            <DialogTitle>Turnier-Einstellungen</DialogTitle>
+            {hasDraft && (
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 px-2 py-0.5 text-xs font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  Ungespeichert
+                </span>
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={discardDraft}>
+                  Verwerfen
+                </Button>
+              </div>
+            )}
+          </div>
         </DialogHeader>
         <Tabs defaultValue="general" className="pt-2">
           <TabsList className="grid w-full grid-cols-3">
