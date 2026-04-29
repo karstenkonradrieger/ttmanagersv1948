@@ -486,8 +486,8 @@ export function TournamentSettingsDialog({
                   <div key={opt.value} className="flex items-start space-x-2">
                     <RadioGroupItem value={opt.value} id={`edit-mode-${opt.value}`} disabled={started} className="mt-0.5" />
                     <div>
-                      <Label htmlFor={`edit-mode-${opt.value}`} className="text-sm font-medium cursor-pointer">{opt.label}</Label>
-                      <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                      <Label htmlFor={`edit-mode-${opt.value}`} className="text-sm font-medium cursor-pointer text-foreground">{opt.label}</Label>
+                      <p className="text-xs text-foreground/70">{opt.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -499,15 +499,15 @@ export function TournamentSettingsDialog({
               <RadioGroup value={localType} onValueChange={(v) => setLocalType(v as TournamentType)} disabled={started} className="flex gap-4">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="singles" id="edit-type-singles" disabled={started} />
-                  <Label htmlFor="edit-type-singles" className="text-sm cursor-pointer">Einzel</Label>
+                  <Label htmlFor="edit-type-singles" className="text-sm cursor-pointer text-foreground">Einzel</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="doubles" id="edit-type-doubles" disabled={started} />
-                  <Label htmlFor="edit-type-doubles" className="text-sm cursor-pointer">Doppel</Label>
+                  <Label htmlFor="edit-type-doubles" className="text-sm cursor-pointer text-foreground">Doppel</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="team" id="edit-type-team" disabled={started} />
-                  <Label htmlFor="edit-type-team" className="text-sm cursor-pointer">Mannschaft</Label>
+                  <Label htmlFor="edit-type-team" className="text-sm cursor-pointer text-foreground">Mannschaft</Label>
                 </div>
               </RadioGroup>
             </div>
@@ -517,11 +517,11 @@ export function TournamentSettingsDialog({
               <RadioGroup value={String(localBestOf)} onValueChange={(v) => setLocalBestOf(parseInt(v))} disabled={started} className="flex gap-4">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="2" id="edit-bestof-2" disabled={started} />
-                  <Label htmlFor="edit-bestof-2" className="text-sm cursor-pointer">2 Gewinnsätze (Best of 3)</Label>
+                  <Label htmlFor="edit-bestof-2" className="text-sm cursor-pointer text-foreground">2 Gewinnsätze (Best of 3)</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="3" id="edit-bestof-3" disabled={started} />
-                  <Label htmlFor="edit-bestof-3" className="text-sm cursor-pointer">3 Gewinnsätze (Best of 5)</Label>
+                  <Label htmlFor="edit-bestof-3" className="text-sm cursor-pointer text-foreground">3 Gewinnsätze (Best of 5)</Label>
                 </div>
               </RadioGroup>
             </div>
