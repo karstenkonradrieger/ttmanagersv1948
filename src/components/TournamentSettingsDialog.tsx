@@ -94,6 +94,9 @@ export function TournamentSettingsDialog({
   const openingVideoInputRef = useRef<HTMLInputElement>(null);
 
   const draftKey = `tt-tournament-settings-draft-${tournamentId}`;
+  const [hasDraft, setHasDraft] = useState<boolean>(() => {
+    try { return !!localStorage.getItem(draftKey); } catch { return false; }
+  });
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
@@ -124,6 +127,7 @@ export function TournamentSettingsDialog({
       setLocalFontBold(draft?.localFontBold ?? !!certificateExtraSizes.fontBold);
       setLocalOpeningVideoUrl(draft?.localOpeningVideoUrl ?? openingVideoUrl);
 
+      setHasDraft(!!draft);
       if (draft) toast.info('Nicht gespeicherter Entwurf wiederhergestellt');
     }
     setOpen(isOpen);
@@ -140,6 +144,7 @@ export function TournamentSettingsDialog({
         localSponsors, localCertBgUrl, localFontFamily, localFontSize,
         localTextColor, localFontBold, localOpeningVideoUrl,
       }));
+      setHasDraft(true);
     } catch {}
   }, [open, draftKey,
     localMode, localType, localBestOf, localDate,
@@ -149,7 +154,32 @@ export function TournamentSettingsDialog({
     localTextColor, localFontBold, localOpeningVideoUrl,
   ]);
 
-  // Note: drafts are restored when the user reopens the dialog (handleOpen).
+  const discardDraft = () => {
+    try { localStorage.removeItem(draftKey); } catch {}
+    setHasDraft(false);
+    // Reset fields to props
+    setLocalMode(mode);
+    setLocalType(type);
+    setLocalBestOf(bestOf);
+    setLocalDate(tournamentDate || '');
+    setLocalStreet(venueStreet);
+    setLocalHouseNumber(venueHouseNumber);
+    setLocalPostalCode(venuePostalCode);
+    setLocalCity(venueCity);
+    setLocalMotto(motto);
+    setLocalBreakMinutes(breakMinutes);
+    setLocalCertText(certificateText);
+    setLocalOrganizerName(organizerName);
+    setLocalSponsors(sponsors.map(s => ({ ...s })));
+    setLocalCertBgUrl(certificateBgUrl);
+    setLocalFontFamily(certificateFontFamily);
+    setLocalFontSize(certificateFontSize);
+    setLocalTextColor(certificateTextColor);
+    setLocalFontBold(!!certificateExtraSizes.fontBold);
+    setLocalOpeningVideoUrl(openingVideoUrl);
+    toast.info('Entwurf verworfen');
+  };
+
 
 
 
