@@ -353,13 +353,29 @@ export function TournamentSettingsDialog({
     <>
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground relative">
           <Settings2 className="h-4 w-4" />
+          {hasDraft && (
+            <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-amber-500 ring-2 ring-background" title="Ungespeicherter Entwurf" />
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Turnier-Einstellungen</DialogTitle>
+          <div className="flex items-center justify-between gap-2 pr-6">
+            <DialogTitle>Turnier-Einstellungen</DialogTitle>
+            {hasDraft && (
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 px-2 py-0.5 text-xs font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  Ungespeichert
+                </span>
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={discardDraft}>
+                  Verwerfen
+                </Button>
+              </div>
+            )}
+          </div>
         </DialogHeader>
         <Tabs defaultValue="general" className="pt-2">
           <TabsList className="grid w-full grid-cols-3">
