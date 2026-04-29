@@ -471,8 +471,8 @@ export function TournamentSettingsDialog({
 
           <TabsContent value="mode" className="space-y-4">
             {/* Mode */}
-            <div className={started ? 'opacity-50' : ''}>
-              <Label className="text-sm font-semibold mb-2 block">Turniermodus</Label>
+            <div className="form-section-locked">
+              <Label className="form-label">Turniermodus</Label>
               <RadioGroup value={localMode} onValueChange={(v) => setLocalMode(v as TournamentMode)} disabled={started} className="flex flex-col gap-3">
                 {[
                   { value: 'knockout', label: 'K.-o.-System (Einfach-K.o.)', desc: 'Wer verliert, scheidet sofort aus. Ideal bei Zeitnot.' },
@@ -486,54 +486,54 @@ export function TournamentSettingsDialog({
                   <div key={opt.value} className="flex items-start space-x-2">
                     <RadioGroupItem value={opt.value} id={`edit-mode-${opt.value}`} disabled={started} className="mt-0.5" />
                     <div>
-                      <Label htmlFor={`edit-mode-${opt.value}`} className="text-sm font-medium cursor-pointer text-foreground">{opt.label}</Label>
-                      <p className="text-xs text-foreground/70">{opt.desc}</p>
+                      <Label htmlFor={`edit-mode-${opt.value}`} className="form-option-label">{opt.label}</Label>
+                      <p className="form-option-desc">{opt.desc}</p>
                     </div>
                   </div>
                 ))}
               </RadioGroup>
             </div>
 
-            <div className={started ? 'opacity-50' : ''}>
-              <Label className="text-sm font-semibold mb-2 block">Turniertyp</Label>
+            <div className="form-section-locked">
+              <Label className="form-label">Turniertyp</Label>
               <RadioGroup value={localType} onValueChange={(v) => setLocalType(v as TournamentType)} disabled={started} className="flex gap-4">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="singles" id="edit-type-singles" disabled={started} />
-                  <Label htmlFor="edit-type-singles" className="text-sm cursor-pointer text-foreground">Einzel</Label>
+                  <Label htmlFor="edit-type-singles" className="form-option-label">Einzel</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="doubles" id="edit-type-doubles" disabled={started} />
-                  <Label htmlFor="edit-type-doubles" className="text-sm cursor-pointer text-foreground">Doppel</Label>
+                  <Label htmlFor="edit-type-doubles" className="form-option-label">Doppel</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="team" id="edit-type-team" disabled={started} />
-                  <Label htmlFor="edit-type-team" className="text-sm cursor-pointer text-foreground">Mannschaft</Label>
+                  <Label htmlFor="edit-type-team" className="form-option-label">Mannschaft</Label>
                 </div>
               </RadioGroup>
             </div>
 
-            <div className={started ? 'opacity-50' : ''}>
-              <Label className="text-sm font-semibold mb-2 block">Gewinnsätze</Label>
+            <div className="form-section-locked">
+              <Label className="form-label">Gewinnsätze</Label>
               <RadioGroup value={String(localBestOf)} onValueChange={(v) => setLocalBestOf(parseInt(v))} disabled={started} className="flex gap-4">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="2" id="edit-bestof-2" disabled={started} />
-                  <Label htmlFor="edit-bestof-2" className="text-sm cursor-pointer text-foreground">2 Gewinnsätze (Best of 3)</Label>
+                  <Label htmlFor="edit-bestof-2" className="form-option-label">2 Gewinnsätze (Best of 3)</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="3" id="edit-bestof-3" disabled={started} />
-                  <Label htmlFor="edit-bestof-3" className="text-sm cursor-pointer text-foreground">3 Gewinnsätze (Best of 5)</Label>
+                  <Label htmlFor="edit-bestof-3" className="form-option-label">3 Gewinnsätze (Best of 5)</Label>
                 </div>
               </RadioGroup>
             </div>
 
             {/* Break time */}
-            <div>
-              <Label className="text-sm font-semibold mb-2 block">Pausenzeit zwischen Spielen</Label>
+            <div className="form-section">
+              <Label className="form-label">Pausenzeit zwischen Spielen</Label>
               <RadioGroup value={String(localBreakMinutes)} onValueChange={(v) => setLocalBreakMinutes(parseInt(v))} className="flex gap-4">
                 {[0, 3, 5, 10].map(min => (
                   <div key={min} className="flex items-center space-x-2">
                     <RadioGroupItem value={String(min)} id={`break-${min}`} />
-                    <Label htmlFor={`break-${min}`} className="text-sm cursor-pointer">{min === 0 ? 'Keine' : `${min} Min.`}</Label>
+                    <Label htmlFor={`break-${min}`} className="form-option-label">{min === 0 ? 'Keine' : `${min} Min.`}</Label>
                   </div>
                 ))}
               </RadioGroup>
