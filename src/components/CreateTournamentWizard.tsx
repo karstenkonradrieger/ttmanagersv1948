@@ -517,16 +517,16 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             {/* Tournament Type */}
             <div className="form-section">
               <Label className="form-label">Turniertyp</Label>
-              <RadioGroup value={data.type} onValueChange={v => update({ type: v as TournamentType })} className="flex gap-4">
-                <div className="flex items-center space-x-2">
+              <RadioGroup value={data.type} onValueChange={v => update({ type: v as TournamentType })} className="form-radio-group-inline">
+                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
                   <RadioGroupItem value="singles" id="wiz-type-singles" />
                   <Label htmlFor="wiz-type-singles" className="form-option-label">Einzel</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
                   <RadioGroupItem value="doubles" id="wiz-type-doubles" />
                   <Label htmlFor="wiz-type-doubles" className="form-option-label">Doppel</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
                   <RadioGroupItem value="team" id="wiz-type-team" />
                   <Label htmlFor="wiz-type-team" className="form-option-label">Mannschaft</Label>
                 </div>
@@ -537,16 +537,16 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             {data.type === 'team' && (
               <div className="form-section">
                 <Label className="form-label">Mannschaftssystem</Label>
-                <RadioGroup value={data.teamMode} onValueChange={v => update({ teamMode: v as TeamMode })} className="flex flex-col gap-3">
+                <RadioGroup value={data.teamMode} onValueChange={v => update({ teamMode: v as TeamMode })} className="form-radio-group-stack">
                   {[
                     { value: 'bundessystem', label: 'Bundessystem (4er)', desc: '2 Doppel + 8 Einzel.' },
                     { value: 'werner_scheffler', label: 'Werner-Scheffler (4er)', desc: '2 Doppel + 6 Einzel.' },
                     { value: 'olympic', label: 'Olympisches System (3er)', desc: '2 Einzel, 1 Doppel, ggf. 2 weitere.' },
                     { value: 'corbillon', label: 'Corbillon-Cup (2er)', desc: '2 Einzel, 1 Doppel, ggf. 2 weitere.' },
                   ].map(opt => (
-                    <div key={opt.value} className="flex items-start space-x-2">
-                      <RadioGroupItem value={opt.value} id={`wiz-team-${opt.value}`} className="mt-0.5" />
-                      <div>
+                    <div key={opt.value} className="form-radio-row">
+                      <RadioGroupItem value={opt.value} id={`wiz-team-${opt.value}`} className="mt-1.5 flex-shrink-0" />
+                      <div className="min-w-0">
                         <Label htmlFor={`wiz-team-${opt.value}`} className="form-option-label">{opt.label}</Label>
                         <p className="form-option-desc">{opt.desc}</p>
                       </div>
@@ -559,11 +559,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             {/* Tournament Mode */}
             <div className="form-section">
               <Label className="form-label">Turniermodus</Label>
-              <RadioGroup value={data.mode} onValueChange={v => update({ mode: v as TournamentMode })} className="flex flex-col gap-3">
+              <RadioGroup value={data.mode} onValueChange={v => update({ mode: v as TournamentMode })} className="form-radio-group-stack">
                 {MODE_OPTIONS.all.map(opt => (
-                  <div key={opt.value} className="flex items-start space-x-2">
-                    <RadioGroupItem value={opt.value} id={`wiz-mode-${opt.value}`} className="mt-0.5" />
-                    <div>
+                  <div key={opt.value} className="form-radio-row">
+                    <RadioGroupItem value={opt.value} id={`wiz-mode-${opt.value}`} className="mt-1.5 flex-shrink-0" />
+                    <div className="min-w-0">
                       <Label htmlFor={`wiz-mode-${opt.value}`} className="form-option-label">{opt.label}</Label>
                       <p className="form-option-desc">{opt.desc}</p>
                     </div>
@@ -575,12 +575,12 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             {/* Best Of */}
             <div className="form-section">
               <Label className="form-label">Gewinnsätze</Label>
-              <RadioGroup value={String(data.bestOf)} onValueChange={v => update({ bestOf: parseInt(v) })} className="flex gap-4">
-                <div className="flex items-center space-x-2">
+              <RadioGroup value={String(data.bestOf)} onValueChange={v => update({ bestOf: parseInt(v) })} className="form-radio-group-inline">
+                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
                   <RadioGroupItem value="2" id="wiz-bestof-2" />
                   <Label htmlFor="wiz-bestof-2" className="form-option-label">2 Gewinnsätze (Best of 3)</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
                   <RadioGroupItem value="3" id="wiz-bestof-3" />
                   <Label htmlFor="wiz-bestof-3" className="form-option-label">3 Gewinnsätze (Best of 5)</Label>
                 </div>
@@ -588,10 +588,10 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             </div>
 
             {!canProceedMode && (
-              <p className="text-xs text-destructive">Pflichtfelder fehlen: {modeErrors.join(', ')}</p>
+              <p className="form-error">Pflichtfelder fehlen: {modeErrors.join(', ')}</p>
             )}
 
-            <Button onClick={() => tryChangeTab('certificate')} disabled={!canProceedMode} className="w-full">
+            <Button onClick={() => tryChangeTab('certificate')} disabled={!canProceedMode} className="form-primary-button">
               Weiter zu Urkunden
             </Button>
           </TabsContent>
