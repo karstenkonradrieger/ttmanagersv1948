@@ -460,8 +460,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             <div className="form-section">
               <Label className="form-label">Anfahrtsbeschreibung (PDF)</Label>
               {data.directionsPdfUrl ? (
-                <div className="flex items-center gap-2 text-sm">
-                  <a href={data.directionsPdfUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline truncate flex-1">
+                <div className="form-upload-status">
+                  <a href={data.directionsPdfUrl} target="_blank" rel="noopener noreferrer" className="form-upload-link">
                     PDF hochgeladen
                   </a>
                   <Button variant="ghost" size="icon" className="h-9 w-9" onClick={removePdf}>
