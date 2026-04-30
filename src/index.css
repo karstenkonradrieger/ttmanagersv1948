@@ -126,13 +126,33 @@
     @apply text-sm font-semibold mb-2 block text-foreground;
   }
   .form-option-label {
-    @apply text-sm font-medium cursor-pointer text-foreground;
+    /* min-h sorgt für komfortable Touch-Targets (≥40px) auf Mobilgeräten */
+    @apply text-sm font-medium cursor-pointer text-foreground leading-snug min-h-[24px] flex items-center;
   }
   .form-option-desc {
-    @apply text-xs text-foreground/70;
+    /* 80% Opazität: bleibt deutlich >7:1 Kontrast gegen --background → WCAG AAA */
+    @apply text-xs text-foreground/80 leading-snug;
   }
   .form-hint {
-    @apply text-xs text-foreground/60 mt-1;
+    /* 75% Opazität: WCAG AA-konform für kleine Hilfstexte */
+    @apply text-xs text-foreground/75 mt-1 leading-snug;
+  }
+  .form-error {
+    @apply text-xs text-destructive mt-1;
+  }
+  /* Radio-/Checkbox-Reihen: ausreichend großer Klick-/Touch-Bereich,
+     verhindert Umbrüche bei langen Optionstexten auf Mobile. */
+  .form-radio-row {
+    @apply flex items-start gap-2 py-1 min-h-[40px];
+  }
+  .form-radio-group-inline {
+    @apply flex flex-wrap gap-x-4 gap-y-2;
+  }
+  .form-radio-group-stack {
+    @apply flex flex-col gap-2;
+  }
+  .form-primary-button {
+    @apply w-full min-h-[44px];
   }
   .glass {
     backdrop-filter: blur(12px);

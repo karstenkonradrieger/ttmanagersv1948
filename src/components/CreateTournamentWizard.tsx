@@ -355,9 +355,9 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
 
           <TabsContent value="general" className="space-y-4">
             {/* Name + Logo */}
-            <div className="flex gap-3 items-end">
-              <div className="flex-1">
-                <Label className="text-sm font-semibold mb-1 block">Turniername *</Label>
+            <div className="form-section flex gap-3 items-end">
+              <div className="flex-1 min-w-0">
+                <Label className="form-label">Turniername *</Label>
                 <Input
                   placeholder="z.B. Vereinsmeisterschaft 2026"
                   value={data.name}
@@ -370,15 +370,15 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 <button
                   onClick={() => logoInputRef.current?.click()}
                   disabled={uploadingLogo}
-                  className="flex-shrink-0 h-10 w-10 rounded-lg overflow-hidden border border-border hover:border-primary transition-colors flex items-center justify-center bg-secondary relative"
+                  className="flex-shrink-0 h-11 w-11 rounded-lg overflow-hidden border border-border hover:border-primary transition-colors flex items-center justify-center bg-secondary relative"
                   title="Turnierlogo hochladen"
                 >
                   {uploadingLogo ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    <Loader2 className="h-4 w-4 animate-spin text-foreground/70" />
                   ) : data.logoUrl ? (
                     <img src={data.logoUrl} alt="Logo" className="h-full w-full object-contain" />
                   ) : (
-                    <ImagePlus className="h-4 w-4 text-muted-foreground" />
+                    <ImagePlus className="h-4 w-4 text-foreground/70" />
                   )}
                 </button>
                 {data.logoUrl && (
@@ -390,22 +390,22 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             </div>
 
             {/* Sport */}
-            <div>
-              <Label className="text-sm font-semibold mb-2 block">Sportart</Label>
+            <div className="form-section">
+              <Label className="form-label">Sportart</Label>
               <RadioGroup
                 value={data.sport}
                 onValueChange={v => update({ sport: v })}
-                className="flex flex-wrap gap-3"
+                className="form-radio-group-inline"
               >
                 {SPORT_OPTIONS.map(s => (
-                  <div key={s} className="flex items-center space-x-2">
+                  <div key={s} className="flex items-center space-x-2 py-1 min-h-[40px]">
                     <RadioGroupItem value={s} id={`sport-${s}`} />
-                    <Label htmlFor={`sport-${s}`} className="text-sm cursor-pointer">{s}</Label>
+                    <Label htmlFor={`sport-${s}`} className="form-option-label">{s}</Label>
                   </div>
                 ))}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
                   <RadioGroupItem value="__custom" id="sport-custom" />
-                  <Label htmlFor="sport-custom" className="text-sm cursor-pointer">Andere</Label>
+                  <Label htmlFor="sport-custom" className="form-option-label">Andere</Label>
                 </div>
               </RadioGroup>
               {data.sport === '__custom' && (
@@ -419,9 +419,9 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             </div>
 
             {/* Dates */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="form-section grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label className="text-sm font-semibold mb-1 block">Erster Turniertag</Label>
+                <Label className="form-label">Erster Turniertag</Label>
                 <Input
                   type="date"
                   value={data.startDate}
@@ -429,7 +429,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 />
               </div>
               <div>
-                <Label className="text-sm font-semibold mb-1 block">Letzter Turniertag</Label>
+                <Label className="form-label">Letzter Turniertag</Label>
                 <Input
                   type="date"
                   value={data.endDate}
@@ -440,8 +440,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             </div>
 
             {/* Venue */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Veranstaltungsort</Label>
+            <div className="form-section">
+              <Label className="form-label">Veranstaltungsort</Label>
               <div className="grid grid-cols-3 gap-2">
                 <div className="col-span-2">
                   <Input placeholder="Straße" value={data.venueStreet} onChange={e => update({ venueStreet: e.target.value })} />
@@ -457,14 +457,14 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             </div>
 
             {/* Directions PDF */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Anfahrtsbeschreibung (PDF)</Label>
+            <div className="form-section">
+              <Label className="form-label">Anfahrtsbeschreibung (PDF)</Label>
               {data.directionsPdfUrl ? (
                 <div className="flex items-center gap-2 text-sm">
                   <a href={data.directionsPdfUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline truncate flex-1">
                     PDF hochgeladen
                   </a>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removePdf}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={removePdf}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -480,8 +480,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             </div>
 
             {/* Google Maps Link */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">
+            <div className="form-section">
+              <Label className="form-label">
                 <MapPin className="inline h-4 w-4 mr-1" />
                 Google Maps Link
               </Label>
@@ -493,8 +493,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             </div>
 
             {/* Organizer */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Veranstalter</Label>
+            <div className="form-section">
+              <Label className="form-label">Veranstalter</Label>
               <Input
                 placeholder="Name des Veranstalters"
                 value={data.organizerName}
@@ -502,13 +502,13 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               />
             </div>
 
-            <p className="text-xs text-muted-foreground">Sponsoren können nach dem Erstellen in den Turniereinstellungen hinzugefügt werden.</p>
+            <p className="form-hint">Sponsoren können nach dem Erstellen in den Turniereinstellungen hinzugefügt werden.</p>
 
             {!canProceedStep1 && (
-              <p className="text-xs text-destructive">Pflichtfelder fehlen: {generalErrors.join(', ')}</p>
+              <p className="form-error">Pflichtfelder fehlen: {generalErrors.join(', ')}</p>
             )}
 
-            <Button onClick={() => tryChangeTab('mode')} disabled={!canProceedStep1} className="w-full">
+            <Button onClick={() => tryChangeTab('mode')} disabled={!canProceedStep1} className="form-primary-button">
               Weiter zu Modus
             </Button>
           </TabsContent>
@@ -517,16 +517,16 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             {/* Tournament Type */}
             <div className="form-section">
               <Label className="form-label">Turniertyp</Label>
-              <RadioGroup value={data.type} onValueChange={v => update({ type: v as TournamentType })} className="flex gap-4">
-                <div className="flex items-center space-x-2">
+              <RadioGroup value={data.type} onValueChange={v => update({ type: v as TournamentType })} className="form-radio-group-inline">
+                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
                   <RadioGroupItem value="singles" id="wiz-type-singles" />
                   <Label htmlFor="wiz-type-singles" className="form-option-label">Einzel</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
                   <RadioGroupItem value="doubles" id="wiz-type-doubles" />
                   <Label htmlFor="wiz-type-doubles" className="form-option-label">Doppel</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
                   <RadioGroupItem value="team" id="wiz-type-team" />
                   <Label htmlFor="wiz-type-team" className="form-option-label">Mannschaft</Label>
                 </div>
@@ -537,16 +537,16 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             {data.type === 'team' && (
               <div className="form-section">
                 <Label className="form-label">Mannschaftssystem</Label>
-                <RadioGroup value={data.teamMode} onValueChange={v => update({ teamMode: v as TeamMode })} className="flex flex-col gap-3">
+                <RadioGroup value={data.teamMode} onValueChange={v => update({ teamMode: v as TeamMode })} className="form-radio-group-stack">
                   {[
                     { value: 'bundessystem', label: 'Bundessystem (4er)', desc: '2 Doppel + 8 Einzel.' },
                     { value: 'werner_scheffler', label: 'Werner-Scheffler (4er)', desc: '2 Doppel + 6 Einzel.' },
                     { value: 'olympic', label: 'Olympisches System (3er)', desc: '2 Einzel, 1 Doppel, ggf. 2 weitere.' },
                     { value: 'corbillon', label: 'Corbillon-Cup (2er)', desc: '2 Einzel, 1 Doppel, ggf. 2 weitere.' },
                   ].map(opt => (
-                    <div key={opt.value} className="flex items-start space-x-2">
-                      <RadioGroupItem value={opt.value} id={`wiz-team-${opt.value}`} className="mt-0.5" />
-                      <div>
+                    <div key={opt.value} className="form-radio-row">
+                      <RadioGroupItem value={opt.value} id={`wiz-team-${opt.value}`} className="mt-1.5 flex-shrink-0" />
+                      <div className="min-w-0">
                         <Label htmlFor={`wiz-team-${opt.value}`} className="form-option-label">{opt.label}</Label>
                         <p className="form-option-desc">{opt.desc}</p>
                       </div>
@@ -559,11 +559,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             {/* Tournament Mode */}
             <div className="form-section">
               <Label className="form-label">Turniermodus</Label>
-              <RadioGroup value={data.mode} onValueChange={v => update({ mode: v as TournamentMode })} className="flex flex-col gap-3">
+              <RadioGroup value={data.mode} onValueChange={v => update({ mode: v as TournamentMode })} className="form-radio-group-stack">
                 {MODE_OPTIONS.all.map(opt => (
-                  <div key={opt.value} className="flex items-start space-x-2">
-                    <RadioGroupItem value={opt.value} id={`wiz-mode-${opt.value}`} className="mt-0.5" />
-                    <div>
+                  <div key={opt.value} className="form-radio-row">
+                    <RadioGroupItem value={opt.value} id={`wiz-mode-${opt.value}`} className="mt-1.5 flex-shrink-0" />
+                    <div className="min-w-0">
                       <Label htmlFor={`wiz-mode-${opt.value}`} className="form-option-label">{opt.label}</Label>
                       <p className="form-option-desc">{opt.desc}</p>
                     </div>
@@ -575,12 +575,12 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             {/* Best Of */}
             <div className="form-section">
               <Label className="form-label">Gewinnsätze</Label>
-              <RadioGroup value={String(data.bestOf)} onValueChange={v => update({ bestOf: parseInt(v) })} className="flex gap-4">
-                <div className="flex items-center space-x-2">
+              <RadioGroup value={String(data.bestOf)} onValueChange={v => update({ bestOf: parseInt(v) })} className="form-radio-group-inline">
+                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
                   <RadioGroupItem value="2" id="wiz-bestof-2" />
                   <Label htmlFor="wiz-bestof-2" className="form-option-label">2 Gewinnsätze (Best of 3)</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
                   <RadioGroupItem value="3" id="wiz-bestof-3" />
                   <Label htmlFor="wiz-bestof-3" className="form-option-label">3 Gewinnsätze (Best of 5)</Label>
                 </div>
@@ -588,37 +588,37 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             </div>
 
             {!canProceedMode && (
-              <p className="text-xs text-destructive">Pflichtfelder fehlen: {modeErrors.join(', ')}</p>
+              <p className="form-error">Pflichtfelder fehlen: {modeErrors.join(', ')}</p>
             )}
 
-            <Button onClick={() => tryChangeTab('certificate')} disabled={!canProceedMode} className="w-full">
+            <Button onClick={() => tryChangeTab('certificate')} disabled={!canProceedMode} className="form-primary-button">
               Weiter zu Urkunden
             </Button>
           </TabsContent>
 
           <TabsContent value="certificate" className="space-y-4">
             {/* Certificate Text */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Text für Siegerurkunden</Label>
+            <div className="form-section">
+              <Label className="form-label">Text für Siegerurkunden</Label>
               <Textarea
                 value={data.certificateText}
                 onChange={e => update({ certificateText: e.target.value })}
                 rows={3}
                 className="text-sm"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Platzhalter: <code className="bg-muted px-1 rounded">{'{turniername}'}</code> <code className="bg-muted px-1 rounded">{'{spieler}'}</code> <code className="bg-muted px-1 rounded">{'{verein}'}</code> <code className="bg-muted px-1 rounded">{'{platz}'}</code>
+              <p className="form-hint">
+                Platzhalter: <code className="bg-muted px-1 rounded text-foreground">{'{turniername}'}</code> <code className="bg-muted px-1 rounded text-foreground">{'{spieler}'}</code> <code className="bg-muted px-1 rounded text-foreground">{'{verein}'}</code> <code className="bg-muted px-1 rounded text-foreground">{'{platz}'}</code>
               </p>
             </div>
 
             {/* Certificate Background */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">
+            <div className="form-section">
+              <Label className="form-label">
                 <ImagePlus className="inline h-4 w-4 mr-1" />
                 Hintergrundbild / Rahmen für Urkunden
               </Label>
 
-              <div className="grid grid-cols-5 gap-2 mb-2">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-2">
                 {[
                   { label: 'Keiner', url: null },
                   { label: 'Klassisch Gold', url: '/certificate-frames/frame-classic-gold.png' },
@@ -633,17 +633,17 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                     <button
                       key={frame.label}
                       type="button"
-                      className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 transition-colors ${
-                        isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-muted-foreground'
+                      className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 transition-colors min-h-[88px] ${
+                        isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-foreground/40'
                       }`}
                       onClick={() => update({ certificateBgUrl: frame.url })}
                     >
                       {frame.url ? (
                         <img src={frame.url} alt={frame.label} className="h-14 w-10 object-cover rounded" />
                       ) : (
-                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-muted-foreground text-xs">–</div>
+                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-foreground/70 text-xs">–</div>
                       )}
-                      <span className="text-[10px] text-muted-foreground leading-tight text-center">{frame.label}</span>
+                      <span className="text-[10px] text-foreground/80 leading-tight text-center">{frame.label}</span>
                     </button>
                   );
                 })}
@@ -652,7 +652,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               {data.certificateBgUrl && !['/certificate-frames/frame-classic-gold.png', '/certificate-frames/frame-sport-red.png', '/certificate-frames/frame-nature-green.png', '/certificate-frames/frame-modern-blue.png'].includes(data.certificateBgUrl) ? (
                 <div className="flex items-center gap-2">
                   <img src={data.certificateBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeCertBg}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={removeCertBg}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -665,15 +665,15 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                   </Button>
                 </div>
               )}
-              <p className="text-xs text-muted-foreground mt-1">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
+              <p className="form-hint">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
             </div>
 
             {/* Certificate Font Settings */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="form-section grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label className="text-sm font-semibold mb-1 block">Schriftart</Label>
+                <Label className="form-label">Schriftart</Label>
                 <select
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
                   value={data.certificateFontFamily}
                   onChange={e => update({ certificateFontFamily: e.target.value })}
                 >
@@ -689,9 +689,9 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 </select>
               </div>
               <div>
-                <Label className="text-sm font-semibold mb-1 block">Schriftgröße</Label>
+                <Label className="form-label">Schriftgröße</Label>
                 <select
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
                   value={data.certificateFontSize}
                   onChange={e => update({ certificateFontSize: Number(e.target.value) })}
                 >
@@ -701,7 +701,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 </select>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 py-1 min-h-[40px]">
               <input
                 type="checkbox"
                 id="cert-font-bold-wizard"
@@ -709,21 +709,21 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 onChange={e => update({ certificateFontBold: e.target.checked })}
                 className="h-4 w-4 rounded border-input"
               />
-              <Label htmlFor="cert-font-bold-wizard" className="text-sm font-semibold cursor-pointer">Fettdruck</Label>
+              <Label htmlFor="cert-font-bold-wizard" className="form-option-label">Fettdruck</Label>
             </div>
 
             {/* Text Color */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>
-              <div className="flex items-center gap-2">
+            <div className="form-section">
+              <Label className="form-label">Textfarbe</Label>
+              <div className="flex items-center gap-2 flex-wrap">
                 <input
                   type="color"
                   value={data.certificateTextColor}
                   onChange={e => update({ certificateTextColor: e.target.value })}
-                  className="w-10 h-10 rounded border border-input cursor-pointer"
+                  className="w-12 h-10 rounded border border-input cursor-pointer"
                 />
                 <input
-                  className="w-28 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
+                  className="w-28 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-mono text-foreground"
                   value={data.certificateTextColor}
                   onChange={e => update({ certificateTextColor: e.target.value })}
                   maxLength={7}
@@ -732,10 +732,10 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             </div>
 
             {certificateErrors.length > 0 && (
-              <p className="text-xs text-destructive">Pflichtfelder fehlen: {certificateErrors.join(', ')}</p>
+              <p className="form-error">Pflichtfelder fehlen: {certificateErrors.join(', ')}</p>
             )}
 
-            <Button onClick={handleCreate} disabled={creating || !canCreate} className="w-full">
+            <Button onClick={handleCreate} disabled={creating || !canCreate} className="form-primary-button">
               {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Turnier erstellen
             </Button>
