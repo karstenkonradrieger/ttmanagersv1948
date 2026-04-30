@@ -154,6 +154,29 @@
   .form-primary-button {
     @apply w-full min-h-[44px];
   }
+  /* Native select/color/checkbox inputs an Token-Sprache angleichen */
+  .form-native-select {
+    @apply w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground;
+  }
+  .form-checkbox-row {
+    @apply flex items-center gap-2 py-1 min-h-[40px];
+  }
+  .form-checkbox {
+    @apply h-4 w-4 rounded border-input;
+  }
+  /* Upload-/Status-Bausteine */
+  .form-upload-status {
+    @apply flex items-center gap-2 text-sm text-foreground;
+  }
+  .form-upload-link {
+    @apply text-primary underline truncate flex-1;
+  }
+  .form-icon-muted {
+    @apply text-foreground/70;
+  }
+  .form-code-token {
+    @apply bg-muted px-1 rounded text-foreground;
+  }
   .glass {
     backdrop-filter: blur(12px);
     background: hsl(222 47% 11% / 0.85);

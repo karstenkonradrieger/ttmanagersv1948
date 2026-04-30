@@ -374,11 +374,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                   title="Turnierlogo hochladen"
                 >
                   {uploadingLogo ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-foreground/70" />
+                    <Loader2 className="h-4 w-4 animate-spin form-icon-muted" />
                   ) : data.logoUrl ? (
                     <img src={data.logoUrl} alt="Logo" className="h-full w-full object-contain" />
                   ) : (
-                    <ImagePlus className="h-4 w-4 text-foreground/70" />
+                    <ImagePlus className="h-4 w-4 form-icon-muted" />
                   )}
                 </button>
                 {data.logoUrl && (
@@ -398,12 +398,12 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 className="form-radio-group-inline"
               >
                 {SPORT_OPTIONS.map(s => (
-                  <div key={s} className="flex items-center space-x-2 py-1 min-h-[40px]">
+                  <div key={s} className="form-radio-row items-center">
                     <RadioGroupItem value={s} id={`sport-${s}`} />
                     <Label htmlFor={`sport-${s}`} className="form-option-label">{s}</Label>
                   </div>
                 ))}
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="__custom" id="sport-custom" />
                   <Label htmlFor="sport-custom" className="form-option-label">Andere</Label>
                 </div>
@@ -460,8 +460,8 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             <div className="form-section">
               <Label className="form-label">Anfahrtsbeschreibung (PDF)</Label>
               {data.directionsPdfUrl ? (
-                <div className="flex items-center gap-2 text-sm">
-                  <a href={data.directionsPdfUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline truncate flex-1">
+                <div className="form-upload-status">
+                  <a href={data.directionsPdfUrl} target="_blank" rel="noopener noreferrer" className="form-upload-link">
                     PDF hochgeladen
                   </a>
                   <Button variant="ghost" size="icon" className="h-9 w-9" onClick={removePdf}>
@@ -518,15 +518,15 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             <div className="form-section">
               <Label className="form-label">Turniertyp</Label>
               <RadioGroup value={data.type} onValueChange={v => update({ type: v as TournamentType })} className="form-radio-group-inline">
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="singles" id="wiz-type-singles" />
                   <Label htmlFor="wiz-type-singles" className="form-option-label">Einzel</Label>
                 </div>
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="doubles" id="wiz-type-doubles" />
                   <Label htmlFor="wiz-type-doubles" className="form-option-label">Doppel</Label>
                 </div>
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="team" id="wiz-type-team" />
                   <Label htmlFor="wiz-type-team" className="form-option-label">Mannschaft</Label>
                 </div>
@@ -576,11 +576,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             <div className="form-section">
               <Label className="form-label">Gewinnsätze</Label>
               <RadioGroup value={String(data.bestOf)} onValueChange={v => update({ bestOf: parseInt(v) })} className="form-radio-group-inline">
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="2" id="wiz-bestof-2" />
                   <Label htmlFor="wiz-bestof-2" className="form-option-label">2 Gewinnsätze (Best of 3)</Label>
                 </div>
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="3" id="wiz-bestof-3" />
                   <Label htmlFor="wiz-bestof-3" className="form-option-label">3 Gewinnsätze (Best of 5)</Label>
                 </div>
@@ -607,7 +607,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 className="text-sm"
               />
               <p className="form-hint">
-                Platzhalter: <code className="bg-muted px-1 rounded text-foreground">{'{turniername}'}</code> <code className="bg-muted px-1 rounded text-foreground">{'{spieler}'}</code> <code className="bg-muted px-1 rounded text-foreground">{'{verein}'}</code> <code className="bg-muted px-1 rounded text-foreground">{'{platz}'}</code>
+                Platzhalter: <code className="form-code-token">{'{turniername}'}</code> <code className="form-code-token">{'{spieler}'}</code> <code className="form-code-token">{'{verein}'}</code> <code className="form-code-token">{'{platz}'}</code>
               </p>
             </div>
 
@@ -641,7 +641,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                       {frame.url ? (
                         <img src={frame.url} alt={frame.label} className="h-14 w-10 object-cover rounded" />
                       ) : (
-                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-foreground/70 text-xs">–</div>
+                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded form-icon-muted text-xs">–</div>
                       )}
                       <span className="text-[10px] text-foreground/80 leading-tight text-center">{frame.label}</span>
                     </button>
@@ -673,7 +673,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               <div>
                 <Label className="form-label">Schriftart</Label>
                 <select
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
+                  className="form-native-select"
                   value={data.certificateFontFamily}
                   onChange={e => update({ certificateFontFamily: e.target.value })}
                 >
@@ -691,7 +691,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               <div>
                 <Label className="form-label">Schriftgröße</Label>
                 <select
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
+                  className="form-native-select"
                   value={data.certificateFontSize}
                   onChange={e => update({ certificateFontSize: Number(e.target.value) })}
                 >
@@ -701,13 +701,13 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 </select>
               </div>
             </div>
-            <div className="flex items-center gap-2 py-1 min-h-[40px]">
+            <div className="form-checkbox-row">
               <input
                 type="checkbox"
                 id="cert-font-bold-wizard"
                 checked={data.certificateFontBold}
                 onChange={e => update({ certificateFontBold: e.target.checked })}
-                className="h-4 w-4 rounded border-input"
+                className="form-checkbox"
               />
               <Label htmlFor="cert-font-bold-wizard" className="form-option-label">Fettdruck</Label>
             </div>
