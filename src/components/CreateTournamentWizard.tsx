@@ -398,12 +398,12 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 className="form-radio-group-inline"
               >
                 {SPORT_OPTIONS.map(s => (
-                  <div key={s} className="flex items-center space-x-2 py-1 min-h-[40px]">
+                  <div key={s} className="form-radio-row items-center">
                     <RadioGroupItem value={s} id={`sport-${s}`} />
                     <Label htmlFor={`sport-${s}`} className="form-option-label">{s}</Label>
                   </div>
                 ))}
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="__custom" id="sport-custom" />
                   <Label htmlFor="sport-custom" className="form-option-label">Andere</Label>
                 </div>
