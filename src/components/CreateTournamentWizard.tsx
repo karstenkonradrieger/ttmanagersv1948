@@ -576,11 +576,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             <div className="form-section">
               <Label className="form-label">Gewinnsätze</Label>
               <RadioGroup value={String(data.bestOf)} onValueChange={v => update({ bestOf: parseInt(v) })} className="form-radio-group-inline">
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="2" id="wiz-bestof-2" />
                   <Label htmlFor="wiz-bestof-2" className="form-option-label">2 Gewinnsätze (Best of 3)</Label>
                 </div>
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="3" id="wiz-bestof-3" />
                   <Label htmlFor="wiz-bestof-3" className="form-option-label">3 Gewinnsätze (Best of 5)</Label>
                 </div>
