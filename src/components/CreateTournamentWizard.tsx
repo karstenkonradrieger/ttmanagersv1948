@@ -673,7 +673,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               <div>
                 <Label className="form-label">Schriftart</Label>
                 <select
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
+                  className="form-native-select"
                   value={data.certificateFontFamily}
                   onChange={e => update({ certificateFontFamily: e.target.value })}
                 >
@@ -691,7 +691,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               <div>
                 <Label className="form-label">Schriftgröße</Label>
                 <select
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
+                  className="form-native-select"
                   value={data.certificateFontSize}
                   onChange={e => update({ certificateFontSize: Number(e.target.value) })}
                 >
@@ -701,13 +701,13 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 </select>
               </div>
             </div>
-            <div className="flex items-center gap-2 py-1 min-h-[40px]">
+            <div className="form-checkbox-row">
               <input
                 type="checkbox"
                 id="cert-font-bold-wizard"
                 checked={data.certificateFontBold}
                 onChange={e => update({ certificateFontBold: e.target.checked })}
-                className="h-4 w-4 rounded border-input"
+                className="form-checkbox"
               />
               <Label htmlFor="cert-font-bold-wizard" className="form-option-label">Fettdruck</Label>
             </div>
