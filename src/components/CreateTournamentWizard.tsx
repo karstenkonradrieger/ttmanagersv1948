@@ -598,27 +598,27 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
 
           <TabsContent value="certificate" className="space-y-4">
             {/* Certificate Text */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Text für Siegerurkunden</Label>
+            <div className="form-section">
+              <Label className="form-label">Text für Siegerurkunden</Label>
               <Textarea
                 value={data.certificateText}
                 onChange={e => update({ certificateText: e.target.value })}
                 rows={3}
                 className="text-sm"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Platzhalter: <code className="bg-muted px-1 rounded">{'{turniername}'}</code> <code className="bg-muted px-1 rounded">{'{spieler}'}</code> <code className="bg-muted px-1 rounded">{'{verein}'}</code> <code className="bg-muted px-1 rounded">{'{platz}'}</code>
+              <p className="form-hint">
+                Platzhalter: <code className="bg-muted px-1 rounded text-foreground">{'{turniername}'}</code> <code className="bg-muted px-1 rounded text-foreground">{'{spieler}'}</code> <code className="bg-muted px-1 rounded text-foreground">{'{verein}'}</code> <code className="bg-muted px-1 rounded text-foreground">{'{platz}'}</code>
               </p>
             </div>
 
             {/* Certificate Background */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">
+            <div className="form-section">
+              <Label className="form-label">
                 <ImagePlus className="inline h-4 w-4 mr-1" />
                 Hintergrundbild / Rahmen für Urkunden
               </Label>
 
-              <div className="grid grid-cols-5 gap-2 mb-2">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-2">
                 {[
                   { label: 'Keiner', url: null },
                   { label: 'Klassisch Gold', url: '/certificate-frames/frame-classic-gold.png' },
@@ -633,17 +633,17 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                     <button
                       key={frame.label}
                       type="button"
-                      className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 transition-colors ${
-                        isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-muted-foreground'
+                      className={`flex flex-col items-center gap-1 rounded-md border-2 p-1 transition-colors min-h-[88px] ${
+                        isSelected ? 'border-primary bg-primary/10' : 'border-border hover:border-foreground/40'
                       }`}
                       onClick={() => update({ certificateBgUrl: frame.url })}
                     >
                       {frame.url ? (
                         <img src={frame.url} alt={frame.label} className="h-14 w-10 object-cover rounded" />
                       ) : (
-                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-muted-foreground text-xs">–</div>
+                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-foreground/70 text-xs">–</div>
                       )}
-                      <span className="text-[10px] text-muted-foreground leading-tight text-center">{frame.label}</span>
+                      <span className="text-[10px] text-foreground/80 leading-tight text-center">{frame.label}</span>
                     </button>
                   );
                 })}
@@ -652,7 +652,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               {data.certificateBgUrl && !['/certificate-frames/frame-classic-gold.png', '/certificate-frames/frame-sport-red.png', '/certificate-frames/frame-nature-green.png', '/certificate-frames/frame-modern-blue.png'].includes(data.certificateBgUrl) ? (
                 <div className="flex items-center gap-2">
                   <img src={data.certificateBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeCertBg}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={removeCertBg}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -665,15 +665,15 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                   </Button>
                 </div>
               )}
-              <p className="text-xs text-muted-foreground mt-1">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
+              <p className="form-hint">Wird als Hintergrund auf der Siegerurkunde (A4) verwendet</p>
             </div>
 
             {/* Certificate Font Settings */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="form-section grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label className="text-sm font-semibold mb-1 block">Schriftart</Label>
+                <Label className="form-label">Schriftart</Label>
                 <select
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
                   value={data.certificateFontFamily}
                   onChange={e => update({ certificateFontFamily: e.target.value })}
                 >
@@ -689,9 +689,9 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 </select>
               </div>
               <div>
-                <Label className="text-sm font-semibold mb-1 block">Schriftgröße</Label>
+                <Label className="form-label">Schriftgröße</Label>
                 <select
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
                   value={data.certificateFontSize}
                   onChange={e => update({ certificateFontSize: Number(e.target.value) })}
                 >
@@ -701,7 +701,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 </select>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 py-1 min-h-[40px]">
               <input
                 type="checkbox"
                 id="cert-font-bold-wizard"
@@ -709,21 +709,21 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 onChange={e => update({ certificateFontBold: e.target.checked })}
                 className="h-4 w-4 rounded border-input"
               />
-              <Label htmlFor="cert-font-bold-wizard" className="text-sm font-semibold cursor-pointer">Fettdruck</Label>
+              <Label htmlFor="cert-font-bold-wizard" className="form-option-label">Fettdruck</Label>
             </div>
 
             {/* Text Color */}
-            <div>
-              <Label className="text-sm font-semibold mb-1 block">Textfarbe</Label>
-              <div className="flex items-center gap-2">
+            <div className="form-section">
+              <Label className="form-label">Textfarbe</Label>
+              <div className="flex items-center gap-2 flex-wrap">
                 <input
                   type="color"
                   value={data.certificateTextColor}
                   onChange={e => update({ certificateTextColor: e.target.value })}
-                  className="w-10 h-10 rounded border border-input cursor-pointer"
+                  className="w-12 h-10 rounded border border-input cursor-pointer"
                 />
                 <input
-                  className="w-28 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
+                  className="w-28 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-mono text-foreground"
                   value={data.certificateTextColor}
                   onChange={e => update({ certificateTextColor: e.target.value })}
                   maxLength={7}
@@ -732,10 +732,10 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             </div>
 
             {certificateErrors.length > 0 && (
-              <p className="text-xs text-destructive">Pflichtfelder fehlen: {certificateErrors.join(', ')}</p>
+              <p className="form-error">Pflichtfelder fehlen: {certificateErrors.join(', ')}</p>
             )}
 
-            <Button onClick={handleCreate} disabled={creating || !canCreate} className="w-full">
+            <Button onClick={handleCreate} disabled={creating || !canCreate} className="form-primary-button">
               {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Turnier erstellen
             </Button>
