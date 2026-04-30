@@ -641,7 +641,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                       {frame.url ? (
                         <img src={frame.url} alt={frame.label} className="h-14 w-10 object-cover rounded" />
                       ) : (
-                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-foreground/70 text-xs">–</div>
+                        <div className="h-14 w-10 flex items-center justify-center bg-muted rounded form-icon-muted text-xs">–</div>
                       )}
                       <span className="text-[10px] text-foreground/80 leading-tight text-center">{frame.label}</span>
                     </button>
