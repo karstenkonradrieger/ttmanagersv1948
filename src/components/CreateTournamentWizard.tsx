@@ -374,11 +374,11 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                   title="Turnierlogo hochladen"
                 >
                   {uploadingLogo ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-foreground/70" />
+                    <Loader2 className="h-4 w-4 animate-spin form-icon-muted" />
                   ) : data.logoUrl ? (
                     <img src={data.logoUrl} alt="Logo" className="h-full w-full object-contain" />
                   ) : (
-                    <ImagePlus className="h-4 w-4 text-foreground/70" />
+                    <ImagePlus className="h-4 w-4 form-icon-muted" />
                   )}
                 </button>
                 {data.logoUrl && (
