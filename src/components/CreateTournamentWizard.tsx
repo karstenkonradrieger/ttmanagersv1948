@@ -518,15 +518,15 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             <div className="form-section">
               <Label className="form-label">Turniertyp</Label>
               <RadioGroup value={data.type} onValueChange={v => update({ type: v as TournamentType })} className="form-radio-group-inline">
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="singles" id="wiz-type-singles" />
                   <Label htmlFor="wiz-type-singles" className="form-option-label">Einzel</Label>
                 </div>
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="doubles" id="wiz-type-doubles" />
                   <Label htmlFor="wiz-type-doubles" className="form-option-label">Doppel</Label>
                 </div>
-                <div className="flex items-center space-x-2 py-1 min-h-[40px]">
+                <div className="form-radio-row items-center">
                   <RadioGroupItem value="team" id="wiz-type-team" />
                   <Label htmlFor="wiz-type-team" className="form-option-label">Mannschaft</Label>
                 </div>
