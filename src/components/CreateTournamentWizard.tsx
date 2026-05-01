@@ -464,14 +464,14 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                   <a href={data.directionsPdfUrl} target="_blank" rel="noopener noreferrer" className="form-upload-link">
                     PDF hochgeladen
                   </a>
-                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={removePdf}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0" onClick={removePdf}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
                 <div>
                   <input ref={fileInputRef} type="file" accept="application/pdf" className="hidden" onChange={handlePdfUpload} />
-                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadingPdf}>
+                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadingPdf} className="w-full sm:w-auto min-h-[40px]">
                     {uploadingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                     PDF hochladen
                   </Button>
