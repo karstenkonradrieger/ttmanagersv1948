@@ -654,16 +654,16 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               </div>
 
               {data.certificateBgUrl && !['/certificate-frames/frame-classic-gold.png', '/certificate-frames/frame-sport-red.png', '/certificate-frames/frame-nature-green.png', '/certificate-frames/frame-modern-blue.png'].includes(data.certificateBgUrl) ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <img src={data.certificateBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
-                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={removeCertBg}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0" onClick={removeCertBg}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
                 <div>
                   <input ref={certBgInputRef} type="file" accept="image/*" className="hidden" onChange={handleCertBgUpload} />
-                  <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg}>
+                  <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg} className="w-full sm:w-auto min-h-[40px]">
                     {uploadingCertBg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                     Eigenes Bild hochladen
                   </Button>
