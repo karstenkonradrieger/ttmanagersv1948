@@ -341,16 +341,16 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           Neues Turnier
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Neues Turnier</DialogTitle>
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={v => tryChangeTab(v as typeof tab)} className="pt-2">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="general">Allgemein</TabsTrigger>
-            <TabsTrigger value="mode" disabled={!canProceedStep1}>Modus</TabsTrigger>
-            <TabsTrigger value="certificate" disabled={!canProceedStep1 || !canProceedMode}>Urkunden</TabsTrigger>
+          <TabsList className="form-tabs-list">
+            <TabsTrigger value="general" className="px-1 sm:px-3">Allgemein</TabsTrigger>
+            <TabsTrigger value="mode" disabled={!canProceedStep1} className="px-1 sm:px-3">Modus</TabsTrigger>
+            <TabsTrigger value="certificate" disabled={!canProceedStep1 || !canProceedMode} className="px-1 sm:px-3">Urkunden</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-4">
@@ -442,15 +442,15 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             {/* Venue */}
             <div className="form-section">
               <Label className="form-label">Veranstaltungsort</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-2">
+              <div className="form-venue-row">
+                <div className="form-venue-col-2">
                   <Input placeholder="Straße" value={data.venueStreet} onChange={e => update({ venueStreet: e.target.value })} />
                 </div>
                 <Input placeholder="Hausnr." value={data.venueHouseNumber} onChange={e => update({ venueHouseNumber: e.target.value })} />
               </div>
-              <div className="grid grid-cols-3 gap-2 mt-2">
+              <div className="form-venue-row mt-2">
                 <Input placeholder="PLZ" value={data.venuePostalCode} onChange={e => update({ venuePostalCode: e.target.value })} />
-                <div className="col-span-2">
+                <div className="form-venue-col-2">
                   <Input placeholder="Ort" value={data.venueCity} onChange={e => update({ venueCity: e.target.value })} />
                 </div>
               </div>
@@ -464,14 +464,14 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                   <a href={data.directionsPdfUrl} target="_blank" rel="noopener noreferrer" className="form-upload-link">
                     PDF hochgeladen
                   </a>
-                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={removePdf}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0" onClick={removePdf}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
                 <div>
                   <input ref={fileInputRef} type="file" accept="application/pdf" className="hidden" onChange={handlePdfUpload} />
-                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadingPdf}>
+                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadingPdf} className="w-full sm:w-auto min-h-[40px]">
                     {uploadingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                     PDF hochladen
                   </Button>
@@ -606,8 +606,12 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 rows={3}
                 className="text-sm"
               />
-              <p className="form-hint">
-                Platzhalter: <code className="form-code-token">{'{turniername}'}</code> <code className="form-code-token">{'{spieler}'}</code> <code className="form-code-token">{'{verein}'}</code> <code className="form-code-token">{'{platz}'}</code>
+              <p className="form-code-hint">
+                <span className="w-full">Platzhalter:</span>
+                <code className="form-code-token">{'{turniername}'}</code>
+                <code className="form-code-token">{'{spieler}'}</code>
+                <code className="form-code-token">{'{verein}'}</code>
+                <code className="form-code-token">{'{platz}'}</code>
               </p>
             </div>
 
@@ -618,7 +622,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 Hintergrundbild / Rahmen für Urkunden
               </Label>
 
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-2">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-2">
                 {[
                   { label: 'Keiner', url: null },
                   { label: 'Klassisch Gold', url: '/certificate-frames/frame-classic-gold.png' },
@@ -650,16 +654,16 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
               </div>
 
               {data.certificateBgUrl && !['/certificate-frames/frame-classic-gold.png', '/certificate-frames/frame-sport-red.png', '/certificate-frames/frame-nature-green.png', '/certificate-frames/frame-modern-blue.png'].includes(data.certificateBgUrl) ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <img src={data.certificateBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
-                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={removeCertBg}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0" onClick={removeCertBg}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
                 <div>
                   <input ref={certBgInputRef} type="file" accept="image/*" className="hidden" onChange={handleCertBgUpload} />
-                  <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg}>
+                  <Button variant="outline" size="sm" onClick={() => certBgInputRef.current?.click()} disabled={uploadingCertBg} className="w-full sm:w-auto min-h-[40px]">
                     {uploadingCertBg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                     Eigenes Bild hochladen
                   </Button>

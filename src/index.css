@@ -166,16 +166,34 @@
   }
   /* Upload-/Status-Bausteine */
   .form-upload-status {
-    @apply flex items-center gap-2 text-sm text-foreground;
+    /* flex-wrap verhindert Overflow auf 320px, min-h für Touch-Komfort */
+    @apply flex items-center gap-2 text-sm text-foreground flex-wrap min-h-[40px];
   }
   .form-upload-link {
-    @apply text-primary underline truncate flex-1;
+    /* min-w-0 erlaubt truncate innerhalb flex-Kontext */
+    @apply text-primary underline truncate flex-1 min-w-0;
   }
   .form-icon-muted {
     @apply text-foreground/70;
   }
+  /* Inline Code-/Platzhalter-Token: bricht sauber statt Overflow */
   .form-code-token {
-    @apply bg-muted px-1 rounded text-foreground;
+    @apply bg-muted px-1 rounded text-foreground whitespace-nowrap;
+  }
+  /* Hilfstext-Container für mehrere Code-Tokens — bricht auf Mobile sauber um */
+  .form-code-hint {
+    @apply text-xs text-foreground/75 mt-1 leading-snug flex flex-wrap items-center gap-x-1 gap-y-1;
+  }
+  /* Wizard/Dialog Tabs-Liste: kleine Schrift auf 320px, größer ab sm */
+  .form-tabs-list {
+    @apply grid w-full grid-cols-3 text-xs sm:text-sm;
+  }
+  /* Adress-Layout: stacked auf Mobile, 3-Spalten ab sm-Breakpoint */
+  .form-venue-row {
+    @apply grid grid-cols-1 sm:grid-cols-3 gap-2;
+  }
+  .form-venue-col-2 {
+    @apply sm:col-span-2;
   }
   .glass {
     backdrop-filter: blur(12px);
