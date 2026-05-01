@@ -676,7 +676,9 @@ export function TournamentSettingsDialog({
               </div>
             </div>
 
-            {/* Sponsoren (bis zu 5) */}
+          </TabsContent>
+
+          <TabsContent value="sponsors" className="space-y-4">
             <div>
               <Label className="text-sm font-semibold mb-2 block">Sponsoren (max. 5)</Label>
               <div className="space-y-3">
