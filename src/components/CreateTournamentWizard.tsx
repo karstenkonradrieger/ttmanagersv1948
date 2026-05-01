@@ -341,16 +341,16 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           Neues Turnier
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Neues Turnier</DialogTitle>
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={v => tryChangeTab(v as typeof tab)} className="pt-2">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="general">Allgemein</TabsTrigger>
-            <TabsTrigger value="mode" disabled={!canProceedStep1}>Modus</TabsTrigger>
-            <TabsTrigger value="certificate" disabled={!canProceedStep1 || !canProceedMode}>Urkunden</TabsTrigger>
+          <TabsList className="form-tabs-list">
+            <TabsTrigger value="general" className="px-1 sm:px-3">Allgemein</TabsTrigger>
+            <TabsTrigger value="mode" disabled={!canProceedStep1} className="px-1 sm:px-3">Modus</TabsTrigger>
+            <TabsTrigger value="certificate" disabled={!canProceedStep1 || !canProceedMode} className="px-1 sm:px-3">Urkunden</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-4">
