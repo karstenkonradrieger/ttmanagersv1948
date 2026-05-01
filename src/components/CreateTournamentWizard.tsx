@@ -442,15 +442,15 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
             {/* Venue */}
             <div className="form-section">
               <Label className="form-label">Veranstaltungsort</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-2">
+              <div className="form-venue-row">
+                <div className="form-venue-col-2">
                   <Input placeholder="Straße" value={data.venueStreet} onChange={e => update({ venueStreet: e.target.value })} />
                 </div>
                 <Input placeholder="Hausnr." value={data.venueHouseNumber} onChange={e => update({ venueHouseNumber: e.target.value })} />
               </div>
-              <div className="grid grid-cols-3 gap-2 mt-2">
+              <div className="form-venue-row mt-2">
                 <Input placeholder="PLZ" value={data.venuePostalCode} onChange={e => update({ venuePostalCode: e.target.value })} />
-                <div className="col-span-2">
+                <div className="form-venue-col-2">
                   <Input placeholder="Ort" value={data.venueCity} onChange={e => update({ venueCity: e.target.value })} />
                 </div>
               </div>
