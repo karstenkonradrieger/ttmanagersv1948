@@ -606,8 +606,12 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 rows={3}
                 className="text-sm"
               />
-              <p className="form-hint">
-                Platzhalter: <code className="form-code-token">{'{turniername}'}</code> <code className="form-code-token">{'{spieler}'}</code> <code className="form-code-token">{'{verein}'}</code> <code className="form-code-token">{'{platz}'}</code>
+              <p className="form-code-hint">
+                <span className="w-full">Platzhalter:</span>
+                <code className="form-code-token">{'{turniername}'}</code>
+                <code className="form-code-token">{'{spieler}'}</code>
+                <code className="form-code-token">{'{verein}'}</code>
+                <code className="form-code-token">{'{platz}'}</code>
               </p>
             </div>
 
