@@ -386,10 +386,11 @@ export function TournamentSettingsDialog({
           </div>
         </DialogHeader>
         <Tabs defaultValue="general" className="pt-2">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="general">Allgemein</TabsTrigger>
             <TabsTrigger value="mode">Modus</TabsTrigger>
             <TabsTrigger value="certificate">Urkunden</TabsTrigger>
+            <TabsTrigger value="sponsors">Sponsoren</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-4">
