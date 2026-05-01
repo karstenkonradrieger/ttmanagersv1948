@@ -188,12 +188,12 @@
   .form-tabs-list {
     @apply grid w-full grid-cols-3 text-xs sm:text-sm;
   }
-  /* Adress-Layout: stacked auf <360px, danach 3-Spalten-Raster */
+  /* Adress-Layout: stacked auf Mobile, 3-Spalten ab sm-Breakpoint */
   .form-venue-row {
-    @apply grid grid-cols-1 xs:grid-cols-3 gap-2;
+    @apply grid grid-cols-1 sm:grid-cols-3 gap-2;
   }
   .form-venue-col-2 {
-    @apply xs:col-span-2;
+    @apply sm:col-span-2;
   }
   .glass {
     backdrop-filter: blur(12px);
