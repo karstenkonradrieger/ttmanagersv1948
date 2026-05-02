@@ -12,6 +12,7 @@ import { TournamentMode, TournamentType, TeamMode, Sponsor } from '@/types/tourn
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import * as tournamentService from '@/services/tournamentService';
+import { writeSponsorCache } from '@/lib/sponsorCache';
 
 interface Props {
   mode: TournamentMode;
