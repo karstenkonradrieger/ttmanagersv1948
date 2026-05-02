@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Tournament, Player, Match, SetScore, DoublesPair, TournamentMode, Team, TeamPlayer, EncounterGame, TeamMode, Sponsor, BracketType } from '@/types/tournament';
 import { Json } from '@/integrations/supabase/types';
+import { writeSponsorCache } from '@/lib/sponsorCache';
 
 export interface DbTournament {
   id: string;
