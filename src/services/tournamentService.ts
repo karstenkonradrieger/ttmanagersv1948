@@ -154,13 +154,16 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     googleMapsLink: (tournament as any).google_maps_link || null,
     certificateText: (tournament as any).certificate_text || 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.',
     organizerName: (tournament as any).organizer_name || '',
-    sponsors: (sponsors || []).map((s: any) => ({
-      id: s.id,
-      name: s.name,
-      logoUrl: s.logo_url || null,
-      sortOrder: s.sort_order,
-    })),
-    certificateBgUrl: (tournament as any).certificate_bg_url || null,
+    sponsors: (() => {
+      const mapped: Sponsor[] = (sponsors || []).map((s: any) => ({
+        id: s.id,
+        name: s.name,
+        logoUrl: s.logo_url || null,
+        sortOrder: s.sort_order,
+      }));
+      writeSponsorCache(id, mapped);
+      return mapped;
+    })(),
     certificateFontFamily: (tournament as any).certificate_font_family || 'Helvetica',
     certificateFontSize: (tournament as any).certificate_font_size ?? 20,
     certificateTextColor: (tournament as any).certificate_text_color || '#1e1e1e',
