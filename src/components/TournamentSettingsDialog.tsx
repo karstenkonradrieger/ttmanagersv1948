@@ -12,7 +12,7 @@ import { TournamentMode, TournamentType, TeamMode, Sponsor } from '@/types/tourn
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import * as tournamentService from '@/services/tournamentService';
-import { writeSponsorCache } from '@/lib/sponsorCache';
+import { writeSponsorCache, clearSponsorCache } from '@/lib/sponsorCache';
 
 interface Props {
   mode: TournamentMode;
@@ -56,6 +56,7 @@ interface Props {
     certificate_extra_sizes?: Record<string, number>;
     opening_video_url?: string | null;
   }) => Promise<void>;
+  onSaved?: () => void | Promise<void>;
 }
 
 export function TournamentSettingsDialog({
@@ -64,7 +65,7 @@ export function TournamentSettingsDialog({
   certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize, certificateTextColor, certificateExtraSizes = {},
   organizerName, sponsors,
   openingVideoUrl, tournamentId,
-  onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails,
+  onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails, onSaved,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [localMode, setLocalMode] = useState(mode);
@@ -329,10 +330,12 @@ export function TournamentSettingsDialog({
       });
 
       // Save sponsors
+      let sponsorsChanged = false;
       // Remove deleted sponsors
       for (const existing of sponsors) {
         if (!localSponsors.find(s => s.id === existing.id)) {
           await tournamentService.removeSponsor(existing.id);
+          sponsorsChanged = true;
         }
       }
       // Add/update sponsors
@@ -341,19 +344,35 @@ export function TournamentSettingsDialog({
           const existing = sponsors.find(e => e.id === s.id);
           if (existing && (existing.name !== s.name || existing.logoUrl !== s.logoUrl)) {
             await tournamentService.updateSponsor(s.id, { name: s.name, logo_url: s.logoUrl });
+            sponsorsChanged = true;
           }
         } else if (s.name.trim()) {
           await tournamentService.addSponsor(tournamentId, s.name, s.logoUrl, s.sortOrder);
+          sponsorsChanged = true;
         }
       }
 
-      // Write-through cache: keep latest sponsors in localStorage for instant availability
-      writeSponsorCache(tournamentId, localSponsors);
+      // Cache invalidation: refetch from DB so the global cache holds the
+      // authoritative state (with real IDs after inserts) and every consumer
+      // sees the new sponsor list immediately on next render.
+      if (sponsorsChanged) {
+        try {
+          clearSponsorCache(tournamentId);
+          await tournamentService.refreshSponsorCache(tournamentId);
+        } catch {
+          // Fallback: at least keep the optimistic local state cached
+          writeSponsorCache(tournamentId, localSponsors);
+        }
+      } else {
+        writeSponsorCache(tournamentId, localSponsors);
+      }
 
       toast.success('Einstellungen gespeichert');
       try { localStorage.removeItem(draftKey); } catch {}
       setHasDraft(false);
       setOpen(false);
+      // Trigger parent refresh so UI reflects the new sponsor list right away
+      try { await onSaved?.(); } catch {}
     } catch {
       toast.error('Fehler beim Speichern');
     } finally {
