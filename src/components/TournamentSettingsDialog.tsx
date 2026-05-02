@@ -347,6 +347,9 @@ export function TournamentSettingsDialog({
         }
       }
 
+      // Write-through cache: keep latest sponsors in localStorage for instant availability
+      writeSponsorCache(tournamentId, localSponsors);
+
       toast.success('Einstellungen gespeichert');
       try { localStorage.removeItem(draftKey); } catch {}
       setHasDraft(false);
