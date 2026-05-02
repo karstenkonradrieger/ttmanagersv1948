@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { computeQualifiedPlayers } from '@/services/byeValidation';
 import { validateSeeding, validateBracketSlots, type SeedTier } from '@/services/seedingValidation';
 import { computeConsolationSeeds, buildConsolationMatches, isMainRound0Complete, hasConsolationBracket } from '@/services/consolationBracket';
+import { readSponsorCache } from '@/lib/sponsorCache';
 
 const emptyTournament: Tournament = {
   id: '',
