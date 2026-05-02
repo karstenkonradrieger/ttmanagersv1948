@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { computeQualifiedPlayers } from '@/services/byeValidation';
 import { validateSeeding, validateBracketSlots, type SeedTier } from '@/services/seedingValidation';
 import { computeConsolationSeeds, buildConsolationMatches, isMainRound0Complete, hasConsolationBracket } from '@/services/consolationBracket';
+import { readSponsorCache } from '@/lib/sponsorCache';
 
 const emptyTournament: Tournament = {
   id: '',
@@ -70,6 +71,11 @@ export function useTournamentDb(tournamentId: string | null) {
     }
 
     setLoading(true);
+    // Optimistically hydrate sponsors from cache so they render before DB responds
+    const cachedSponsors = readSponsorCache(tournamentId);
+    if (cachedSponsors && cachedSponsors.length > 0) {
+      setTournament(prev => ({ ...prev, id: tournamentId, sponsors: cachedSponsors }));
+    }
     try {
       const data = await tournamentService.fetchTournament(tournamentId);
       if (data) {

@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Tournament, Player, Match, SetScore, DoublesPair, TournamentMode, Team, TeamPlayer, EncounterGame, TeamMode, Sponsor, BracketType } from '@/types/tournament';
 import { Json } from '@/integrations/supabase/types';
+import { writeSponsorCache } from '@/lib/sponsorCache';
 
 export interface DbTournament {
   id: string;
@@ -153,12 +154,16 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     googleMapsLink: (tournament as any).google_maps_link || null,
     certificateText: (tournament as any).certificate_text || 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.',
     organizerName: (tournament as any).organizer_name || '',
-    sponsors: (sponsors || []).map((s: any) => ({
-      id: s.id,
-      name: s.name,
-      logoUrl: s.logo_url || null,
-      sortOrder: s.sort_order,
-    })),
+    sponsors: (() => {
+      const mapped: Sponsor[] = (sponsors || []).map((s: any) => ({
+        id: s.id,
+        name: s.name,
+        logoUrl: s.logo_url || null,
+        sortOrder: s.sort_order,
+      }));
+      writeSponsorCache(id, mapped);
+      return mapped;
+    })(),
     certificateBgUrl: (tournament as any).certificate_bg_url || null,
     certificateFontFamily: (tournament as any).certificate_font_family || 'Helvetica',
     certificateFontSize: (tournament as any).certificate_font_size ?? 20,

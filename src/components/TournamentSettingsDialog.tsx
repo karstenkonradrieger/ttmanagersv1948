@@ -12,6 +12,7 @@ import { TournamentMode, TournamentType, TeamMode, Sponsor } from '@/types/tourn
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import * as tournamentService from '@/services/tournamentService';
+import { writeSponsorCache } from '@/lib/sponsorCache';
 
 interface Props {
   mode: TournamentMode;
@@ -345,6 +346,9 @@ export function TournamentSettingsDialog({
           await tournamentService.addSponsor(tournamentId, s.name, s.logoUrl, s.sortOrder);
         }
       }
+
+      // Write-through cache: keep latest sponsors in localStorage for instant availability
+      writeSponsorCache(tournamentId, localSponsors);
 
       toast.success('Einstellungen gespeichert');
       try { localStorage.removeItem(draftKey); } catch {}
