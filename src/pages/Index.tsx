@@ -82,6 +82,7 @@ const Index = () => {
     updateEncounterGameScore,
     updateKaiserDuration,
     generateNextKaiserRound,
+    reload,
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
@@ -286,6 +287,7 @@ const Index = () => {
               onUpdateType={updateTournamentType}
               onUpdateBestOf={updateBestOf}
               onUpdateDetails={updateDetails}
+              onSaved={reload}
             />
             {tournament.openingVideoUrl && (
               <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setOpeningVideoPlayerOpen(true)} title="Eröffnungsvideo abspielen">

@@ -339,12 +339,25 @@ export async function fetchSponsors(tournamentId: string): Promise<Sponsor[]> {
     .eq('tournament_id', tournamentId)
     .order('sort_order', { ascending: true });
   if (error) throw error;
-  return (data || []).map((s: any) => ({
+  const mapped: Sponsor[] = (data || []).map((s: any) => ({
     id: s.id,
     name: s.name,
     logoUrl: s.logo_url || null,
     sortOrder: s.sort_order,
   }));
+  // Keep the global sponsor cache in sync whenever we fetch fresh data
+  writeSponsorCache(tournamentId, mapped);
+  return mapped;
+}
+
+/**
+ * Reloads sponsors for a tournament from the database and refreshes the
+ * localStorage cache. Use this after add/update/remove operations to make
+ * sure every consumer (overview, live view, reports) sees the new state
+ * immediately on next read — even before realtime/refetch kicks in.
+ */
+export async function refreshSponsorCache(tournamentId: string): Promise<Sponsor[]> {
+  return await fetchSponsors(tournamentId);
 }
 
 export async function addSponsor(tournamentId: string, name: string, logoUrl: string | null, sortOrder: number): Promise<Sponsor> {
