@@ -602,6 +602,14 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                           <Checkbox id={`photo-consent-new-${club.id}`} checked={pPhotoConsent} onCheckedChange={(v) => setPPhotoConsent(v === true)} />
                           <label htmlFor={`photo-consent-new-${club.id}`} className="text-sm text-muted-foreground cursor-pointer">Fotoerlaubnis erteilt</label>
                         </div>
+                        <Select value={pRole} onValueChange={(v) => setPRole(v as 'player' | 'chairman' | 'admin')}>
+                          <SelectTrigger className="h-9 text-sm bg-secondary"><SelectValue placeholder="Rolle" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="player">Spieler</SelectItem>
+                            <SelectItem value="chairman">Vorsitz</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <div className="flex gap-2">
                           <Button size="sm" className="flex-1 h-9" onClick={() => handleAddPlayer(club.id)} disabled={!pName.trim()}>
                             <UserPlus className="mr-1 h-3.5 w-3.5" /> Hinzufügen
@@ -648,6 +656,14 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                 <Checkbox id={`photo-consent-edit-${editingId}`} checked={editData.photoConsent ?? false} onCheckedChange={(v) => setEditData(p => ({ ...p, photoConsent: v === true }))} />
                                 <label htmlFor={`photo-consent-edit-${editingId}`} className="text-sm text-muted-foreground cursor-pointer">Fotoerlaubnis erteilt</label>
                               </div>
+                              <Select value={editData.role || 'player'} onValueChange={(v) => setEditData(p => ({ ...p, role: v as ClubPlayer['role'] }))}>
+                                <SelectTrigger className="h-8 text-sm bg-secondary"><SelectValue placeholder="Rolle" /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="player">Spieler</SelectItem>
+                                  <SelectItem value="chairman">Vorsitz</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <div className="flex justify-end gap-1">
                                 <Button variant="ghost" size="icon" onClick={() => { setEditingId(null); setEditData({}); }} className="h-7 w-7"><X className="h-3.5 w-3.5" /></Button>
                                 <Button size="icon" onClick={saveEdit} className="h-7 w-7" disabled={!editData.name?.trim()}><Check className="h-3.5 w-3.5" /></Button>
