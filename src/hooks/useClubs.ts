@@ -11,6 +11,7 @@ export interface Club {
   postal_code: string;
   city: string;
   chairman: string;
+  admin: string;
   logo_url: string | null;
   phone: string;
   email: string;
