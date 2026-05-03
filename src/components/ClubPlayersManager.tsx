@@ -62,7 +62,7 @@ function ClubLogoUpload({ club, onUpdate }: { club: Club; onUpdate?: Props['onUp
 function ClubDetailsSection({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdateClub'] }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
-    chairman: club.chairman, street: club.street, house_number: club.house_number,
+    chairman: club.chairman, admin: club.admin || '', street: club.street, house_number: club.house_number,
     postal_code: club.postal_code, city: club.city, phone: club.phone, email: club.email, website: club.website,
   });
 
@@ -74,12 +74,12 @@ function ClubDetailsSection({ club, onUpdate }: { club: Club; onUpdate?: Props['
   };
 
   const handleCancel = () => {
-    setForm({ chairman: club.chairman, street: club.street, house_number: club.house_number,
+    setForm({ chairman: club.chairman, admin: club.admin || '', street: club.street, house_number: club.house_number,
       postal_code: club.postal_code, city: club.city, phone: club.phone, email: club.email, website: club.website });
     setEditing(false);
   };
 
-  const hasData = club.chairman || club.street || club.city || club.phone || club.email || club.website;
+  const hasData = club.chairman || club.admin || club.street || club.city || club.phone || club.email || club.website;
 
   if (!editing) {
     return (
@@ -95,6 +95,7 @@ function ClubDetailsSection({ club, onUpdate }: { club: Club; onUpdate?: Props['
         {hasData ? (
           <div className="grid gap-1.5 text-sm">
             {club.chairman && <div className="flex items-center gap-2 text-xs"><UserCheck className="h-3 w-3 text-muted-foreground flex-shrink-0" /><span>Vorsitzender: {club.chairman}</span></div>}
+            {club.admin && <div className="flex items-center gap-2 text-xs"><UserCheck className="h-3 w-3 text-muted-foreground flex-shrink-0" /><span>Administrator: {club.admin}</span></div>}
             {(club.street || club.city) && <div className="flex items-center gap-2 text-xs"><MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" /><span>{club.street && `${club.street} ${club.house_number}`.trim()}{club.street && club.city ? ', ' : ''}{club.postal_code && `${club.postal_code} `}{club.city}</span></div>}
             {club.phone && <div className="flex items-center gap-2 text-xs"><Phone className="h-3 w-3 text-muted-foreground flex-shrink-0" /><span>{club.phone}</span></div>}
             {club.email && <div className="flex items-center gap-2 text-xs"><Mail className="h-3 w-3 text-muted-foreground flex-shrink-0" /><span>{club.email}</span></div>}
@@ -118,6 +119,7 @@ function ClubDetailsSection({ club, onUpdate }: { club: Club; onUpdate?: Props['
       </div>
       <div className="grid gap-2">
         <Input placeholder="Vereinsvorsitzender" value={form.chairman} onChange={e => setForm(f => ({ ...f, chairman: e.target.value }))} className="h-8 text-xs" />
+        <Input placeholder="Administrator" value={form.admin} onChange={e => setForm(f => ({ ...f, admin: e.target.value }))} className="h-8 text-xs" />
         <div className="grid grid-cols-[1fr_80px] gap-2">
           <Input placeholder="Straße" value={form.street} onChange={e => setForm(f => ({ ...f, street: e.target.value }))} className="h-8 text-xs" />
           <Input placeholder="Nr." value={form.house_number} onChange={e => setForm(f => ({ ...f, house_number: e.target.value }))} className="h-8 text-xs" />
