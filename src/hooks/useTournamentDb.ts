@@ -62,6 +62,7 @@ export function useTournamentDb(tournamentId: string | null) {
   const [tournament, setTournament] = useState<Tournament>(emptyTournament);
   const [loading, setLoading] = useState(false);
   const [koUndoSnapshot, setKoUndoSnapshot] = useState<KoSnapshot | null>(null);
+  const [encounterGames, setEncounterGames] = useState<Record<string, EncounterGame[]>>({});
 
   // Load tournament data
   const loadTournament = useCallback(async () => {
@@ -1890,9 +1891,7 @@ export function useTournamentDb(tournamentId: string | null) {
     }
   }, [tournamentId]);
 
-  // Encounter game scoring for team matches
-  const [encounterGames, setEncounterGames] = useState<Record<string, EncounterGame[]>>({});
-
+  // Encounter game scoring for team matches (state declared at top of hook)
   const loadEncounterGames = useCallback(async (matchId: string) => {
     try {
       const games = await tournamentService.fetchEncounterGames(matchId);
