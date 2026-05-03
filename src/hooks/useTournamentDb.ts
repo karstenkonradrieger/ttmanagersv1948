@@ -62,6 +62,7 @@ export function useTournamentDb(tournamentId: string | null) {
   const [tournament, setTournament] = useState<Tournament>(emptyTournament);
   const [loading, setLoading] = useState(false);
   const [koUndoSnapshot, setKoUndoSnapshot] = useState<KoSnapshot | null>(null);
+  const [encounterGames, setEncounterGames] = useState<Record<string, EncounterGame[]>>({});
 
   // Load tournament data
   const loadTournament = useCallback(async () => {
