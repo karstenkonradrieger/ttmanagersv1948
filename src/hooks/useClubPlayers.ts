@@ -20,6 +20,7 @@ export interface ClubPlayer {
   photoConsent: boolean;
   voiceNameUrl: string | null;
   photoConsentUrl: string | null;
+  role: 'player' | 'chairman' | 'admin';
 }
 
 export function useClubPlayers() {
@@ -52,6 +53,7 @@ export function useClubPlayers() {
           photoConsent: row.photo_consent ?? false,
           voiceNameUrl: row.voice_name_url || null,
           photoConsentUrl: row.photo_consent_url || null,
+          role: (row.role as ClubPlayer['role']) || 'player',
         }))
       );
     } catch (error) {
@@ -118,6 +120,7 @@ export function useClubPlayers() {
         photoConsent: data.photo_consent ?? false,
         voiceNameUrl: (data as any).voice_name_url || null,
         photoConsentUrl: (data as any).photo_consent_url || null,
+        role: ((data as any).role as ClubPlayer['role']) || 'player',
       };
       setPlayers(prev => [...prev, mapped].sort((a, b) => a.name.localeCompare(b.name)));
       return mapped;
@@ -144,6 +147,7 @@ export function useClubPlayers() {
       if (updates.photoConsent !== undefined) dbUpdates.photo_consent = updates.photoConsent;
       if (updates.voiceNameUrl !== undefined) dbUpdates.voice_name_url = updates.voiceNameUrl;
       if (updates.photoConsentUrl !== undefined) dbUpdates.photo_consent_url = updates.photoConsentUrl;
+      if (updates.role !== undefined) dbUpdates.role = updates.role;
 
       const { error } = await supabase.from('club_players').update(dbUpdates as any).eq('id', id);
       if (error) throw error;
