@@ -331,6 +331,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const [pPhone, setPPhone] = useState('');
   const [pEmail, setPEmail] = useState('');
   const [pPhotoConsent, setPPhotoConsent] = useState(false);
+  const [pRole, setPRole] = useState<'player' | 'chairman' | 'admin'>('player');
 
   const handleAddClub = async () => {
     if (!clubName.trim()) return;
@@ -346,12 +347,15 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const resetPlayerForm = () => {
     setPName(''); setPGender(''); setPBirthDate(''); setPTtr('');
     setPPostalCode(''); setPCity(''); setPStreet(''); setPHouseNumber(''); setPPhone('');
-    setPEmail(''); setPPhotoConsent(false);
+    setPEmail(''); setPPhotoConsent(false); setPRole('player');
   };
 
   const handleAddPlayer = async (clubId: string) => {
     if (!pName.trim()) return;
-    await onAddPlayer(clubId, pName.trim(), pGender, pBirthDate || null, parseInt(pTtr) || 1000, pPostalCode, pCity, pStreet, pHouseNumber, pPhone, pEmail, pPhotoConsent);
+    const created = await onAddPlayer(clubId, pName.trim(), pGender, pBirthDate || null, parseInt(pTtr) || 1000, pPostalCode, pCity, pStreet, pHouseNumber, pPhone, pEmail, pPhotoConsent);
+    if (created && pRole !== 'player') {
+      onUpdatePlayer(created.id, { role: pRole });
+    }
     resetPlayerForm();
     setAddingPlayerFor(null);
   };
@@ -375,6 +379,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
       phone: editData.phone || '',
       email: editData.email || '',
       photoConsent: editData.photoConsent ?? false,
+      role: (editData.role as ClubPlayer['role']) || 'player',
     });
     setEditingId(null);
     setEditData({});
