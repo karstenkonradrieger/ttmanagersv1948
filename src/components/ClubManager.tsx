@@ -104,6 +104,7 @@ function ClubDetails({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdat
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     chairman: club.chairman,
+    admin: club.admin || '',
     street: club.street,
     house_number: club.house_number,
     postal_code: club.postal_code,
@@ -123,6 +124,7 @@ function ClubDetails({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdat
   const handleCancel = () => {
     setForm({
       chairman: club.chairman,
+      admin: club.admin || '',
       street: club.street,
       house_number: club.house_number,
       postal_code: club.postal_code,
@@ -134,7 +136,7 @@ function ClubDetails({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdat
     setEditing(false);
   };
 
-  const hasData = club.chairman || club.street || club.city || club.phone || club.email || club.website;
+  const hasData = club.chairman || club.admin || club.street || club.city || club.phone || club.email || club.website;
 
   if (!editing) {
     return (
