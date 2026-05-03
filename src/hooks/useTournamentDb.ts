@@ -132,6 +132,19 @@ export function useTournamentDb(tournamentId: string | null) {
     };
   }, [tournamentId, loadTournament]);
 
+  // Cross-tab sync: when sponsor cache changes in another tab, reload
+  useEffect(() => {
+    if (!tournamentId) return;
+    const cacheKey = `ttm_sponsors_cache_v1:${tournamentId}`;
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === cacheKey) {
+        loadTournament();
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [tournamentId, loadTournament]);
+
   const addPlayer = useCallback(async (name: string, club: string, ttr: number, gender: string = '', birthDate: string | null = null, postalCode: string = '', city: string = '', street: string = '', houseNumber: string = '', phone: string = '', voiceNameUrl?: string, photoConsent?: boolean) => {
     if (!tournamentId) return;
     try {
