@@ -158,6 +158,12 @@ function ClubDetails({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdat
                 <span>Vorsitzender: {club.chairman}</span>
               </div>
             )}
+            {club.admin && (
+              <div className="flex items-center gap-2 text-xs">
+                <UserCheck className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                <span>Administrator: {club.admin}</span>
+              </div>
+            )}
             {(club.street || club.city) && (
               <div className="flex items-center gap-2 text-xs">
                 <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
@@ -216,6 +222,12 @@ function ClubDetails({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdat
           placeholder="Vereinsvorsitzender"
           value={form.chairman}
           onChange={e => setForm(f => ({ ...f, chairman: e.target.value }))}
+          className="h-8 text-xs"
+        />
+        <Input
+          placeholder="Administrator"
+          value={form.admin}
+          onChange={e => setForm(f => ({ ...f, admin: e.target.value }))}
           className="h-8 text-xs"
         />
         <div className="grid grid-cols-[1fr_80px] gap-2">
