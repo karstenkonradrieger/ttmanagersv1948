@@ -11,6 +11,7 @@ export interface Club {
   postal_code: string;
   city: string;
   chairman: string;
+  admin: string;
   logo_url: string | null;
   phone: string;
   email: string;
@@ -26,7 +27,7 @@ export function useClubs() {
     try {
       const { data, error } = await supabase
         .from('clubs')
-        .select('id, name, street, house_number, postal_code, city, chairman, logo_url, phone, email, website')
+        .select('id, name, street, house_number, postal_code, city, chairman, admin, logo_url, phone, email, website')
         .order('name');
       if (error) throw error;
       setClubs(data || []);
@@ -54,7 +55,7 @@ export function useClubs() {
       const { data, error } = await supabase
         .from('clubs')
         .insert({ name: trimmed, created_by: user.id })
-        .select('id, name, street, house_number, postal_code, city, chairman, logo_url, phone, email, website')
+        .select('id, name, street, house_number, postal_code, city, chairman, admin, logo_url, phone, email, website')
         .single();
       if (error) throw error;
       setClubs(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));

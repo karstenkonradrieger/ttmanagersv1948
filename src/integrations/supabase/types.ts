@@ -57,6 +57,7 @@ export type Database = {
           photo_consent: boolean
           photo_consent_url: string | null
           postal_code: string
+          role: string
           street: string
           ttr: number
           voice_name_url: string | null
@@ -76,6 +77,7 @@ export type Database = {
           photo_consent?: boolean
           photo_consent_url?: string | null
           postal_code?: string
+          role?: string
           street?: string
           ttr?: number
           voice_name_url?: string | null
@@ -95,6 +97,7 @@ export type Database = {
           photo_consent?: boolean
           photo_consent_url?: string | null
           postal_code?: string
+          role?: string
           street?: string
           ttr?: number
           voice_name_url?: string | null
@@ -111,6 +114,7 @@ export type Database = {
       }
       clubs: {
         Row: {
+          admin: string
           chairman: string
           city: string
           created_at: string
@@ -126,6 +130,7 @@ export type Database = {
           website: string
         }
         Insert: {
+          admin?: string
           chairman?: string
           city?: string
           created_at?: string
@@ -141,6 +146,7 @@ export type Database = {
           website?: string
         }
         Update: {
+          admin?: string
           chairman?: string
           city?: string
           created_at?: string

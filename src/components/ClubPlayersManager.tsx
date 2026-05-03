@@ -62,7 +62,7 @@ function ClubLogoUpload({ club, onUpdate }: { club: Club; onUpdate?: Props['onUp
 function ClubDetailsSection({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdateClub'] }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
-    chairman: club.chairman, street: club.street, house_number: club.house_number,
+    chairman: club.chairman, admin: club.admin || '', street: club.street, house_number: club.house_number,
     postal_code: club.postal_code, city: club.city, phone: club.phone, email: club.email, website: club.website,
   });
 
@@ -74,12 +74,12 @@ function ClubDetailsSection({ club, onUpdate }: { club: Club; onUpdate?: Props['
   };
 
   const handleCancel = () => {
-    setForm({ chairman: club.chairman, street: club.street, house_number: club.house_number,
+    setForm({ chairman: club.chairman, admin: club.admin || '', street: club.street, house_number: club.house_number,
       postal_code: club.postal_code, city: club.city, phone: club.phone, email: club.email, website: club.website });
     setEditing(false);
   };
 
-  const hasData = club.chairman || club.street || club.city || club.phone || club.email || club.website;
+  const hasData = club.chairman || club.admin || club.street || club.city || club.phone || club.email || club.website;
 
   if (!editing) {
     return (
@@ -95,6 +95,7 @@ function ClubDetailsSection({ club, onUpdate }: { club: Club; onUpdate?: Props['
         {hasData ? (
           <div className="grid gap-1.5 text-sm">
             {club.chairman && <div className="flex items-center gap-2 text-xs"><UserCheck className="h-3 w-3 text-muted-foreground flex-shrink-0" /><span>Vorsitzender: {club.chairman}</span></div>}
+            {club.admin && <div className="flex items-center gap-2 text-xs"><UserCheck className="h-3 w-3 text-muted-foreground flex-shrink-0" /><span>Administrator: {club.admin}</span></div>}
             {(club.street || club.city) && <div className="flex items-center gap-2 text-xs"><MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" /><span>{club.street && `${club.street} ${club.house_number}`.trim()}{club.street && club.city ? ', ' : ''}{club.postal_code && `${club.postal_code} `}{club.city}</span></div>}
             {club.phone && <div className="flex items-center gap-2 text-xs"><Phone className="h-3 w-3 text-muted-foreground flex-shrink-0" /><span>{club.phone}</span></div>}
             {club.email && <div className="flex items-center gap-2 text-xs"><Mail className="h-3 w-3 text-muted-foreground flex-shrink-0" /><span>{club.email}</span></div>}
@@ -118,6 +119,7 @@ function ClubDetailsSection({ club, onUpdate }: { club: Club; onUpdate?: Props['
       </div>
       <div className="grid gap-2">
         <Input placeholder="Vereinsvorsitzender" value={form.chairman} onChange={e => setForm(f => ({ ...f, chairman: e.target.value }))} className="h-8 text-xs" />
+        <Input placeholder="Administrator" value={form.admin} onChange={e => setForm(f => ({ ...f, admin: e.target.value }))} className="h-8 text-xs" />
         <div className="grid grid-cols-[1fr_80px] gap-2">
           <Input placeholder="Straße" value={form.street} onChange={e => setForm(f => ({ ...f, street: e.target.value }))} className="h-8 text-xs" />
           <Input placeholder="Nr." value={form.house_number} onChange={e => setForm(f => ({ ...f, house_number: e.target.value }))} className="h-8 text-xs" />
@@ -329,6 +331,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const [pPhone, setPPhone] = useState('');
   const [pEmail, setPEmail] = useState('');
   const [pPhotoConsent, setPPhotoConsent] = useState(false);
+  const [pRole, setPRole] = useState<'player' | 'chairman' | 'admin'>('player');
 
   const handleAddClub = async () => {
     if (!clubName.trim()) return;
@@ -344,12 +347,15 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const resetPlayerForm = () => {
     setPName(''); setPGender(''); setPBirthDate(''); setPTtr('');
     setPPostalCode(''); setPCity(''); setPStreet(''); setPHouseNumber(''); setPPhone('');
-    setPEmail(''); setPPhotoConsent(false);
+    setPEmail(''); setPPhotoConsent(false); setPRole('player');
   };
 
   const handleAddPlayer = async (clubId: string) => {
     if (!pName.trim()) return;
-    await onAddPlayer(clubId, pName.trim(), pGender, pBirthDate || null, parseInt(pTtr) || 1000, pPostalCode, pCity, pStreet, pHouseNumber, pPhone, pEmail, pPhotoConsent);
+    const created = await onAddPlayer(clubId, pName.trim(), pGender, pBirthDate || null, parseInt(pTtr) || 1000, pPostalCode, pCity, pStreet, pHouseNumber, pPhone, pEmail, pPhotoConsent);
+    if (created && pRole !== 'player') {
+      onUpdatePlayer(created.id, { role: pRole });
+    }
     resetPlayerForm();
     setAddingPlayerFor(null);
   };
@@ -373,6 +379,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
       phone: editData.phone || '',
       email: editData.email || '',
       photoConsent: editData.photoConsent ?? false,
+      role: (editData.role as ClubPlayer['role']) || 'player',
     });
     setEditingId(null);
     setEditData({});
@@ -595,6 +602,14 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                           <Checkbox id={`photo-consent-new-${club.id}`} checked={pPhotoConsent} onCheckedChange={(v) => setPPhotoConsent(v === true)} />
                           <label htmlFor={`photo-consent-new-${club.id}`} className="text-sm text-muted-foreground cursor-pointer">Fotoerlaubnis erteilt</label>
                         </div>
+                        <Select value={pRole} onValueChange={(v) => setPRole(v as 'player' | 'chairman' | 'admin')}>
+                          <SelectTrigger className="h-9 text-sm bg-secondary"><SelectValue placeholder="Rolle" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="player">Spieler</SelectItem>
+                            <SelectItem value="chairman">Vorsitz</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <div className="flex gap-2">
                           <Button size="sm" className="flex-1 h-9" onClick={() => handleAddPlayer(club.id)} disabled={!pName.trim()}>
                             <UserPlus className="mr-1 h-3.5 w-3.5" /> Hinzufügen
@@ -641,6 +656,14 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                 <Checkbox id={`photo-consent-edit-${editingId}`} checked={editData.photoConsent ?? false} onCheckedChange={(v) => setEditData(p => ({ ...p, photoConsent: v === true }))} />
                                 <label htmlFor={`photo-consent-edit-${editingId}`} className="text-sm text-muted-foreground cursor-pointer">Fotoerlaubnis erteilt</label>
                               </div>
+                              <Select value={editData.role || 'player'} onValueChange={(v) => setEditData(p => ({ ...p, role: v as ClubPlayer['role'] }))}>
+                                <SelectTrigger className="h-8 text-sm bg-secondary"><SelectValue placeholder="Rolle" /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="player">Spieler</SelectItem>
+                                  <SelectItem value="chairman">Vorsitz</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <div className="flex justify-end gap-1">
                                 <Button variant="ghost" size="icon" onClick={() => { setEditingId(null); setEditData({}); }} className="h-7 w-7"><X className="h-3.5 w-3.5" /></Button>
                                 <Button size="icon" onClick={saveEdit} className="h-7 w-7" disabled={!editData.name?.trim()}><Check className="h-3.5 w-3.5" /></Button>
@@ -655,6 +678,11 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   {player.gender && (
                                     <span className="ml-1 text-xs text-muted-foreground">
                                       ({player.gender === 'm' ? '♂' : player.gender === 'w' ? '♀' : '⚧'})
+                                    </span>
+                                  )}
+                                  {player.role && player.role !== 'player' && (
+                                    <span className="ml-2 text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary">
+                                      {player.role === 'chairman' ? 'Vorsitz' : 'Admin'}
                                     </span>
                                   )}
                                 </p>

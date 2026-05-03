@@ -104,6 +104,7 @@ function ClubDetails({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdat
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     chairman: club.chairman,
+    admin: club.admin || '',
     street: club.street,
     house_number: club.house_number,
     postal_code: club.postal_code,
@@ -123,6 +124,7 @@ function ClubDetails({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdat
   const handleCancel = () => {
     setForm({
       chairman: club.chairman,
+      admin: club.admin || '',
       street: club.street,
       house_number: club.house_number,
       postal_code: club.postal_code,
@@ -134,7 +136,7 @@ function ClubDetails({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdat
     setEditing(false);
   };
 
-  const hasData = club.chairman || club.street || club.city || club.phone || club.email || club.website;
+  const hasData = club.chairman || club.admin || club.street || club.city || club.phone || club.email || club.website;
 
   if (!editing) {
     return (
@@ -154,6 +156,12 @@ function ClubDetails({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdat
               <div className="flex items-center gap-2 text-xs">
                 <UserCheck className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                 <span>Vorsitzender: {club.chairman}</span>
+              </div>
+            )}
+            {club.admin && (
+              <div className="flex items-center gap-2 text-xs">
+                <UserCheck className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                <span>Administrator: {club.admin}</span>
               </div>
             )}
             {(club.street || club.city) && (
@@ -214,6 +222,12 @@ function ClubDetails({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdat
           placeholder="Vereinsvorsitzender"
           value={form.chairman}
           onChange={e => setForm(f => ({ ...f, chairman: e.target.value }))}
+          className="h-8 text-xs"
+        />
+        <Input
+          placeholder="Administrator"
+          value={form.admin}
+          onChange={e => setForm(f => ({ ...f, admin: e.target.value }))}
           className="h-8 text-xs"
         />
         <div className="grid grid-cols-[1fr_80px] gap-2">
