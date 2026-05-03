@@ -680,6 +680,11 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                       ({player.gender === 'm' ? '♂' : player.gender === 'w' ? '♀' : '⚧'})
                                     </span>
                                   )}
+                                  {player.role && player.role !== 'player' && (
+                                    <span className="ml-2 text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary">
+                                      {player.role === 'chairman' ? 'Vorsitz' : 'Admin'}
+                                    </span>
+                                  )}
                                 </p>
                                 <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
                                   {player.birthDate && <span>{new Date(player.birthDate).toLocaleDateString('de-DE')}</span>}
