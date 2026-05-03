@@ -119,6 +119,12 @@ export function useTournamentDb(tournamentId: string | null) {
         table: 'matches',
         filter: `tournament_id=eq.${tournamentId}`,
       }, () => loadTournament())
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'tournament_sponsors',
+        filter: `tournament_id=eq.${tournamentId}`,
+      }, () => loadTournament())
       .subscribe();
 
     return () => {
