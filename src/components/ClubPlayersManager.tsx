@@ -14,6 +14,8 @@ import { printGeneralPhotoConsentPdf } from '@/components/PhotoConsentForm';
 import { ConsentDocumentDialog } from '@/components/ConsentViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useClubAuthority } from '@/hooks/useClubAuthority';
+import { Lock } from 'lucide-react';
 
 interface Props {
   clubs: Club[];
@@ -59,7 +61,7 @@ function ClubLogoUpload({ club, onUpdate }: { club: Club; onUpdate?: Props['onUp
   );
 }
 
-function ClubDetailsSection({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdateClub'] }) {
+function ClubDetailsSection({ club, onUpdate, canEdit = true }: { club: Club; onUpdate?: Props['onUpdateClub']; canEdit?: boolean }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     chairman: club.chairman, admin: club.admin || '', street: club.street, house_number: club.house_number,
@@ -86,7 +88,7 @@ function ClubDetailsSection({ club, onUpdate }: { club: Club; onUpdate?: Props['
       <div className="space-y-2 mb-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Vereinsdaten</span>
-          {onUpdate && (
+          {onUpdate && canEdit && (
             <Button variant="ghost" size="sm" onClick={() => setEditing(true)} className="h-6 px-2 text-xs">
               <Pencil className="h-3 w-3 mr-1" /> Bearbeiten
             </Button>
@@ -306,6 +308,7 @@ function ConsentViewDialog({ url, name, playerId, onClose, onDelete }: {
 }
 
 export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub, onUpdateClub, onAddPlayer, onUpdatePlayer, onRemovePlayer, getPlayersForClub }: Props) {
+  const { canManageClub, isAuthenticated } = useClubAuthority();
   const [clubName, setClubName] = useState('');
   const [addingClub, setAddingClub] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -508,6 +511,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
         {clubs.map(club => {
           const players = getPlayersForClub(club.id);
           const isOpen = openClubs.has(club.id);
+          const canManage = canManageClub(club.id);
 
           return (
             <Collapsible key={club.id} open={isOpen} onOpenChange={() => toggleClub(club.id)}>
@@ -523,10 +527,13 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                       )}
                       <span className="text-sm font-medium">{club.name}</span>
                       <span className="text-xs text-muted-foreground ml-1">({players.length} Spieler)</span>
+                      {!canManage && isAuthenticated && (
+                        <Lock className="h-3 w-3 text-muted-foreground ml-1" aria-label="Nur Lesezugriff – Vorsitz/Admin erforderlich" />
+                      )}
                     </button>
                   </CollapsibleTrigger>
                   <div className="flex items-center gap-1">
-                    <ClubLogoUpload club={club} onUpdate={onUpdateClub} />
+                    {canManage && <ClubLogoUpload club={club} onUpdate={onUpdateClub} />}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -536,42 +543,52 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                     >
                       <Download className="h-3.5 w-3.5" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => { e.stopPropagation(); setAddingPlayerFor(addingPlayerFor === club.id ? null : club.id); resetPlayerForm(); }}
-                      className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                      title="Spieler hinzufügen"
-                    >
-                      <UserPlus className="h-3.5 w-3.5" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Verein löschen?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Möchtest du <strong>{club.name}</strong> und alle zugehörigen Spieler wirklich löschen?
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => onRemoveClub(club.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                            Löschen
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    {canManage && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => { e.stopPropagation(); setAddingPlayerFor(addingPlayerFor === club.id ? null : club.id); resetPlayerForm(); }}
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        title="Spieler hinzufügen"
+                      >
+                        <UserPlus className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                    {canManage && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Verein löschen?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Möchtest du <strong>{club.name}</strong> und alle zugehörigen Spieler wirklich löschen?
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => onRemoveClub(club.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Löschen
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   </div>
                 </div>
 
                 <CollapsibleContent>
                   <div className="px-3 pb-3 pt-1 border-t border-border/50 mx-2">
-                    <ClubDetailsSection club={club} onUpdate={onUpdateClub} />
+                    <ClubDetailsSection club={club} onUpdate={onUpdateClub} canEdit={canManage} />
+                    {!canManage && isAuthenticated && (
+                      <div className="mb-3 px-3 py-2 rounded-md bg-muted/50 text-xs text-muted-foreground flex items-center gap-2">
+                        <Lock className="h-3.5 w-3.5" />
+                        <span>Nur <strong>Vorsitz</strong> oder <strong>Admin</strong> dieses Vereins können Daten und Spielerrollen bearbeiten.</span>
+                      </div>
+                    )}
                     {/* Add player form */}
                     {addingPlayerFor === club.id && (
                       <div className="space-y-2 mb-3 p-2 bg-background/60 rounded-md">
@@ -712,48 +729,50 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   </p>
                                 )}
                               </div>
-                              <div className="flex items-center gap-0.5">
-                                <VoiceRecorder
-                                  playerId={player.id}
-                                  playerName={player.name}
-                                  voiceNameUrl={player.voiceNameUrl}
-                                  onSaved={(url) => onUpdatePlayer(player.id, { voiceNameUrl: url })}
-                                  storagePrefix="voice-names-club"
-                                />
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => { setUploadingConsentFor(player.id); consentFileRef.current?.click(); }}
-                                  className={`h-7 w-7 ${player.photoConsentUrl ? 'text-green-600' : 'text-muted-foreground'} hover:text-foreground`}
-                                  title={player.photoConsentUrl ? 'Fotoerlaubnis-Scan ersetzen' : 'Fotoerlaubnis-Scan hochladen'}
-                                >
-                                  <Paperclip className="h-3.5 w-3.5" />
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={() => startEdit(player)} className="h-7 w-7 text-muted-foreground hover:text-foreground">
-                                  <Pencil className="h-3.5 w-3.5" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10">
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Spieler entfernen?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Möchtest du <strong>{player.name}</strong> wirklich aus dem Verein entfernen?
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => onRemovePlayer(player.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                        Entfernen
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
+                              {canManage && (
+                                <div className="flex items-center gap-0.5">
+                                  <VoiceRecorder
+                                    playerId={player.id}
+                                    playerName={player.name}
+                                    voiceNameUrl={player.voiceNameUrl}
+                                    onSaved={(url) => onUpdatePlayer(player.id, { voiceNameUrl: url })}
+                                    storagePrefix="voice-names-club"
+                                  />
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => { setUploadingConsentFor(player.id); consentFileRef.current?.click(); }}
+                                    className={`h-7 w-7 ${player.photoConsentUrl ? 'text-green-600' : 'text-muted-foreground'} hover:text-foreground`}
+                                    title={player.photoConsentUrl ? 'Fotoerlaubnis-Scan ersetzen' : 'Fotoerlaubnis-Scan hochladen'}
+                                  >
+                                    <Paperclip className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon" onClick={() => startEdit(player)} className="h-7 w-7 text-muted-foreground hover:text-foreground">
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10">
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Spieler entfernen?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Möchtest du <strong>{player.name}</strong> wirklich aus dem Verein entfernen?
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => onRemovePlayer(player.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                          Entfernen
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              )}
                             </>
                           )}
                         </div>
