@@ -729,48 +729,50 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   </p>
                                 )}
                               </div>
-                              <div className="flex items-center gap-0.5">
-                                <VoiceRecorder
-                                  playerId={player.id}
-                                  playerName={player.name}
-                                  voiceNameUrl={player.voiceNameUrl}
-                                  onSaved={(url) => onUpdatePlayer(player.id, { voiceNameUrl: url })}
-                                  storagePrefix="voice-names-club"
-                                />
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => { setUploadingConsentFor(player.id); consentFileRef.current?.click(); }}
-                                  className={`h-7 w-7 ${player.photoConsentUrl ? 'text-green-600' : 'text-muted-foreground'} hover:text-foreground`}
-                                  title={player.photoConsentUrl ? 'Fotoerlaubnis-Scan ersetzen' : 'Fotoerlaubnis-Scan hochladen'}
-                                >
-                                  <Paperclip className="h-3.5 w-3.5" />
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={() => startEdit(player)} className="h-7 w-7 text-muted-foreground hover:text-foreground">
-                                  <Pencil className="h-3.5 w-3.5" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10">
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Spieler entfernen?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Möchtest du <strong>{player.name}</strong> wirklich aus dem Verein entfernen?
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => onRemovePlayer(player.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                        Entfernen
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
+                              {canManage && (
+                                <div className="flex items-center gap-0.5">
+                                  <VoiceRecorder
+                                    playerId={player.id}
+                                    playerName={player.name}
+                                    voiceNameUrl={player.voiceNameUrl}
+                                    onSaved={(url) => onUpdatePlayer(player.id, { voiceNameUrl: url })}
+                                    storagePrefix="voice-names-club"
+                                  />
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => { setUploadingConsentFor(player.id); consentFileRef.current?.click(); }}
+                                    className={`h-7 w-7 ${player.photoConsentUrl ? 'text-green-600' : 'text-muted-foreground'} hover:text-foreground`}
+                                    title={player.photoConsentUrl ? 'Fotoerlaubnis-Scan ersetzen' : 'Fotoerlaubnis-Scan hochladen'}
+                                  >
+                                    <Paperclip className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon" onClick={() => startEdit(player)} className="h-7 w-7 text-muted-foreground hover:text-foreground">
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10">
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Spieler entfernen?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Möchtest du <strong>{player.name}</strong> wirklich aus dem Verein entfernen?
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => onRemovePlayer(player.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                          Entfernen
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              )}
                             </>
                           )}
                         </div>
