@@ -284,6 +284,7 @@ function ClubDetails({ club, onUpdate, canEdit = true }: { club: Club; onUpdate?
 }
 
 export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, onImportClubsWithPlayers }: Props) {
+  const { canManageClub, isAuthenticated } = useClubAuthority();
   const [name, setName] = useState('');
   const [adding, setAdding] = useState(false);
   const [openClubs, setOpenClubs] = useState<Set<string>>(new Set());
