@@ -511,6 +511,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
         {clubs.map(club => {
           const players = getPlayersForClub(club.id);
           const isOpen = openClubs.has(club.id);
+          const canManage = canManageClub(club.id);
 
           return (
             <Collapsible key={club.id} open={isOpen} onOpenChange={() => toggleClub(club.id)}>
@@ -526,10 +527,13 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                       )}
                       <span className="text-sm font-medium">{club.name}</span>
                       <span className="text-xs text-muted-foreground ml-1">({players.length} Spieler)</span>
+                      {!canManage && isAuthenticated && (
+                        <Lock className="h-3 w-3 text-muted-foreground ml-1" aria-label="Nur Lesezugriff – Vorsitz/Admin erforderlich" />
+                      )}
                     </button>
                   </CollapsibleTrigger>
                   <div className="flex items-center gap-1">
-                    <ClubLogoUpload club={club} onUpdate={onUpdateClub} />
+                    {canManage && <ClubLogoUpload club={club} onUpdate={onUpdateClub} />}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -539,36 +543,40 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                     >
                       <Download className="h-3.5 w-3.5" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => { e.stopPropagation(); setAddingPlayerFor(addingPlayerFor === club.id ? null : club.id); resetPlayerForm(); }}
-                      className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                      title="Spieler hinzufügen"
-                    >
-                      <UserPlus className="h-3.5 w-3.5" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Verein löschen?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Möchtest du <strong>{club.name}</strong> und alle zugehörigen Spieler wirklich löschen?
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => onRemoveClub(club.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                            Löschen
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    {canManage && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => { e.stopPropagation(); setAddingPlayerFor(addingPlayerFor === club.id ? null : club.id); resetPlayerForm(); }}
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        title="Spieler hinzufügen"
+                      >
+                        <UserPlus className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                    {canManage && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Verein löschen?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Möchtest du <strong>{club.name}</strong> und alle zugehörigen Spieler wirklich löschen?
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => onRemoveClub(club.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Löschen
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   </div>
                 </div>
 
