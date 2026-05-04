@@ -793,10 +793,61 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      club_players_public: {
+        Row: {
+          birth_date: string | null
+          club_id: string | null
+          created_at: string | null
+          gender: string | null
+          id: string | null
+          name: string | null
+          photo_consent: boolean | null
+          photo_consent_url: string | null
+          role: string | null
+          ttr: number | null
+          voice_name_url: string | null
+        }
+        Insert: {
+          birth_date?: string | null
+          club_id?: string | null
+          created_at?: string | null
+          gender?: string | null
+          id?: string | null
+          name?: string | null
+          photo_consent?: boolean | null
+          photo_consent_url?: string | null
+          role?: string | null
+          ttr?: number | null
+          voice_name_url?: string | null
+        }
+        Update: {
+          birth_date?: string | null
+          club_id?: string | null
+          created_at?: string | null
+          gender?: string | null
+          id?: string | null
+          name?: string | null
+          photo_consent?: boolean | null
+          photo_consent_url?: string | null
+          role?: string | null
+          ttr?: number | null
+          voice_name_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_players_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      current_user_email: { Args: never; Returns: string }
+      is_club_authority: { Args: { _club_id: string }; Returns: boolean }
+      is_self_club_player: { Args: { _player_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
