@@ -30,31 +30,52 @@ export function useClubPlayers() {
 
   const loadPlayers = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('club_players')
-        .select('*, clubs(name)')
+      // 1) Public-View: alle Spieler ohne PII (Name, TTR, Geschlecht, Geburtstag, Foto-Consent, Rolle)
+      const { data: publicRows, error: pubErr } = await (supabase as any)
+        .from('club_players_public')
+        .select('id, club_id, name, gender, birth_date, ttr, photo_consent, voice_name_url, photo_consent_url, role')
         .order('name');
-      if (error) throw error;
+      if (pubErr) throw pubErr;
+
+      // 2) Basistabelle mit PII — RLS gibt nur Zeilen zurück, auf die der User Zugriff hat
+      //    (Ersteller, Authority des Clubs, oder Self via E-Mail-Match)
+      const { data: privRows } = await supabase
+        .from('club_players')
+        .select('id, email, phone, postal_code, city, street, house_number');
+
+      const privMap = new Map<string, any>();
+      for (const r of privRows || []) privMap.set(r.id, r);
+
+      // Vereinsnamen separat laden (öffentlich lesbar)
+      const { data: clubsData } = await supabase
+        .from('clubs')
+        .select('id, name');
+      const clubNameMap = new Map<string, string>();
+      for (const c of clubsData || []) clubNameMap.set(c.id, c.name);
+
       setPlayers(
-        (data || []).map((row: any) => ({
-          id: row.id,
-          clubId: row.club_id,
-          clubName: row.clubs?.name || '',
-          name: row.name,
-          gender: row.gender || '',
-          birthDate: row.birth_date,
-          ttr: row.ttr,
-          postalCode: row.postal_code || '',
-          city: row.city || '',
-          street: row.street || '',
-          houseNumber: row.house_number || '',
-          phone: row.phone || '',
-          email: row.email || '',
-          photoConsent: row.photo_consent ?? false,
-          voiceNameUrl: row.voice_name_url || null,
-          photoConsentUrl: row.photo_consent_url || null,
-          role: (row.role as ClubPlayer['role']) || 'player',
-        }))
+        (publicRows || []).map((row: any) => {
+          const priv = privMap.get(row.id);
+          return {
+            id: row.id,
+            clubId: row.club_id,
+            clubName: clubNameMap.get(row.club_id) || '',
+            name: row.name,
+            gender: row.gender || '',
+            birthDate: row.birth_date,
+            ttr: row.ttr,
+            postalCode: priv?.postal_code || '',
+            city: priv?.city || '',
+            street: priv?.street || '',
+            houseNumber: priv?.house_number || '',
+            phone: priv?.phone || '',
+            email: priv?.email || '',
+            photoConsent: row.photo_consent ?? false,
+            voiceNameUrl: row.voice_name_url || null,
+            photoConsentUrl: row.photo_consent_url || null,
+            role: (row.role as ClubPlayer['role']) || 'player',
+          };
+        })
       );
     } catch (error) {
       console.error('Error loading club players:', error);
