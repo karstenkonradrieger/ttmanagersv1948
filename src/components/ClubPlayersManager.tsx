@@ -14,6 +14,8 @@ import { printGeneralPhotoConsentPdf } from '@/components/PhotoConsentForm';
 import { ConsentDocumentDialog } from '@/components/ConsentViewDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useClubAuthority } from '@/hooks/useClubAuthority';
+import { Lock } from 'lucide-react';
 
 interface Props {
   clubs: Club[];
