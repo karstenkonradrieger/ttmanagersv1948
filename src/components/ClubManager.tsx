@@ -102,7 +102,7 @@ function ClubLogoUpload({ club, onUpdate }: { club: Club; onUpdate?: Props['onUp
   );
 }
 
-function ClubDetails({ club, onUpdate }: { club: Club; onUpdate?: Props['onUpdate'] }) {
+function ClubDetails({ club, onUpdate, canEdit = true }: { club: Club; onUpdate?: Props['onUpdate']; canEdit?: boolean }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     chairman: club.chairman,
