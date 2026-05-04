@@ -582,7 +582,13 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
 
                 <CollapsibleContent>
                   <div className="px-3 pb-3 pt-1 border-t border-border/50 mx-2">
-                    <ClubDetailsSection club={club} onUpdate={onUpdateClub} />
+                    <ClubDetailsSection club={club} onUpdate={onUpdateClub} canEdit={canManage} />
+                    {!canManage && isAuthenticated && (
+                      <div className="mb-3 px-3 py-2 rounded-md bg-muted/50 text-xs text-muted-foreground flex items-center gap-2">
+                        <Lock className="h-3.5 w-3.5" />
+                        <span>Nur <strong>Vorsitz</strong> oder <strong>Admin</strong> dieses Vereins können Daten und Spielerrollen bearbeiten.</span>
+                      </div>
+                    )}
                     {/* Add player form */}
                     {addingPlayerFor === club.id && (
                       <div className="space-y-2 mb-3 p-2 bg-background/60 rounded-md">
