@@ -88,7 +88,7 @@ function ClubDetailsSection({ club, onUpdate, canEdit = true }: { club: Club; on
       <div className="space-y-2 mb-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Vereinsdaten</span>
-          {onUpdate && (
+          {onUpdate && canEdit && (
             <Button variant="ghost" size="sm" onClick={() => setEditing(true)} className="h-6 px-2 text-xs">
               <Pencil className="h-3 w-3 mr-1" /> Bearbeiten
             </Button>
