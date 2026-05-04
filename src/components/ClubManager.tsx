@@ -350,6 +350,7 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
         {clubs.map(club => {
           const clubPlayers = getPlayersForClub(club.name);
           const isOpen = openClubs.has(club.id);
+          const canManage = canManageClub(club.id);
 
           return (
             <Collapsible
@@ -375,10 +376,13 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
                       <span className="text-xs text-muted-foreground ml-1">
                         ({clubPlayers.length} Spieler)
                       </span>
+                      {!canManage && isAuthenticated && (
+                        <Lock className="h-3 w-3 text-muted-foreground ml-1" aria-label="Nur Lesezugriff" />
+                      )}
                     </button>
                   </CollapsibleTrigger>
                   <div className="flex items-center gap-1">
-                    <ClubLogoUpload club={club} onUpdate={onUpdate} />
+                    {canManage && <ClubLogoUpload club={club} onUpdate={onUpdate} />}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -388,21 +392,23 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
                     >
                       <Download className="h-3.5 w-3.5" />
                     </Button>
-                    <ClubImportButton clubName={club.name} onImport={onImportClubsWithPlayers} />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onRemove(club.id)}
-                      className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    {canManage && <ClubImportButton clubName={club.name} onImport={onImportClubsWithPlayers} />}
+                    {canManage && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onRemove(club.id)}
+                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                   </div>
                 </div>
 
                 <CollapsibleContent>
                   <div className="px-3 pb-3 pt-1 border-t border-border/50 mx-2 space-y-3">
-                    <ClubDetails club={club} onUpdate={onUpdate} />
+                    <ClubDetails club={club} onUpdate={onUpdate} canEdit={canManage} />
                     
                     <div>
                       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
