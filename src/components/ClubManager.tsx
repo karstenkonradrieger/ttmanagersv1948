@@ -8,6 +8,8 @@ import { ClubImportExport, exportClubCsv, parseCsv } from '@/components/ClubImpo
 import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, Download, Upload, MapPin, Globe, Mail, UserCheck, ImagePlus, Pencil, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useClubAuthority } from '@/hooks/useClubAuthority';
+import { Lock } from 'lucide-react';
 
 interface Props {
   clubs: Club[];
