@@ -308,6 +308,7 @@ function ConsentViewDialog({ url, name, playerId, onClose, onDelete }: {
 }
 
 export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub, onUpdateClub, onAddPlayer, onUpdatePlayer, onRemovePlayer, getPlayersForClub }: Props) {
+  const { canManageClub, isAuthenticated } = useClubAuthority();
   const [clubName, setClubName] = useState('');
   const [addingClub, setAddingClub] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
