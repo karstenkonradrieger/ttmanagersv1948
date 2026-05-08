@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { LiveDashboard } from '@/components/LiveDashboard';
 import { SponsorLogos } from '@/components/SponsorLogos';
@@ -8,6 +9,18 @@ const LiveView = () => {
   const { id } = useParams<{ id: string }>();
   const { tournament, loading, getPlayer, getParticipantName } = useTournamentDb(id || null);
   const isDoubles = tournament.type === 'doubles';
+  const sponsorRef = useRef<HTMLDivElement>(null);
+  const [sponsorHeight, setSponsorHeight] = useState(0);
+
+  useEffect(() => {
+    const el = sponsorRef.current;
+    if (!el) return;
+    const update = () => setSponsorHeight(el.offsetHeight);
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    update();
+    return () => ro.disconnect();
+  }, [tournament.sponsors]);
 
   if (loading) {
     return (
@@ -30,7 +43,7 @@ const LiveView = () => {
           <span className="ml-auto text-xs text-muted-foreground font-medium">Live-Ansicht</span>
         </div>
       </header>
-      <div className="container py-6 pb-32">
+      <div className="container py-6" style={{ paddingBottom: sponsorHeight ? sponsorHeight + 24 : 24 }}>
         <LiveDashboard
           matches={tournament.matches}
           rounds={tournament.rounds}
@@ -47,7 +60,7 @@ const LiveView = () => {
           started={tournament.started}
         />
       </div>
-      <div className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-border/50">
+      <div ref={sponsorRef} className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-border/50">
         <div className="container py-3">
           <SponsorLogos sponsors={tournament.sponsors} />
         </div>
