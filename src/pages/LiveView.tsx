@@ -30,7 +30,7 @@ const LiveView = () => {
           <span className="ml-auto text-xs text-muted-foreground font-medium">Live-Ansicht</span>
         </div>
       </header>
-      <div className="container py-6">
+      <div className="container py-6 pb-32">
         <LiveDashboard
           matches={tournament.matches}
           rounds={tournament.rounds}
@@ -44,9 +44,13 @@ const LiveView = () => {
           players={tournament.players}
           groupCount={Math.max(...tournament.players.map(p => (p.groupNumber ?? -1) + 1), 0)}
           tournamentDate={tournament.tournamentDate}
-         started={tournament.started}
+          started={tournament.started}
         />
-        <SponsorLogos sponsors={tournament.sponsors} />
+      </div>
+      <div className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-border/50">
+        <div className="container py-3">
+          <SponsorLogos sponsors={tournament.sponsors} />
+        </div>
       </div>
     </div>
   );
