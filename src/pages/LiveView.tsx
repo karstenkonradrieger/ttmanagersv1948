@@ -11,6 +11,7 @@ const LiveView = () => {
   const isDoubles = tournament.type === 'doubles';
   const sponsorRef = useRef<HTMLDivElement>(null);
   const [sponsorHeight, setSponsorHeight] = useState(0);
+  const [audioFooterHeight, setAudioFooterHeight] = useState(0);
 
   useEffect(() => {
     const el = sponsorRef.current;
@@ -21,6 +22,35 @@ const LiveView = () => {
     update();
     return () => ro.disconnect();
   }, [tournament.sponsors]);
+
+  useEffect(() => {
+    const findFooter = () =>
+      document.querySelector<HTMLElement>('[data-audio-player-footer]');
+    let ro: ResizeObserver | null = null;
+    const attach = () => {
+      const el = findFooter();
+      if (!el) {
+        setAudioFooterHeight(0);
+        return false;
+      }
+      const update = () => setAudioFooterHeight(el.offsetHeight);
+      ro = new ResizeObserver(update);
+      ro.observe(el);
+      update();
+      return true;
+    };
+    if (!attach()) {
+      const mo = new MutationObserver(() => {
+        if (attach()) mo.disconnect();
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+      return () => {
+        mo.disconnect();
+        ro?.disconnect();
+      };
+    }
+    return () => ro?.disconnect();
+  }, []);
 
   if (loading) {
     return (
