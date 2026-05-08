@@ -172,7 +172,7 @@ export function AudioPlayer() {
       <audio ref={audioRef} preload="none" />
       <audio ref={gongRef} src={gongSrc} preload="auto" />
 
-      <footer className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md">
+      <footer data-audio-player-footer className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-md">
         <div className="container flex items-center gap-3 py-2 flex-wrap sm:flex-nowrap">
 
           {/* Playlist label */}
