@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { LiveDashboard } from '@/components/LiveDashboard';
 import { SponsorLogos } from '@/components/SponsorLogos';
@@ -8,6 +9,18 @@ const LiveView = () => {
   const { id } = useParams<{ id: string }>();
   const { tournament, loading, getPlayer, getParticipantName } = useTournamentDb(id || null);
   const isDoubles = tournament.type === 'doubles';
+  const sponsorRef = useRef<HTMLDivElement>(null);
+  const [sponsorHeight, setSponsorHeight] = useState(0);
+
+  useEffect(() => {
+    const el = sponsorRef.current;
+    if (!el) return;
+    const update = () => setSponsorHeight(el.offsetHeight);
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    update();
+    return () => ro.disconnect();
+  }, [tournament.sponsors]);
 
   if (loading) {
     return (
