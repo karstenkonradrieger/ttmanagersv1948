@@ -73,7 +73,7 @@ const LiveView = () => {
           <span className="ml-auto text-xs text-muted-foreground font-medium">Live-Ansicht</span>
         </div>
       </header>
-      <div className="container py-6" style={{ paddingBottom: sponsorHeight ? sponsorHeight + 24 : 24 }}>
+      <div className="container py-6" style={{ paddingBottom: sponsorHeight + audioFooterHeight + 24 }}>
         <LiveDashboard
           matches={tournament.matches}
           rounds={tournament.rounds}
@@ -90,7 +90,11 @@ const LiveView = () => {
           started={tournament.started}
         />
       </div>
-      <div ref={sponsorRef} className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-border/50">
+      <div
+        ref={sponsorRef}
+        className="fixed left-0 right-0 z-40 glass border-t border-border/50"
+        style={{ bottom: audioFooterHeight }}
+      >
         <div className="container py-3">
           <SponsorLogos sponsors={tournament.sponsors} />
         </div>
