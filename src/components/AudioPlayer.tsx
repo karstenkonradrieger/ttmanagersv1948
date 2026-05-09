@@ -217,8 +217,7 @@ export function AudioPlayer() {
             />
           </div>
 
-          {/* Playlist manager */}
-          <PlaylistManager />
+          {/* Playlist manager moved to tournament settings */}
 
           {/* Announcement phrase manager */}
           <AnnouncementPhraseManager />
