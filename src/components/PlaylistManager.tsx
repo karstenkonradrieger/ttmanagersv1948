@@ -103,6 +103,7 @@ export function PlaylistManager({ inline = false, tournamentId }: { inline?: boo
 
         updateQueueItem(item.id, { progress: 70 });
 
+        if (!tournamentId) throw new Error('Kein Turnier ausgewählt');
         const maxOrder = tracks.length > 0 ? Math.max(...tracks.map(t => t.sort_order)) + 1 : 0;
         const { error: dbError } = await supabase
           .from('playlist_tracks')
@@ -111,6 +112,7 @@ export function PlaylistManager({ inline = false, tournamentId }: { inline?: boo
             file_path: fileName,
             sort_order: maxOrder + pending.indexOf(item),
             is_gong: false,
+            tournament_id: tournamentId,
           });
 
         if (dbError) throw dbError;
