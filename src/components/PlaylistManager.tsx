@@ -43,7 +43,7 @@ interface UploadItem {
   error?: string;
 }
 
-export function PlaylistManager() {
+export function PlaylistManager({ inline = false }: { inline?: boolean } = {}) {
   const { tracks, gongTrack, loading, uploadTrack, deleteTrack, reorderAll, getPublicUrl, refetch } = usePlaylistTracks();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -194,21 +194,9 @@ export function PlaylistManager() {
     await reorderAll(reordered.map(t => t.id));
   }, [tracks, reorderAll]);
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8" title="Playlist verwalten">
-          <Music className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Music className="h-5 w-5" /> Playlist & Gong verwalten
-          </DialogTitle>
-        </DialogHeader>
-
-        {/* Drag & Drop Upload Zone */}
+  const body = (
+    <>
+      {/* Drag & Drop Upload Zone */}
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -345,6 +333,27 @@ export function PlaylistManager() {
             </DndContext>
           )}
         </div>
+    </>
+  );
+
+  if (inline) {
+    return <div className="space-y-4">{body}</div>;
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8" title="Playlist verwalten">
+          <Music className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto overflow-x-hidden">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Music className="h-5 w-5" /> Playlist & Gong verwalten
+          </DialogTitle>
+        </DialogHeader>
+        {body}
       </DialogContent>
     </Dialog>
   );

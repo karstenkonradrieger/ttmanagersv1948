@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { usePlaylistTracks } from '@/hooks/usePlaylistTracks';
-import { PlaylistManager } from '@/components/PlaylistManager';
+
 import { AnnouncementPhraseManager } from '@/components/AnnouncementPhraseManager';
 
 const DEFAULT_PLAYLIST = [
@@ -217,8 +217,7 @@ export function AudioPlayer() {
             />
           </div>
 
-          {/* Playlist manager */}
-          <PlaylistManager />
+          {/* Playlist manager moved to tournament settings */}
 
           {/* Announcement phrase manager */}
           <AnnouncementPhraseManager />

@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Settings2, Upload, X, Loader2, ImagePlus, Video, Play, Plus } from 'lucide-react';
+import { Settings2, Upload, X, Loader2, ImagePlus, Video, Play, Plus, Music } from 'lucide-react';
+import { PlaylistManager } from '@/components/PlaylistManager';
 import { TournamentMode, TournamentType, TeamMode, Sponsor } from '@/types/tournament';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -409,11 +410,12 @@ export function TournamentSettingsDialog({
           </div>
         </DialogHeader>
         <Tabs defaultValue="general" className="pt-2">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="general">Allgemein</TabsTrigger>
             <TabsTrigger value="mode">Modus</TabsTrigger>
             <TabsTrigger value="certificate">Urkunden</TabsTrigger>
             <TabsTrigger value="sponsors">Sponsoren</TabsTrigger>
+            <TabsTrigger value="audio" className="gap-1"><Music className="h-3.5 w-3.5" />Audio</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-4">
@@ -749,6 +751,18 @@ export function TournamentSettingsDialog({
                 </Button>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="audio" className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold flex items-center gap-2 mb-1">
+                <Music className="h-4 w-4" /> Playlist & Gong verwalten
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Diese Tracks werden global verwendet und stehen in allen Turnieren zur Verfügung.
+              </p>
+            </div>
+            <PlaylistManager inline />
           </TabsContent>
         </Tabs>
 
