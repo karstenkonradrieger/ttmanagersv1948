@@ -43,8 +43,8 @@ interface UploadItem {
   error?: string;
 }
 
-export function PlaylistManager({ inline = false }: { inline?: boolean } = {}) {
-  const { tracks, gongTrack, loading, uploadTrack, deleteTrack, reorderAll, getPublicUrl, refetch } = usePlaylistTracks();
+export function PlaylistManager({ inline = false, tournamentId }: { inline?: boolean; tournamentId?: string | null }) {
+  const { tracks, gongTrack, loading, uploadTrack, deleteTrack, reorderAll, getPublicUrl, refetch } = usePlaylistTracks(tournamentId);
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [isGong, setIsGong] = useState(false);
@@ -103,6 +103,7 @@ export function PlaylistManager({ inline = false }: { inline?: boolean } = {}) {
 
         updateQueueItem(item.id, { progress: 70 });
 
+        if (!tournamentId) throw new Error('Kein Turnier ausgewählt');
         const maxOrder = tracks.length > 0 ? Math.max(...tracks.map(t => t.sort_order)) + 1 : 0;
         const { error: dbError } = await supabase
           .from('playlist_tracks')
@@ -111,6 +112,7 @@ export function PlaylistManager({ inline = false }: { inline?: boolean } = {}) {
             file_path: fileName,
             sort_order: maxOrder + pending.indexOf(item),
             is_gong: false,
+            tournament_id: tournamentId,
           });
 
         if (dbError) throw dbError;

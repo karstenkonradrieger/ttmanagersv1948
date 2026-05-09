@@ -8,17 +8,25 @@ export interface PlaylistTrack {
   sort_order: number;
   is_gong: boolean;
   created_at: string;
+  tournament_id: string;
 }
 
-export function usePlaylistTracks() {
+export function usePlaylistTracks(tournamentId?: string | null) {
   const [tracks, setTracks] = useState<PlaylistTrack[]>([]);
   const [gongTrack, setGongTrack] = useState<PlaylistTrack | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchTracks = useCallback(async () => {
+    if (!tournamentId) {
+      setTracks([]);
+      setGongTrack(null);
+      setLoading(false);
+      return;
+    }
     const { data, error } = await supabase
       .from('playlist_tracks')
       .select('*')
+      .eq('tournament_id', tournamentId)
       .order('sort_order', { ascending: true });
 
     if (!error && data) {
@@ -28,16 +36,18 @@ export function usePlaylistTracks() {
       setGongTrack(gong);
     }
     setLoading(false);
-  }, []);
+  }, [tournamentId]);
 
   useEffect(() => {
     fetchTracks();
 
+    if (!tournamentId) return;
+
     const channel = supabase
-      .channel('playlist_tracks_changes')
+      .channel(`playlist_tracks_changes_${tournamentId}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'playlist_tracks' },
+        { event: '*', schema: 'public', table: 'playlist_tracks', filter: `tournament_id=eq.${tournamentId}` },
         () => { fetchTracks(); }
       )
       .subscribe();
@@ -45,7 +55,7 @@ export function usePlaylistTracks() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchTracks]);
+  }, [fetchTracks, tournamentId]);
 
   const getPublicUrl = useCallback((filePath: string) => {
     const { data } = supabase.storage.from('audio').getPublicUrl(filePath);
@@ -53,6 +63,7 @@ export function usePlaylistTracks() {
   }, []);
 
   const uploadTrack = useCallback(async (file: File, title: string, isGong: boolean) => {
+    if (!tournamentId) throw new Error('Kein Turnier ausgewählt');
     const ext = file.name.split('.').pop();
     const fileName = `${crypto.randomUUID()}.${ext}`;
 
@@ -77,11 +88,12 @@ export function usePlaylistTracks() {
         file_path: fileName,
         sort_order: isGong ? 0 : maxOrder,
         is_gong: isGong,
+        tournament_id: tournamentId,
       });
 
     if (dbError) throw dbError;
     await fetchTracks();
-  }, [tracks, gongTrack, fetchTracks]);
+  }, [tracks, gongTrack, fetchTracks, tournamentId]);
 
   const deleteTrack = useCallback(async (track: PlaylistTrack) => {
     await supabase.storage.from('audio').remove([track.file_path]);
@@ -106,14 +118,12 @@ export function usePlaylistTracks() {
   }, [tracks, fetchTracks]);
 
   const reorderAll = useCallback(async (orderedIds: string[]) => {
-    // Optimistic update
     const reordered = orderedIds.map((id, i) => {
       const t = tracks.find(tr => tr.id === id);
       return t ? { ...t, sort_order: i } : null;
     }).filter(Boolean) as PlaylistTrack[];
     setTracks(reordered);
 
-    // Persist
     await Promise.all(
       orderedIds.map((id, i) =>
         supabase.from('playlist_tracks').update({ sort_order: i }).eq('id', id)

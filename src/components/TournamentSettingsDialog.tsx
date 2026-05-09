@@ -762,7 +762,7 @@ export function TournamentSettingsDialog({
                 Diese Tracks werden global verwendet und stehen in allen Turnieren zur Verfügung.
               </p>
             </div>
-            <PlaylistManager inline />
+            <PlaylistManager inline tournamentId={tournamentId} />
           </TabsContent>
         </Tabs>
 

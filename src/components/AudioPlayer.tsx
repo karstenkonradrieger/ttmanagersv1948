@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Play, Pause, Music, Volume2, VolumeX, SkipBack, SkipForward, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -28,7 +29,13 @@ export function AudioPlayer() {
   const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const savedVolumeRef = useRef(0.7);
 
-  const { tracks: dbTracks, gongTrack, getPublicUrl } = usePlaylistTracks();
+  const location = useLocation();
+  const tournamentIdFromRoute = useMemo(() => {
+    const m = location.pathname.match(/^\/(?:live|standings|doubles|groups)\/([0-9a-f-]{36})/i);
+    return m ? m[1] : null;
+  }, [location.pathname]);
+
+  const { tracks: dbTracks, gongTrack, getPublicUrl } = usePlaylistTracks(tournamentIdFromRoute);
 
   const playlist = useMemo(() => {
     if (dbTracks.length > 0) {
