@@ -43,7 +43,7 @@ interface UploadItem {
   error?: string;
 }
 
-export function PlaylistManager() {
+export function PlaylistManager({ inline = false }: { inline?: boolean } = {}) {
   const { tracks, gongTrack, loading, uploadTrack, deleteTrack, reorderAll, getPublicUrl, refetch } = usePlaylistTracks();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
