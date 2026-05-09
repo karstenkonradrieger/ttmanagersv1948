@@ -752,6 +752,18 @@ export function TournamentSettingsDialog({
               )}
             </div>
           </TabsContent>
+
+          <TabsContent value="audio" className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold flex items-center gap-2 mb-1">
+                <Music className="h-4 w-4" /> Playlist & Gong verwalten
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Diese Tracks werden global verwendet und stehen in allen Turnieren zur Verfügung.
+              </p>
+            </div>
+            <PlaylistManager inline />
+          </TabsContent>
         </Tabs>
 
         <Button onClick={handleSave} disabled={saving} className="w-full mt-4">
