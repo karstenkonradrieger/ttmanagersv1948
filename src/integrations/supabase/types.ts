@@ -512,6 +512,7 @@ export type Database = {
           is_gong: boolean
           sort_order: number
           title: string
+          tournament_id: string
         }
         Insert: {
           created_at?: string
@@ -521,6 +522,7 @@ export type Database = {
           is_gong?: boolean
           sort_order?: number
           title: string
+          tournament_id: string
         }
         Update: {
           created_at?: string
@@ -530,8 +532,17 @@ export type Database = {
           is_gong?: boolean
           sort_order?: number
           title?: string
+          tournament_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "playlist_tracks_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_players: {
         Row: {
