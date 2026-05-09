@@ -43,8 +43,8 @@ interface UploadItem {
   error?: string;
 }
 
-export function PlaylistManager({ inline = false }: { inline?: boolean } = {}) {
-  const { tracks, gongTrack, loading, uploadTrack, deleteTrack, reorderAll, getPublicUrl, refetch } = usePlaylistTracks();
+export function PlaylistManager({ inline = false, tournamentId }: { inline?: boolean; tournamentId?: string | null }) {
+  const { tracks, gongTrack, loading, uploadTrack, deleteTrack, reorderAll, getPublicUrl, refetch } = usePlaylistTracks(tournamentId);
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [isGong, setIsGong] = useState(false);
