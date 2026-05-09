@@ -410,11 +410,12 @@ export function TournamentSettingsDialog({
           </div>
         </DialogHeader>
         <Tabs defaultValue="general" className="pt-2">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="general">Allgemein</TabsTrigger>
             <TabsTrigger value="mode">Modus</TabsTrigger>
             <TabsTrigger value="certificate">Urkunden</TabsTrigger>
             <TabsTrigger value="sponsors">Sponsoren</TabsTrigger>
+            <TabsTrigger value="audio" className="gap-1"><Music className="h-3.5 w-3.5" />Audio</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-4">
