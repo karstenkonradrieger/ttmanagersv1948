@@ -32,6 +32,19 @@ export function usePlaylistTracks() {
 
   useEffect(() => {
     fetchTracks();
+
+    const channel = supabase
+      .channel('playlist_tracks_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'playlist_tracks' },
+        () => { fetchTracks(); }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchTracks]);
 
   const getPublicUrl = useCallback((filePath: string) => {
