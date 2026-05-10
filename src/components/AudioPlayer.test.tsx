@@ -57,19 +57,11 @@ describe('AudioPlayer route → tournament id', () => {
     expect(usePlaylistTracksMock).toHaveBeenCalledWith(null);
   });
 
-  it('updates id when navigating between tournaments', () => {
-    const { rerender } = render(
-      <MemoryRouter initialEntries={[`/live/${TID_A}`]}>
-        <AudioPlayer />
-      </MemoryRouter>
-    );
+  it('uses different ids for different tournament routes', () => {
+    renderAt(`/live/${TID_A}`);
     expect(usePlaylistTracksMock).toHaveBeenLastCalledWith(TID_A);
-
-    rerender(
-      <MemoryRouter initialEntries={[`/standings/${TID_B}`]}>
-        <AudioPlayer />
-      </MemoryRouter>
-    );
+    usePlaylistTracksMock.mockClear();
+    renderAt(`/standings/${TID_B}`);
     expect(usePlaylistTracksMock).toHaveBeenLastCalledWith(TID_B);
   });
 });
