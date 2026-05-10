@@ -104,5 +104,17 @@ export function useClubs() {
     }
   }, []);
 
-  return { clubs, loading, addClub, removeClub, updateClub, reload: loadClubs };
+  const setClubActive = useCallback(async (id: string, active: boolean) => {
+    try {
+      const { error } = await supabase.from('clubs').update({ is_active: active }).eq('id', id);
+      if (error) throw error;
+      setClubs(prev => prev.map(c => c.id === id ? { ...c, is_active: active } : c));
+      toast.success(active ? 'Verein aktiviert' : 'Verein deaktiviert');
+    } catch (error) {
+      console.error('Error toggling club active:', error);
+      toast.error('Fehler beim Ändern des Aktiv-Status');
+    }
+  }, []);
+
+  return { clubs, loading, addClub, removeClub, updateClub, setClubActive, reload: loadClubs };
 }
