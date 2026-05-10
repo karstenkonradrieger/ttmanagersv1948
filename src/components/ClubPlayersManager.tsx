@@ -23,6 +23,7 @@ interface Props {
   onAddClub: (name: string) => Promise<Club | null>;
   onRemoveClub: (id: string) => void;
   onUpdateClub?: (id: string, updates: Partial<Omit<Club, 'id'>>) => Promise<void>;
+  onSetClubActive?: (id: string, active: boolean) => Promise<void>;
   onAddPlayer: (clubId: string, name: string, gender: string, birthDate: string | null, ttr: number, postalCode: string, city: string, street: string, houseNumber: string, phone: string, email: string, photoConsent: boolean) => Promise<ClubPlayer | null>;
   onUpdatePlayer: (id: string, updates: Partial<Omit<ClubPlayer, 'id' | 'clubId' | 'clubName'>>) => void;
   onRemovePlayer: (id: string) => void;
