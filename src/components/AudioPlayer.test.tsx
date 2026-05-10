@@ -3,14 +3,14 @@ import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AudioPlayer } from './AudioPlayer';
 
-const usePlaylistTracksMock = vi.fn(() => ({
-  tracks: [],
-  gongTrack: null,
+const usePlaylistTracksMock = vi.fn((_id: string | null) => ({
+  tracks: [] as any[],
+  gongTrack: null as any,
   getPublicUrl: (p: string) => `https://cdn.test/${p}`,
 }));
 
 vi.mock('@/hooks/usePlaylistTracks', () => ({
-  usePlaylistTracks: (id: string | null) => usePlaylistTracksMock(id as any),
+  usePlaylistTracks: (id: string | null) => usePlaylistTracksMock(id),
 }));
 
 vi.mock('@/components/AnnouncementPhraseManager', () => ({
