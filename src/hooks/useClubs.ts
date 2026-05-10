@@ -56,7 +56,7 @@ export function useClubs() {
       const { data, error } = await supabase
         .from('clubs')
         .insert({ name: trimmed, created_by: user.id })
-        .select('id, name, street, house_number, postal_code, city, chairman, admin, logo_url, phone, email, website')
+        .select('id, name, street, house_number, postal_code, city, chairman, admin, logo_url, phone, email, website, is_active')
         .single();
       if (error) throw error;
       setClubs(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
