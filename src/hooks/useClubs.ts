@@ -28,7 +28,7 @@ export function useClubs() {
     try {
       const { data, error } = await supabase
         .from('clubs')
-        .select('id, name, street, house_number, postal_code, city, chairman, admin, logo_url, phone, email, website')
+        .select('id, name, street, house_number, postal_code, city, chairman, admin, logo_url, phone, email, website, is_active')
         .order('name');
       if (error) throw error;
       setClubs(data || []);
