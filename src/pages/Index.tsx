@@ -191,6 +191,7 @@ const Index = () => {
               onAddClub={addClub}
               onRemoveClub={removeClub}
               onUpdateClub={updateClub}
+              onSetClubActive={setClubActive}
               onAddPlayer={addClubPlayer}
               onUpdatePlayer={updateClubPlayer}
               onRemovePlayer={removeClubPlayer}
