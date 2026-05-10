@@ -39,7 +39,7 @@ import { hasMisallocatedByes, computeQualifiedPlayers } from '@/services/byeVali
 
 const Index = () => {
   const { signOut } = useAuth();
-  const { clubs, addClub, removeClub, updateClub } = useClubs();
+  const { clubs, addClub, removeClub, updateClub, setClubActive } = useClubs();
   const { players: clubPlayers, addPlayer: addClubPlayer, updatePlayer: updateClubPlayer, removePlayer: removeClubPlayer, getPlayersForClub } = useClubPlayers();
   const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
   const {
@@ -191,6 +191,7 @@ const Index = () => {
               onAddClub={addClub}
               onRemoveClub={removeClub}
               onUpdateClub={updateClub}
+              onSetClubActive={setClubActive}
               onAddPlayer={addClubPlayer}
               onUpdatePlayer={updateClubPlayer}
               onRemovePlayer={removeClubPlayer}
@@ -553,6 +554,7 @@ const Index = () => {
                 onAdd={addClub}
                 onRemove={removeClub}
                 onUpdate={updateClub}
+                onSetActive={setClubActive}
                 onImportClubsWithPlayers={handleImportClubsWithPlayers}
               />
             </TabsContent>

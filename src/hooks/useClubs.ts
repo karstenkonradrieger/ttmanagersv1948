@@ -16,6 +16,7 @@ export interface Club {
   phone: string;
   email: string;
   website: string;
+  is_active: boolean;
 }
 
 export function useClubs() {
@@ -27,7 +28,7 @@ export function useClubs() {
     try {
       const { data, error } = await supabase
         .from('clubs')
-        .select('id, name, street, house_number, postal_code, city, chairman, admin, logo_url, phone, email, website')
+        .select('id, name, street, house_number, postal_code, city, chairman, admin, logo_url, phone, email, website, is_active')
         .order('name');
       if (error) throw error;
       setClubs(data || []);
@@ -55,7 +56,7 @@ export function useClubs() {
       const { data, error } = await supabase
         .from('clubs')
         .insert({ name: trimmed, created_by: user.id })
-        .select('id, name, street, house_number, postal_code, city, chairman, admin, logo_url, phone, email, website')
+        .select('id, name, street, house_number, postal_code, city, chairman, admin, logo_url, phone, email, website, is_active')
         .single();
       if (error) throw error;
       setClubs(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
@@ -103,5 +104,17 @@ export function useClubs() {
     }
   }, []);
 
-  return { clubs, loading, addClub, removeClub, updateClub, reload: loadClubs };
+  const setClubActive = useCallback(async (id: string, active: boolean) => {
+    try {
+      const { error } = await supabase.from('clubs').update({ is_active: active }).eq('id', id);
+      if (error) throw error;
+      setClubs(prev => prev.map(c => c.id === id ? { ...c, is_active: active } : c));
+      toast.success(active ? 'Verein aktiviert' : 'Verein deaktiviert');
+    } catch (error) {
+      console.error('Error toggling club active:', error);
+      toast.error('Fehler beim Ändern des Aktiv-Status');
+    }
+  }, []);
+
+  return { clubs, loading, addClub, removeClub, updateClub, setClubActive, reload: loadClubs };
 }

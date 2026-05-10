@@ -122,6 +122,7 @@ export type Database = {
           email: string
           house_number: string
           id: string
+          is_active: boolean
           logo_url: string | null
           name: string
           phone: string
@@ -138,6 +139,7 @@ export type Database = {
           email?: string
           house_number?: string
           id?: string
+          is_active?: boolean
           logo_url?: string | null
           name: string
           phone?: string
@@ -154,6 +156,7 @@ export type Database = {
           email?: string
           house_number?: string
           id?: string
+          is_active?: boolean
           logo_url?: string | null
           name?: string
           phone?: string
