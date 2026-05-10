@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ClubImportExport, exportClubCsv, parseCsv } from '@/components/ClubImportExport';
-import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, Download, Upload, MapPin, Globe, Mail, UserCheck, ImagePlus, Pencil, Save, X } from 'lucide-react';
+import { Building2, Plus, Trash2, ChevronDown, ChevronRight, User, Trophy, Phone, Download, Upload, MapPin, Globe, Mail, UserCheck, ImagePlus, Pencil, Save, X, Power, PowerOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useClubAuthority } from '@/hooks/useClubAuthority';
