@@ -554,6 +554,7 @@ const Index = () => {
                 onAdd={addClub}
                 onRemove={removeClub}
                 onUpdate={updateClub}
+                onSetActive={setClubActive}
                 onImportClubsWithPlayers={handleImportClubsWithPlayers}
               />
             </TabsContent>
