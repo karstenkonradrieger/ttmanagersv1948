@@ -359,7 +359,7 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
               open={isOpen}
               onOpenChange={() => toggleClub(club.id)}
             >
-              <div className="bg-secondary rounded-lg">
+              <div className={`bg-secondary rounded-lg ${club.is_active === false ? 'opacity-60' : ''}`}>
                 <div className="flex items-center justify-between px-3 py-2">
                   <CollapsibleTrigger asChild>
                     <button className="flex items-center gap-2 flex-1 text-left hover:opacity-80 transition-opacity">
@@ -373,10 +373,15 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
                       ) : (
                         <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
                       )}
-                      <span className="text-sm font-medium">{club.name}</span>
+                      <span className={`text-sm font-medium ${club.is_active === false ? 'line-through text-muted-foreground' : ''}`}>{club.name}</span>
                       <span className="text-xs text-muted-foreground ml-1">
                         ({clubPlayers.length} Spieler)
                       </span>
+                      {club.is_active === false && (
+                        <span className="ml-1 text-[10px] uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                          Inaktiv
+                        </span>
+                      )}
                       {!canManage && isAuthenticated && (
                         <Lock className="h-3 w-3 text-muted-foreground ml-1" aria-label="Nur Lesezugriff" />
                       )}
@@ -394,12 +399,28 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
                       <Download className="h-3.5 w-3.5" />
                     </Button>
                     {canManage && <ClubImportButton clubName={club.name} onImport={onImportClubsWithPlayers} />}
+                    {canManage && onSetActive && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => { e.stopPropagation(); onSetActive(club.id, !(club.is_active !== false)); }}
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        title={club.is_active === false ? 'Verein aktivieren' : 'Verein deaktivieren (Daten erhalten)'}
+                      >
+                        {club.is_active === false ? (
+                          <Power className="h-3.5 w-3.5 text-primary" />
+                        ) : (
+                          <PowerOff className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                    )}
                     {canManage && (
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => onRemove(club.id)}
                         className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        title="Verein löschen"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
