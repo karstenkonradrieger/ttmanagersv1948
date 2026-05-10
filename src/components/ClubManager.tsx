@@ -17,6 +17,7 @@ interface Props {
   onAdd: (name: string) => Promise<Club | null>;
   onRemove: (id: string) => void;
   onUpdate?: (id: string, updates: Partial<Omit<Club, 'id'>>) => Promise<void>;
+  onSetActive?: (id: string, active: boolean) => Promise<void>;
   onImportClubsWithPlayers?: (data: Array<{ clubName: string; players: Array<{ name: string; club: string; ttr: number; gender: string; birthDate: string | null; postalCode: string; city: string; street: string; houseNumber: string; phone: string }> }>) => void;
 }
 
