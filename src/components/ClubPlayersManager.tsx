@@ -560,10 +560,25 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                         <UserPlus className="h-3.5 w-3.5" />
                       </Button>
                     )}
+                    {canManage && onSetClubActive && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => { e.stopPropagation(); onSetClubActive(club.id, !(club.is_active !== false)); }}
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        title={club.is_active === false ? 'Verein aktivieren' : 'Verein deaktivieren (Daten erhalten)'}
+                      >
+                        {club.is_active === false ? (
+                          <Power className="h-3.5 w-3.5 text-primary" />
+                        ) : (
+                          <PowerOff className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                    )}
                     {canManage && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10">
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" title="Verein löschen">
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </AlertDialogTrigger>
@@ -571,7 +586,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                           <AlertDialogHeader>
                             <AlertDialogTitle>Verein löschen?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Möchtest du <strong>{club.name}</strong> und alle zugehörigen Spieler wirklich löschen?
+                              Möchtest du <strong>{club.name}</strong> und alle zugehörigen Spieler wirklich löschen? Spieler, die bereits an Turnieren teilgenommen haben, blockieren das Löschen — verwende in dem Fall die Deaktivierung.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
