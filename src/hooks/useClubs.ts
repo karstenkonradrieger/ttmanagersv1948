@@ -72,14 +72,23 @@ export function useClubs() {
     }
   }, [user, clubs, loadClubs]);
 
-  const removeClub = useCallback(async (id: string) => {
+  const removeClub = useCallback(async (id: string): Promise<boolean> => {
     try {
       const { error } = await supabase.from('clubs').delete().eq('id', id);
       if (error) throw error;
       setClubs(prev => prev.filter(c => c.id !== id));
-    } catch (error) {
+      return true;
+    } catch (error: any) {
       console.error('Error removing club:', error);
-      toast.error('Fehler beim Entfernen des Vereins');
+      const msg: string = error?.message || '';
+      if (msg.includes('kann nicht gelöscht werden') || error?.code === '23514') {
+        // Friendly message extracted from trigger RAISE EXCEPTION
+        const friendly = msg.replace(/^.*?:\s*/, '');
+        toast.error(friendly || 'Verein kann nicht gelöscht werden, da bereits Spieler an Turnieren teilgenommen haben.');
+      } else {
+        toast.error('Fehler beim Entfernen des Vereins');
+      }
+      return false;
     }
   }, []);
 
