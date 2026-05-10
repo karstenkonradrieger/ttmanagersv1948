@@ -16,6 +16,7 @@ export interface Club {
   phone: string;
   email: string;
   website: string;
+  is_active: boolean;
 }
 
 export function useClubs() {
