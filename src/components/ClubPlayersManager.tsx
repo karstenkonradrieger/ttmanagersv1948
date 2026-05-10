@@ -516,7 +516,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
 
           return (
             <Collapsible key={club.id} open={isOpen} onOpenChange={() => toggleClub(club.id)}>
-              <div className="bg-secondary rounded-lg">
+              <div className={`bg-secondary rounded-lg ${club.is_active === false ? 'opacity-60' : ''}`}>
                 <div className="flex items-center justify-between px-3 py-2">
                   <CollapsibleTrigger asChild>
                     <button className="flex items-center gap-2 flex-1 text-left hover:opacity-80 transition-opacity">
@@ -526,8 +526,13 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                       ) : (
                         <Building2 className="h-4 w-4 text-primary" />
                       )}
-                      <span className="text-sm font-medium">{club.name}</span>
+                      <span className={`text-sm font-medium ${club.is_active === false ? 'line-through text-muted-foreground' : ''}`}>{club.name}</span>
                       <span className="text-xs text-muted-foreground ml-1">({players.length} Spieler)</span>
+                      {club.is_active === false && (
+                        <span className="ml-1 text-[10px] uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                          Inaktiv
+                        </span>
+                      )}
                       {!canManage && isAuthenticated && (
                         <Lock className="h-3 w-3 text-muted-foreground ml-1" aria-label="Nur Lesezugriff – Vorsitz/Admin erforderlich" />
                       )}
