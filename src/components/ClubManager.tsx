@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useClubAuthority } from '@/hooks/useClubAuthority';
 import { Lock } from 'lucide-react';
 import { ClubActiveToggle } from '@/components/ClubActiveToggle';
+import { ClubStatusHistory } from '@/components/ClubStatusHistory';
 
 interface Props {
   clubs: Club[];
