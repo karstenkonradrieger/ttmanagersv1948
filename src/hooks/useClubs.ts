@@ -105,16 +105,28 @@ export function useClubs() {
   }, []);
 
   const setClubActive = useCallback(async (id: string, active: boolean) => {
+    if (!user) {
+      toast.error('Bitte zuerst anmelden');
+      return;
+    }
     try {
       const { error } = await supabase.from('clubs').update({ is_active: active }).eq('id', id);
       if (error) throw error;
+      // Log status change (best-effort, don't block on errors)
+      const { error: logError } = await supabase.from('club_status_history').insert({
+        club_id: id,
+        is_active: active,
+        changed_by: user.id,
+        changed_by_email: user.email ?? null,
+      });
+      if (logError) console.error('Error logging club status change:', logError);
       setClubs(prev => prev.map(c => c.id === id ? { ...c, is_active: active } : c));
       toast.success(active ? 'Verein aktiviert' : 'Verein deaktiviert');
     } catch (error) {
       console.error('Error toggling club active:', error);
       toast.error('Fehler beim Ändern des Aktiv-Status');
     }
-  }, []);
+  }, [user]);
 
   return { clubs, loading, addClub, removeClub, updateClub, setClubActive, reload: loadClubs };
 }
