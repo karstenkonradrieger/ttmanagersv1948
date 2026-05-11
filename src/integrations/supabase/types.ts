@@ -112,6 +112,33 @@ export type Database = {
           },
         ]
       }
+      club_status_history: {
+        Row: {
+          changed_by: string | null
+          changed_by_email: string | null
+          club_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+        }
+        Insert: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          club_id: string
+          created_at?: string
+          id?: string
+          is_active: boolean
+        }
+        Update: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          club_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+        }
+        Relationships: []
+      }
       clubs: {
         Row: {
           admin: string
