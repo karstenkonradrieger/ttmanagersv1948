@@ -561,19 +561,11 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                       </Button>
                     )}
                     {canManage && onSetClubActive && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => { e.stopPropagation(); onSetClubActive(club.id, !(club.is_active !== false)); }}
-                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                        title={club.is_active === false ? 'Verein aktivieren' : 'Verein deaktivieren (Daten erhalten)'}
-                      >
-                        {club.is_active === false ? (
-                          <Power className="h-3.5 w-3.5 text-primary" />
-                        ) : (
-                          <PowerOff className="h-3.5 w-3.5" />
-                        )}
-                      </Button>
+                      <ClubActiveToggle
+                        clubName={club.name}
+                        isActive={club.is_active !== false}
+                        onConfirm={() => onSetClubActive(club.id, !(club.is_active !== false))}
+                      />
                     )}
                     {canManage && (
                       <AlertDialog>
