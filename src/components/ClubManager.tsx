@@ -426,6 +426,7 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
                 <CollapsibleContent>
                   <div className="px-3 pb-3 pt-1 border-t border-border/50 mx-2 space-y-3">
                     <ClubDetails club={club} onUpdate={onUpdate} canEdit={canManage} />
+                    {isOpen && <ClubRoles clubId={club.id} />}
                     {isOpen && <ClubStatusHistory clubId={club.id} />}
                     
                     <div>
