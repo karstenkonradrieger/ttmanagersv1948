@@ -13,6 +13,7 @@ import { Lock } from 'lucide-react';
 import { ClubActiveToggle } from '@/components/ClubActiveToggle';
 import { ClubStatusHistory } from '@/components/ClubStatusHistory';
 import { ClubRoles } from '@/components/ClubRoles';
+import { ClubRoleHistory } from '@/components/ClubRoleHistory';
 
 interface Props {
   clubs: Club[];
