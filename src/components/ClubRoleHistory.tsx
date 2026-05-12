@@ -58,11 +58,6 @@ export function ClubRoleHistory({ clubId }: { clubId: string }) {
     let cancelled = false;
     async function load() {
       setLoading(true);
-      const { data } = await supabase
-        .from('club_role_history')
-        .select('id, player_name, player_email, old_role, new_role, action, changed_by_email, created_at')
-        .eq('club_id', clubId)
-        .order('created_at', { ascending: false });
       let memberFlag = false;
       if (user && userEmail) {
         const { data: priv } = await supabase
@@ -71,6 +66,25 @@ export function ClubRoleHistory({ clubId }: { clubId: string }) {
           .eq('club_id', clubId);
         memberFlag = (priv || []).some(p => (p.email || '').toLowerCase().trim() === userEmail);
       }
+      const allowEmails = !!user && (canManage || memberFlag);
+
+      let data: any[] | null = null;
+      if (allowEmails) {
+        const res = await supabase
+          .from('club_role_history')
+          .select('id, player_name, player_email, old_role, new_role, action, changed_by_email, created_at')
+          .eq('club_id', clubId)
+          .order('created_at', { ascending: false });
+        data = res.data;
+      } else {
+        const res = await supabase
+          .from('club_role_history_public' as any)
+          .select('id, player_name, old_role, new_role, action, created_at')
+          .eq('club_id', clubId)
+          .order('created_at', { ascending: false });
+        data = (res.data || []).map((r: any) => ({ ...r, player_email: '', changed_by_email: null }));
+      }
+
       if (!cancelled) {
         setEntries((data as any) || []);
         setIsMember(memberFlag);
@@ -80,7 +94,7 @@ export function ClubRoleHistory({ clubId }: { clubId: string }) {
     }
     load();
     return () => { cancelled = true; };
-  }, [clubId, user, userEmail]);
+  }, [clubId, user, userEmail, canManage]);
 
   const filtered = useMemo(() => {
     return entries.filter(e => {
