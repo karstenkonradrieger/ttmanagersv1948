@@ -112,6 +112,48 @@ export type Database = {
           },
         ]
       }
+      club_role_history: {
+        Row: {
+          action: string
+          changed_by: string | null
+          changed_by_email: string | null
+          club_id: string
+          created_at: string
+          id: string
+          new_role: string | null
+          old_role: string | null
+          player_email: string
+          player_id: string | null
+          player_name: string
+        }
+        Insert: {
+          action: string
+          changed_by?: string | null
+          changed_by_email?: string | null
+          club_id: string
+          created_at?: string
+          id?: string
+          new_role?: string | null
+          old_role?: string | null
+          player_email?: string
+          player_id?: string | null
+          player_name?: string
+        }
+        Update: {
+          action?: string
+          changed_by?: string | null
+          changed_by_email?: string | null
+          club_id?: string
+          created_at?: string
+          id?: string
+          new_role?: string | null
+          old_role?: string | null
+          player_email?: string
+          player_id?: string | null
+          player_name?: string
+        }
+        Relationships: []
+      }
       club_status_history: {
         Row: {
           changed_by: string | null

@@ -13,6 +13,7 @@ import { Lock } from 'lucide-react';
 import { ClubActiveToggle } from '@/components/ClubActiveToggle';
 import { ClubStatusHistory } from '@/components/ClubStatusHistory';
 import { ClubRoles } from '@/components/ClubRoles';
+import { ClubRoleHistory } from '@/components/ClubRoleHistory';
 
 interface Props {
   clubs: Club[];
@@ -427,6 +428,7 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
                   <div className="px-3 pb-3 pt-1 border-t border-border/50 mx-2 space-y-3">
                     <ClubDetails club={club} onUpdate={onUpdate} canEdit={canManage} />
                     {isOpen && <ClubRoles clubId={club.id} />}
+                    {isOpen && canManage && <ClubRoleHistory clubId={club.id} />}
                     {isOpen && <ClubStatusHistory clubId={club.id} />}
                     
                     <div>
