@@ -926,6 +926,39 @@ export type Database = {
           },
         ]
       }
+      club_role_history_public: {
+        Row: {
+          action: string | null
+          club_id: string | null
+          created_at: string | null
+          id: string | null
+          new_role: string | null
+          old_role: string | null
+          player_id: string | null
+          player_name: string | null
+        }
+        Insert: {
+          action?: string | null
+          club_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          new_role?: string | null
+          old_role?: string | null
+          player_id?: string | null
+          player_name?: string | null
+        }
+        Update: {
+          action?: string | null
+          club_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          new_role?: string | null
+          old_role?: string | null
+          player_id?: string | null
+          player_name?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       current_user_email: { Args: never; Returns: string }
