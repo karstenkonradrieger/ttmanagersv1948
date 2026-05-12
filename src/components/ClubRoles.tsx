@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Shield, UserCheck, Mail } from 'lucide-react';
+import { Shield, UserCheck, Mail, Lock } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useClubAuthority } from '@/hooks/useClubAuthority';
 
 interface Role {
   id: string;
@@ -10,26 +12,42 @@ interface Role {
 }
 
 export function ClubRoles({ clubId }: { clubId: string }) {
+  const { user } = useAuth();
+  const { canManageClub, userEmail } = useClubAuthority();
   const [roles, setRoles] = useState<Role[]>([]);
+  const [isMember, setIsMember] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const canManage = canManageClub(clubId);
+  const canSeeDetails = !!user && (canManage || isMember);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
-      // Public view exposes role + name without PII; basistabelle liefert E-Mail wenn erlaubt
+      // Public-View liefert nur Name + Rolle (keine PII)
       const { data: pub } = await supabase
         .from('club_players_public')
         .select('id, name, role')
         .eq('club_id', clubId)
         .in('role', ['admin', 'chairman']);
-      const { data: priv } = await supabase
-        .from('club_players')
-        .select('id, email')
-        .eq('club_id', clubId)
-        .in('role', ['admin', 'chairman']);
-      const emailMap = new Map<string, string>();
-      for (const r of priv || []) emailMap.set(r.id, r.email || '');
+
+      // E-Mails nur für berechtigte Nutzer (RLS filtert serverseitig)
+      let emailMap = new Map<string, string>();
+      let memberFlag = false;
+      if (user) {
+        const { data: priv } = await supabase
+          .from('club_players')
+          .select('id, email')
+          .eq('club_id', clubId);
+        for (const r of priv || []) {
+          emailMap.set(r.id, r.email || '');
+          if (userEmail && (r.email || '').toLowerCase().trim() === userEmail) {
+            memberFlag = true;
+          }
+        }
+      }
+
       if (!cancelled) {
         const list = (pub || []).map((r: any) => ({
           id: r.id,
@@ -39,14 +57,35 @@ export function ClubRoles({ clubId }: { clubId: string }) {
         })) as Role[];
         list.sort((a, b) => (a.role === b.role ? a.name.localeCompare(b.name) : a.role === 'admin' ? -1 : 1));
         setRoles(list);
+        setIsMember(memberFlag);
         setLoading(false);
       }
     }
     load();
-  }, [clubId]);
+    return () => { cancelled = true; };
+  }, [clubId, user, userEmail]);
 
   if (loading) {
     return <p className="text-xs text-muted-foreground italic">Lade Rollen...</p>;
+  }
+
+  // Nicht eingeloggt oder nicht berechtigt → nur anonymisierte Anzahl
+  if (!canSeeDetails) {
+    const adminCount = roles.filter(r => r.role === 'admin').length;
+    const chairmanCount = roles.filter(r => r.role === 'chairman').length;
+    return (
+      <div className="space-y-2">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+          Rollen <Lock className="h-3 w-3" aria-label="Nur für Vereinsmitglieder sichtbar" />
+        </span>
+        <p className="text-xs text-muted-foreground">
+          {adminCount} Administrator{adminCount !== 1 ? 'en' : ''} · {chairmanCount} Vorsitzende{chairmanCount !== 1 ? '' : 'r'}
+        </p>
+        <p className="text-[10px] text-muted-foreground italic">
+          Detaillierte Rollenansicht nur für eingeloggte Vereinsmitglieder sichtbar.
+        </p>
+      </div>
+    );
   }
 
   return (
