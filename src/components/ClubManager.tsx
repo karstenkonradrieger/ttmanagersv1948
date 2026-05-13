@@ -14,6 +14,7 @@ import { ClubActiveToggle } from '@/components/ClubActiveToggle';
 import { ClubStatusHistory } from '@/components/ClubStatusHistory';
 import { ClubRoles } from '@/components/ClubRoles';
 import { ClubRoleHistory } from '@/components/ClubRoleHistory';
+import { ClubRoleBadge } from '@/components/ClubRoleBadge';
 
 interface Props {
   clubs: Club[];
