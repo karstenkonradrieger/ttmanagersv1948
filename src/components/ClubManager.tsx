@@ -14,6 +14,7 @@ import { ClubActiveToggle } from '@/components/ClubActiveToggle';
 import { ClubStatusHistory } from '@/components/ClubStatusHistory';
 import { ClubRoles } from '@/components/ClubRoles';
 import { ClubRoleHistory } from '@/components/ClubRoleHistory';
+import { ClubRoleBadge } from '@/components/ClubRoleBadge';
 
 interface Props {
   clubs: Club[];
@@ -386,6 +387,7 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
                           Inaktiv
                         </span>
                       )}
+                      <ClubRoleBadge clubId={club.id} />
                       {!canManage && isAuthenticated && (
                         <Lock className="h-3 w-3 text-muted-foreground ml-1" aria-label="Nur Lesezugriff" />
                       )}
