@@ -20,7 +20,7 @@ vi.mock('@/integrations/supabase/client', () => ({
   }
 }));
 
-import { ClubRoleHistory } from '../src/components/ClubRoleHistory';
+import { ClubRoleHistory } from '@/components/ClubRoleHistory';
 
 describe('debug', () => {
   it('renders', async () => {
