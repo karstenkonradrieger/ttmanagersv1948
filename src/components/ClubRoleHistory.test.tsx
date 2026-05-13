@@ -3,13 +3,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-// --- Mocks ---
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: { id: 'u1', email: 'me@test.de' } }),
-}));
-vi.mock('@/hooks/useClubAuthority', () => ({
-  useClubAuthority: () => ({ canManageClub: () => true, userEmail: 'me@test.de' }),
-}));
+// --- Mocks (stable references, sonst Endlosschleife in useEffect) ---
+const STABLE_USER = { id: 'u1', email: 'me@test.de' };
+const STABLE_AUTH = { user: STABLE_USER };
+const STABLE_AUTHORITY = { canManageClub: () => true, userEmail: 'me@test.de' };
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => STABLE_AUTH }));
+vi.mock('@/hooks/useClubAuthority', () => ({ useClubAuthority: () => STABLE_AUTHORITY }));
 
 type Row = {
   id: string;
