@@ -4,9 +4,10 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 // --- Mocks (stable references, sonst Endlosschleife in useEffect) ---
-const STABLE_USER = { id: 'u1', email: 'me@test.de' };
-const STABLE_AUTH = { user: STABLE_USER };
-const STABLE_AUTHORITY = { canManageClub: () => true, userEmail: 'me@test.de' };
+const { STABLE_AUTH, STABLE_AUTHORITY } = vi.hoisted(() => ({
+  STABLE_AUTH: { user: { id: 'u1', email: 'me@test.de' } },
+  STABLE_AUTHORITY: { canManageClub: () => true, userEmail: 'me@test.de' },
+}));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => STABLE_AUTH }));
 vi.mock('@/hooks/useClubAuthority', () => ({ useClubAuthority: () => STABLE_AUTHORITY }));
 
