@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Shield, UserCheck, UserMinus, ArrowRight, Clock, Filter } from 'lucide-react';
+import { Shield, UserCheck, UserMinus, ArrowRight, Clock, Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useClubAuthority } from '@/hooks/useClubAuthority';
@@ -45,77 +45,107 @@ export function ClubRoleHistory({ clubId }: { clubId: string }) {
   const { user } = useAuth();
   const { canManageClub, userEmail } = useClubAuthority();
   const [entries, setEntries] = useState<Entry[]>([]);
-  const [visible, setVisible] = useState(PAGE_SIZE);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
   const [actionFilter, setActionFilter] = useState<ActionFilter>('all');
   const [isMember, setIsMember] = useState(false);
+  const [memberChecked, setMemberChecked] = useState(false);
 
   const canManage = canManageClub(clubId);
   const canSeeEmails = !!user && (canManage || isMember);
 
+  // Mitgliedschaft einmalig prüfen
   useEffect(() => {
+    let cancelled = false;
+    async function checkMember() {
+      if (!user || !userEmail) {
+        if (!cancelled) { setIsMember(false); setMemberChecked(true); }
+        return;
+      }
+      const { data } = await supabase
+        .from('club_players')
+        .select('email')
+        .eq('club_id', clubId);
+      const flag = (data || []).some(p => (p.email || '').toLowerCase().trim() === userEmail);
+      if (!cancelled) { setIsMember(flag); setMemberChecked(true); }
+    }
+    setMemberChecked(false);
+    checkMember();
+    return () => { cancelled = true; };
+  }, [clubId, user, userEmail]);
+
+  async function fetchPage(from: number, to: number, allowEmails: boolean) {
+    if (allowEmails) {
+      let q = supabase
+        .from('club_role_history')
+        .select('id, player_name, player_email, old_role, new_role, action, changed_by_email, created_at', { count: 'exact' })
+        .eq('club_id', clubId);
+      if (actionFilter !== 'all') q = q.eq('action', actionFilter);
+      if (roleFilter !== 'all') q = q.or(`new_role.eq.${roleFilter},old_role.eq.${roleFilter}`);
+      const res = await q.order('created_at', { ascending: false }).range(from, to);
+      return { rows: (res.data as any[]) || [], count: res.count ?? 0 };
+    } else {
+      let q = supabase
+        .from('club_role_history_public' as any)
+        .select('id, player_name, old_role, new_role, action, created_at', { count: 'exact' })
+        .eq('club_id', clubId);
+      if (actionFilter !== 'all') q = q.eq('action', actionFilter);
+      if (roleFilter !== 'all') q = q.or(`new_role.eq.${roleFilter},old_role.eq.${roleFilter}`);
+      const res = await q.order('created_at', { ascending: false }).range(from, to);
+      const rows = ((res.data as any[]) || []).map(r => ({ ...r, player_email: '', changed_by_email: null }));
+      return { rows, count: res.count ?? 0 };
+    }
+  }
+
+  // Erste Seite bei Filter-/Auth-Änderung
+  useEffect(() => {
+    if (!memberChecked) return;
     let cancelled = false;
     async function load() {
       setLoading(true);
-      let memberFlag = false;
-      if (user && userEmail) {
-        const { data: priv } = await supabase
-          .from('club_players')
-          .select('email')
-          .eq('club_id', clubId);
-        memberFlag = (priv || []).some(p => (p.email || '').toLowerCase().trim() === userEmail);
-      }
-      const allowEmails = !!user && (canManage || memberFlag);
-
-      let data: any[] | null = null;
-      if (allowEmails) {
-        const res = await supabase
-          .from('club_role_history')
-          .select('id, player_name, player_email, old_role, new_role, action, changed_by_email, created_at')
-          .eq('club_id', clubId)
-          .order('created_at', { ascending: false });
-        data = res.data;
-      } else {
-        const res = await supabase
-          .from('club_role_history_public' as any)
-          .select('id, player_name, old_role, new_role, action, created_at')
-          .eq('club_id', clubId)
-          .order('created_at', { ascending: false });
-        data = (res.data || []).map((r: any) => ({ ...r, player_email: '', changed_by_email: null }));
-      }
-
+      const allowEmails = !!user && (canManage || isMember);
+      const { rows, count } = await fetchPage(0, PAGE_SIZE - 1, allowEmails);
       if (!cancelled) {
-        setEntries((data as any) || []);
-        setIsMember(memberFlag);
+        setEntries(rows as Entry[]);
+        setTotalCount(count);
+        setOffset(rows.length);
         setLoading(false);
-        setVisible(PAGE_SIZE);
       }
     }
     load();
     return () => { cancelled = true; };
-  }, [clubId, user, userEmail, canManage]);
+  }, [clubId, user, isMember, canManage, memberChecked, roleFilter, actionFilter]);
 
-  const filtered = useMemo(() => {
-    return entries.filter(e => {
-      if (roleFilter !== 'all') {
-        if (e.new_role !== roleFilter && e.old_role !== roleFilter) return false;
-      }
-      if (actionFilter !== 'all' && e.action !== actionFilter) return false;
-      return true;
-    });
-  }, [entries, roleFilter, actionFilter]);
+  async function loadMore() {
+    setLoadingMore(true);
+    const allowEmails = !!user && (canManage || isMember);
+    const { rows } = await fetchPage(offset, offset + PAGE_SIZE - 1, allowEmails);
+    setEntries(prev => [...prev, ...(rows as Entry[])]);
+    setOffset(prev => prev + rows.length);
+    setLoadingMore(false);
+  }
+
+  const activeFilters = useMemo(() => {
+    const arr: { key: string; label: string; clear: () => void }[] = [];
+    if (roleFilter !== 'all') arr.push({ key: 'r', label: `Rolle: ${roleLabel(roleFilter)}`, clear: () => setRoleFilter('all') });
+    if (actionFilter !== 'all') arr.push({ key: 'a', label: `Aktion: ${actionFilter}`, clear: () => setActionFilter('all') });
+    return arr;
+  }, [roleFilter, actionFilter]);
 
   if (loading) return <p className="text-xs text-muted-foreground italic">Lade Rollenverlauf...</p>;
 
-  const shown = filtered.slice(0, visible);
-  const hasMore = filtered.length > visible;
+  const remaining = Math.max(0, totalCount - entries.length);
 
   const FilterChip = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
     <button
       onClick={onClick}
-      className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded transition-colors ${
-        active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/70'
+      className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded transition-colors border ${
+        active
+          ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+          : 'bg-muted text-muted-foreground border-transparent hover:bg-muted/70'
       }`}
     >
       {children}
@@ -126,7 +156,7 @@ export function ClubRoleHistory({ clubId }: { clubId: string }) {
     <div className="space-y-2">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Rollenverlauf {filtered.length > 0 && <span className="ml-1 normal-case">({filtered.length})</span>}
+          Rollenverlauf <span className="ml-1 normal-case">({entries.length}/{totalCount})</span>
         </span>
         <div className="flex items-center gap-2 flex-wrap">
           <Filter className="h-3 w-3 text-muted-foreground" />
@@ -144,11 +174,33 @@ export function ClubRoleHistory({ clubId }: { clubId: string }) {
         </div>
       </div>
 
-      {shown.length === 0 ? (
+      {activeFilters.length > 0 && (
+        <div className="flex items-center gap-1 flex-wrap text-[10px]">
+          <span className="text-muted-foreground">Aktive Filter:</span>
+          {activeFilters.map(f => (
+            <button
+              key={f.key}
+              onClick={f.clear}
+              className="inline-flex items-center gap-1 bg-primary/10 text-primary border border-primary/30 rounded px-1.5 py-0.5 hover:bg-primary/20"
+            >
+              {f.label}
+              <X className="h-2.5 w-2.5" />
+            </button>
+          ))}
+          <button
+            onClick={() => { setRoleFilter('all'); setActionFilter('all'); }}
+            className="ml-1 text-muted-foreground underline hover:text-foreground"
+          >
+            zurücksetzen
+          </button>
+        </div>
+      )}
+
+      {entries.length === 0 ? (
         <p className="text-xs text-muted-foreground italic">Keine Einträge für die gewählten Filter</p>
       ) : (
         <div className="space-y-1">
-          {shown.map(e => {
+          {entries.map(e => {
             const Icon = e.action === 'delete' ? UserMinus : (e.new_role || e.old_role) === 'admin' ? Shield : UserCheck;
             const displayName = canSeeEmails ? e.player_name : anonName(e.player_name);
             const displayEmail = canSeeEmails ? e.player_email : maskEmail(e.player_email);
@@ -176,10 +228,10 @@ export function ClubRoleHistory({ clubId }: { clubId: string }) {
         </div>
       )}
 
-      {hasMore && (
+      {remaining > 0 && (
         <div className="flex justify-center pt-1">
-          <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setVisible(v => v + PAGE_SIZE)}>
-            Mehr laden ({filtered.length - visible})
+          <Button variant="outline" size="sm" className="h-7 text-xs" onClick={loadMore} disabled={loadingMore}>
+            {loadingMore ? 'Lade...' : `Mehr laden (${remaining})`}
           </Button>
         </div>
       )}
