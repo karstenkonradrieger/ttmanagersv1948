@@ -34,7 +34,7 @@ export function useClubPlayers() {
       // 1) Public-View: alle Spieler ohne PII (Name, TTR, Geschlecht, Geburtstag, Foto-Consent, Rolle)
       const { data: publicRows, error: pubErr } = await supabase
         .from('club_players_public')
-        .select('id, club_id, name, gender, birth_date, ttr, photo_consent, voice_name_url, photo_consent_url, role')
+        .select('id, club_id, name, gender, birth_date, ttr, photo_consent, voice_name_url, photo_consent_url, role, is_player')
         .order('name');
       if (pubErr) throw pubErr;
 
