@@ -703,6 +703,12 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   <SelectItem value="admin">Admin</SelectItem>
                                 </SelectContent>
                               </Select>
+                              <div className="flex items-center gap-2">
+                                <Checkbox id={`is-player-edit-${editingId}`} checked={editData.isPlayer ?? true} onCheckedChange={(v) => setEditData(p => ({ ...p, isPlayer: v === true }))} />
+                                <label htmlFor={`is-player-edit-${editingId}`} className="text-sm text-muted-foreground cursor-pointer">
+                                  Aktiver Spieler (für Turnierauswahl verfügbar)
+                                </label>
+                              </div>
                               <div className="flex justify-end gap-1">
                                 <Button variant="ghost" size="icon" onClick={() => { setEditingId(null); setEditData({}); }} className="h-7 w-7"><X className="h-3.5 w-3.5" /></Button>
                                 <Button size="icon" onClick={saveEdit} className="h-7 w-7" disabled={!editData.name?.trim()}><Check className="h-3.5 w-3.5" /></Button>
