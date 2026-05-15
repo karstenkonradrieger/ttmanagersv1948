@@ -337,6 +337,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const [pEmail, setPEmail] = useState('');
   const [pPhotoConsent, setPPhotoConsent] = useState(false);
   const [pRole, setPRole] = useState<'player' | 'chairman' | 'admin'>('player');
+  const [pIsPlayer, setPIsPlayer] = useState(true);
 
   const handleAddClub = async () => {
     if (!clubName.trim()) return;
