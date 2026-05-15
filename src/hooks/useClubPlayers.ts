@@ -75,6 +75,7 @@ export function useClubPlayers() {
             voiceNameUrl: row.voice_name_url || null,
             photoConsentUrl: row.photo_consent_url || null,
             role: (row.role as ClubPlayer['role']) || 'player',
+            isPlayer: row.is_player ?? true,
           };
         })
       );
