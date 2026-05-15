@@ -172,6 +172,7 @@ export function useClubPlayers() {
       if (updates.voiceNameUrl !== undefined) dbUpdates.voice_name_url = updates.voiceNameUrl;
       if (updates.photoConsentUrl !== undefined) dbUpdates.photo_consent_url = updates.photoConsentUrl;
       if (updates.role !== undefined) dbUpdates.role = updates.role;
+      if (updates.isPlayer !== undefined) dbUpdates.is_player = updates.isPlayer;
 
       const { error } = await supabase.from('club_players').update(dbUpdates as any).eq('id', id);
       if (error) throw error;
