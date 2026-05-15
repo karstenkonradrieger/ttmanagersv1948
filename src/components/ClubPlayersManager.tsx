@@ -353,14 +353,14 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const resetPlayerForm = () => {
     setPName(''); setPGender(''); setPBirthDate(''); setPTtr('');
     setPPostalCode(''); setPCity(''); setPStreet(''); setPHouseNumber(''); setPPhone('');
-    setPEmail(''); setPPhotoConsent(false); setPRole('player');
+    setPEmail(''); setPPhotoConsent(false); setPRole('player'); setPIsPlayer(true);
   };
 
   const handleAddPlayer = async (clubId: string) => {
     if (!pName.trim()) return;
     const created = await onAddPlayer(clubId, pName.trim(), pGender, pBirthDate || null, parseInt(pTtr) || 1000, pPostalCode, pCity, pStreet, pHouseNumber, pPhone, pEmail, pPhotoConsent);
-    if (created && pRole !== 'player') {
-      onUpdatePlayer(created.id, { role: pRole });
+    if (created && (pRole !== 'player' || pIsPlayer === false)) {
+      onUpdatePlayer(created.id, { role: pRole, isPlayer: pIsPlayer });
     }
     resetPlayerForm();
     setAddingPlayerFor(null);
