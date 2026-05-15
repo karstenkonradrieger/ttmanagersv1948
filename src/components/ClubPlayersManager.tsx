@@ -730,6 +730,11 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                       {player.role === 'chairman' ? 'Vorsitz' : 'Admin'}
                                     </span>
                                   )}
+                                  {player.isPlayer === false && (
+                                    <span className="ml-2 text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground" title="Wird nicht in der Turnier-Spielerauswahl angezeigt">
+                                      Nicht-Spieler
+                                    </span>
+                                  )}
                                 </p>
                                 <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
                                   {player.birthDate && <span>{new Date(player.birthDate).toLocaleDateString('de-DE')}</span>}
