@@ -643,6 +643,12 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                             <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
                         </Select>
+                        <div className="flex items-center gap-2">
+                          <Checkbox id={`is-player-new-${club.id}`} checked={pIsPlayer} onCheckedChange={(v) => setPIsPlayer(v === true)} />
+                          <label htmlFor={`is-player-new-${club.id}`} className="text-sm text-muted-foreground cursor-pointer">
+                            Aktiver Spieler (für Turnierauswahl verfügbar)
+                          </label>
+                        </div>
                         <div className="flex gap-2">
                           <Button size="sm" className="flex-1 h-9" onClick={() => handleAddPlayer(club.id)} disabled={!pName.trim()}>
                             <UserPlus className="mr-1 h-3.5 w-3.5" /> Hinzufügen
