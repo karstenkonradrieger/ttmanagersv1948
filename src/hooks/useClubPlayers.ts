@@ -21,6 +21,7 @@ export interface ClubPlayer {
   voiceNameUrl: string | null;
   photoConsentUrl: string | null;
   role: 'player' | 'chairman' | 'admin';
+  isPlayer: boolean;
 }
 
 export function useClubPlayers() {
