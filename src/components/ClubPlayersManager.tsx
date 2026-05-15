@@ -386,6 +386,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
       email: editData.email || '',
       photoConsent: editData.photoConsent ?? false,
       role: (editData.role as ClubPlayer['role']) || 'player',
+      isPlayer: editData.isPlayer ?? true,
     });
     setEditingId(null);
     setEditData({});
