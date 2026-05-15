@@ -52,6 +52,7 @@ export type Database = {
           gender: string
           house_number: string
           id: string
+          is_player: boolean
           name: string
           phone: string
           photo_consent: boolean
@@ -72,6 +73,7 @@ export type Database = {
           gender?: string
           house_number?: string
           id?: string
+          is_player?: boolean
           name: string
           phone?: string
           photo_consent?: boolean
@@ -92,6 +94,7 @@ export type Database = {
           gender?: string
           house_number?: string
           id?: string
+          is_player?: boolean
           name?: string
           phone?: string
           photo_consent?: boolean
@@ -883,6 +886,7 @@ export type Database = {
           created_at: string | null
           gender: string | null
           id: string | null
+          is_player: boolean | null
           name: string | null
           photo_consent: boolean | null
           photo_consent_url: string | null
@@ -896,6 +900,7 @@ export type Database = {
           created_at?: string | null
           gender?: string | null
           id?: string | null
+          is_player?: boolean | null
           name?: string | null
           photo_consent?: boolean | null
           photo_consent_url?: string | null
@@ -909,6 +914,7 @@ export type Database = {
           created_at?: string | null
           gender?: string | null
           id?: string | null
+          is_player?: boolean | null
           name?: string | null
           photo_consent?: boolean | null
           photo_consent_url?: string | null

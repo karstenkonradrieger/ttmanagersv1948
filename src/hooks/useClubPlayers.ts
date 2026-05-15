@@ -21,6 +21,7 @@ export interface ClubPlayer {
   voiceNameUrl: string | null;
   photoConsentUrl: string | null;
   role: 'player' | 'chairman' | 'admin';
+  isPlayer: boolean;
 }
 
 export function useClubPlayers() {
@@ -33,7 +34,7 @@ export function useClubPlayers() {
       // 1) Public-View: alle Spieler ohne PII (Name, TTR, Geschlecht, Geburtstag, Foto-Consent, Rolle)
       const { data: publicRows, error: pubErr } = await supabase
         .from('club_players_public')
-        .select('id, club_id, name, gender, birth_date, ttr, photo_consent, voice_name_url, photo_consent_url, role')
+        .select('id, club_id, name, gender, birth_date, ttr, photo_consent, voice_name_url, photo_consent_url, role, is_player')
         .order('name');
       if (pubErr) throw pubErr;
 
@@ -74,6 +75,7 @@ export function useClubPlayers() {
             voiceNameUrl: row.voice_name_url || null,
             photoConsentUrl: row.photo_consent_url || null,
             role: (row.role as ClubPlayer['role']) || 'player',
+            isPlayer: row.is_player ?? true,
           };
         })
       );
@@ -142,6 +144,7 @@ export function useClubPlayers() {
         voiceNameUrl: (data as any).voice_name_url || null,
         photoConsentUrl: (data as any).photo_consent_url || null,
         role: ((data as any).role as ClubPlayer['role']) || 'player',
+        isPlayer: (data as any).is_player ?? true,
       };
       setPlayers(prev => [...prev, mapped].sort((a, b) => a.name.localeCompare(b.name)));
       return mapped;
@@ -169,6 +172,7 @@ export function useClubPlayers() {
       if (updates.voiceNameUrl !== undefined) dbUpdates.voice_name_url = updates.voiceNameUrl;
       if (updates.photoConsentUrl !== undefined) dbUpdates.photo_consent_url = updates.photoConsentUrl;
       if (updates.role !== undefined) dbUpdates.role = updates.role;
+      if (updates.isPlayer !== undefined) dbUpdates.is_player = updates.isPlayer;
 
       const { error } = await supabase.from('club_players').update(dbUpdates as any).eq('id', id);
       if (error) throw error;

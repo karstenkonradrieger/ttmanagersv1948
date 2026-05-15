@@ -46,7 +46,7 @@ export function ImportFromClubPlayers({ clubs, clubPlayers, getPlayersForClub, o
 
   const filteredForClub = useMemo(() => {
     return (clubId: string) => {
-      let players = getPlayersForClub(clubId);
+      let players = getPlayersForClub(clubId).filter(p => p.isPlayer !== false);
       if (genderFilter !== 'all') {
         players = players.filter(p => p.gender === genderFilter);
       }

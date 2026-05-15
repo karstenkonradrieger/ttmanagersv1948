@@ -337,6 +337,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const [pEmail, setPEmail] = useState('');
   const [pPhotoConsent, setPPhotoConsent] = useState(false);
   const [pRole, setPRole] = useState<'player' | 'chairman' | 'admin'>('player');
+  const [pIsPlayer, setPIsPlayer] = useState(true);
 
   const handleAddClub = async () => {
     if (!clubName.trim()) return;
@@ -352,14 +353,14 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
   const resetPlayerForm = () => {
     setPName(''); setPGender(''); setPBirthDate(''); setPTtr('');
     setPPostalCode(''); setPCity(''); setPStreet(''); setPHouseNumber(''); setPPhone('');
-    setPEmail(''); setPPhotoConsent(false); setPRole('player');
+    setPEmail(''); setPPhotoConsent(false); setPRole('player'); setPIsPlayer(true);
   };
 
   const handleAddPlayer = async (clubId: string) => {
     if (!pName.trim()) return;
     const created = await onAddPlayer(clubId, pName.trim(), pGender, pBirthDate || null, parseInt(pTtr) || 1000, pPostalCode, pCity, pStreet, pHouseNumber, pPhone, pEmail, pPhotoConsent);
-    if (created && pRole !== 'player') {
-      onUpdatePlayer(created.id, { role: pRole });
+    if (created && (pRole !== 'player' || pIsPlayer === false)) {
+      onUpdatePlayer(created.id, { role: pRole, isPlayer: pIsPlayer });
     }
     resetPlayerForm();
     setAddingPlayerFor(null);
@@ -385,6 +386,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
       email: editData.email || '',
       photoConsent: editData.photoConsent ?? false,
       role: (editData.role as ClubPlayer['role']) || 'player',
+      isPlayer: editData.isPlayer ?? true,
     });
     setEditingId(null);
     setEditData({});
@@ -641,6 +643,12 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                             <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
                         </Select>
+                        <div className="flex items-center gap-2">
+                          <Checkbox id={`is-player-new-${club.id}`} checked={pIsPlayer} onCheckedChange={(v) => setPIsPlayer(v === true)} />
+                          <label htmlFor={`is-player-new-${club.id}`} className="text-sm text-muted-foreground cursor-pointer">
+                            Aktiver Spieler (für Turnierauswahl verfügbar)
+                          </label>
+                        </div>
                         <div className="flex gap-2">
                           <Button size="sm" className="flex-1 h-9" onClick={() => handleAddPlayer(club.id)} disabled={!pName.trim()}>
                             <UserPlus className="mr-1 h-3.5 w-3.5" /> Hinzufügen
@@ -695,6 +703,12 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   <SelectItem value="admin">Admin</SelectItem>
                                 </SelectContent>
                               </Select>
+                              <div className="flex items-center gap-2">
+                                <Checkbox id={`is-player-edit-${editingId}`} checked={editData.isPlayer ?? true} onCheckedChange={(v) => setEditData(p => ({ ...p, isPlayer: v === true }))} />
+                                <label htmlFor={`is-player-edit-${editingId}`} className="text-sm text-muted-foreground cursor-pointer">
+                                  Aktiver Spieler (für Turnierauswahl verfügbar)
+                                </label>
+                              </div>
                               <div className="flex justify-end gap-1">
                                 <Button variant="ghost" size="icon" onClick={() => { setEditingId(null); setEditData({}); }} className="h-7 w-7"><X className="h-3.5 w-3.5" /></Button>
                                 <Button size="icon" onClick={saveEdit} className="h-7 w-7" disabled={!editData.name?.trim()}><Check className="h-3.5 w-3.5" /></Button>
@@ -714,6 +728,11 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                   {player.role && player.role !== 'player' && (
                                     <span className="ml-2 text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary">
                                       {player.role === 'chairman' ? 'Vorsitz' : 'Admin'}
+                                    </span>
+                                  )}
+                                  {player.isPlayer === false && (
+                                    <span className="ml-2 text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground" title="Wird nicht in der Turnier-Spielerauswahl angezeigt">
+                                      Nicht-Spieler
                                     </span>
                                   )}
                                 </p>
