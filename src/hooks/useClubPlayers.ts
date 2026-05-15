@@ -144,6 +144,7 @@ export function useClubPlayers() {
         voiceNameUrl: (data as any).voice_name_url || null,
         photoConsentUrl: (data as any).photo_consent_url || null,
         role: ((data as any).role as ClubPlayer['role']) || 'player',
+        isPlayer: (data as any).is_player ?? true,
       };
       setPlayers(prev => [...prev, mapped].sort((a, b) => a.name.localeCompare(b.name)));
       return mapped;
