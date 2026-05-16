@@ -77,7 +77,8 @@ export function ImportFromClubPlayers({ clubs, clubPlayers, getPlayersForClub, o
   };
 
   const handleImport = () => {
-    const selectedPlayers = clubPlayers.filter(p => selected.has(p.id));
+    // Sicherheitsfilter: Vorsitzende/Admins mit isPlayer=false dürfen nie importiert werden
+    const selectedPlayers = clubPlayers.filter(p => selected.has(p.id) && p.isPlayer !== false);
     const playersWithConsent = selectedPlayers.filter(p => p.photoConsent);
 
     const toImport = selectedPlayers.map(p => ({
