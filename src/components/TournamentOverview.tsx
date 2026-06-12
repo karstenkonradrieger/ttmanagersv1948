@@ -1120,22 +1120,22 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header with export */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-bold">Spielübersicht</h3>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {champion && (
             <>
-              <Button onClick={() => setShowCertPreview(true)} size="sm" variant="outline" className="h-9 font-semibold">
+              <Button onClick={() => setShowCertPreview(true)} size="sm" variant="outline" className="h-9 font-semibold flex-1 sm:flex-none min-w-[110px]">
                 <Eye className="mr-1 h-4 w-4" />
                 Vorschau
               </Button>
-              <Button onClick={exportCertificates} size="sm" variant="outline" className="h-9 font-semibold">
+              <Button onClick={exportCertificates} size="sm" variant="outline" className="h-9 font-semibold flex-1 sm:flex-none min-w-[110px]">
                 <Award className="mr-1 h-4 w-4" />
                 Urkunden
               </Button>
             </>
           )}
-          <Button onClick={exportPdf} size="sm" className="h-9 font-semibold">
+          <Button onClick={exportPdf} size="sm" className="h-9 font-semibold flex-1 sm:flex-none min-w-[110px]">
             <FileDown className="mr-1 h-4 w-4" />
             PDF Export
           </Button>
@@ -1160,13 +1160,14 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
             }}
             size="sm"
             variant="outline"
-            className="h-9 font-semibold"
+            className="h-9 font-semibold flex-1 sm:flex-none min-w-[110px]"
           >
             <ImageIcon className="mr-1 h-4 w-4" />
             Foto-Report
           </Button>
         </div>
       </div>
+
 
       {/* Champion banner */}
       {champion && (
