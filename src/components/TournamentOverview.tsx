@@ -222,17 +222,17 @@ function OverviewMatchRow({ match: m, getPlayer, bestOf, mode, rounds, isEditing
     <div className={`bg-card rounded-lg p-3 card-shadow border-l-4 ${
       m.status === 'completed' ? 'border-l-primary' : m.status === 'active' ? 'border-l-amber-500' : 'border-l-muted'
     }`}>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 text-sm">
-            <span className={`font-semibold ${m.winnerId === m.player1Id ? 'text-primary' : ''}`}>{p1?.name || 'TBD'}</span>
-            <span className="text-muted-foreground">vs</span>
-            <span className={`font-semibold ${m.winnerId === m.player2Id ? 'text-primary' : ''}`}>{isBye ? 'Freilos' : (p2?.name || 'TBD')}</span>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+            <span className={`font-semibold break-words ${m.winnerId === m.player1Id ? 'text-primary' : ''}`}>{p1?.name || 'TBD'}</span>
+            <span className="text-muted-foreground text-xs">vs</span>
+            <span className={`font-semibold break-words ${m.winnerId === m.player2Id ? 'text-primary' : ''}`}>{isBye ? 'Freilos' : (p2?.name || 'TBD')}</span>
           </div>
           {m.sets.length > 0 && !isBye && (
-            <div className="mt-1 flex items-center gap-2">
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="text-xs font-bold text-primary">{wins.p1}:{wins.p2}</span>
-              <span className="text-xs text-muted-foreground">({formatSets(m.sets)})</span>
+              <span className="text-xs text-muted-foreground break-all">({formatSets(m.sets)})</span>
               {wasUpgradedBestOf(m, bestOf) && (
                 <span className="text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded font-semibold">Bo5</span>
               )}
@@ -240,9 +240,9 @@ function OverviewMatchRow({ match: m, getPlayer, bestOf, mode, rounds, isEditing
           )}
           {isBye && <p className="text-xs text-muted-foreground mt-1">Freilos</p>}
         </div>
-        <div className="text-right flex-shrink-0 ml-3 flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:flex-shrink-0 sm:ml-3 sm:justify-end">
           {m.status === 'completed' && !isBye && onUpdateScore && (
-            <Button variant="ghost" size="sm" className="h-6 text-xs text-muted-foreground" onClick={onStartEdit}>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground" onClick={onStartEdit}>
               <Settings className="mr-1 h-3 w-3" />Korrigieren
             </Button>
           )}
@@ -254,6 +254,7 @@ function OverviewMatchRow({ match: m, getPlayer, bestOf, mode, rounds, isEditing
     </div>
   );
 }
+
 
 export function TournamentOverview({ tournamentName, matches, rounds, getPlayer, getParticipantName, players, logoUrl, bestOf, tournamentId, tournamentDate, venueString, motto, mode, organizerName, sponsors = [], certificateBgUrl, certificateText = 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.', certificateFontFamily = 'Helvetica', certificateFontSize = 20, certificateTextColor = '#1e1e1e', certificateLineSizes = [], certificateExtraSizes = {}, certificateHiddenFields = [], onSaveCertificateSettings, onUpdateScore }: Props) {
   const [showMatchPhotos, setShowMatchPhotos] = useState(false);
@@ -1120,22 +1121,22 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header with export */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-bold">Spielübersicht</h3>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {champion && (
             <>
-              <Button onClick={() => setShowCertPreview(true)} size="sm" variant="outline" className="h-9 font-semibold">
+              <Button onClick={() => setShowCertPreview(true)} size="sm" variant="outline" className="h-9 font-semibold flex-1 sm:flex-none min-w-[110px]">
                 <Eye className="mr-1 h-4 w-4" />
                 Vorschau
               </Button>
-              <Button onClick={exportCertificates} size="sm" variant="outline" className="h-9 font-semibold">
+              <Button onClick={exportCertificates} size="sm" variant="outline" className="h-9 font-semibold flex-1 sm:flex-none min-w-[110px]">
                 <Award className="mr-1 h-4 w-4" />
                 Urkunden
               </Button>
             </>
           )}
-          <Button onClick={exportPdf} size="sm" className="h-9 font-semibold">
+          <Button onClick={exportPdf} size="sm" className="h-9 font-semibold flex-1 sm:flex-none min-w-[110px]">
             <FileDown className="mr-1 h-4 w-4" />
             PDF Export
           </Button>
@@ -1160,13 +1161,14 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
             }}
             size="sm"
             variant="outline"
-            className="h-9 font-semibold"
+            className="h-9 font-semibold flex-1 sm:flex-none min-w-[110px]"
           >
             <ImageIcon className="mr-1 h-4 w-4" />
             Foto-Report
           </Button>
         </div>
       </div>
+
 
       {/* Champion banner */}
       {champion && (
