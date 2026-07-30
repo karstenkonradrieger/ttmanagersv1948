@@ -2,8 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useAuth, hasStoredAuthToken } from "@/hooks/useAuth";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute, AuthRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import LiveView from "./pages/LiveView";
 import StandingsView from "./pages/StandingsView";
@@ -11,48 +11,10 @@ import DoublesView from "./pages/DoublesView";
 import GroupBracketView from "./pages/GroupBracketView";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import { Loader2 } from "lucide-react";
 import { AudioPlayer } from "@/components/AudioPlayer";
 
 const queryClient = new QueryClient();
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-
-  // Immediate guard: no stored token means no valid session, regardless of
-  // whether a SIGNED_OUT event ever arrived.
-  if (!hasStoredAuthToken()) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-  return <>{children}</>;
-}
-
-function AuthRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (user) return <Navigate to="/" replace />;
-  return <>{children}</>;
-}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
