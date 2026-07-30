@@ -23,6 +23,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AuthSyncRedirect />
         <div className="pb-16">
           <Routes>
             <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
