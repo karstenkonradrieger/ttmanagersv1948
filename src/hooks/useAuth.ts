@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
+import { onAuthSignOut, broadcastSignOut } from '@/lib/authSync';
 
 /** Returns true if a Supabase auth token exists in localStorage. */
 export function hasStoredAuthToken(): boolean {
