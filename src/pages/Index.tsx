@@ -142,7 +142,7 @@ const Index = () => {
               </h1>
               <span className="text-[11px] text-muted-foreground hidden sm:block">Sektion Tischtennis</span>
             </div>
-            <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-8 w-8 text-muted-foreground hover:text-foreground" aria-label="Abmelden" title="Abmelden">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
