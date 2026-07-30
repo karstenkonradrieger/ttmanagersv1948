@@ -16,8 +16,14 @@ import { AudioPlayer } from "@/components/AudioPlayer";
 
 const queryClient = new QueryClient();
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+
+  // Immediate guard: no stored token means no valid session, regardless of
+  // whether a SIGNED_OUT event ever arrived.
+  if (!hasStoredAuthToken()) {
+    return <Navigate to="/auth" replace />;
+  }
 
   if (loading) {
     return (
