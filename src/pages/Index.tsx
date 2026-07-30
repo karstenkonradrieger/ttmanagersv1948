@@ -39,6 +39,10 @@ import { hasMisallocatedByes, computeQualifiedPlayers } from '@/services/byeVali
 
 const Index = () => {
   const { signOut } = useAuth();
+  const handleSignOut = async () => {
+    await signOut();
+    window.location.replace('/auth');
+  };
   const { clubs, addClub, removeClub, updateClub, setClubActive } = useClubs();
   const { players: clubPlayers, addPlayer: addClubPlayer, updatePlayer: updateClubPlayer, removePlayer: removeClubPlayer, getPlayersForClub } = useClubPlayers();
   const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
@@ -142,7 +146,7 @@ const Index = () => {
               </h1>
               <span className="text-[11px] text-muted-foreground hidden sm:block">Sektion Tischtennis</span>
             </div>
-            <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-8 w-8 text-muted-foreground hover:text-foreground" aria-label="Abmelden" title="Abmelden">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
