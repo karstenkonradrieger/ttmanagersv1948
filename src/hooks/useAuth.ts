@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
+import { onAuthSignOut, broadcastSignOut } from '@/lib/authSync';
 
 /** Returns true if a Supabase auth token exists in localStorage. */
 export function hasStoredAuthToken(): boolean {
@@ -55,14 +56,17 @@ export function useAuth() {
         setLoading(false);
       }
     };
-    const onStorage = (e: StorageEvent) => {
-      if (!e.key || (e.key.startsWith('sb-') && e.key.includes('-auth-token'))) check();
+    const forceSignedOut = () => {
+      clearStoredAuthTokens();
+      setSession(null);
+      setUser(null);
+      setLoading(false);
     };
-    window.addEventListener('storage', onStorage);
+    const unsubscribe = onAuthSignOut(forceSignedOut);
     window.addEventListener('focus', check);
     const interval = window.setInterval(check, 2000);
     return () => {
-      window.removeEventListener('storage', onStorage);
+      unsubscribe();
       window.removeEventListener('focus', check);
       window.clearInterval(interval);
     };
@@ -76,6 +80,7 @@ export function useAuth() {
       console.error('signOut failed', e);
     } finally {
       clearStoredAuthTokens();
+      broadcastSignOut();
       setSession(null);
       setUser(null);
       setLoading(false);

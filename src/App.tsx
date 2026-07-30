@@ -12,6 +12,7 @@ import GroupBracketView from "./pages/GroupBracketView";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AudioPlayer } from "@/components/AudioPlayer";
+import { AuthSyncRedirect } from "@/components/AuthSyncRedirect";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AuthSyncRedirect />
         <div className="pb-16">
           <Routes>
             <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
