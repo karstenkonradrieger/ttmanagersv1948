@@ -124,7 +124,7 @@ describe('hasStoredAuthToken', () => {
 
 describe('ProtectedRoute Guard', () => {
   it('leitet ohne Token sofort auf /auth um', async () => {
-    const { ProtectedRoute } = await import('@/App');
+    const { ProtectedRoute } = await import('@/components/ProtectedRoute');
     render(
       <MemoryRouter initialEntries={['/']}>
         <Routes>
@@ -139,7 +139,7 @@ describe('ProtectedRoute Guard', () => {
   it('zeigt geschützten Inhalt mit gültiger Session', async () => {
     localStorage.setItem(TOKEN_KEY, JSON.stringify(fakeSession));
     authState.session = fakeSession;
-    const { ProtectedRoute } = await import('@/App');
+    const { ProtectedRoute } = await import('@/components/ProtectedRoute');
     render(
       <MemoryRouter initialEntries={['/']}>
         <Routes>
