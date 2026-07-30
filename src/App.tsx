@@ -12,6 +12,7 @@ import GroupBracketView from "./pages/GroupBracketView";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AudioPlayer } from "@/components/AudioPlayer";
+import { AuthSyncRedirect } from "@/components/AuthSyncRedirect";
 
 const queryClient = new QueryClient();
 
