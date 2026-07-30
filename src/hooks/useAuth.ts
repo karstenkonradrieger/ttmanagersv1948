@@ -2,6 +2,28 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 
+/** Returns true if a Supabase auth token exists in localStorage. */
+export function hasStoredAuthToken(): boolean {
+  try {
+    return Object.keys(localStorage).some(
+      (k) => k.startsWith('sb-') && k.includes('-auth-token') && !!localStorage.getItem(k)
+    );
+  } catch {
+    return true; // storage unavailable -> don't force a logout
+  }
+}
+
+/** Removes all Supabase auth token entries from localStorage. */
+export function clearStoredAuthTokens() {
+  try {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith('sb-') && k.includes('-auth-token'))
+      .forEach((k) => localStorage.removeItem(k));
+  } catch {
+    /* ignore */
+  }
+}
+
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -23,6 +45,29 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Token watchdog: if the stored token disappears (other tab, manual clear,
+  // failed refresh) we drop the local session even without a SIGNED_OUT event.
+  useEffect(() => {
+    const check = () => {
+      if (!hasStoredAuthToken()) {
+        setSession((prev) => (prev ? null : prev));
+        setUser((prev) => (prev ? null : prev));
+        setLoading(false);
+      }
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (!e.key || (e.key.startsWith('sb-') && e.key.includes('-auth-token'))) check();
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', check);
+    const interval = window.setInterval(check, 2000);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('focus', check);
+      window.clearInterval(interval);
+    };
+  }, []);
+
   const signOut = async () => {
     try {
       // 'local' avoids a hard failure when the refresh token is already invalid
@@ -30,20 +75,12 @@ export function useAuth() {
     } catch (e) {
       console.error('signOut failed', e);
     } finally {
-      // Clear any leftover Supabase auth entries and reset local state
-      try {
-        Object.keys(localStorage)
-          .filter((k) => k.startsWith('sb-') && k.includes('-auth-token'))
-          .forEach((k) => localStorage.removeItem(k));
-      } catch {
-        /* ignore */
-      }
+      clearStoredAuthTokens();
       setSession(null);
       setUser(null);
       setLoading(false);
     }
   };
-
 
   return { session, user, loading, signOut };
 }
