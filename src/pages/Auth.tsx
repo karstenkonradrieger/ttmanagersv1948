@@ -41,11 +41,21 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (error) {
-      toast.error('Fehler bei der Google-Anmeldung');
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error('Fehler bei der Google-Anmeldung');
+        return;
+      }
+      if (result.redirected) return; // Browser leitet weiter
+      toast.success('Erfolgreich angemeldet');
+    } catch (e: any) {
+      toast.error(e?.message || 'Fehler bei der Google-Anmeldung');
+    } finally {
+      setLoading(false);
     }
   };
 
