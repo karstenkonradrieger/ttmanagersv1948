@@ -4,8 +4,8 @@
 - [x] Gespeicherte, öffentlich lesbare Turnierzusammenfassungen mit sicherem Schreibzugriff ergänzen.
 - [x] Lovable-AI-Erzeugung aus abgeschlossenen Ergebnissen serverseitig implementieren und testen.
 - [x] Veranstalter-Ansicht, Teilen/Kopieren und öffentliche Live-Anzeige ergänzen.
-- [ ] Tests, Build, Kontraste und End-to-end-Ablauf verifizieren.
+- [x] Tests, Build, Kontraste und End-to-end-Ablauf verifizieren.
 - [x] Privaten, datenbankgespeicherten Turnier-Frageverlauf ergänzen.
 - [x] Servergestützte Lovable-AI-Antworten aus aktuellen Turnierdaten ergänzen.
 - [x] Tablet- und smartphonegerechten Fragebereich in die Ergebnisansicht integrieren.
-- [ ] Rechte, Persistenz, Realtime, Gateway-Aufruf und Darstellung verifizieren.
+- [x] Rechte, Persistenz, Realtime, Gateway-Aufruf und Darstellung verifizieren.
