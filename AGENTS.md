@@ -1,2 +1,3 @@
 - Group draws go through the pure function in src/services/clubBalancedGroupDraw.ts (pots/snake preserved, club balance as secondary constraint) — keeps draw logic testable outside the hook.
 - AI tournament summaries are generated server-side from persisted completed matches and stored with a result signature — prevents exposing AI credentials and stale live reports.
+- Tournament Q&A is one private, database-backed conversation per tournament, generated server-side from current persisted tournament data — keeps access owner-only and answers current.

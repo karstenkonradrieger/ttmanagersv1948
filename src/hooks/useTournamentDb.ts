@@ -12,6 +12,7 @@ import { drawClubBalancedGroups, formatClubBalanceIssue } from '@/services/clubB
 
 const emptyTournament: Tournament = {
   id: '',
+  createdBy: null,
   name: 'Neues Turnier',
   players: [],
   matches: [],

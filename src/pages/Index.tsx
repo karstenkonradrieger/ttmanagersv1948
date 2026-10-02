@@ -40,7 +40,7 @@ import { hasMisallocatedByes, computeQualifiedPlayers } from '@/services/byeVali
 const tournamentTabClass = 'min-h-11 h-11 shrink-0 min-w-11 lg:min-w-0 lg:flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-colors';
 
 const Index = () => {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const handleSignOut = async () => {
     await signOut();
     window.location.replace('/auth');
@@ -884,6 +884,7 @@ const Index = () => {
                    onUpdatePlayer={updatePlayer}
                     summary={tournament.summary}
                     onSummaryGenerated={setTournamentSummary}
+                     canAskTournamentData={Boolean(user && tournament.createdBy === user.id)}
                  />
               )}
             </TabsContent>

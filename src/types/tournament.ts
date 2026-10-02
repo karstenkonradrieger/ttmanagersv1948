@@ -174,6 +174,7 @@ export interface TournamentSummary {
 
 export interface Tournament {
   id: string;
+  createdBy: string | null;
   name: string;
   players: Player[];
   matches: Match[];

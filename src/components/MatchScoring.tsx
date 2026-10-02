@@ -11,6 +11,7 @@ import { MatchPhotos } from '@/components/MatchPhotos';
 import { generateMatchReport } from '@/components/MatchReport';
 import { useAnnouncementPhrases } from '@/hooks/useAnnouncementPhrases';
 import { TournamentSummaryCard } from '@/components/TournamentSummaryCard';
+import { TournamentDataChat } from '@/components/TournamentDataChat';
 import { isTournamentSummaryStale } from '@/services/tournamentSummary';
 
 interface Props {
@@ -39,6 +40,7 @@ interface Props {
   onUpdatePlayer?: (id: string, updates: Partial<Omit<Player, 'id'>>) => void;
   summary?: TournamentSummary | null;
   onSummaryGenerated?: (summary: TournamentSummary) => void;
+  canAskTournamentData?: boolean;
 }
 
 let announcementQueue: Promise<void> = Promise.resolve();
@@ -155,7 +157,7 @@ const announceMatch = async (
   });
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, sponsors = [], isHandicap = false, players = [], doublesPairs = [], mode, breakMinutes = 0, onUpdatePlayer, summary = null, onSummaryGenerated }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, sponsors = [], isHandicap = false, players = [], doublesPairs = [], mode, breakMinutes = 0, onUpdatePlayer, summary = null, onSummaryGenerated, canAskTournamentData = false }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
   const { getPhraseAudioUrl } = useAnnouncementPhrases();
 
@@ -407,6 +409,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
               onGenerated={onSummaryGenerated}
             />
           )}
+          {canAskTournamentData && <TournamentDataChat tournamentId={tournamentId} />}
           <PhaseGroupedMatches
             matches={completedMatches}
             mode={mode}
