@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { useAuth } from '@/hooks/useAuth';
@@ -36,6 +36,8 @@ import { GlobalSettings } from '@/components/GlobalSettings';
 import { Input } from '@/components/ui/input';
 import { PageTransition, FadeIn } from '@/components/ui/motion';
 import { hasMisallocatedByes, computeQualifiedPlayers } from '@/services/byeValidation';
+
+const tournamentTabClass = 'min-h-11 h-11 shrink-0 min-w-11 lg:min-w-0 lg:flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-colors';
 
 const Index = () => {
   const { signOut } = useAuth();
@@ -90,6 +92,11 @@ const Index = () => {
   } = useTournamentDb(selectedTournamentId);
 
   const [tab, setTab] = useState('players');
+  const tabListRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const active = tabListRef.current?.querySelector<HTMLElement>('[data-state="active"]');
+    active?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+  }, [tab]);
   const [homeTab, setHomeTab] = useState<'tournaments' | 'clubs' | 'settings'>('tournaments');
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState('');
@@ -146,19 +153,19 @@ const Index = () => {
               </h1>
               <span className="text-[11px] text-muted-foreground hidden sm:block">Sektion Tischtennis</span>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-8 w-8 text-muted-foreground hover:text-foreground" aria-label="Abmelden" title="Abmelden">
+            <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-11 w-11 text-muted-foreground hover:text-foreground" aria-label="Abmelden" title="Abmelden">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </header>
         <PageTransition className="container py-8">
           <FadeIn delay={0.1}>
-          <div className="flex gap-1 mb-6 bg-secondary/50 p-1 rounded-xl w-fit">
+          <div className="flex gap-1 mb-6 bg-secondary/50 p-1 rounded-xl w-fit max-w-full overflow-x-auto">
             <Button
               variant={homeTab === 'tournaments' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setHomeTab('tournaments')}
-              className={`gap-1.5 rounded-lg text-xs font-medium ${homeTab !== 'tournaments' ? 'text-muted-foreground hover:text-foreground' : ''}`}
+              className={`gap-1.5 rounded-lg text-xs font-medium h-11 ${homeTab !== 'tournaments' ? 'text-muted-foreground hover:text-foreground' : ''}`}
             >
               <Swords className="h-3.5 w-3.5" />
               Turniere
@@ -167,7 +174,7 @@ const Index = () => {
               variant={homeTab === 'clubs' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setHomeTab('clubs')}
-              className={`gap-1.5 rounded-lg text-xs font-medium ${homeTab !== 'clubs' ? 'text-muted-foreground hover:text-foreground' : ''}`}
+              className={`gap-1.5 rounded-lg text-xs font-medium h-11 ${homeTab !== 'clubs' ? 'text-muted-foreground hover:text-foreground' : ''}`}
             >
               <Building2 className="h-3.5 w-3.5" />
               Vereine
@@ -176,7 +183,7 @@ const Index = () => {
               variant={homeTab === 'settings' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setHomeTab('settings')}
-              className={`gap-1.5 rounded-lg text-xs font-medium ${homeTab !== 'settings' ? 'text-muted-foreground hover:text-foreground' : ''}`}
+              className={`gap-1.5 rounded-lg text-xs font-medium h-11 ${homeTab !== 'settings' ? 'text-muted-foreground hover:text-foreground' : ''}`}
             >
               <Settings className="h-3.5 w-3.5" />
               Einstellungen
@@ -221,19 +228,20 @@ const Index = () => {
   const typeLabel = isTeam ? 'Mannschaft' : isDoubles ? 'Doppel' : 'Einzel';
 
   const hasConsolation = tournament.matches.some(m => m.bracketType === 'consolation');
-  const tabCount = (isTeam ? 8 : isDoubles ? 8 : 7) + (hasConsolation ? 1 : 0);
 
   return (
     <PageTransition className="min-h-screen bg-background">
       {/* Header */}
       <header className="glass border-b border-border/50 sticky top-0 z-50">
         <div className="container py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSelectedTournamentId(null)}
-              className="h-8 w-8 flex-shrink-0 text-muted-foreground hover:text-foreground"
+              className="h-11 w-11 flex-shrink-0 text-muted-foreground hover:text-foreground"
+              aria-label="Zurück zur Turnierauswahl"
+              title="Zurück zur Turnierauswahl"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -242,7 +250,7 @@ const Index = () => {
               logoUrl={tournament.logoUrl}
               onLogoChange={updateLogoUrl}
             />
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               {editingName ? (
                 <Input
                   autoFocus
@@ -253,11 +261,13 @@ const Index = () => {
                   className="h-7 text-sm sm:text-lg font-bold w-48 sm:w-64 font-display"
                 />
               ) : (
-                <div className="flex items-center gap-1 group cursor-pointer" onClick={() => { setNameValue(tournament.name); setEditingName(true); }}>
-                  <h1 className="text-sm sm:text-lg font-bold tracking-tight leading-tight truncate font-display">
+                <div className="flex items-center min-w-0">
+                  <h1 className="text-sm sm:text-lg font-bold tracking-tight leading-tight truncate font-display cursor-pointer" onClick={() => { setNameValue(tournament.name); setEditingName(true); }}>
                     {tournament.name || 'Turnier'}
                   </h1>
-                  <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                  <Button variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-muted-foreground" aria-label="Turniername bearbeiten" title="Turniername bearbeiten" onClick={() => { setNameValue(tournament.name); setEditingName(true); }}>
+                    <Pencil className="h-3 w-3" />
+                  </Button>
                 </div>
               )}
               <div className="flex gap-1.5 mt-0.5">
@@ -296,12 +306,12 @@ const Index = () => {
               onSaved={reload}
             />
             {tournament.openingVideoUrl && (
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setOpeningVideoPlayerOpen(true)} title="Eröffnungsvideo abspielen">
+              <Button variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-muted-foreground hover:text-foreground" onClick={() => setOpeningVideoPlayerOpen(true)} title="Eröffnungsvideo abspielen" aria-label="Eröffnungsvideo abspielen">
                 <Video className="h-4 w-4" />
               </Button>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {canStart && (
               <Button
                 onClick={() => {
@@ -378,7 +388,7 @@ const Index = () => {
           {tournament.motto && (
             <>
               <span className="text-border">·</span>
-              <span className="italic text-foreground/50">„{tournament.motto}"</span>
+              <span className="italic text-muted-foreground">„{tournament.motto}"</span>
             </>
           )}
         </div>
@@ -387,50 +397,50 @@ const Index = () => {
       {/* Main content */}
       <div className="container pb-24">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className={`w-full bg-secondary/50 h-11 p-1 rounded-xl grid`} style={{ gridTemplateColumns: `repeat(${tabCount}, minmax(0, 1fr))` }}>
-            <TabsTrigger value="players" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+          <TabsList ref={tabListRef} className="w-full bg-secondary/50 h-auto p-1 rounded-xl flex justify-start overflow-x-auto overflow-y-hidden whitespace-nowrap scrollbar-thin lg:justify-between">
+            <TabsTrigger value="players" aria-label="Spieler" title="Spieler" className={tournamentTabClass}>
               <Users className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Spieler</span>
             </TabsTrigger>
             {isDoubles && (
-              <TabsTrigger value="doubles" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <TabsTrigger value="doubles" aria-label="Doppel" title="Doppel" className={tournamentTabClass}>
                 <Users2 className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Doppel</span>
               </TabsTrigger>
             )}
             {isTeam && (
-              <TabsTrigger value="teams" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <TabsTrigger value="teams" aria-label="Teams" title="Teams" className={tournamentTabClass}>
                 <Shield className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Teams</span>
               </TabsTrigger>
             )}
-            <TabsTrigger value="clubs" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+            <TabsTrigger value="clubs" aria-label="Vereine" title="Vereine" className={tournamentTabClass}>
               <Building2 className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Vereine</span>
             </TabsTrigger>
-            <TabsTrigger value="bracket" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+            <TabsTrigger value="bracket" aria-label={isRoundRobin || isSwiss || isHandicap ? 'Tabelle' : isKaiser ? 'Rangliste' : isGroupKnockout ? 'Gruppen' : 'Bracket'} title={isRoundRobin || isSwiss || isHandicap ? 'Tabelle' : isKaiser ? 'Rangliste' : isGroupKnockout ? 'Gruppen' : 'Bracket'} className={tournamentTabClass}>
               <Swords className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">{isRoundRobin || isSwiss || isHandicap ? 'Tabelle' : isKaiser ? 'Rangliste' : isGroupKnockout ? 'Gruppen' : 'Bracket'}</span>
             </TabsTrigger>
-            <TabsTrigger value="scoring" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+            <TabsTrigger value="scoring" aria-label="Ergebnis" title="Ergebnis" className={tournamentTabClass}>
               <PenLine className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Ergebnis</span>
             </TabsTrigger>
-            <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+            <TabsTrigger value="overview" aria-label="Übersicht" title="Übersicht" className={tournamentTabClass}>
               <ClipboardList className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Übersicht</span>
             </TabsTrigger>
-            <TabsTrigger value="media" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+            <TabsTrigger value="media" aria-label="Medien" title="Medien" className={tournamentTabClass}>
               <Film className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Medien</span>
             </TabsTrigger>
             {hasConsolation && (
-              <TabsTrigger value="consolation" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+              <TabsTrigger value="consolation" aria-label="Trostrunde" title="Trostrunde" className={tournamentTabClass}>
                 <Swords className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Trostrunde</span>
               </TabsTrigger>
             )}
-            <TabsTrigger value="live" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm font-medium text-xs gap-1 transition-all">
+            <TabsTrigger value="live" aria-label="Live" title="Live" className={tournamentTabClass}>
               <Monitor className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Live</span>
             </TabsTrigger>
