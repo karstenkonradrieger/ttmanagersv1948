@@ -1,4 +1,4 @@
-- [ ] Kontrast-Tokens und schwache Textfarben anpassen und nachrechnen.
-- [ ] Turnier- und Startseiten-Tabs sowie Header-Touchflächen verbessern.
-- [ ] Kleine Aktionsflächen und Hover-abhängige Aktionen projektweit korrigieren.
-- [ ] TypeScript, Tests und Darstellung überprüfen.
+- [x] Kontrast-Tokens und schwache Textfarben anpassen und nachrechnen.
+- [x] Turnier- und Startseiten-Tabs sowie Header-Touchflächen verbessern.
+- [x] Kleine Aktionsflächen und Hover-abhängige Aktionen projektweit korrigieren.
+- [x] TypeScript, Tests und Darstellung überprüfen.
