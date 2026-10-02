@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Chat, useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
-import { Bot, Trash2 } from 'lucide-react';
+import { Bot, MessageCircleQuestion, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Message, MessageContent, MessageResponse } from '@/components/ai-elemen
 import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea } from '@/components/ai-elements/prompt-input';
 import { Shimmer } from '@/components/ai-elements/shimmer';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { deleteTournamentChat, fetchTournamentChat } from '@/services/tournamentChat';
 
 interface Props {
@@ -30,11 +31,29 @@ export function TournamentDataChat({ tournamentId }: Props) {
     return () => { active = false; };
   }, [tournamentId]);
 
-  if (!initialMessages) {
-    return <div className="border border-border bg-card p-4 text-sm text-muted-foreground">Frageverlauf wird geladen …</div>;
-  }
-
-  return <TournamentDataChatReady key={tournamentId} tournamentId={tournamentId} initialMessages={initialMessages} textareaRef={textareaRef} />;
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button type="button" variant="outline" className="min-h-11 gap-2">
+          <MessageCircleQuestion className="size-5" />
+          Turnierdaten fragen
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="flex h-[min(90dvh,52rem)] w-[calc(100%-1rem)] max-w-3xl flex-col gap-3 p-3 sm:w-full sm:p-5 [&>button]:size-11 [&>button]:items-center [&>button]:justify-center">
+        <DialogHeader className="pr-12 text-left">
+          <DialogTitle>Turnierdaten fragen</DialogTitle>
+          <DialogDescription>Fragen Sie nach Ergebnissen und dem bisherigen Turnierverlauf.</DialogDescription>
+        </DialogHeader>
+        <div className="min-h-0 flex-1">
+          {initialMessages ? (
+            <TournamentDataChatReady key={tournamentId} tournamentId={tournamentId} initialMessages={initialMessages} textareaRef={textareaRef} />
+          ) : (
+            <div className="flex h-full items-center justify-center border border-border bg-card p-4 text-sm text-muted-foreground">Frageverlauf wird geladen …</div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 function TournamentDataChatReady({ tournamentId, initialMessages, textareaRef }: Props & { initialMessages: UIMessage[]; textareaRef: React.RefObject<HTMLTextAreaElement> }) {
@@ -90,12 +109,9 @@ function TournamentDataChatReady({ tournamentId, initialMessages, textareaRef }:
   };
 
   return (
-    <section className="border border-border bg-card p-3 sm:p-4" aria-labelledby="tournament-data-chat-title">
+    <section className="flex h-full min-h-0 flex-col border border-border bg-card p-3 sm:p-4" aria-label="Fragen und Antworten zu den Turnierdaten">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h4 id="tournament-data-chat-title" className="font-semibold">Turnierdaten fragen</h4>
-          <p className="form-hint">Antworten beruhen ausschließlich auf den aktuell gespeicherten Turnierdaten.</p>
-        </div>
+        <p className="form-hint mt-0">Antworten beruhen ausschließlich auf den aktuell gespeicherten Turnierdaten.</p>
         {messages.length > 0 && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -115,7 +131,7 @@ function TournamentDataChatReady({ tournamentId, initialMessages, textareaRef }:
         )}
       </div>
 
-      <Conversation className="mb-3 h-[min(52vh,30rem)] min-h-64 rounded-md border border-border bg-background">
+      <Conversation className="mb-3 min-h-48 flex-1 rounded-md border border-border bg-background">
         <ConversationContent className="gap-4 p-3 sm:p-4">
           {messages.length === 0 ? (
             <ConversationEmptyState icon={<Bot className="size-7" />} title="Noch keine Fragen" description="Frage zum bisherigen Turnierverlauf oder zu gespeicherten Ergebnissen." />

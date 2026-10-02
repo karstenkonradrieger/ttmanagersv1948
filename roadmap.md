@@ -9,3 +9,4 @@
 - [x] Servergestützte Lovable-AI-Antworten aus aktuellen Turnierdaten ergänzen.
 - [x] Tablet- und smartphonegerechten Fragebereich in die Ergebnisansicht integrieren.
 - [x] Rechte, Persistenz, Realtime, Gateway-Aufruf und Darstellung verifizieren.
+- [ ] Eigenen Frage-Dialog in der Turnieransicht ergänzen und auf dem iPad verifizieren.
