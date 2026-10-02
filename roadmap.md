@@ -5,3 +5,7 @@
 - [x] Lovable-AI-Erzeugung aus abgeschlossenen Ergebnissen serverseitig implementieren und testen.
 - [x] Veranstalter-Ansicht, Teilen/Kopieren und öffentliche Live-Anzeige ergänzen.
 - [ ] Tests, Build, Kontraste und End-to-end-Ablauf verifizieren.
+- [ ] Privaten, datenbankgespeicherten Turnier-Frageverlauf ergänzen.
+- [ ] Servergestützte Lovable-AI-Antworten aus aktuellen Turnierdaten ergänzen.
+- [ ] Tablet- und smartphonegerechten Fragebereich in die Ergebnisansicht integrieren.
+- [ ] Rechte, Persistenz, Realtime, Gateway-Aufruf und Darstellung verifizieren.
