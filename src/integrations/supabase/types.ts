@@ -722,6 +722,41 @@ export type Database = {
           },
         ]
       }
+      tournament_summaries: {
+        Row: {
+          content: string
+          generated_at: string
+          generated_by: string | null
+          source_signature: string
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          generated_at?: string
+          generated_by?: string | null
+          source_signature: string
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          generated_at?: string
+          generated_by?: string | null
+          source_signature?: string
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_summaries_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: true
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_videos: {
         Row: {
           created_at: string
