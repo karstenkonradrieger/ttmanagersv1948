@@ -687,6 +687,44 @@ export type Database = {
           },
         ]
       }
+      tournament_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          role: string
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by: string
+          id?: string
+          role: string
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          role?: string
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_chat_messages_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_sponsors: {
         Row: {
           created_at: string

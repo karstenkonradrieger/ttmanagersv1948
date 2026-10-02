@@ -132,6 +132,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
 
   return {
     id: tournament.id,
+    createdBy: tournament.created_by,
     name: tournament.name,
     tableCount: tournament.table_count,
     rounds: tournament.rounds,
