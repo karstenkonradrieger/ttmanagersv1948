@@ -8,6 +8,7 @@ import { computeQualifiedPlayers } from '@/services/byeValidation';
 import { validateSeeding, validateBracketSlots, type SeedTier } from '@/services/seedingValidation';
 import { computeConsolationSeeds, buildConsolationMatches, isMainRound0Complete, hasConsolationBracket } from '@/services/consolationBracket';
 import { readSponsorCache } from '@/lib/sponsorCache';
+import { drawClubBalancedGroups, formatClubBalanceIssue } from '@/services/clubBalancedGroupDraw';
 
 const emptyTournament: Tournament = {
   id: '',
@@ -50,6 +51,7 @@ const emptyTournament: Tournament = {
   certificateHiddenFields: [],
   openingVideoUrl: null,
   koQualificationMode: 'byes',
+  clubBalanceGroups: true,
 };
 
 interface KoSnapshot {
@@ -238,45 +240,30 @@ export function useTournamentDb(tournamentId: string | null) {
       const groupSize = 4;
       const groupCount = Math.ceil(n / groupSize);
 
-      // Assign groups (snake seeding by TTR with club separation)
-      const groupAssignments: Array<{ playerId: string; groupNumber: number }> = [];
-
-      const pots: string[][] = Array.from({ length: Math.ceil(n / groupCount) }, () => []);
-      for (let i = 0; i < n; i++) {
-        pots[Math.floor(i / groupCount)].push(participants[i]);
-      }
-
-      for (let pIdx = 0; pIdx < pots.length; pIdx++) {
-        const pot = pots[pIdx];
-        const isReverseSnake = pIdx % 2 !== 0;
-        const availableGroups = Array.from({ length: groupCount }, (_, i) => i);
-        if (isReverseSnake) availableGroups.reverse();
-
-        for (let i = 0; i < pot.length; i++) {
-          const playerId = pot[i];
-          const playerClub = tournament.players.find(p => p.id === playerId)?.club || '';
-
-          let bestGroupIndex = 0;
-          let minSameClubPlayers = Infinity;
-
-          for (let j = 0; j < availableGroups.length; j++) {
-            const g = availableGroups[j];
-            const sameClubCount = groupAssignments.filter(a => {
-              const aClub = tournament.players.find(p => p.id === a.playerId)?.club || '';
-              return a.groupNumber === g && aClub === playerClub && playerClub !== '';
-            }).length;
-
-            if (sameClubCount < minSameClubPlayers) {
-              minSameClubPlayers = sameClubCount;
-              bestGroupIndex = j;
-            }
-            if (minSameClubPlayers === 0) break; // perfect match
-          }
-
-          const assignedGroup = availableGroups[bestGroupIndex];
-          groupAssignments.push({ playerId, groupNumber: assignedGroup });
-          availableGroups.splice(bestGroupIndex, 1);
+      // Assign groups (pot/snake seeding by TTR with optional club balance)
+      const clubOf = (pid: string) => tournament.players.find(p => p.id === pid)?.club || '';
+      const clubsForParticipant = (pid: string): string[] => {
+        if (isTeam) {
+          return tournament.teamPlayers.filter(tp => tp.teamId === pid).map(tp => clubOf(tp.playerId));
         }
+        if (isDoubles) {
+          const pair = tournament.doublesPairs.find(dp => dp.player1Id === pid);
+          return pair ? [clubOf(pair.player1Id), clubOf(pair.player2Id)] : [clubOf(pid)];
+        }
+        return [clubOf(pid)];
+      };
+      const draw = drawClubBalancedGroups(
+        participants.map(id => ({ id, clubs: clubsForParticipant(id) })),
+        groupCount,
+        { balance: tournament.clubBalanceGroups !== false },
+      );
+      const groupAssignments: Array<{ playerId: string; groupNumber: number }> =
+        draw.assignments.map(a => ({ playerId: a.id, groupNumber: a.groupNumber }));
+      if (draw.issues.length > 0) {
+        toast.warning('Vereinsausgleich nicht vollständig möglich', {
+          description: draw.issues.slice(0, 3).map(formatClubBalanceIssue).join('\n'),
+          duration: 10000,
+        });
       }
 
       // Update player group numbers in DB

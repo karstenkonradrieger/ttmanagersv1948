@@ -208,4 +208,6 @@ export interface Tournament {
   certificateHiddenFields: string[];
   openingVideoUrl: string | null;
   koQualificationMode: 'byes' | 'thirds';
+  /** Club balance when drawing groups (group phase). Default true. */
+  clubBalanceGroups?: boolean;
 }
