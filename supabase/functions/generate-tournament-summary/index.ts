@@ -99,7 +99,7 @@ Deno.serve(async (request) => {
     }, { onConflict: "tournament_id" });
     if (saveError) return json(500, { message: "Die Zusammenfassung wurde erstellt, konnte aber nicht gespeichert werden." });
 
-    return json(200, { content: content.slice(0, 2400), generatedAt, sourceSignature }, { "X-Lovable-AIG-Run-ID": call.result.response?.headers?.get?.("X-Lovable-AIG-Run-ID") ?? "" });
+    return json(200, { content: content.slice(0, 2400), generatedAt, sourceSignature });
   } catch (error) {
     if (request.signal.aborted) return json(499, { message: "Erstellung abgebrochen." });
     console.error("generate-tournament-summary", error);
