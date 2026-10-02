@@ -34,7 +34,7 @@ export function ClubRoleBadge({ clubId }: { clubId: string }) {
   if (admins.length === 0 && chairmen.length === 0) {
     return (
       <span
-        className="ml-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-muted/60 text-muted-foreground px-1.5 py-0.5 rounded"
+        className="ml-1 inline-flex items-center gap-1 text-xs uppercase tracking-wider bg-muted/60 text-muted-foreground px-1.5 py-0.5 rounded"
         title="Keine Administratoren/Vorsitzende eingetragen"
       >
         <Shield className="h-3 w-3" /> 0
@@ -46,7 +46,7 @@ export function ClubRoleBadge({ clubId }: { clubId: string }) {
     <span className="ml-1 inline-flex items-center gap-1 flex-wrap">
       {admins.length > 0 && (
         <span
-          className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-primary/15 text-primary px-1.5 py-0.5 rounded"
+          className="inline-flex items-center gap-1 text-xs uppercase tracking-wider bg-primary/15 text-primary px-1.5 py-0.5 rounded"
           title={`Administrator: ${admins.join(', ')}`}
         >
           <Shield className="h-3 w-3" />
@@ -55,7 +55,7 @@ export function ClubRoleBadge({ clubId }: { clubId: string }) {
       )}
       {chairmen.length > 0 && (
         <span
-          className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded"
+          className="inline-flex items-center gap-1 text-xs uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded"
           title={`Vorsitz: ${chairmen.join(', ')}`}
         >
           <UserCheck className="h-3 w-3" />

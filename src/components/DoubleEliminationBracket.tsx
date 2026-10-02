@@ -50,7 +50,7 @@ export function DoubleEliminationBracket({ matches, wbRounds, getPlayer }: Props
                     <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {roundNames(r, wbRounds)}
                     </h3>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       {roundMatches.length} {roundMatches.length === 1 ? 'Spiel' : 'Spiele'}
                     </span>
                   </div>
@@ -83,7 +83,7 @@ export function DoubleEliminationBracket({ matches, wbRounds, getPlayer }: Props
                       <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                         LB Runde {r + 1}
                       </h3>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {roundMatches.length} {roundMatches.length === 1 ? 'Spiel' : 'Spiele'}
                       </span>
                     </div>
@@ -128,7 +128,7 @@ function MatchCard({ match, getPlayer, highlight = false }: { match: Match; getP
       <div className="h-px bg-border/40 mx-2" />
       <PlayerRow player={getPlayer(match.player2Id)} isWinner={match.winnerId === match.player2Id && match.winnerId !== null} isLoser={match.winnerId !== null && match.winnerId !== match.player2Id} match={match} playerKey="player2" />
       {isActive && match.table && (
-        <div className="bg-primary/15 text-primary text-[10px] text-center py-0.5 font-bold uppercase tracking-wider">
+        <div className="bg-primary/15 text-primary text-xs text-center py-0.5 font-bold uppercase tracking-wider">
           Tisch {match.table}
         </div>
       )}
@@ -160,7 +160,7 @@ function PlayerRow({ player, isWinner, isLoser, match, playerKey }: {
             const opp = s[playerKey === 'player1' ? 'player2' : 'player1'];
             const wonSet = score >= 11 && score - opp >= 2;
             return (
-              <span key={i} className={`text-[10px] w-5 text-center rounded-sm py-px ${wonSet ? 'bg-primary/15 text-primary font-bold' : 'text-muted-foreground'}`}>
+              <span key={i} className={`text-xs w-5 text-center rounded-sm py-px ${wonSet ? 'bg-primary/15 text-primary font-bold' : 'text-muted-foreground'}`}>
                 {score}
               </span>
             );

@@ -532,7 +532,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                       <span className={`text-sm font-medium ${club.is_active === false ? 'line-through text-muted-foreground' : ''}`}>{club.name}</span>
                       <span className="text-xs text-muted-foreground ml-1">({players.length} Spieler)</span>
                       {club.is_active === false && (
-                        <span className="ml-1 text-[10px] uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                        <span className="ml-1 text-xs uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
                           Inaktiv
                         </span>
                       )}
@@ -726,12 +726,12 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                     </span>
                                   )}
                                   {player.role && player.role !== 'player' && (
-                                    <span className="ml-2 text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary">
+                                    <span className="ml-2 text-xs uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary">
                                       {player.role === 'chairman' ? 'Vorsitz' : 'Admin'}
                                     </span>
                                   )}
                                   {player.isPlayer === false && (
-                                    <span className="ml-2 text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground" title="Wird nicht in der Turnier-Spielerauswahl angezeigt">
+                                    <span className="ml-2 text-xs uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground" title="Wird nicht in der Turnier-Spielerauswahl angezeigt">
                                       Nicht-Spieler
                                     </span>
                                   )}

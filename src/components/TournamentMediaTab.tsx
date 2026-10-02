@@ -480,7 +480,7 @@ export function TournamentMediaTab({ tournamentId, tournamentName, matches, getP
                   variant="outline"
                   size="sm"
                   onClick={() => window.open(videoUrl, '_blank')}
-                  className="gap-1"
+                  className="h-11 gap-1"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                   In neuem Tab öffnen

@@ -67,7 +67,7 @@ const GroupBracketView = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-muted text-muted-foreground hidden sm:inline">
+                    <span className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded bg-muted text-muted-foreground hidden sm:inline">
                       Phase 1
                     </span>
                     <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${groupOpen ? 'rotate-180' : ''}`} />
@@ -93,7 +93,7 @@ const GroupBracketView = () => {
         {phase === 'knockout' && koMatches.length > 0 && (
           <div className="flex items-center gap-3" aria-hidden="true">
             <div className="flex-1 h-px bg-border/60" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               ↓ Qualifizierte ziehen ins K.O. ein ↓
             </span>
             <div className="flex-1 h-px bg-border/60" />
@@ -119,7 +119,7 @@ const GroupBracketView = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-primary/15 text-primary hidden sm:inline">
+                    <span className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded bg-primary/15 text-primary hidden sm:inline">
                       Phase 2
                     </span>
                     <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${koOpen ? 'rotate-180' : ''}`} />

@@ -220,7 +220,7 @@ function OverviewMatchRow({ match: m, getPlayer, bestOf, mode, rounds, isEditing
 
   return (
     <div className={`bg-card rounded-lg p-3 card-shadow border-l-4 ${
-      m.status === 'completed' ? 'border-l-primary' : m.status === 'active' ? 'border-l-amber-500' : 'border-l-muted'
+      m.status === 'completed' ? 'border-l-primary' : m.status === 'active' ? 'border-l-status-busy' : 'border-l-muted'
     }`}>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1 min-w-0">
@@ -246,8 +246,8 @@ function OverviewMatchRow({ match: m, getPlayer, bestOf, mode, rounds, isEditing
               <Settings className="mr-1 h-3 w-3" />Korrigieren
             </Button>
           )}
-          {winner && !isBye && <span className="text-xs font-bold text-primary">🏆 {winner.name}</span>}
-          {m.status === 'active' && <span className="text-xs font-semibold text-amber-500">▶ Live</span>}
+          {winner && !isBye && <span className="text-xs font-bold text-winner">🏆 {winner.name}</span>}
+          {m.status === 'active' && <span className="text-xs font-semibold text-status-busy">▶ Live</span>}
           {m.status === 'pending' && !isBye && <span className="text-xs text-muted-foreground">Ausstehend</span>}
         </div>
       </div>
@@ -1345,7 +1345,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                         <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary/15 text-primary text-xs font-bold flex-shrink-0">1</span>
                         <div>
                           <h5 className="text-sm font-bold leading-tight">Gruppenphase</h5>
-                          <p className="text-[11px] text-muted-foreground">{groupCompleted.length} abgeschlossene Spiele</p>
+                          <p className="text-xs text-muted-foreground">{groupCompleted.length} abgeschlossene Spiele</p>
                         </div>
                       </div>
                       <div className="p-3 space-y-4">
@@ -1373,7 +1373,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                   {groupCompleted.length > 0 && koCompleted.length > 0 && (
                     <div className="flex items-center gap-3" aria-hidden="true">
                       <div className="flex-1 h-px bg-border/60" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">↓ K.O.-Runde ↓</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">↓ K.O.-Runde ↓</span>
                       <div className="flex-1 h-px bg-border/60" />
                     </div>
                   )}
@@ -1385,7 +1385,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                         <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary text-primary-foreground text-xs font-bold flex-shrink-0">2</span>
                         <div>
                           <h5 className="text-sm font-bold leading-tight text-primary">K.O.-Runde</h5>
-                          <p className="text-[11px] text-muted-foreground">{koCompleted.length} abgeschlossene Spiele</p>
+                          <p className="text-xs text-muted-foreground">{koCompleted.length} abgeschlossene Spiele</p>
                         </div>
                       </div>
                       <div className="p-3 space-y-4">
@@ -1691,7 +1691,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                             ))}
                           </select>
                         </div>
-                        <span className="text-[10px] text-muted-foreground">{field.label}</span>
+                        <span className="text-xs text-muted-foreground">{field.label}</span>
                       </div>
                     ))}
                   </div>
@@ -1937,7 +1937,7 @@ function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMat
                 <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary/15 text-primary text-xs font-bold flex-shrink-0">1</span>
                 <div className="min-w-0">
                   <h3 className="text-sm font-bold leading-tight">Gruppenphase</h3>
-                  <p className="text-[11px] text-muted-foreground truncate">
+                  <p className="text-xs text-muted-foreground truncate">
                     {groupMatches.length} Spiele
                   </p>
                 </div>
@@ -1970,7 +1970,7 @@ function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMat
       {/* === Visueller Trenner === */}
       <div className="flex items-center gap-3" aria-hidden="true">
         <div className="flex-1 h-px bg-border/60" />
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
           ↓ K.O.-Runde ↓
         </span>
         <div className="flex-1 h-px bg-border/60" />
@@ -1989,7 +1989,7 @@ function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMat
                 <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary text-primary-foreground text-xs font-bold flex-shrink-0">2</span>
                 <div className="min-w-0">
                   <h3 className="text-sm font-bold leading-tight text-primary">K.O.-Runde</h3>
-                  <p className="text-[11px] text-muted-foreground truncate">
+                  <p className="text-xs text-muted-foreground truncate">
                     {koMatches.length} Spiele
                   </p>
                 </div>
@@ -2029,7 +2029,7 @@ function GroupBox({ label, matches, getPlayer, renderRow }: {
     <div className="rounded-lg border border-border/50 bg-background/40 overflow-hidden">
       <div className="px-3 py-2 bg-muted/40 border-b border-border/50 flex items-center justify-between">
         <h4 className="font-bold text-sm text-foreground">{label}</h4>
-        <span className="text-[11px] text-muted-foreground">{matches.length} Spiele</span>
+        <span className="text-xs text-muted-foreground">{matches.length} Spiele</span>
       </div>
       {standings.length > 0 && (
         <Collapsible open={standingsOpen} onOpenChange={setStandingsOpen} asChild>

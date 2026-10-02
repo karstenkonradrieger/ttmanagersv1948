@@ -665,7 +665,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                       ) : (
                         <div className="h-14 w-10 flex items-center justify-center bg-muted rounded form-icon-muted text-xs">–</div>
                       )}
-                      <span className="text-[10px] text-foreground/80 leading-tight text-center">{frame.label}</span>
+                      <span className="text-xs text-foreground/80 leading-tight text-center">{frame.label}</span>
                     </button>
                   );
                 })}

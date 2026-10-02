@@ -394,7 +394,7 @@ export function TournamentSettingsDialog({
         <Button variant="ghost" size="icon" className="h-11 w-11 text-muted-foreground relative">
           <Settings2 className="h-4 w-4" />
           {hasDraft && (
-            <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-amber-500 ring-2 ring-background" title="Ungespeicherter Entwurf" />
+            <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-status-waiting ring-2 ring-background" title="Ungespeicherter Entwurf" />
           )}
         </Button>
       </DialogTrigger>
@@ -404,8 +404,8 @@ export function TournamentSettingsDialog({
             <DialogTitle>Turnier-Einstellungen</DialogTitle>
             {hasDraft && (
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 px-2 py-0.5 text-xs font-medium">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-status-waiting/15 text-status-waiting px-2 py-0.5 text-xs font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-status-waiting animate-pulse" />
                   Ungespeichert
                 </span>
                 <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={discardDraft}>
@@ -631,7 +631,7 @@ export function TournamentSettingsDialog({
                       ) : (
                         <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-muted-foreground text-xs">–</div>
                       )}
-                      <span className="text-[10px] text-muted-foreground leading-tight text-center">{frame.label}</span>
+                      <span className="text-xs text-muted-foreground leading-tight text-center">{frame.label}</span>
                     </button>
                   );
                 })}

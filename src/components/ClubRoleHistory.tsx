@@ -142,7 +142,7 @@ export function ClubRoleHistory({ clubId }: { clubId: string }) {
   const FilterChip = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
     <button
       onClick={onClick}
-      className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded transition-colors border ${
+      className={`text-xs uppercase tracking-wider px-2 py-0.5 rounded transition-colors border ${
         active
           ? 'bg-primary text-primary-foreground border-primary shadow-sm'
           : 'bg-muted text-muted-foreground border-transparent hover:bg-muted/70'
@@ -175,7 +175,7 @@ export function ClubRoleHistory({ clubId }: { clubId: string }) {
       </div>
 
       {activeFilters.length > 0 && (
-        <div className="flex items-center gap-1 flex-wrap text-[10px]">
+        <div className="flex items-center gap-1 flex-wrap text-xs">
           <span className="text-muted-foreground">Aktive Filter:</span>
           {activeFilters.map(f => (
             <button
@@ -237,7 +237,7 @@ export function ClubRoleHistory({ clubId }: { clubId: string }) {
       )}
 
       {!canSeeEmails && (
-        <p className="text-[10px] text-muted-foreground italic">
+        <p className="text-xs text-muted-foreground italic">
           E-Mail-Adressen sind nur für eingeloggte Vereinsmitglieder sichtbar.
         </p>
       )}

@@ -257,7 +257,7 @@ export function PlaylistManager({ inline = false, tournamentId }: { inline?: boo
                       <p className="text-xs text-destructive mt-0.5 truncate">{item.error}</p>
                     )}
                   </div>
-                  <span className="text-[10px] text-muted-foreground shrink-0">
+                  <span className="text-xs text-muted-foreground shrink-0">
                     {item.status === 'pending' && 'Wartend'}
                     {item.status === 'uploading' && `${item.progress}%`}
                     {item.status === 'done' && '✓'}

@@ -151,7 +151,7 @@ const Index = () => {
                 <span className="text-gradient">TT</span> Turniermanager
                 <span className="hidden sm:inline text-foreground/80"> SV Straßgräbchen</span>
               </h1>
-              <span className="text-[11px] text-muted-foreground hidden sm:block">Sektion Tischtennis</span>
+              <span className="text-xs text-muted-foreground hidden sm:block">Sektion Tischtennis</span>
             </div>
             <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-11 w-11 text-muted-foreground hover:text-foreground" aria-label="Abmelden" title="Abmelden">
               <LogOut className="h-4 w-4" />
@@ -270,10 +270,10 @@ const Index = () => {
                   </Button>
                 </div>
               )}
-              <div className="flex gap-1.5 mt-0.5">
-                <span className="text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-medium">{modeLabel}</span>
-                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded-md">{typeLabel}</span>
-                <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded-md">Bo{tournament.bestOf * 2 - 1}</span>
+              <div className="flex flex-wrap gap-1.5 mt-0.5">
+                <span className="text-xs bg-primary/15 text-primary px-1.5 py-0.5 rounded-md font-medium">{modeLabel}</span>
+                <span className="text-xs bg-secondary text-muted-foreground px-1.5 py-0.5 rounded-md">{typeLabel}</span>
+                <span className="text-xs bg-secondary text-muted-foreground px-1.5 py-0.5 rounded-md">Bo{tournament.bestOf * 2 - 1}</span>
               </div>
             </div>
             <TournamentSettingsDialog
@@ -318,7 +318,7 @@ const Index = () => {
                   generateBracket();
                   setTab(isRoundRobin || isSwiss || isKaiser || isHandicap ? 'scoring' : 'bracket');
                 }}
-                className="h-9 font-semibold glow-green"
+                className="h-11 font-semibold glow-green"
                 size="sm"
               >
                 <Play className="mr-1 h-4 w-4" />
@@ -336,7 +336,7 @@ const Index = () => {
                         resetTournament();
                       }
                     }}
-                    className="gap-1 opacity-90"
+                    className="h-11 gap-1"
                   >
                     Zurücksetzen
                   </Button>
@@ -345,7 +345,7 @@ const Index = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedTournamentId(null)}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="h-11 text-muted-foreground hover:text-foreground"
                 >
                   <RotateCcw className="mr-1 h-4 w-4" />
                   Zurück
@@ -451,7 +451,7 @@ const Index = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => window.open(`/live/${selectedTournamentId}`, '_blank')}
-                className="gap-1 text-xs"
+                className="h-11 gap-1 text-xs"
               >
                 <Monitor className="h-3 w-3" />
                 Im neuen Fenster öffnen
@@ -462,7 +462,7 @@ const Index = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => window.open(`/groups/${selectedTournamentId}`, '_blank')}
-                className="gap-1 text-xs"
+                className="h-11 gap-1 text-xs"
               >
                 <Monitor className="h-3 w-3" />
                 Im neuen Fenster öffnen
@@ -473,7 +473,7 @@ const Index = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => window.open(`/standings/${selectedTournamentId}`, '_blank')}
-                className="gap-1 text-xs"
+                className="h-11 gap-1 text-xs"
               >
                 <Monitor className="h-3 w-3" />
                 Tabelle im neuen Fenster
@@ -637,7 +637,7 @@ const Index = () => {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 flex-shrink-0">
-                                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-muted text-muted-foreground hidden sm:inline">
+                                <span className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded bg-muted text-muted-foreground hidden sm:inline">
                                   Phase 1
                                 </span>
                                 <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${groupSectionOpen ? 'rotate-180' : ''}`} />
@@ -661,7 +661,7 @@ const Index = () => {
                       {/* === Visueller Trenner === */}
                       <div className="flex items-center gap-3" aria-hidden="true">
                         <div className="flex-1 h-px bg-border/60" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                           ↓ Qualifizierte ziehen ins K.O. ein ↓
                         </span>
                         <div className="flex-1 h-px bg-border/60" />
@@ -703,14 +703,14 @@ const Index = () => {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="gap-1.5 border-amber-500/40 text-amber-600 hover:bg-amber-500/10"
+                                  className="gap-1.5 border-status-waiting/60 text-status-waiting hover:bg-status-waiting/10"
                                   onClick={() => undoKoRedistribution()}
                                 >
                                   <Undo2 className="h-3.5 w-3.5" />
                                   <span className="hidden sm:inline">Rückgängig</span>
                                 </Button>
                               )}
-                              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-primary/15 text-primary hidden sm:inline">
+                              <span className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded bg-primary/15 text-primary hidden sm:inline">
                                 Phase 2
                               </span>
                             </div>

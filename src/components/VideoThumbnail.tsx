@@ -60,7 +60,7 @@ export function VideoThumbnail({ src, className = '', onClick }: Props) {
         <img src={thumbnail} alt="Video" className="w-full h-full object-cover" />
       )}
       {!loading && error && (
-        <div className="text-muted-foreground text-[10px] text-center px-1">Video</div>
+        <div className="text-muted-foreground text-xs text-center px-1">Video</div>
       )}
       {!loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">

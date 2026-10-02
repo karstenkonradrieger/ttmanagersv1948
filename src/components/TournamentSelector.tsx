@@ -97,17 +97,17 @@ export function TournamentSelector({ selectedId, onSelect }: Props) {
                     <Trophy className="h-4 w-4 text-primary flex-shrink-0" />
                     <h3 className="font-semibold truncate font-display">{t.name}</h3>
                     {t.started && (
-                      <span className="text-[10px] bg-primary/15 text-primary px-2 py-0.5 rounded-full font-medium">
+                      <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-medium">
                         Gestartet
                       </span>
                     )}
-                    <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
                       {(t as any).mode === 'round_robin' ? 'Alle gg. Alle' : (t as any).mode === 'group_knockout' ? 'Gruppen+KO' : (t as any).mode === 'double_knockout' ? 'Doppel-KO' : (t as any).mode === 'swiss' ? 'Schweizer' : (t as any).mode === 'kaiser' ? 'Kaiser' : (t as any).mode === 'handicap' ? 'Vorgabe' : 'KO'}
                     </span>
-                    <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
                       {(t as any).type === 'doubles' ? 'Doppel' : (t as any).type === 'team' ? 'Mannschaft' : 'Einzel'}
                     </span>
-                    <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
                       Bo{((t as any).best_of || 3) * 2 - 1}
                     </span>
                   </div>

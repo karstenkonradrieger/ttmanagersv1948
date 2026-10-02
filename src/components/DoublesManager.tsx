@@ -45,7 +45,7 @@ export function DoublesManager({ players, doublesPairs, onAddPair, onRemovePair,
         </h3>
         <div className="flex gap-2">
           {tournamentId && doublesPairs.length > 0 && (
-            <Button variant="outline" size="sm" onClick={() => window.open(`/doubles/${tournamentId}`, '_blank')} className="gap-1 text-xs">
+            <Button variant="outline" size="sm" onClick={() => window.open(`/doubles/${tournamentId}`, '_blank')} className="h-11 gap-1 text-xs">
               <ExternalLink className="h-3 w-3" />
               Ansicht
             </Button>

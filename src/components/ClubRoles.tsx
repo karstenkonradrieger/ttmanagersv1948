@@ -81,7 +81,7 @@ export function ClubRoles({ clubId }: { clubId: string }) {
         <p className="text-xs text-muted-foreground">
           {adminCount} Administrator{adminCount !== 1 ? 'en' : ''} · {chairmanCount} Vorsitzende{chairmanCount !== 1 ? '' : 'r'}
         </p>
-        <p className="text-[10px] text-muted-foreground italic">
+        <p className="text-xs text-muted-foreground italic">
           Detaillierte Rollenansicht nur für eingeloggte Vereinsmitglieder sichtbar.
         </p>
       </div>
@@ -105,7 +105,7 @@ export function ClubRoles({ clubId }: { clubId: string }) {
                 <UserCheck className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
               )}
               <span className="font-medium">{r.name}</span>
-              <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded ${r.role === 'admin' ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'}`}>
+              <span className={`text-xs uppercase tracking-wider px-1.5 py-0.5 rounded ${r.role === 'admin' ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'}`}>
                 {r.role === 'admin' ? 'Administrator' : 'Vorsitzender'}
               </span>
               {r.email && (
