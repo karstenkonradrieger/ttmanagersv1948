@@ -339,7 +339,7 @@ export function AnnouncementPhraseManager({ inline = false }: { inline?: boolean
         <Button
           variant="ghost"
           size="icon"
-          className={cn('h-8 w-8', recordedCount < totalCount ? 'text-destructive' : 'text-primary')}
+          className={cn('h-11 w-11', recordedCount < totalCount ? 'text-destructive' : 'text-primary')}
           title={`Durchsage-Stimmen (${recordedCount}/${totalCount} aufgenommen)`}
         >
           <Mic className="h-4 w-4" />

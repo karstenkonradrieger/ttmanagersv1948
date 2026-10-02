@@ -106,7 +106,7 @@ export function TeamManager({
                     {!started && (
                       <Button
                         variant="ghost" size="icon"
-                        className="h-7 w-7 text-destructive"
+                        className="h-11 w-11 text-destructive"
                         onClick={() => onRemoveTeam(team.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -130,7 +130,7 @@ export function TeamManager({
                         {!started && (
                           <Button
                             variant="ghost" size="icon"
-                            className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                            className="h-10 w-10 text-muted-foreground hover:text-destructive"
                             onClick={() => onRemovePlayerFromTeam(tp.id)}
                           >
                             <Trash2 className="h-3 w-3" />
