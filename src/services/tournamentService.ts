@@ -107,6 +107,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     { data: teams, error: teError },
     { data: teamPlayers, error: tpError },
     { data: sponsors, error: spError },
+    { data: summary, error: summaryError },
   ] = await Promise.all([
     supabase.from('players').select('*').eq('tournament_id', id),
     supabase.from('matches').select('*').eq('tournament_id', id).order('round', { ascending: true }).order('position', { ascending: true }),
@@ -114,6 +115,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     supabase.from('teams').select('*').eq('tournament_id', id),
     supabase.from('team_players').select('*'),
     supabase.from('tournament_sponsors').select('*').eq('tournament_id', id).order('sort_order', { ascending: true }),
+    supabase.from('tournament_summaries').select('content, generated_at, source_signature').eq('tournament_id', id).maybeSingle(),
   ]);
 
   if (pError) throw pError;
@@ -122,6 +124,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
   if (teError) throw teError;
   if (tpError) throw tpError;
   if (spError) throw spError;
+  if (summaryError) throw summaryError;
 
   // Filter team_players to only those belonging to this tournament's teams
   const teamIds = new Set((teams || []).map((t: any) => t.id));
@@ -174,6 +177,11 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     openingVideoUrl: (tournament as any).opening_video_url || null,
     koQualificationMode: ((tournament as any).ko_qualification_mode === 'thirds' ? 'thirds' : 'byes') as 'byes' | 'thirds',
     clubBalanceGroups: (tournament as any).club_balance_groups ?? true,
+    summary: summary ? {
+      content: summary.content,
+      generatedAt: summary.generated_at,
+      sourceSignature: summary.source_signature,
+    } : null,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,

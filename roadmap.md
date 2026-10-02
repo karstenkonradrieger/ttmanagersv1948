@@ -1,4 +1,7 @@
-- [x] Kontrast-Tokens und schwache Textfarben anpassen und nachrechnen.
-- [x] Turnier- und Startseiten-Tabs sowie Header-Touchflächen verbessern.
-- [x] Kleine Aktionsflächen und Hover-abhängige Aktionen projektweit korrigieren.
-- [x] TypeScript, Tests und Darstellung überprüfen.
+- [x] Bestehende Farb-Tokens und tatsächliche Kontraste prüfen.
+- [x] Tatsächliche Kontrastverhältnisse der finalen Karten-, Eingabe- und Buttonzustände dokumentieren.
+- [x] Kritische transparente Karten-, Text- und Buttonzustände WCAG-gerecht angleichen.
+- [x] Gespeicherte, öffentlich lesbare Turnierzusammenfassungen mit sicherem Schreibzugriff ergänzen.
+- [x] Lovable-AI-Erzeugung aus abgeschlossenen Ergebnissen serverseitig implementieren und testen.
+- [x] Veranstalter-Ansicht, Teilen/Kopieren und öffentliche Live-Anzeige ergänzen.
+- [ ] Tests, Build, Kontraste und End-to-end-Ablauf verifizieren.

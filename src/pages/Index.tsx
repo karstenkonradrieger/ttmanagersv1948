@@ -77,6 +77,7 @@ const Index = () => {
     koUndoSnapshot,
     resetTournament,
     generateNextSwissRound,
+    setTournamentSummary,
     addTeam,
     removeTeam,
     addPlayerToTeam,
@@ -160,7 +161,7 @@ const Index = () => {
         </header>
         <PageTransition className="container py-8">
           <FadeIn delay={0.1}>
-          <div className="flex gap-1 mb-6 bg-secondary/50 p-1 rounded-xl w-fit max-w-full overflow-x-auto">
+          <div className="flex gap-1 mb-6 border border-border bg-secondary p-1 rounded-xl w-fit max-w-full overflow-x-auto">
             <Button
               variant={homeTab === 'tournaments' ? 'default' : 'ghost'}
               size="sm"
@@ -397,7 +398,7 @@ const Index = () => {
       {/* Main content */}
       <div className="container pb-24">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList ref={tabListRef} className="tournament-tab-scroll w-full bg-secondary/50 h-auto p-1 rounded-xl flex justify-start overflow-x-auto overflow-y-hidden whitespace-nowrap lg:justify-between">
+          <TabsList ref={tabListRef} className="tournament-tab-scroll w-full border border-border bg-secondary h-auto p-1 rounded-xl flex justify-start overflow-x-auto overflow-y-hidden whitespace-nowrap lg:justify-between">
             <TabsTrigger value="players" aria-label="Spieler" title="Spieler" className={tournamentTabClass}>
               <Users className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Spieler</span>
@@ -620,7 +621,7 @@ const Index = () => {
                     <div className="space-y-6">
                       {/* === Sektion 1: Gruppenphase (collapsible) === */}
                       <Collapsible open={groupSectionOpen} onOpenChange={setGroupSectionOpen} asChild>
-                        <section className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+                        <section className="rounded-xl border border-border bg-card overflow-hidden">
                           <CollapsibleTrigger asChild>
                             <button
                               type="button"
@@ -881,6 +882,8 @@ const Index = () => {
                    mode={tournament.mode}
                    breakMinutes={tournament.breakMinutes}
                    onUpdatePlayer={updatePlayer}
+                    summary={tournament.summary}
+                    onSummaryGenerated={setTournamentSummary}
                  />
               )}
             </TabsContent>
@@ -1002,7 +1005,7 @@ const Index = () => {
             return (
               <div className="space-y-3">
                 {hasPlayed && (
-                  <div className="rounded-md bg-destructive/10 border border-destructive/30 p-3 text-sm text-destructive">
+                  <div className="rounded-md bg-card border border-status-error p-3 text-sm text-status-error">
                     ⚠️ Es wurden bereits K.O.-Spiele gespielt. Beim Ändern werden alle K.O.-Ergebnisse gelöscht und die Runde komplett neu ausgelost.
                   </div>
                 )}

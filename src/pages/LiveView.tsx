@@ -4,6 +4,7 @@ import { useTournamentDb } from '@/hooks/useTournamentDb';
 import { LiveDashboard } from '@/components/LiveDashboard';
 import { SponsorLogos } from '@/components/SponsorLogos';
 import { Loader2 } from 'lucide-react';
+import { isTournamentSummaryStale } from '@/services/tournamentSummary';
 
 const LiveView = () => {
   const { id } = useParams<{ id: string }>();
@@ -74,6 +75,15 @@ const LiveView = () => {
         </div>
       </header>
       <div className="container py-6" style={{ paddingBottom: sponsorHeight + audioFooterHeight + 24 }}>
+        {tournament.summary && !isTournamentSummaryStale(tournament.summary, tournament.matches) && (
+          <section className="mb-6 rounded-lg border border-border bg-card p-5 card-shadow" aria-labelledby="live-summary-title">
+            <h2 id="live-summary-title" className="text-lg font-bold">Turnierzusammenfassung</h2>
+            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-foreground">{tournament.summary.content}</p>
+            <time className="mt-3 block text-xs text-muted-foreground" dateTime={tournament.summary.generatedAt}>
+              Stand: {new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(tournament.summary.generatedAt))}
+            </time>
+          </section>
+        )}
         <LiveDashboard
           matches={tournament.matches}
           rounds={tournament.rounds}

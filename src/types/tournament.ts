@@ -166,6 +166,12 @@ export interface Sponsor {
   sortOrder: number;
 }
 
+export interface TournamentSummary {
+  content: string;
+  generatedAt: string;
+  sourceSignature: string;
+}
+
 export interface Tournament {
   id: string;
   name: string;
@@ -210,4 +216,5 @@ export interface Tournament {
   koQualificationMode: 'byes' | 'thirds';
   /** Club balance when drawing groups (group phase). Default true. */
   clubBalanceGroups?: boolean;
+  summary: TournamentSummary | null;
 }

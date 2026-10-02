@@ -53,6 +53,7 @@ function loadTournament(): Tournament {
     certificateHiddenFields: [],
     openingVideoUrl: null,
     koQualificationMode: 'byes',
+    summary: null,
   };
 }
 
@@ -223,6 +224,7 @@ export function useTournament() {
       certificateHiddenFields: [],
       openingVideoUrl: null,
       koQualificationMode: 'byes',
+      summary: null,
     });
   }, []);
 
