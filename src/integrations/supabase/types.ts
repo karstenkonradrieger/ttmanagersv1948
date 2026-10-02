@@ -763,6 +763,7 @@ export type Database = {
           certificate_line_sizes: Json
           certificate_text: string
           certificate_text_color: string
+          club_balance_groups: boolean
           created_at: string
           created_by: string | null
           directions_pdf_url: string | null
@@ -804,6 +805,7 @@ export type Database = {
           certificate_line_sizes?: Json
           certificate_text?: string
           certificate_text_color?: string
+          club_balance_groups?: boolean
           created_at?: string
           created_by?: string | null
           directions_pdf_url?: string | null
@@ -845,6 +847,7 @@ export type Database = {
           certificate_line_sizes?: Json
           certificate_text?: string
           certificate_text_color?: string
+          club_balance_groups?: boolean
           created_at?: string
           created_by?: string | null
           directions_pdf_url?: string | null
