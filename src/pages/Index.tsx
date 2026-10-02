@@ -397,7 +397,7 @@ const Index = () => {
       {/* Main content */}
       <div className="container pb-24">
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList ref={tabListRef} className="w-full bg-secondary/50 h-auto p-1 rounded-xl flex justify-start overflow-x-auto overflow-y-hidden whitespace-nowrap scrollbar-thin lg:justify-between">
+          <TabsList ref={tabListRef} className="tournament-tab-scroll w-full bg-secondary/50 h-auto p-1 rounded-xl flex justify-start overflow-x-auto overflow-y-hidden whitespace-nowrap lg:justify-between">
             <TabsTrigger value="players" aria-label="Spieler" title="Spieler" className={tournamentTabClass}>
               <Users className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Spieler</span>

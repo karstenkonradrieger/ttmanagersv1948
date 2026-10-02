@@ -87,6 +87,10 @@
 }
 
 @layer utilities {
+  .tournament-tab-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
   .glow-green {
     box-shadow: var(--shadow-glow);
   }
