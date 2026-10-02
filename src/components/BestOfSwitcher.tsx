@@ -44,7 +44,7 @@ export function BestOfSwitcher({ bestOf, onUpdateBestOf, context, size = 'sm' }:
         <TooltipTrigger asChild>
           <div className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-card/60 px-2 py-1">
             <Trophy className="h-3.5 w-3.5 text-primary shrink-0" />
-            <span className="text-[11px] font-medium text-muted-foreground hidden sm:inline">Modus:</span>
+            <span className="text-xs font-medium text-muted-foreground hidden sm:inline">Modus:</span>
             <div className="inline-flex rounded-md overflow-hidden border border-border/50">
               <Button
                 type="button"

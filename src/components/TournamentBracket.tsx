@@ -182,7 +182,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
                   <h3 className={`text-xs font-bold uppercase tracking-widest ${isFinal ? 'text-primary' : 'text-muted-foreground'}`}>
                     {roundNames(r)}
                   </h3>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {roundMatches.length} {roundMatches.length === 1 ? 'Spiel' : 'Spiele'}
                   </span>
                 </div>
@@ -228,7 +228,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
             <div className="rounded-lg border border-border/50 bg-muted/30 p-3 space-y-3">
               {/* Tiebreaker order config */}
               <div className="space-y-1.5">
-                <p className="text-[11px] font-semibold text-muted-foreground">Tiebreaker-Reihenfolge (anpassbar):</p>
+                <p className="text-xs font-semibold text-muted-foreground">Tiebreaker-Reihenfolge (anpassbar):</p>
                 <div className="flex flex-col gap-1">
                   {tiebreakerOrder.map((criterion, idx) => (
                     <div key={criterion} className="flex items-center gap-1.5 text-xs bg-background/60 border border-border/30 rounded-md px-2 py-1">
@@ -265,11 +265,11 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
                   className="rounded border-border accent-primary h-3.5 w-3.5"
                 />
                 <span className="font-medium">Direkter Vergleich (H2H) hat Vorrang</span>
-                <span className="text-muted-foreground text-[10px]">
+                <span className="text-muted-foreground text-xs">
                   {h2hPriority ? '— H2H wird vor der Tiebreaker-Reihenfolge geprüft' : '— H2H greift nur als letzter Fallback'}
                 </span>
               </label>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Setzung: Gruppensieger (nach {h2hPriority ? 'H2H → ' : ''}{tiebreakerOrder.map(c => criterionLabels[c]).join(' → ')}{!h2hPriority ? ' → H2H' : ''}), dann Gruppenzweite nach gleicher Logik. Seed #1 trifft auf den niedrigsten Seed.
               </p>
               <div className="space-y-1.5">
@@ -286,26 +286,26 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
                           <div className="flex items-center gap-1 flex-wrap">
                             <span className="font-semibold">{d.p1?.name ?? 'TBD'}</span>
                             {d.seed1 && (
-                              <span className="px-1 py-px rounded text-[10px] bg-primary/15 text-primary font-bold">
+                              <span className="px-1 py-px rounded text-xs bg-primary/15 text-primary font-bold">
                                 Seed {d.seed1}
                               </span>
                             )}
                             {d.s1 && (
-                              <span className="text-muted-foreground text-[10px]">
+                              <span className="text-muted-foreground text-xs">
                                 ({tierLabel(d.s1.rank)}, Gr.{d.s1.groupNumber + 1}: {d.s1.won}S, ±{d.s1.setsDiff > 0 ? '+' : ''}{d.s1.setsDiff} Sätze, ±{d.s1.pointsDiff > 0 ? '+' : ''}{d.s1.pointsDiff} Pkt)
                               </span>
                             )}
                           </div>
-                          <div className="text-muted-foreground text-[10px] pl-1">vs.</div>
+                          <div className="text-muted-foreground text-xs pl-1">vs.</div>
                           <div className="flex items-center gap-1 flex-wrap">
                             <span className="font-semibold">{d.p2?.name ?? 'TBD'}</span>
                             {d.seed2 && (
-                              <span className="px-1 py-px rounded text-[10px] bg-accent/50 text-accent-foreground font-bold">
+                              <span className="px-1 py-px rounded text-xs bg-accent/50 text-accent-foreground font-bold">
                                 Seed {d.seed2}
                               </span>
                             )}
                             {d.s2 && (
-                              <span className="text-muted-foreground text-[10px]">
+                              <span className="text-muted-foreground text-xs">
                                 ({tierLabel(d.s2.rank)}, Gr.{d.s2.groupNumber + 1}: {d.s2.won}S, ±{d.s2.setsDiff > 0 ? '+' : ''}{d.s2.setsDiff} Sätze, ±{d.s2.pointsDiff > 0 ? '+' : ''}{d.s2.pointsDiff} Pkt)
                               </span>
                             )}
@@ -372,7 +372,7 @@ function BracketMatch({ match, getPlayer, isFinal, seedMap, tierLabel }: { match
         tierLabel={tierLabel}
       />
       {isActive && match.table && (
-        <div className="bg-primary/15 text-primary text-[10px] text-center py-0.5 font-bold uppercase tracking-wider">
+        <div className="bg-primary/15 text-primary text-xs text-center py-0.5 font-bold uppercase tracking-wider">
           Tisch {match.table}
         </div>
       )}
@@ -444,7 +444,7 @@ function PlayerSlot({ player, wins, isWinner, isLoser, sets, playerKey, isActive
             return (
               <span
                 key={i}
-                className={`text-[10px] w-5 text-center rounded-sm py-px ${
+                className={`text-xs w-5 text-center rounded-sm py-px ${
                   wonSet ? 'bg-primary/15 text-primary font-bold' : 'text-muted-foreground'
                 }`}
               >

@@ -383,7 +383,7 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
                         ({clubPlayers.length} Spieler)
                       </span>
                       {club.is_active === false && (
-                        <span className="ml-1 text-[10px] uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                        <span className="ml-1 text-xs uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
                           Inaktiv
                         </span>
                       )}

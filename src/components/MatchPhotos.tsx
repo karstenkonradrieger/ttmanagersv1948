@@ -323,7 +323,7 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
             ) : (
               <>
                 <Video className="h-5 w-5" />
-                <span className="text-[10px]">Video</span>
+                <span className="text-xs">Video</span>
               </>
             )}
           </button>

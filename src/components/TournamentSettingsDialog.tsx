@@ -631,7 +631,7 @@ export function TournamentSettingsDialog({
                       ) : (
                         <div className="h-14 w-10 flex items-center justify-center bg-muted rounded text-muted-foreground text-xs">–</div>
                       )}
-                      <span className="text-[10px] text-muted-foreground leading-tight text-center">{frame.label}</span>
+                      <span className="text-xs text-muted-foreground leading-tight text-center">{frame.label}</span>
                     </button>
                   );
                 })}

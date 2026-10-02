@@ -212,7 +212,7 @@ export function KaiserScoring({
                         <div className="flex gap-2 flex-wrap">
                           {Array.from({ length: bestOf * 2 - 1 }).map((_, si) => (
                             <div key={si} className="flex flex-col gap-1">
-                              <span className="text-[10px] text-muted-foreground text-center">S{si + 1}</span>
+                              <span className="text-xs text-muted-foreground text-center">S{si + 1}</span>
                               <div className="flex gap-1">
                                 <Input
                                   type="number"

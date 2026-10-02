@@ -244,7 +244,7 @@ function GroupKnockoutSections({ matches, players, groupCount, getName, getPlaye
                 <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary/15 text-primary text-xs font-bold flex-shrink-0">1</span>
                 <div className="min-w-0">
                   <h3 className="text-sm font-bold leading-tight">Gruppenphase</h3>
-                  <p className="text-[11px] text-muted-foreground truncate">
+                  <p className="text-xs text-muted-foreground truncate">
                     {groupOpen ? 'Endstände der Gruppen' : 'Klick zum Anzeigen'}
                   </p>
                 </div>
@@ -268,7 +268,7 @@ function GroupKnockoutSections({ matches, players, groupCount, getName, getPlaye
       {/* === Visueller Trenner === */}
       <div className="flex items-center gap-3" aria-hidden="true">
         <div className="flex-1 h-px bg-border/60" />
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
           ↓ K.O.-Runde ↓
         </span>
         <div className="flex-1 h-px bg-border/60" />
@@ -287,7 +287,7 @@ function GroupKnockoutSections({ matches, players, groupCount, getName, getPlaye
                 <span className="flex items-center justify-center h-7 w-7 rounded-md bg-primary text-primary-foreground text-xs font-bold flex-shrink-0">2</span>
                 <div className="min-w-0">
                   <h3 className="text-sm font-bold leading-tight text-primary">🏆 Turnierbaum</h3>
-                  <p className="text-[11px] text-muted-foreground truncate">
+                  <p className="text-xs text-muted-foreground truncate">
                     {koOpen ? 'Finalrunden um den Turniersieg' : 'Klick zum Anzeigen'}
                   </p>
                 </div>

@@ -180,7 +180,7 @@ export function SwissStandings({ matches, players, getParticipantName, onGenerat
                           {getParticipantName(m.player2Id)}
                         </span>
                         {m.status === 'active' && m.table && (
-                          <span className="text-primary text-[10px]">T{m.table}</span>
+                          <span className="text-primary text-xs">T{m.table}</span>
                         )}
                       </div>
                     );

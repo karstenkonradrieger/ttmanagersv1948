@@ -383,7 +383,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                     <td className="py-2 px-2 font-semibold">
                       {s.name}
                       {i < 2 && group.allCompleted && (
-                        <span className="ml-1.5 text-[10px] bg-primary/20 text-primary px-1 py-0.5 rounded">Q</span>
+                        <span className="ml-1.5 text-xs bg-primary/20 text-primary px-1 py-0.5 rounded">Q</span>
                       )}
                     </td>
                     <td className="text-center py-2 px-2">{s.played}</td>
@@ -406,7 +406,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
               </div>
               {group.tiebreakers.map((tb, i) => (
                 <div key={i} className="text-xs text-muted-foreground flex items-start gap-1.5 mt-0.5">
-                  <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                  <span className={`inline-block px-1.5 py-0.5 rounded text-xs font-bold shrink-0 ${
                     tb.decidedBy === 'h2h' ? 'bg-primary/15 text-primary' :
                     tb.decidedBy === 'setDiff' ? 'bg-accent/50 text-accent-foreground' :
                     tb.decidedBy === 'pointDiff' ? 'bg-muted text-muted-foreground' :
@@ -436,7 +436,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                     {getParticipantName(m.player2Id)}
                   </span>
                   {m.status === 'active' && m.table && (
-                    <span className="text-primary text-[10px]">T{m.table}</span>
+                    <span className="text-primary text-xs">T{m.table}</span>
                   )}
                   {m.status === 'completed' && (
                     <span className="text-muted-foreground ml-1">
@@ -463,7 +463,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
             {qualifiedData.winners.length > 0 && (
               <div>
                 <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold">1</span>
+                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs font-bold">1</span>
                   Gruppensieger
                 </h5>
                 <div className="overflow-x-auto">
@@ -517,7 +517,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
             {qualifiedData.runnersUp.length > 0 && (
               <div>
                 <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">2</span>
+                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-muted text-muted-foreground text-xs font-bold">2</span>
                   Gruppenzweite
                 </h5>
                 <div className="overflow-x-auto">
@@ -573,7 +573,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                 <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider flex items-center gap-1.5">
                   <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-status-waiting/20 text-status-waiting text-xs font-bold">3</span>
                   Beste Gruppendritte
-                  <span className="ml-1 text-[10px] font-normal normal-case tracking-normal text-muted-foreground">
+                  <span className="ml-1 text-xs font-normal normal-case tracking-normal text-muted-foreground">
                     (rücken für Freilose nach)
                   </span>
                 </h5>
@@ -649,7 +649,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                   { label: 'Beste Gruppendritte', list: qualifiedData.thirds, seedOffset: qualifiedData.winners.length + qualifiedData.runnersUp.length, useQuotient: true },
                 ].filter(t => t.list.length > 1).map(tier => (
                   <div key={tier.label}>
-                    <p className="text-[11px] font-bold text-foreground mb-1">{tier.label} – Reihenfolge</p>
+                    <p className="text-xs font-bold text-foreground mb-1">{tier.label} – Reihenfolge</p>
                     <div className="space-y-1">
                       {tier.list.map((q, i) => {
                         const seed = tier.seedOffset + i + 1;
@@ -680,7 +680,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                           ? `${q.won}/${q.played} (Quote ${q.winQuotient.toFixed(2)}), Sätze${q.setsDiff > 0 ? '+' : ''}${q.setsDiff}, Pkt${q.pointsDiff > 0 ? '+' : ''}${q.pointsDiff}`
                           : `${q.won}S, Sätze${q.setsDiff > 0 ? '+' : ''}${q.setsDiff}, Pkt${q.pointsDiff > 0 ? '+' : ''}${q.pointsDiff}`;
                         return (
-                          <div key={q.playerId} className="flex items-start gap-2 text-[11px]">
+                          <div key={q.playerId} className="flex items-start gap-2 text-xs">
                             <span className="font-bold text-primary w-4 text-right shrink-0">#{seed}</span>
                             <span className="font-semibold shrink-0">{getParticipantName(q.playerId)}</span>
                             <span className="text-muted-foreground">
@@ -697,7 +697,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                     </div>
                   </div>
                 ))}
-                <p className="text-[10px] text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Sieger & Zweite: 1. Siege → 2. Satzdifferenz → 3. Punktdifferenz (zzgl. direkter Vergleich in der Gruppe).<br />
                   Beste Dritte: 1. Leistungs-Quotient (Siege/Spiele) → 2. Satzdifferenz → 3. Punktdifferenz – fair bei ungleich großen Gruppen.
                 </p>
