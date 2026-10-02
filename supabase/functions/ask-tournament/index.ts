@@ -102,7 +102,7 @@ Deno.serve(async (request) => {
     const call = createResponsesCall(request, { baseURL: "https://ai.gateway.lovable.dev/v1", apiKey, model: "openai/gpt-6-astra" }, modelMessages, {
       originalMessages,
       onEnd: async ({ messages, isAborted, outcome }) => {
-        if (isAborted || outcome.status !== "success") return;
+        if (isAborted || outcome.status !== "completed") return;
         const answer = textFromMessage(messages.at(-1)).slice(0, 8000);
         if (!answer) throw new Error("Das Modell hat keine Antwort geliefert.");
         const { error: saveError } = await client.from("tournament_chat_messages").insert([

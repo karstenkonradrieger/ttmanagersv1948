@@ -14,6 +14,7 @@ function loadTournament(): Tournament {
   } catch {}
   return {
     id: generateId(),
+    createdBy: null,
     name: 'Tischtennis Turnier',
     players: [],
     matches: [],
@@ -185,6 +186,7 @@ export function useTournament() {
   const resetTournament = useCallback(() => {
     setTournament({
       id: generateId(),
+      createdBy: null,
       name: 'Tischtennis Turnier',
       players: [],
       matches: [],

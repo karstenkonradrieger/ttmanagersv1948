@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Chat } from '@ai-sdk/react';
+import { Chat, useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { Bot, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -59,11 +59,7 @@ function TournamentDataChatReady({ tournamentId, initialMessages, textareaRef }:
     onError: (error) => toast.error(error.message || 'Die Frage konnte nicht beantwortet werden.'),
     onFinish: () => window.setTimeout(() => textareaRef.current?.focus(), 0),
   }), [initialMessages, textareaRef, tournamentId, transport]);
-  const { messages, sendMessage, setMessages, status, stop } = chat;
-  const [, forceRender] = useState(0);
-
-  useEffect(() => chat['~registerMessagesCallback'](() => forceRender((value) => value + 1)), [chat]);
-  useEffect(() => chat['~registerStatusCallback'](() => forceRender((value) => value + 1)), [chat]);
+  const { messages, sendMessage, setMessages, status, stop } = useChat({ chat });
   useEffect(() => { textareaRef.current?.focus(); }, [textareaRef]);
 
   const reload = useCallback(async () => {
