@@ -220,7 +220,7 @@ function OverviewMatchRow({ match: m, getPlayer, bestOf, mode, rounds, isEditing
 
   return (
     <div className={`bg-card rounded-lg p-3 card-shadow border-l-4 ${
-      m.status === 'completed' ? 'border-l-primary' : m.status === 'active' ? 'border-l-amber-500' : 'border-l-muted'
+      m.status === 'completed' ? 'border-l-primary' : m.status === 'active' ? 'border-l-status-busy' : 'border-l-muted'
     }`}>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1 min-w-0">
@@ -246,8 +246,8 @@ function OverviewMatchRow({ match: m, getPlayer, bestOf, mode, rounds, isEditing
               <Settings className="mr-1 h-3 w-3" />Korrigieren
             </Button>
           )}
-          {winner && !isBye && <span className="text-xs font-bold text-primary">🏆 {winner.name}</span>}
-          {m.status === 'active' && <span className="text-xs font-semibold text-amber-500">▶ Live</span>}
+          {winner && !isBye && <span className="text-xs font-bold text-winner">🏆 {winner.name}</span>}
+          {m.status === 'active' && <span className="text-xs font-semibold text-status-busy">▶ Live</span>}
           {m.status === 'pending' && !isBye && <span className="text-xs text-muted-foreground">Ausstehend</span>}
         </div>
       </div>

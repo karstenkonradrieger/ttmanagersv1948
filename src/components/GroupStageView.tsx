@@ -571,7 +571,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
             {qualifiedData.thirds.length > 0 && (
               <div>
                 <h5 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-bold">3</span>
+                  <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-status-waiting/20 text-status-waiting text-xs font-bold">3</span>
                   Beste Gruppendritte
                   <span className="ml-1 text-[10px] font-normal normal-case tracking-normal text-muted-foreground">
                     (rücken für Freilose nach)
@@ -594,8 +594,8 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                       {qualifiedData.thirds.map((q, i) => {
                         const tip = buildSeedTieBreakerExplanation(qualifiedData.thirds, i, true);
                         return (
-                        <tr key={q.playerId} className="border-b border-border/50 bg-amber-500/5">
-                          <td className="py-1.5 px-2 font-bold text-amber-700 dark:text-amber-400">
+                        <tr key={q.playerId} className="border-b border-border/50 bg-status-waiting/5">
+                          <td className="py-1.5 px-2 font-bold text-status-waiting">
                             <TooltipProvider delayDuration={150}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
