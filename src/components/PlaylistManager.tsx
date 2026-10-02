@@ -264,7 +264,7 @@ export function PlaylistManager({ inline = false, tournamentId }: { inline?: boo
                     {item.status === 'error' && '✗'}
                   </span>
                   {item.status === 'pending' && (
-                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={(e) => { e.stopPropagation(); removeFromQueue(item.id); }}>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={(e) => { e.stopPropagation(); removeFromQueue(item.id); }}>
                       <X className="h-3.5 w-3.5" />
                     </Button>
                   )}
@@ -284,7 +284,7 @@ export function PlaylistManager({ inline = false, tournamentId }: { inline?: boo
               <span className="truncate flex-1 min-w-0">{gongTrack.title}</span>
               <div className="flex items-center gap-1 shrink-0">
                 <audio src={getPublicUrl(gongTrack.file_path)} controls className="h-8 w-24" />
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive shrink-0" onClick={() => handleDelete(gongTrack)}>
+                <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive shrink-0" onClick={() => handleDelete(gongTrack)}>
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -345,7 +345,7 @@ export function PlaylistManager({ inline = false, tournamentId }: { inline?: boo
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8" title="Playlist verwalten">
+        <Button variant="ghost" size="icon" className="h-11 w-11" title="Playlist verwalten">
           <Music className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -386,7 +386,7 @@ function SortableTrackItem({ track, index, audioSrc, onDelete }: {
       <span className="text-muted-foreground text-xs w-5 text-center font-mono">{index + 1}</span>
       <span className="truncate flex-1">{track.title}</span>
       <audio src={audioSrc} controls className="h-8 w-24 shrink-0" />
-      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive shrink-0" onClick={onDelete}>
+      <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive shrink-0" onClick={onDelete}>
         <Trash2 className="h-3.5 w-3.5" />
       </Button>
     </div>

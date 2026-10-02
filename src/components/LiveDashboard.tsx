@@ -268,7 +268,7 @@ function GroupKnockoutSections({ matches, players, groupCount, getName, getPlaye
       {/* === Visueller Trenner === */}
       <div className="flex items-center gap-3" aria-hidden="true">
         <div className="flex-1 h-px bg-border/60" />
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           ↓ K.O.-Runde ↓
         </span>
         <div className="flex-1 h-px bg-border/60" />

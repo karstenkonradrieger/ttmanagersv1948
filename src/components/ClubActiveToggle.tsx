@@ -29,7 +29,7 @@ export function ClubActiveToggle({ clubName, isActive, onConfirm }: Props) {
             variant="outline"
             size="sm"
             onClick={(e) => e.stopPropagation()}
-            className="h-7 px-2 text-xs gap-1 border-primary/40 text-primary hover:bg-primary/10 hover:text-primary"
+            className="h-10 px-2 text-xs gap-1 border-primary/40 text-primary hover:bg-primary/10 hover:text-primary"
             title="Verein wieder aktivieren"
           >
             <Power className="h-3.5 w-3.5" />
@@ -40,7 +40,7 @@ export function ClubActiveToggle({ clubName, isActive, onConfirm }: Props) {
             variant="ghost"
             size="icon"
             onClick={(e) => e.stopPropagation()}
-            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+            className="h-10 w-10 text-muted-foreground hover:text-foreground"
             title="Verein deaktivieren (Daten erhalten)"
           >
             <PowerOff className="h-3.5 w-3.5" />

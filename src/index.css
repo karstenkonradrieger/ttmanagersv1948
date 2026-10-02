@@ -9,29 +9,29 @@
     --background: 222 47% 11%;
     --foreground: 210 40% 98%;
 
-    --card: 222 40% 14%;
+    --card: 222 38% 17%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 40% 14%;
+    --popover: 222 38% 17%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 160 84% 39%;
     --primary-foreground: 222 47% 8%;
 
-    --secondary: 222 30% 18%;
+    --secondary: 222 28% 21%;
     --secondary-foreground: 210 40% 90%;
 
-    --muted: 222 25% 18%;
-    --muted-foreground: 215 20% 55%;
+    --muted: 222 28% 21%;
+    --muted-foreground: 215 22% 68%;
 
     --accent: 160 84% 39%;
     --accent-foreground: 222 47% 8%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 50%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 222 20% 20%;
-    --input: 222 20% 20%;
+    --border: 222 20% 30%;
+    --input: 222 20% 30%;
     --ring: 160 84% 39%;
 
     --radius: 0.75rem;
@@ -40,9 +40,9 @@
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 160 84% 39%;
     --sidebar-primary-foreground: 222 47% 8%;
-    --sidebar-accent: 222 40% 14%;
+    --sidebar-accent: 222 38% 17%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 20% 20%;
+    --sidebar-border: 222 20% 30%;
     --sidebar-ring: 160 84% 39%;
 
     /* Custom tokens */
@@ -87,6 +87,10 @@
 }
 
 @layer utilities {
+  .tournament-tab-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
   .glow-green {
     box-shadow: var(--shadow-glow);
   }
@@ -202,12 +206,14 @@
   .interactive-card {
     @apply transition-all duration-200 cursor-pointer;
   }
-  .interactive-card:hover {
-    @apply translate-y-[-2px];
-    box-shadow: var(--shadow-card-hover);
-  }
-  .interactive-card:active {
-    @apply translate-y-0;
-    transition-duration: 100ms;
+  @media (hover: hover) {
+    .interactive-card:hover {
+      @apply translate-y-[-2px];
+      box-shadow: var(--shadow-card-hover);
+    }
+    .interactive-card:active {
+      @apply translate-y-0;
+      transition-duration: 100ms;
+    }
   }
 }

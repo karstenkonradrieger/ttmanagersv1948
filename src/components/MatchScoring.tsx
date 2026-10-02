@@ -862,7 +862,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 text-xs text-muted-foreground"
+          className="h-10 text-xs text-muted-foreground"
           onClick={() => printRefereeSheet({
             match,
             player1Name: getParticipantName(match.player1Id),
@@ -901,9 +901,9 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
                 aria-label={`Satz ${i + 1} – Spieler 1 Punkte`}
               />
               <div className="flex gap-0.5 justify-center">
-                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] flex-1 min-w-0" onClick={() => { updateSet(i, 'player1', 11); focusInput(i, 'p2'); }}>11</Button>
-                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player1', Math.max(0, set.player1 - 1))}>−</Button>
-                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player1', set.player1 + 1)}>+</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px] flex-1 min-w-0" onClick={() => { updateSet(i, 'player1', 11); focusInput(i, 'p2'); }}>11</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player1', Math.max(0, set.player1 - 1))}>−</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player1', set.player1 + 1)}>+</Button>
               </div>
             </div>
             <span className="text-muted-foreground text-lg">:</span>
@@ -923,9 +923,9 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
                 aria-label={`Satz ${i + 1} – Spieler 2 Punkte`}
               />
               <div className="flex gap-0.5 justify-center">
-                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] flex-1 min-w-0" onClick={() => { updateSet(i, 'player2', 11); focusInput(i, 'p1'); }}>11</Button>
-                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player2', Math.max(0, set.player2 - 1))}>−</Button>
-                <Button type="button" variant="ghost" size="sm" className="h-6 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player2', set.player2 + 1)}>+</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px] flex-1 min-w-0" onClick={() => { updateSet(i, 'player2', 11); focusInput(i, 'p1'); }}>11</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player2', Math.max(0, set.player2 - 1))}>−</Button>
+                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player2', set.player2 + 1)}>+</Button>
               </div>
             </div>
             {sets.length > 1 && (

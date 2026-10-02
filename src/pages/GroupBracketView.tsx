@@ -93,7 +93,7 @@ const GroupBracketView = () => {
         {phase === 'knockout' && koMatches.length > 0 && (
           <div className="flex items-center gap-3" aria-hidden="true">
             <div className="flex-1 h-px bg-border/60" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               ↓ Qualifizierte ziehen ins K.O. ein ↓
             </span>
             <div className="flex-1 h-px bg-border/60" />
