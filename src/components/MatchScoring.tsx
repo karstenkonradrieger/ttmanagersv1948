@@ -1028,16 +1028,18 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
     })() : null;
 
     return (
-      <div className="relative">
+      <div>
+        <div className="flex justify-end mb-2">
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-2 right-2 z-10 h-11 text-xs text-muted-foreground"
+          className="h-11 text-xs text-muted-foreground"
           onClick={() => setEditing(false)}
         >
           <X className="mr-1 h-3 w-3" />
           Abbrechen
         </Button>
+        </div>
         <ScoreEntry
           match={{ ...match, status: 'active' }}
           getPlayer={getPlayer}
