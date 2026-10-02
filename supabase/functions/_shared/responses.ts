@@ -12,6 +12,7 @@ export function createResponsesCall(
   config: { baseURL: string; apiKey: string; model: string },
   messages: ModelMessage[],
   streamOptions?: UIMessageStreamOptions<UIMessage>,
+  instructions?: string,
 ) {
   const runIdFetch = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(request));
   const provider = createOpenAI({
@@ -23,6 +24,7 @@ export function createResponsesCall(
   const reasoning = config.model !== "openai/chat-latest";
   const result = streamText({
     model: provider.responses(config.model),
+    instructions,
     messages,
     abortSignal: request.signal,
     providerOptions: {

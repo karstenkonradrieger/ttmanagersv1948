@@ -92,7 +92,6 @@ Deno.serve(async (request) => {
     const dataContext = `Turnier: ${tournament.name}\nModus: ${tournament.mode}\nTyp: ${tournament.type}\nPhase: ${tournament.phase ?? "keine"}\nGestartet: ${tournament.started ? "ja" : "nein"}\n\nSpiele:\n${matchLines.join("\n") || "Noch keine Spiele gespeichert."}\n\nMannschafts-Einzelbegegnungen:\n${encounterLines.join("\n") || "Keine gespeichert."}`;
 
     const modelMessages: ModelMessage[] = [
-      { role: "system", content: "Du beantwortest auf Deutsch Fragen eines Turnierveranstalters. Nutze ausschließlich die mitgelieferten aktuellen Turnierdaten. Erfinde keine Ergebnisse, Namen oder Zusammenhänge. Wenn die Daten nicht reichen, sage das klar. Antworte kurz, sachlich und gut teilbar. Gib keine privaten Kontaktdaten aus." },
       { role: "user", content: `Aktueller Turnierdatenstand:\n${dataContext}` },
       ...(history ?? []).map((message) => ({ role: message.role as "user" | "assistant", content: message.content })),
       { role: "user", content: question },
@@ -111,7 +110,7 @@ Deno.serve(async (request) => {
         ]);
         if (saveError) throw new Error("Die Antwort wurde erstellt, konnte aber nicht gespeichert werden.");
       },
-    });
+    }, "Du beantwortest auf Deutsch Fragen eines Turnierveranstalters. Nutze ausschließlich die mitgelieferten aktuellen Turnierdaten. Erfinde keine Ergebnisse, Namen oder Zusammenhänge. Wenn die Daten nicht reichen, sage das klar. Antworte kurz, sachlich und gut teilbar. Gib keine privaten Kontaktdaten aus.");
     return await call.response(corsHeaders);
   } catch (error) {
     if (request.signal.aborted) return json(499, { message: "Antwort abgebrochen." });
