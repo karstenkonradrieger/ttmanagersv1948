@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { toast } from 'sonner';
-import { DoublesPair, Match, Player, SetScore, Sponsor, getHandicap } from '@/types/tournament';
+import { DoublesPair, Match, Player, SetScore, Sponsor, TournamentSummary, getHandicap } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,8 @@ import { printRefereeSheet, printAllRefereeSheets } from '@/components/RefereeSh
 import { MatchPhotos } from '@/components/MatchPhotos';
 import { generateMatchReport } from '@/components/MatchReport';
 import { useAnnouncementPhrases } from '@/hooks/useAnnouncementPhrases';
+import { TournamentSummaryCard } from '@/components/TournamentSummaryCard';
+import { isTournamentSummaryStale } from '@/services/tournamentSummary';
 
 interface Props {
   matches: Match[];
@@ -35,6 +37,8 @@ interface Props {
   mode?: string;
   breakMinutes?: number;
   onUpdatePlayer?: (id: string, updates: Partial<Omit<Player, 'id'>>) => void;
+  summary?: TournamentSummary | null;
+  onSummaryGenerated?: (summary: TournamentSummary) => void;
 }
 
 let announcementQueue: Promise<void> = Promise.resolve();
@@ -151,7 +155,7 @@ const announceMatch = async (
   });
 };
 
-export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, sponsors = [], isHandicap = false, players = [], doublesPairs = [], mode, breakMinutes = 0, onUpdatePlayer }: Props) {
+export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateScore, onSetActive, tableCount, onTableCountChange, onAutoAssign, bestOf, tournamentName, rounds, tournamentId, logoUrl, tournamentDate, venueString, motto, sponsors = [], isHandicap = false, players = [], doublesPairs = [], mode, breakMinutes = 0, onUpdatePlayer, summary = null, onSummaryGenerated }: Props) {
   const [autoPrint, setAutoPrint] = useState(true);
   const { getPhraseAudioUrl } = useAnnouncementPhrases();
 
@@ -393,6 +397,16 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
 
       {completedMatches.length > 0 && (
         <Section title="✅ Abgeschlossene Spiele">
+          {onSummaryGenerated && (
+            <TournamentSummaryCard
+              tournamentId={tournamentId}
+              tournamentName={tournamentName}
+              completedMatchCount={completedMatches.length}
+              summary={summary}
+              isStale={isTournamentSummaryStale(summary, matches)}
+              onGenerated={onSummaryGenerated}
+            />
+          )}
           <PhaseGroupedMatches
             matches={completedMatches}
             mode={mode}
@@ -1059,7 +1073,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
   }
 
   return (
-    <div className="bg-card/50 rounded-lg p-3 card-shadow space-y-2">
+    <div className="bg-card border border-border rounded-lg p-3 card-shadow space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="text-sm min-w-0 break-words">
           <span className={match.winnerId === match.player1Id ? 'font-bold text-winner' : ''}>{p1?.name}</span>

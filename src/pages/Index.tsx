@@ -77,6 +77,7 @@ const Index = () => {
     koUndoSnapshot,
     resetTournament,
     generateNextSwissRound,
+    setTournamentSummary,
     addTeam,
     removeTeam,
     addPlayerToTeam,
@@ -881,6 +882,8 @@ const Index = () => {
                    mode={tournament.mode}
                    breakMinutes={tournament.breakMinutes}
                    onUpdatePlayer={updatePlayer}
+                    summary={tournament.summary}
+                    onSummaryGenerated={setTournamentSummary}
                  />
               )}
             </TabsContent>

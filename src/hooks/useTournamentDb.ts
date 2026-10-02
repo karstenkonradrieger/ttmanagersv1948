@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Player, Match, Tournament, SetScore, DoublesPair, TournamentMode, TournamentType, Team, TeamPlayer, TeamMode, TEAM_GAME_SEQUENCES, EncounterGame, getHandicap } from '@/types/tournament';
+import { Player, Match, Tournament, TournamentSummary, SetScore, DoublesPair, TournamentMode, TournamentType, Team, TeamPlayer, TeamMode, TEAM_GAME_SEQUENCES, EncounterGame, getHandicap } from '@/types/tournament';
 import { Json } from '@/integrations/supabase/types';
 import * as tournamentService from '@/services/tournamentService';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,6 +52,7 @@ const emptyTournament: Tournament = {
   openingVideoUrl: null,
   koQualificationMode: 'byes',
   clubBalanceGroups: true,
+  summary: null,
 };
 
 interface KoSnapshot {
@@ -126,6 +127,12 @@ export function useTournamentDb(tournamentId: string | null) {
         event: '*',
         schema: 'public',
         table: 'tournament_sponsors',
+        filter: `tournament_id=eq.${tournamentId}`,
+      }, () => loadTournament())
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'tournament_summaries',
         filter: `tournament_id=eq.${tournamentId}`,
       }, () => loadTournament())
       .subscribe();
@@ -205,6 +212,10 @@ export function useTournamentDb(tournamentId: string | null) {
       console.error('Error updating player:', error);
       toast.error('Fehler beim Aktualisieren des Spielers');
     }
+  }, []);
+
+  const setTournamentSummary = useCallback((summary: TournamentSummary) => {
+    setTournament(prev => ({ ...prev, summary }));
   }, []);
 
   const generateBracket = useCallback(async () => {
@@ -2079,6 +2090,7 @@ export function useTournamentDb(tournamentId: string | null) {
     reload: loadTournament,
     updateKaiserDuration,
     generateNextKaiserRound,
+    setTournamentSummary,
   };
 }
 
