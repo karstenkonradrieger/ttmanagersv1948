@@ -653,7 +653,7 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
         <select
           value={selectedTable}
           onChange={e => setSelectedTable(e.target.value ? parseInt(e.target.value) : '')}
-          className="w-28 h-10 rounded-md border border-input bg-secondary px-3 text-sm"
+          className="w-28 h-11 rounded-md border border-input bg-secondary px-3 text-sm"
         >
           <option value="">Tisch...</option>
           {freeTables.map(t => (
@@ -904,7 +904,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
                 aria-label={`Satz ${i + 1} – Spieler 1 Punkte`}
               />
               <div className="flex gap-0.5 justify-center">
-                <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => { updateSet(i, 'player1', 11); focusInput(i, 'p2'); }}>11</Button>
+                <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => updateSet(i, 'player1', 11)}>11</Button>
                 <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => updateSet(i, 'player1', Math.max(0, set.player1 - 1))}>−</Button>
                 <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => updateSet(i, 'player1', set.player1 + 1)}>+</Button>
               </div>
@@ -926,7 +926,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
                 aria-label={`Satz ${i + 1} – Spieler 2 Punkte`}
               />
               <div className="flex gap-0.5 justify-center">
-                <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => { updateSet(i, 'player2', 11); focusInput(i, 'p1'); }}>11</Button>
+                <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => updateSet(i, 'player2', 11)}>11</Button>
                 <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => updateSet(i, 'player2', Math.max(0, set.player2 - 1))}>−</Button>
                 <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => updateSet(i, 'player2', set.player2 + 1)}>+</Button>
               </div>
