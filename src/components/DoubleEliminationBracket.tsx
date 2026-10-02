@@ -148,7 +148,7 @@ function PlayerRow({ player, isWinner, isLoser, match, playerKey }: {
   }).length;
 
   return (
-    <div className={`flex items-center gap-2 px-3 py-2 text-sm ${isWinner ? 'bg-primary/10' : isLoser ? '' : ''}`}>
+    <div className={`flex items-center gap-2 px-3 py-2 text-sm ${isWinner ? 'bg-primary/10' : ''}`}>
       <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isWinner ? 'bg-primary' : player ? 'bg-muted-foreground/30' : 'bg-transparent'}`} />
       <span className={`truncate flex-1 min-w-0 ${isWinner ? 'font-bold text-primary' : isLoser ? 'text-muted-foreground' : player ? 'font-medium' : 'text-muted-foreground italic'}`}>
         {player?.name || 'TBD'}

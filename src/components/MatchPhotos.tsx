@@ -256,12 +256,13 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
               onClick={() => openLightbox(i)}
             />
             {!readOnly && (
-              <button
+              <Button variant="destructive" size="icon"
                 onClick={() => handleDelete(photo)}
-                className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full h-5 w-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Foto löschen" title="Foto löschen"
+                className="absolute -top-2 -right-2 rounded-full h-10 w-10 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 focus:opacity-100"
               >
                 <X className="h-3 w-3" />
-              </button>
+              </Button>
             )}
           </div>
         ))}
@@ -300,12 +301,13 @@ export function MatchPhotos({ tournamentId, matchId, photoType, maxPhotos = 2, m
               onClick={() => setVideoPlayerUrl(vid.photo_url)}
             />
             {!readOnly && (
-              <button
+              <Button variant="destructive" size="icon"
                 onClick={(e) => { e.stopPropagation(); handleDelete(vid); }}
-                className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full h-5 w-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                aria-label="Video löschen" title="Video löschen"
+                className="absolute -top-2 -right-2 rounded-full h-10 w-10 transition-opacity z-10 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 focus:opacity-100"
               >
                 <X className="h-3 w-3" />
-              </button>
+              </Button>
             )}
           </div>
         ))}
