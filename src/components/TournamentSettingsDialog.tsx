@@ -1,3 +1,4 @@
+import { Switch } from '@/components/ui/switch';
 import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -36,6 +37,7 @@ interface Props {
   organizerName: string;
   sponsors: Sponsor[];
   openingVideoUrl: string | null;
+  clubBalanceGroups?: boolean;
   tournamentId: string;
   onUpdateMode: (mode: TournamentMode) => Promise<void>;
   onUpdateType: (type: TournamentType) => Promise<void>;
@@ -56,6 +58,7 @@ interface Props {
     certificate_text_color?: string;
     certificate_extra_sizes?: Record<string, number>;
     opening_video_url?: string | null;
+    club_balance_groups?: boolean;
   }) => Promise<void>;
   onSaved?: () => void | Promise<void>;
 }
@@ -65,7 +68,7 @@ export function TournamentSettingsDialog({
   tournamentDate, venueStreet, venueHouseNumber, venuePostalCode, venueCity, motto, breakMinutes,
   certificateText, certificateBgUrl, certificateFontFamily, certificateFontSize, certificateTextColor, certificateExtraSizes = {},
   organizerName, sponsors,
-  openingVideoUrl, tournamentId,
+  openingVideoUrl, clubBalanceGroups = true, tournamentId,
   onUpdateMode, onUpdateType, onUpdateBestOf, onUpdateDetails, onSaved,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -79,6 +82,7 @@ export function TournamentSettingsDialog({
   const [localCity, setLocalCity] = useState(venueCity);
   const [localMotto, setLocalMotto] = useState(motto);
   const [localBreakMinutes, setLocalBreakMinutes] = useState(breakMinutes);
+  const [localClubBalance, setLocalClubBalance] = useState(clubBalanceGroups);
   const [localCertText, setLocalCertText] = useState(certificateText);
   const [localOrganizerName, setLocalOrganizerName] = useState(organizerName);
   const [localSponsors, setLocalSponsors] = useState<Sponsor[]>(sponsors);
@@ -128,6 +132,7 @@ export function TournamentSettingsDialog({
       setLocalCity(draft?.localCity ?? venueCity);
       setLocalMotto(draft?.localMotto ?? motto);
       setLocalBreakMinutes(draft?.localBreakMinutes ?? breakMinutes);
+      setLocalClubBalance(draft?.localClubBalance ?? clubBalanceGroups);
       setLocalCertText(draft?.localCertText ?? certificateText);
       setLocalOrganizerName(draft?.localOrganizerName ?? organizerName);
       setLocalSponsors(draft?.localSponsors ?? sponsors.map(s => ({ ...s })));
@@ -151,7 +156,7 @@ export function TournamentSettingsDialog({
       localStorage.setItem(draftKey, JSON.stringify({
         localMode, localType, localBestOf, localDate,
         localStreet, localHouseNumber, localPostalCode, localCity,
-        localMotto, localBreakMinutes, localCertText, localOrganizerName,
+        localMotto, localBreakMinutes, localClubBalance, localCertText, localOrganizerName,
         localSponsors, localCertBgUrl, localFontFamily, localFontSize,
         localTextColor, localFontBold, localOpeningVideoUrl,
       }));
@@ -160,7 +165,7 @@ export function TournamentSettingsDialog({
   }, [open, draftKey,
     localMode, localType, localBestOf, localDate,
     localStreet, localHouseNumber, localPostalCode, localCity,
-    localMotto, localBreakMinutes, localCertText, localOrganizerName,
+    localMotto, localBreakMinutes, localClubBalance, localCertText, localOrganizerName,
     localSponsors, localCertBgUrl, localFontFamily, localFontSize,
     localTextColor, localFontBold, localOpeningVideoUrl,
   ]);
@@ -320,6 +325,7 @@ export function TournamentSettingsDialog({
         venue_city: localCity,
         motto: localMotto,
         break_minutes: localBreakMinutes,
+        club_balance_groups: localClubBalance,
         certificate_text: localCertText,
         organizer_name: localOrganizerName,
         certificate_bg_url: localCertBgUrl,
@@ -551,6 +557,18 @@ export function TournamentSettingsDialog({
                 </div>
               </RadioGroup>
             </div>
+
+            {localMode === 'group_knockout' && (
+              <div className="form-section">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <Label htmlFor="edit-club-balance" className="form-option-label">Vereinsausgleich bei Gruppenauslosung</Label>
+                    <p className="form-option-desc">Spieler eines Vereins werden möglichst gleichmäßig auf alle Gruppen verteilt.</p>
+                  </div>
+                  <Switch id="edit-club-balance" checked={localClubBalance} onCheckedChange={setLocalClubBalance} disabled={started} />
+                </div>
+              </div>
+            )}
 
             {/* Break time */}
             <div className="form-section">

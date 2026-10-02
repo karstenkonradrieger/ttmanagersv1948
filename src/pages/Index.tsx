@@ -287,6 +287,7 @@ const Index = () => {
               certificateExtraSizes={tournament.certificateExtraSizes}
               started={tournament.started}
               openingVideoUrl={tournament.openingVideoUrl || null}
+              clubBalanceGroups={tournament.clubBalanceGroups !== false}
               tournamentId={tournament.id}
               onUpdateMode={updateTournamentMode}
               onUpdateType={updateTournamentType}

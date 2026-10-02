@@ -1,3 +1,4 @@
+import { Switch } from '@/components/ui/switch';
 import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ interface WizardData {
   teamMode: TeamMode;
   mode: TournamentMode;
   bestOf: number;
+  clubBalanceGroups: boolean;
 }
 
 const DEFAULT_CERTIFICATE_TEXT = 'Beim {turniername} hat {spieler} ({verein}) den {platz} belegt.';
@@ -80,6 +82,7 @@ interface Props {
       certificate_font_size?: number;
       certificate_text_color?: string;
       certificate_extra_sizes?: Record<string, number>;
+      club_balance_groups?: boolean;
     },
   ) => Promise<string>;
 }
@@ -119,6 +122,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
     teamMode: 'bundessystem',
     mode: 'knockout',
     bestOf: 3,
+    clubBalanceGroups: true,
   });
 
   const update = (partial: Partial<WizardData>) => setData(prev => ({ ...prev, ...partial }));
@@ -149,6 +153,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
         teamMode: 'bundessystem',
         mode: 'knockout',
         bestOf: 3,
+        clubBalanceGroups: true,
       });
       setCustomSport('');
     }
@@ -321,6 +326,7 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
           certificate_font_size: data.certificateFontSize,
           certificate_text_color: data.certificateTextColor,
           certificate_extra_sizes: { fontBold: data.certificateFontBold ? 1 : 0 },
+          club_balance_groups: data.clubBalanceGroups,
         },
       );
       setOpen(false);
@@ -571,6 +577,18 @@ export function CreateTournamentWizard({ onCreated, userId, createTournament }: 
                 ))}
               </RadioGroup>
             </div>
+
+            {data.mode === 'group_knockout' && (
+              <div className="form-section">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <Label htmlFor="wiz-club-balance" className="form-option-label">Vereinsausgleich bei Gruppenauslosung</Label>
+                    <p className="form-option-desc">Spieler eines Vereins werden möglichst gleichmäßig auf alle Gruppen verteilt.</p>
+                  </div>
+                  <Switch id="wiz-club-balance" checked={data.clubBalanceGroups} onCheckedChange={v => update({ clubBalanceGroups: v })} />
+                </div>
+              </div>
+            )}
 
             {/* Best Of */}
             <div className="form-section">

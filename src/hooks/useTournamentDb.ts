@@ -1317,6 +1317,7 @@ export function useTournamentDb(tournamentId: string | null) {
     certificate_text_color: string;
     certificate_extra_sizes: Record<string, number>;
     opening_video_url: string | null;
+    club_balance_groups: boolean;
   }>) => {
     if (!tournamentId) return;
     try {
@@ -1338,6 +1339,7 @@ export function useTournamentDb(tournamentId: string | null) {
         ...(details.certificate_text_color !== undefined ? { certificateTextColor: details.certificate_text_color } : {}),
         ...(details.certificate_extra_sizes !== undefined ? { certificateExtraSizes: details.certificate_extra_sizes } : {}),
         ...(details.opening_video_url !== undefined ? { openingVideoUrl: details.opening_video_url } : {}),
+        ...(details.club_balance_groups !== undefined ? { clubBalanceGroups: details.club_balance_groups } : {}),
       }));
     } catch (error) {
       console.error('Error updating details:', error);
