@@ -18,20 +18,20 @@
     --primary: 160 84% 39%;
     --primary-foreground: 222 47% 8%;
 
-    --secondary: 222 28% 21%;
+    --secondary: 222 28% 23%;
     --secondary-foreground: 210 40% 90%;
 
-    --muted: 222 28% 21%;
+    --muted: 222 28% 23%;
     --muted-foreground: 215 22% 68%;
 
     --accent: 160 84% 39%;
     --accent-foreground: 222 47% 8%;
 
-    --destructive: 0 72% 50%;
+    --destructive: 0 72% 45%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 222 20% 30%;
-    --input: 222 20% 30%;
+    --border: 222 20% 53%;
+    --input: 222 20% 53%;
     --ring: 160 84% 39%;
 
     --radius: 0.75rem;
@@ -42,7 +42,7 @@
     --sidebar-primary-foreground: 222 47% 8%;
     --sidebar-accent: 222 38% 17%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 20% 30%;
+    --sidebar-border: 222 20% 53%;
     --sidebar-ring: 160 84% 39%;
 
     /* Custom tokens */
@@ -51,6 +51,11 @@
     --tt-blue: 222 60% 22%;
     --tt-blue-deep: 222 47% 11%;
     --tt-gold: 43 96% 56%;
+    --status-free: 160 84% 39%;
+    --status-busy: 38 92% 48%;
+    --status-waiting: 38 92% 48%;
+    --status-error: 0 72% 70%;
+    --winner: 43 96% 56%;
     --gradient-sport: linear-gradient(135deg, hsl(222 47% 11%), hsl(222 47% 14%));
     --gradient-accent: linear-gradient(135deg, hsl(160 84% 39%), hsl(160 90% 48%));
     --gradient-header: linear-gradient(180deg, hsl(222 47% 13%), hsl(222 47% 11%));
@@ -201,7 +206,7 @@
   }
   .glass {
     backdrop-filter: blur(12px);
-    background: hsl(222 47% 11% / 0.85);
+    background: hsl(var(--background) / 0.85);
   }
   .interactive-card {
     @apply transition-all duration-200 cursor-pointer;

@@ -58,6 +58,13 @@ export default {
           "blue-deep": "hsl(var(--tt-blue-deep))",
           gold: "hsl(var(--tt-gold))",
         },
+        status: {
+          free: "hsl(var(--status-free))",
+          busy: "hsl(var(--status-busy))",
+          waiting: "hsl(var(--status-waiting))",
+          error: "hsl(var(--status-error))",
+        },
+        winner: "hsl(var(--winner))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -84,8 +91,8 @@ export default {
           to: { height: "0" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 10px hsl(155 65% 42% / 0.3)" },
-          "50%": { boxShadow: "0 0 25px hsl(155 65% 42% / 0.5)" },
+          "0%, 100%": { boxShadow: "0 0 10px hsl(var(--primary) / 0.3)" },
+          "50%": { boxShadow: "0 0 25px hsl(var(--primary) / 0.5)" },
         },
         "slide-up": {
           from: { opacity: "0", transform: "translateY(10px)" },
