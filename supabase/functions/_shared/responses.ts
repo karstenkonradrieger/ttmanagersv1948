@@ -1,5 +1,5 @@
-import { createOpenAI } from "@ai-sdk/openai";
-import { streamText, type ModelMessage } from "ai";
+import { createOpenAI } from "npm:@ai-sdk/openai";
+import { streamText, type ModelMessage } from "npm:ai";
 
 import {
   createLovableAiGatewayRunIdFetch,
