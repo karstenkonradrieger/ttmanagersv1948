@@ -950,7 +950,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
                 type="button"
                 variant="outline"
                 onClick={() => removeSetWithFocus(i, 'p1')}
-                className="h-14 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30 self-center gap-1.5 font-semibold"
+                className="h-14 px-3 text-destructive hover:bg-destructive hover:text-destructive-foreground border-destructive self-center gap-1.5 font-semibold"
                 aria-label={`Satz ${i + 1} löschen`}
               >
                 <X className="h-5 w-5" />
@@ -976,7 +976,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
       </div>
 
       {validationError && (
-        <div className="mt-3 p-3 bg-destructive/10 border border-destructive/50 text-destructive text-sm rounded-md flex items-start gap-2 animate-slide-up">
+        <div className="mt-3 p-3 bg-card border border-status-error text-status-error text-sm rounded-md flex items-start gap-2 animate-slide-up">
           <Settings className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <p>{validationError}</p>
         </div>
