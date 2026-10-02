@@ -198,7 +198,7 @@ function OverviewMatchRow({ match: m, getPlayer, bestOf, mode, rounds, isEditing
               <span className="text-muted-foreground text-xs">:</span>
               <Input type="number" value={set.player2 || ''} onChange={e => { const u = [...editSets]; u[i] = { ...u[i], player2: parseInt(e.target.value) || 0 }; setEditSets(u); }} className="h-9 text-center text-sm font-bold bg-secondary flex-1" min={0} />
               {editSets.length > 1 && (
-                <Button variant="ghost" size="icon" onClick={() => setEditSets(editSets.filter((_, j) => j !== i))} className="h-8 w-8 text-muted-foreground"><X className="h-3 w-3" /></Button>
+                <Button variant="ghost" size="icon" onClick={() => setEditSets(editSets.filter((_, j) => j !== i))} className="h-10 w-10 text-muted-foreground"><X className="h-3 w-3" /></Button>
               )}
             </div>
           ))}
@@ -1262,7 +1262,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 text-xs text-muted-foreground"
+              className="h-10 text-xs text-muted-foreground"
               onClick={() => setShowMatchPhotos(prev => !prev)}
             >
               {showMatchPhotos ? <ImageOff className="mr-1 h-3 w-3" /> : <ImageIcon className="mr-1 h-3 w-3" />}
@@ -1280,7 +1280,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 text-xs text-muted-foreground"
+                      className="h-10 text-xs text-muted-foreground"
                       onClick={() => generateMatchReport({
                         match: m, player1: p1, player2: p2,
                         tournamentName, tournamentId,
@@ -1373,7 +1373,7 @@ export function TournamentOverview({ tournamentName, matches, rounds, getPlayer,
                   {groupCompleted.length > 0 && koCompleted.length > 0 && (
                     <div className="flex items-center gap-3" aria-hidden="true">
                       <div className="flex-1 h-px bg-border/60" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">↓ K.O.-Runde ↓</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">↓ K.O.-Runde ↓</span>
                       <div className="flex-1 h-px bg-border/60" />
                     </div>
                   )}
@@ -1970,7 +1970,7 @@ function PhaseSplitRounds({ matches, rounds, mode, getPlayer, bestOf, editingMat
       {/* === Visueller Trenner === */}
       <div className="flex items-center gap-3" aria-hidden="true">
         <div className="flex-1 h-px bg-border/60" />
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           ↓ K.O.-Runde ↓
         </span>
         <div className="flex-1 h-px bg-border/60" />

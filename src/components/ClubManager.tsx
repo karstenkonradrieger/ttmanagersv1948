@@ -56,7 +56,7 @@ function ClubImportButton({ clubName, onImport }: { clubName: string; onImport?:
         variant="ghost"
         size="icon"
         onClick={(e) => { e.stopPropagation(); ref.current?.click(); }}
-        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+        className="h-10 w-10 text-muted-foreground hover:text-foreground"
         title={`Spieler für ${clubName} importieren`}
       >
         <Upload className="h-3.5 w-3.5" />
@@ -95,7 +95,7 @@ function ClubLogoUpload({ club, onUpdate }: { club: Club; onUpdate?: Props['onUp
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
       <button
         onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-        className="flex-shrink-0 h-8 w-8 rounded-md overflow-hidden border border-border hover:border-primary transition-colors flex items-center justify-center bg-background"
+        className="flex-shrink-0 h-10 w-10 rounded-md overflow-hidden border border-border hover:border-primary transition-colors flex items-center justify-center bg-background"
         title="Vereinslogo hochladen"
       >
         {club.logo_url ? (
@@ -399,7 +399,7 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
                       variant="ghost"
                       size="icon"
                       onClick={(e) => { e.stopPropagation(); exportClubCsv(club.name, players); }}
-                      className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                      className="h-10 w-10 text-muted-foreground hover:text-foreground"
                       title="Verein exportieren"
                     >
                       <Download className="h-3.5 w-3.5" />
@@ -417,7 +417,7 @@ export function ClubManager({ clubs, players = [], onAdd, onRemove, onUpdate, on
                         variant="ghost"
                         size="icon"
                         onClick={() => onRemove(club.id)}
-                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        className="h-10 w-10 text-destructive hover:text-destructive hover:bg-destructive/10"
                         title="Verein löschen"
                       >
                         <Trash2 className="h-3.5 w-3.5" />

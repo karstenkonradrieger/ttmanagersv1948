@@ -52,8 +52,8 @@ export function LogoUpload({ tournamentId, logoUrl, onLogoChange }: Props) {
       />
       <button
         onClick={() => fileInputRef.current?.click()}
-        className="flex-shrink-0 h-9 w-9 rounded-lg overflow-hidden border border-border hover:border-primary transition-colors flex items-center justify-center bg-secondary"
-        title="Logo hochladen"
+        className="flex-shrink-0 h-11 w-11 rounded-lg overflow-hidden border border-border hover:border-primary transition-colors flex items-center justify-center bg-secondary"
+        title="Logo hochladen" aria-label="Logo hochladen"
       >
         {logoUrl ? (
           <img src={logoUrl} alt="Logo" className="h-full w-full object-contain" />

@@ -391,7 +391,7 @@ export function TournamentSettingsDialog({
     <>
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground relative">
+        <Button variant="ghost" size="icon" className="h-11 w-11 text-muted-foreground relative">
           <Settings2 className="h-4 w-4" />
           {hasDraft && (
             <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-amber-500 ring-2 ring-background" title="Ungespeicherter Entwurf" />
@@ -457,7 +457,7 @@ export function TournamentSettingsDialog({
                     <Play className="mr-1 h-4 w-4" />
                     Abspielen
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeOpeningVideo}>
+                  <Button variant="ghost" size="icon" className="h-11 w-11" onClick={removeOpeningVideo}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -640,7 +640,7 @@ export function TournamentSettingsDialog({
               {localCertBgUrl && !['/certificate-frames/frame-classic-gold.png', '/certificate-frames/frame-sport-red.png', '/certificate-frames/frame-nature-green.png', '/certificate-frames/frame-modern-blue.png'].includes(localCertBgUrl) ? (
                 <div className="flex items-center gap-2">
                   <img src={localCertBgUrl} alt="Hintergrund" className="h-16 border border-border rounded p-1 object-contain" />
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={removeCertBg}>
+                  <Button variant="ghost" size="icon" className="h-11 w-11" onClick={removeCertBg}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -734,7 +734,7 @@ export function TournamentSettingsDialog({
                         onChange={e => setLocalSponsors(prev => prev.map((s, i) => i === idx ? { ...s, name: e.target.value } : s))}
                         className="flex-1"
                       />
-                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeSponsorSlot(idx)}>
+                      <Button variant="ghost" size="icon" className="h-11 w-11 shrink-0" onClick={() => removeSponsorSlot(idx)}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -742,7 +742,7 @@ export function TournamentSettingsDialog({
                       {sponsor.logoUrl ? (
                         <>
                           <img src={sponsor.logoUrl} alt="Logo" className="h-10 border border-border rounded p-1 object-contain" />
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeSponsorLogo(idx)}>
+                          <Button variant="ghost" size="icon" className="h-11 w-11" onClick={() => removeSponsorLogo(idx)}>
                             <X className="h-3 w-3" />
                           </Button>
                         </>

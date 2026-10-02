@@ -687,7 +687,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                               (Gr.{String.fromCharCode(65 + q.groupNumber)}: {stats})
                             </span>
                             {comparison && (
-                              <span className="text-muted-foreground/70 italic ml-auto text-right">
+                              <span className="text-muted-foreground italic ml-auto text-right">
                                 ↳ vs. #{seed + 1}: {comparison}
                               </span>
                             )}
@@ -697,7 +697,7 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
                     </div>
                   </div>
                 ))}
-                <p className="text-[10px] text-muted-foreground/60 mt-1">
+                <p className="text-[10px] text-muted-foreground mt-1">
                   Sieger & Zweite: 1. Siege → 2. Satzdifferenz → 3. Punktdifferenz (zzgl. direkter Vergleich in der Gruppe).<br />
                   Beste Dritte: 1. Leistungs-Quotient (Siege/Spiele) → 2. Satzdifferenz → 3. Punktdifferenz – fair bei ungleich großen Gruppen.
                 </p>

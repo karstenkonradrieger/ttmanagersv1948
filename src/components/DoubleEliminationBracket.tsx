@@ -50,7 +50,7 @@ export function DoubleEliminationBracket({ matches, wbRounds, getPlayer }: Props
                     <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {roundNames(r, wbRounds)}
                     </h3>
-                    <span className="text-[10px] text-muted-foreground/60">
+                    <span className="text-[10px] text-muted-foreground">
                       {roundMatches.length} {roundMatches.length === 1 ? 'Spiel' : 'Spiele'}
                     </span>
                   </div>
@@ -83,7 +83,7 @@ export function DoubleEliminationBracket({ matches, wbRounds, getPlayer }: Props
                       <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                         LB Runde {r + 1}
                       </h3>
-                      <span className="text-[10px] text-muted-foreground/60">
+                      <span className="text-[10px] text-muted-foreground">
                         {roundMatches.length} {roundMatches.length === 1 ? 'Spiel' : 'Spiele'}
                       </span>
                     </div>
@@ -148,9 +148,9 @@ function PlayerRow({ player, isWinner, isLoser, match, playerKey }: {
   }).length;
 
   return (
-    <div className={`flex items-center gap-2 px-3 py-2 text-sm ${isWinner ? 'bg-primary/10' : isLoser ? 'opacity-50' : ''}`}>
+    <div className={`flex items-center gap-2 px-3 py-2 text-sm ${isWinner ? 'bg-primary/10' : isLoser ? '' : ''}`}>
       <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isWinner ? 'bg-primary' : player ? 'bg-muted-foreground/30' : 'bg-transparent'}`} />
-      <span className={`truncate flex-1 min-w-0 ${isWinner ? 'font-bold text-primary' : isLoser ? 'text-muted-foreground' : player ? 'font-medium' : 'text-muted-foreground/50 italic'}`}>
+      <span className={`truncate flex-1 min-w-0 ${isWinner ? 'font-bold text-primary' : isLoser ? 'text-muted-foreground' : player ? 'font-medium' : 'text-muted-foreground italic'}`}>
         {player?.name || 'TBD'}
       </span>
       {hasSets && (

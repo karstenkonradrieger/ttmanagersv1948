@@ -50,7 +50,7 @@ function ClubLogoUpload({ club, onUpdate }: { club: Club; onUpdate?: Props['onUp
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
       <button
         onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-        className="flex-shrink-0 h-8 w-8 rounded-md overflow-hidden border border-border hover:border-primary transition-colors flex items-center justify-center bg-background"
+        className="flex-shrink-0 h-10 w-10 rounded-md overflow-hidden border border-border hover:border-primary transition-colors flex items-center justify-center bg-background"
         title="Vereinslogo hochladen"
       >
         {club.logo_url ? (
@@ -547,7 +547,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                       variant="ghost"
                       size="icon"
                       onClick={(e) => { e.stopPropagation(); handleExportClub(club); }}
-                      className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                      className="h-10 w-10 text-muted-foreground hover:text-foreground"
                       title="Verein exportieren"
                     >
                       <Download className="h-3.5 w-3.5" />
@@ -557,7 +557,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                         variant="ghost"
                         size="icon"
                         onClick={(e) => { e.stopPropagation(); setAddingPlayerFor(addingPlayerFor === club.id ? null : club.id); resetPlayerForm(); }}
-                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        className="h-10 w-10 text-muted-foreground hover:text-foreground"
                         title="Spieler hinzufügen"
                       >
                         <UserPlus className="h-3.5 w-3.5" />
@@ -573,7 +573,7 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                     {canManage && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" title="Verein löschen">
+                          <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive hover:text-destructive hover:bg-destructive/10" title="Verein löschen">
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </AlertDialogTrigger>
@@ -710,8 +710,8 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                 </label>
                               </div>
                               <div className="flex justify-end gap-1">
-                                <Button variant="ghost" size="icon" onClick={() => { setEditingId(null); setEditData({}); }} className="h-7 w-7"><X className="h-3.5 w-3.5" /></Button>
-                                <Button size="icon" onClick={saveEdit} className="h-7 w-7" disabled={!editData.name?.trim()}><Check className="h-3.5 w-3.5" /></Button>
+                                <Button variant="ghost" size="icon" onClick={() => { setEditingId(null); setEditData({}); }} className="h-10 w-10"><X className="h-3.5 w-3.5" /></Button>
+                                <Button size="icon" onClick={saveEdit} className="h-10 w-10" disabled={!editData.name?.trim()}><Check className="h-3.5 w-3.5" /></Button>
                               </div>
                             </div>
                           ) : (
@@ -775,17 +775,17 @@ export function ClubPlayersManager({ clubs, clubPlayers, onAddClub, onRemoveClub
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => { setUploadingConsentFor(player.id); consentFileRef.current?.click(); }}
-                                    className={`h-7 w-7 ${player.photoConsentUrl ? 'text-green-600' : 'text-muted-foreground'} hover:text-foreground`}
+                                    className={`h-10 w-10 ${player.photoConsentUrl ? 'text-green-600' : 'text-muted-foreground'} hover:text-foreground`}
                                     title={player.photoConsentUrl ? 'Fotoerlaubnis-Scan ersetzen' : 'Fotoerlaubnis-Scan hochladen'}
                                   >
                                     <Paperclip className="h-3.5 w-3.5" />
                                   </Button>
-                                  <Button variant="ghost" size="icon" onClick={() => startEdit(player)} className="h-7 w-7 text-muted-foreground hover:text-foreground">
+                                  <Button variant="ghost" size="icon" onClick={() => startEdit(player)} className="h-10 w-10 text-muted-foreground hover:text-foreground">
                                     <Pencil className="h-3.5 w-3.5" />
                                   </Button>
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10">
+                                      <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive hover:text-destructive hover:bg-destructive/10">
                                         <Trash2 className="h-3.5 w-3.5" />
                                       </Button>
                                     </AlertDialogTrigger>

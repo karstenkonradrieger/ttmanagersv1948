@@ -194,18 +194,18 @@ export function AudioPlayer() {
 
           {/* Transport controls */}
           <div className="flex items-center gap-1 shrink-0">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={prevTrack}>
+            <Button variant="ghost" size="icon" className="h-11 w-11" onClick={prevTrack}>
               <SkipBack className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full border border-border"
+              className="h-11 w-11 rounded-full border border-border"
               onClick={togglePlay}
             >
               {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={nextTrack}>
+            <Button variant="ghost" size="icon" className="h-11 w-11" onClick={nextTrack}>
               <SkipForward className="h-4 w-4" />
             </Button>
           </div>

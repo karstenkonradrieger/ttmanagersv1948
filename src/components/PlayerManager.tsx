@@ -383,10 +383,10 @@ export function PlayerManager({ players, onAdd, onRemove, onUpdate, started, clu
                   </div>
                 </div>
                 <div className="flex justify-end gap-1">
-                  <Button variant="ghost" size="icon" onClick={cancelEdit} className="h-8 w-8">
+                  <Button variant="ghost" size="icon" onClick={cancelEdit} className="h-11 w-11">
                     <X className="h-4 w-4" />
                   </Button>
-                  <Button variant="default" size="icon" onClick={saveEdit} className="h-8 w-8" disabled={!editData.name?.trim()}>
+                  <Button variant="default" size="icon" onClick={saveEdit} className="h-11 w-11" disabled={!editData.name?.trim()}>
                     <Check className="h-4 w-4" />
                   </Button>
                 </div>

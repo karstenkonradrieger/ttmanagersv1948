@@ -119,14 +119,14 @@ function PhraseRecorderRow({ phrase, onUpload, onRemove }: {
 
         {/* Play existing/preview */}
         {(hasExisting || hasNew) && (
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={playPreview}>
+          <Button variant="ghost" size="icon" className="h-10 w-10" onClick={playPreview}>
             <Play className="h-3 w-3" />
           </Button>
         )}
 
         {/* Export single */}
         {hasExisting && !hasNew && (
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleExportSingle} title="Einzeln exportieren">
+          <Button variant="ghost" size="icon" className="h-10 w-10" onClick={handleExportSingle} title="Einzeln exportieren">
             <Download className="h-3 w-3" />
           </Button>
         )}
@@ -134,7 +134,7 @@ function PhraseRecorderRow({ phrase, onUpload, onRemove }: {
         {/* Import single */}
         {!hasNew && (
           <>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => importRef.current?.click()} disabled={uploading} title="Datei importieren">
+            <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => importRef.current?.click()} disabled={uploading} title="Datei importieren">
               {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
             </Button>
             <input ref={importRef} type="file" accept="audio/*" className="hidden" onChange={handleImportSingle} />
@@ -143,25 +143,25 @@ function PhraseRecorderRow({ phrase, onUpload, onRemove }: {
 
         {/* Record */}
         {!recording ? (
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={startRecording}>
+          <Button variant="ghost" size="icon" className="h-10 w-10" onClick={startRecording}>
             <Mic className={cn('h-3 w-3', !hasExisting && 'text-destructive')} />
           </Button>
         ) : (
-          <Button variant="destructive" size="icon" className="h-7 w-7 animate-pulse" onClick={stopRecording}>
+          <Button variant="destructive" size="icon" className="h-10 w-10 animate-pulse" onClick={stopRecording}>
             <Square className="h-3 w-3" />
           </Button>
         )}
 
         {/* Save new recording */}
         {hasNew && (
-          <Button variant="default" size="icon" className="h-7 w-7" onClick={save} disabled={uploading}>
+          <Button variant="default" size="icon" className="h-10 w-10" onClick={save} disabled={uploading}>
             {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
           </Button>
         )}
 
         {/* Remove existing */}
         {hasExisting && !hasNew && (
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={remove} disabled={uploading}>
+          <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive" onClick={remove} disabled={uploading}>
             <Trash2 className="h-3 w-3" />
           </Button>
         )}

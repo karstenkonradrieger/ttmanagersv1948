@@ -182,7 +182,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
                   <h3 className={`text-xs font-bold uppercase tracking-widest ${isFinal ? 'text-primary' : 'text-muted-foreground'}`}>
                     {roundNames(r)}
                   </h3>
-                  <span className="text-[10px] text-muted-foreground/60">
+                  <span className="text-[10px] text-muted-foreground">
                     {roundMatches.length} {roundMatches.length === 1 ? 'Spiel' : 'Spiele'}
                   </span>
                 </div>
@@ -296,7 +296,7 @@ export function TournamentBracket({ matches, rounds, getPlayer, allMatches, play
                               </span>
                             )}
                           </div>
-                          <div className="text-muted-foreground/60 text-[10px] pl-1">vs.</div>
+                          <div className="text-muted-foreground text-[10px] pl-1">vs.</div>
                           <div className="flex items-center gap-1 flex-wrap">
                             <span className="font-semibold">{d.p2?.name ?? 'TBD'}</span>
                             {d.seed2 && (
@@ -397,7 +397,7 @@ function PlayerSlot({ player, wins, isWinner, isLoser, sets, playerKey, isActive
     <span className={`truncate flex-1 min-w-0 ${
       isWinner ? 'font-bold text-primary' :
       isLoser ? 'text-muted-foreground' :
-      player ? 'font-medium' : 'text-muted-foreground/50 italic'
+      player ? 'font-medium' : 'text-muted-foreground italic'
     } ${seedInfo ? 'cursor-help underline decoration-dotted decoration-primary/40 underline-offset-2' : ''}`}>
       {player?.name || 'TBD'}
       {seedInfo && (
