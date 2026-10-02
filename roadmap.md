@@ -1,4 +1,5 @@
 - [x] Bestehende Farb-Tokens und tatsächliche Kontraste prüfen.
+- [ ] Tatsächliche Kontrastverhältnisse der finalen Karten-, Eingabe- und Buttonzustände dokumentieren.
 - [ ] Kritische transparente Karten-, Text- und Buttonzustände WCAG-gerecht angleichen.
 - [ ] Gespeicherte, öffentlich lesbare Turnierzusammenfassungen mit sicherem Schreibzugriff ergänzen.
 - [ ] Lovable-AI-Erzeugung aus abgeschlossenen Ergebnissen serverseitig implementieren und testen.
