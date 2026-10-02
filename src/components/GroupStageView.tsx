@@ -1,3 +1,4 @@
+import { countClubsPerGroup } from '@/services/clubBalancedGroupDraw';
 import { useMemo, useState } from 'react';
 import { Match, Player, SetScore } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
@@ -215,6 +216,7 @@ interface Props {
 }
 
 export function GroupStageView({ matches, players, getParticipantName, onAdvanceToKnockout, groupCount, koQualificationMode = 'byes', bestOf, onUpdateBestOf }: Props) {
+  const clubsPerGroup = useMemo(() => countClubsPerGroup(players), [players]);
   const [showAdvanceDialog, setShowAdvanceDialog] = useState(false);
 
   const groupData = useMemo(() => {
@@ -348,7 +350,14 @@ export function GroupStageView({ matches, players, getParticipantName, onAdvance
 
       {groupData.map(group => (
         <div key={group.groupNumber} className="bg-card rounded-lg p-4 card-shadow">
-          <h4 className="font-bold text-primary mb-3">Gruppe {String.fromCharCode(65 + group.groupNumber)}</h4>
+          <div className="flex items-baseline justify-between gap-2 mb-3">
+            <h4 className="font-bold text-primary">Gruppe {String.fromCharCode(65 + group.groupNumber)}</h4>
+            {(clubsPerGroup.get(group.groupNumber) ?? 0) > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {clubsPerGroup.get(group.groupNumber)} {clubsPerGroup.get(group.groupNumber) === 1 ? 'Verein' : 'Vereine'}
+              </span>
+            )}
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
