@@ -1,0 +1,1 @@
+- Group draws go through the pure function in src/services/clubBalancedGroupDraw.ts (pots/snake preserved, club balance as secondary constraint) — keeps draw logic testable outside the hook.

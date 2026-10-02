@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Player } from '@/types/tournament';
-import { validateSeeding, ValidationError } from '@/services/validationService';
+import { validateSeeding, validateClubDistribution, ValidationError } from '@/services/validationService';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -13,7 +13,7 @@ export function LogicAgentValidator({ players }: Props) {
     const [issues, setIssues] = useState<ValidationError[] | null>(null);
 
     const handleValidate = () => {
-        const findings = validateSeeding(players);
+        const findings = [...validateSeeding(players), ...validateClubDistribution(players)];
         setIssues(findings);
     };
 

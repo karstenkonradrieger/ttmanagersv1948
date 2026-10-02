@@ -1,0 +1,1 @@
+ALTER TABLE public.tournaments ADD COLUMN IF NOT EXISTS club_balance_groups boolean NOT NULL DEFAULT true;

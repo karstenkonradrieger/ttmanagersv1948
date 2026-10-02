@@ -173,6 +173,7 @@ export async function fetchTournament(id: string): Promise<Tournament | null> {
     certificateHiddenFields: Array.isArray((tournament as any).certificate_hidden_fields) ? (tournament as any).certificate_hidden_fields : [],
     openingVideoUrl: (tournament as any).opening_video_url || null,
     koQualificationMode: ((tournament as any).ko_qualification_mode === 'thirds' ? 'thirds' : 'byes') as 'byes' | 'thirds',
+    clubBalanceGroups: (tournament as any).club_balance_groups ?? true,
     doublesPairs: (doublesPairs || []).map((dp: any) => ({
       id: dp.id,
       tournamentId: dp.tournament_id,
@@ -253,6 +254,7 @@ export async function createTournament(
     certificate_text_color?: string;
     certificate_line_sizes?: number[];
     certificate_extra_sizes?: Record<string, number>;
+    club_balance_groups?: boolean;
   },
 ): Promise<string> {
   const { data, error } = await supabase
@@ -282,6 +284,7 @@ export async function createTournament(
       ...(extras?.certificate_text_color !== undefined ? { certificate_text_color: extras.certificate_text_color } : {}),
       ...(extras?.certificate_line_sizes !== undefined ? { certificate_line_sizes: extras.certificate_line_sizes } : {}),
       ...(extras?.certificate_extra_sizes !== undefined ? { certificate_extra_sizes: extras.certificate_extra_sizes } : {}),
+      ...(extras?.club_balance_groups !== undefined ? { club_balance_groups: extras.club_balance_groups } : {}),
     })
     .select('id')
     .single();
@@ -322,6 +325,7 @@ export async function updateTournament(id: string, updates: Partial<{
   certificate_text_color: string;
   certificate_line_sizes: number[];
   ko_qualification_mode: string;
+  club_balance_groups: boolean;
 }>): Promise<void> {
   const { error } = await supabase
     .from('tournaments')
