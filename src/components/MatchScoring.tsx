@@ -310,7 +310,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
             />
           </div>
           <div className="text-sm text-muted-foreground">
-            <span className="text-primary font-semibold">{freeTables.length}</span> frei | <span className="text-primary font-semibold">{activeTables.size}</span> belegt
+            <span className="text-status-free font-semibold">{freeTables.length}</span> frei | <span className="text-status-busy font-semibold">{activeTables.size}</span> belegt
           </div>
           <div className="flex items-center gap-2">
             <Switch id="autoPrint" checked={autoPrint} onCheckedChange={setAutoPrint} />
@@ -333,13 +333,13 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
             return (
               <div
                 key={table}
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-muted-foreground'
+                className={`px-3 py-1 rounded-full text-xs font-semibold border ${isActive
+                    ? 'border-status-busy/60 bg-status-busy/15 text-status-busy'
+                    : 'border-status-free/60 bg-status-free/15 text-status-free'
                   }`}
                 title={isActive && p1 && p2 ? `${p1.name} vs ${p2.name}` : 'Frei'}
               >
-                T{table} {isActive && p1 && p2 ? `• ${p1.name?.split(' ')[0]} vs ${p2.name?.split(' ')[0]}` : ''}
+                T{table} · {isActive ? 'Belegt' : 'Frei'} {isActive && p1 && p2 ? `· ${p1.name?.split(' ')[0]} vs ${p2.name?.split(' ')[0]}` : ''}
               </div>
             );
           })}
@@ -356,6 +356,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
           <PhaseGroupedMatches
             matches={activeMatches}
             mode={mode}
+            tabletGrid
             renderMatch={(m) => {
               const handicapInfo = isHandicap ? computeHandicap(m, getPlayer) : null;
               return <ScoreEntry key={m.id} match={m} getPlayer={getPlayer} onUpdateScore={onUpdateScore} bestOf={bestOf} getParticipantName={getParticipantName} tournamentName={tournamentName} rounds={rounds} tournamentId={tournamentId} handicapInfo={handicapInfo} />;
@@ -381,6 +382,7 @@ export function MatchScoring({ matches, getPlayer, getParticipantName, onUpdateS
                 return waitA - waitB;
               })}
             mode={mode}
+            tabletGrid
             renderMatch={(m) => {
               const handicapInfo = isHandicap ? computeHandicap(m, getPlayer) : null;
               return <PendingMatch key={m.id} match={m} getPlayer={getPlayer} onSetActive={handleSetActive} freeTables={freeTables} handicapInfo={handicapInfo} allMatches={matches} breakMinutes={breakMinutes} onUpdatePlayer={onUpdatePlayer} />;
@@ -428,9 +430,10 @@ function Section({ title, children, action }: { title: string; children: React.R
   );
 }
 
-function PhaseGroupedMatches({ matches, mode, renderMatch }: {
+function PhaseGroupedMatches({ matches, mode, renderMatch, tabletGrid = false }: {
   matches: Match[];
   mode?: string;
+  tabletGrid?: boolean;
   renderMatch: (m: Match) => React.ReactNode;
 }) {
   const isGroupKnockout = mode === 'group_knockout';
@@ -443,7 +446,7 @@ function PhaseGroupedMatches({ matches, mode, renderMatch }: {
 
   // No split needed: not group+KO, or only one phase present
   if (!isGroupKnockout || groupMatches.length === 0 || koMatches.length === 0) {
-    return <>{matches.map(renderMatch)}</>;
+    return <div className={tabletGrid ? 'grid grid-cols-1 md:grid-cols-2 gap-3 items-start' : 'space-y-3'}>{matches.map(renderMatch)}</div>;
   }
 
   return (
@@ -456,7 +459,7 @@ function PhaseGroupedMatches({ matches, mode, renderMatch }: {
         open={groupOpen}
         onOpenChange={setGroupOpen}
       >
-        {groupMatches.map(renderMatch)}
+        <div className={tabletGrid ? 'grid grid-cols-1 md:grid-cols-2 gap-3 items-start' : 'space-y-3'}>{groupMatches.map(renderMatch)}</div>
       </CollapsiblePhase>
       <CollapsiblePhase
         number={2}
@@ -466,7 +469,7 @@ function PhaseGroupedMatches({ matches, mode, renderMatch }: {
         open={koOpen}
         onOpenChange={setKoOpen}
       >
-        {koMatches.map(renderMatch)}
+        <div className={tabletGrid ? 'grid grid-cols-1 md:grid-cols-2 gap-3 items-start' : 'space-y-3'}>{koMatches.map(renderMatch)}</div>
       </CollapsiblePhase>
     </div>
   );
@@ -494,7 +497,7 @@ function CollapsiblePhase({ number, label, count, tone, open, onOpenChange, chil
             : 'border-border/60 bg-muted/30 hover:bg-muted/50'
         }`}
       >
-        <span className={`flex items-center justify-center h-5 w-5 rounded text-[10px] font-bold flex-shrink-0 ${
+        <span className={`flex items-center justify-center h-6 w-6 rounded text-xs font-bold flex-shrink-0 ${
           isPrimary ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'
         }`}>
           {number}
@@ -504,7 +507,7 @@ function CollapsiblePhase({ number, label, count, tone, open, onOpenChange, chil
         }`}>
           {label}
         </h4>
-        <span className="text-[10px] text-muted-foreground ml-auto">
+        <span className="text-xs text-muted-foreground ml-auto">
           {count} {count === 1 ? 'Spiel' : 'Spiele'}
         </span>
         <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -588,12 +591,12 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
   const p2Delay = p2?.delayMinutes ?? 0;
 
   return (
-    <div className={`bg-card rounded-lg p-4 card-shadow ${maxWait > 0 ? 'border border-destructive/40' : ''}`}>
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-sm">
+    <div className={`bg-card rounded-lg p-4 card-shadow min-w-0 ${maxWait > 0 ? 'border border-status-waiting/60' : ''}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div className="text-sm min-w-0 break-words">
           <span className="font-semibold">{p1?.name}</span>
           {p1Wait > 0 && (
-            <span className="ml-1 text-xs bg-destructive/15 text-destructive px-1.5 py-0.5 rounded-full font-mono">⏸ {formatTime(p1Wait)}</span>
+            <span className="ml-1 text-xs bg-status-waiting/15 text-status-waiting px-1.5 py-0.5 rounded-full font-mono">⏸ {formatTime(p1Wait)}</span>
           )}
           {handicapInfo && handicapInfo.player1Handicap > 0 && (
             <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded">+{handicapInfo.player1Handicap}</span>
@@ -601,14 +604,14 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
           <span className="text-muted-foreground mx-2">vs</span>
           <span className="font-semibold">{p2?.name}</span>
           {p2Wait > 0 && (
-            <span className="ml-1 text-xs bg-destructive/15 text-destructive px-1.5 py-0.5 rounded-full font-mono">⏸ {formatTime(p2Wait)}</span>
+            <span className="ml-1 text-xs bg-status-waiting/15 text-status-waiting px-1.5 py-0.5 rounded-full font-mono">⏸ {formatTime(p2Wait)}</span>
           )}
           {handicapInfo && handicapInfo.player2Handicap > 0 && (
             <span className="ml-1 text-xs bg-accent text-accent-foreground px-1.5 py-0.5 rounded">+{handicapInfo.player2Handicap}</span>
           )}
         </div>
         {maxWait > 0 && (
-          <span className="text-xs font-mono text-destructive">bereit in {formatTime(maxWait)}</span>
+          <span className="text-xs font-mono text-status-waiting">bereit in {formatTime(maxWait)}</span>
         )}
       </div>
       {/* Inline delay editor */}
@@ -624,7 +627,7 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
               onChange={e => {
                 if (match.player1Id) onUpdatePlayer(match.player1Id, { delayMinutes: parseInt(e.target.value) || 0 });
               }}
-              className="w-16 h-7 text-xs bg-secondary"
+              className="w-16 h-11 text-sm bg-secondary"
               title="Zeitverzögerung in Minuten"
             />
             <span className="text-muted-foreground">Min.</span>
@@ -639,7 +642,7 @@ function PendingMatch({ match, getPlayer, onSetActive, freeTables, handicapInfo,
               onChange={e => {
                 if (match.player2Id) onUpdatePlayer(match.player2Id, { delayMinutes: parseInt(e.target.value) || 0 });
               }}
-              className="w-16 h-7 text-xs bg-secondary"
+              className="w-16 h-11 text-sm bg-secondary"
               title="Zeitverzögerung in Minuten"
             />
             <span className="text-muted-foreground">Min.</span>
@@ -840,12 +843,12 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
       <div className="flex items-center justify-between mb-4">
         <div className="text-center flex-1">
           <p className="font-bold text-lg">{p1?.name}</p>
-          <p className={`text-2xl font-extrabold ${p1Wins >= 3 ? 'text-primary' : ''}`}>{p1Wins}</p>
+          <p className={`text-2xl font-extrabold ${p1Wins >= effectiveBestOf ? 'text-winner' : ''}`}>{p1Wins}</p>
         </div>
         <span className="text-muted-foreground text-xl font-light mx-2">:</span>
         <div className="text-center flex-1">
           <p className="font-bold text-lg">{p2?.name}</p>
-          <p className={`text-2xl font-extrabold ${p2Wins >= 3 ? 'text-primary' : ''}`}>{p2Wins}</p>
+          <p className={`text-2xl font-extrabold ${p2Wins >= effectiveBestOf ? 'text-winner' : ''}`}>{p2Wins}</p>
         </div>
       </div>
 
@@ -876,16 +879,16 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
         </Button>
       </div>
 
-      <p className="text-[10px] text-muted-foreground text-center mb-2">
-        💡 Tipp: Zahlen tippen, <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">Enter</kbd> springt/speichert · <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">Backspace</kbd> in leerem Feld löscht den Satz · <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[10px] font-mono">11</kbd> für Schnellsieg.
+      <p className="hidden [@media(hover:hover)]:block text-xs text-muted-foreground text-center mb-2">
+        💡 Tipp: Zahlen tippen, <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-xs font-mono">Enter</kbd> springt/speichert · <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-xs font-mono">Backspace</kbd> in leerem Feld löscht den Satz · <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-xs font-mono">11</kbd> für Schnellsieg.
       </p>
       <div className="space-y-2">
         {sets.map((set, i) => {
           const setComplete = isSetComplete(set);
           return (
-          <div key={i} className={`flex items-center gap-2 rounded-md transition-colors ${setComplete ? 'bg-primary/5 ring-1 ring-primary/20 p-1' : ''}`}>
-            <span className="text-xs text-muted-foreground w-8 text-center">S{i + 1}</span>
-            <div className="flex-1 flex flex-col gap-1">
+          <div key={i} className={`flex flex-wrap items-center gap-2 rounded-md transition-colors ${setComplete ? 'bg-primary/5 ring-1 ring-primary/20 p-1' : ''}`}>
+            <span className="text-xs text-muted-foreground w-8 text-center shrink-0">S{i + 1}</span>
+            <div className="flex-1 min-w-[136px] flex flex-col gap-1">
               <Input
                 ref={registerRef(i, 'p1')}
                 type="number"
@@ -901,13 +904,13 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
                 aria-label={`Satz ${i + 1} – Spieler 1 Punkte`}
               />
               <div className="flex gap-0.5 justify-center">
-                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px] flex-1 min-w-0" onClick={() => { updateSet(i, 'player1', 11); focusInput(i, 'p2'); }}>11</Button>
-                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player1', Math.max(0, set.player1 - 1))}>−</Button>
-                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player1', set.player1 + 1)}>+</Button>
+                <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => { updateSet(i, 'player1', 11); focusInput(i, 'p2'); }}>11</Button>
+                <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => updateSet(i, 'player1', Math.max(0, set.player1 - 1))}>−</Button>
+                <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => updateSet(i, 'player1', set.player1 + 1)}>+</Button>
               </div>
             </div>
-            <span className="text-muted-foreground text-lg">:</span>
-            <div className="flex-1 flex flex-col gap-1">
+            <span className="text-muted-foreground text-lg shrink-0">:</span>
+            <div className="flex-1 min-w-[136px] flex flex-col gap-1">
               <Input
                 ref={registerRef(i, 'p2')}
                 type="number"
@@ -923,9 +926,9 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
                 aria-label={`Satz ${i + 1} – Spieler 2 Punkte`}
               />
               <div className="flex gap-0.5 justify-center">
-                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px] flex-1 min-w-0" onClick={() => { updateSet(i, 'player2', 11); focusInput(i, 'p1'); }}>11</Button>
-                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player2', Math.max(0, set.player2 - 1))}>−</Button>
-                <Button type="button" variant="ghost" size="sm" className="h-10 px-1.5 text-[10px]" onClick={() => updateSet(i, 'player2', set.player2 + 1)}>+</Button>
+                <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => { updateSet(i, 'player2', 11); focusInput(i, 'p1'); }}>11</Button>
+                <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => updateSet(i, 'player2', Math.max(0, set.player2 - 1))}>−</Button>
+                <Button type="button" variant="ghost" size="icon" className="h-11 w-11 shrink-0 text-base" onClick={() => updateSet(i, 'player2', set.player2 + 1)}>+</Button>
               </div>
             </div>
             {sets.length > 1 && (
@@ -966,7 +969,7 @@ function ScoreEntry({ match, getPlayer, onUpdateScore, bestOf, getParticipantNam
       )}
 
       {matchOver && (
-        <p className="text-center text-primary font-bold mt-3 text-sm">
+        <p className="text-center text-winner font-bold mt-3 text-sm">
           🏆 {p1Wins >= effectiveBestOf ? p1?.name : p2?.name} gewinnt {p1Wins}:{p2Wins}
         </p>
       )}
@@ -1029,7 +1032,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-2 right-2 z-10 h-7 text-xs text-muted-foreground"
+          className="absolute top-2 right-2 z-10 h-11 text-xs text-muted-foreground"
           onClick={() => setEditing(false)}
         >
           <X className="mr-1 h-3 w-3" />
@@ -1055,17 +1058,17 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
 
   return (
     <div className="bg-card/50 rounded-lg p-3 card-shadow space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="text-sm">
-          <span className={match.winnerId === match.player1Id ? 'font-bold text-primary' : ''}>{p1?.name}</span>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-sm min-w-0 break-words">
+          <span className={match.winnerId === match.player1Id ? 'font-bold text-winner' : ''}>{p1?.name}</span>
           <span className="text-muted-foreground mx-2">{p1Wins} : {p2Wins}</span>
-          <span className={match.winnerId === match.player2Id ? 'font-bold text-primary' : ''}>{p2?.name}</span>
+          <span className={match.winnerId === match.player2Id ? 'font-bold text-winner' : ''}>{p2?.name}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-xs text-muted-foreground"
+            className="h-11 text-xs text-muted-foreground"
             onClick={() => setEditing(true)}
           >
             <Settings className="mr-1 h-3 w-3" />
@@ -1074,7 +1077,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-xs text-muted-foreground"
+            className="h-11 text-xs text-muted-foreground"
             onClick={() => generateMatchReport({
               match, player1: p1, player2: p2,
               tournamentName, tournamentId,
@@ -1085,7 +1088,7 @@ function CompletedMatch({ match, getPlayer, tournamentId, tournamentName, bestOf
             <FileText className="mr-1 h-3 w-3" />
             Spielbericht
           </Button>
-          <span className="text-xs text-primary">🏆 {winner?.name}</span>
+          <span className="text-xs text-winner">🏆 {winner?.name}</span>
         </div>
       </div>
       <div className="text-xs text-muted-foreground">
