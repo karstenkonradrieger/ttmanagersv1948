@@ -233,8 +233,8 @@ const Index = () => {
     <PageTransition className="min-h-screen bg-background">
       {/* Header */}
       <header className="glass border-b border-border/50 sticky top-0 z-50">
-        <div className="container py-3 flex items-center justify-between">
-          <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
+        <div className="container py-3 flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-1">
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0 w-full sm:w-auto sm:flex-1">
             <Button
               variant="ghost"
               size="icon"
@@ -311,7 +311,7 @@ const Index = () => {
               </Button>
             )}
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 w-full justify-end sm:w-auto">
             {canStart && (
               <Button
                 onClick={() => {
